@@ -37,7 +37,7 @@ export default function LandingPage() {
   const publicos = proyectos.filter(p => p.estado !== 'cancelado');
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[chocolate]">
       {/* Header */}
       <header className="bg-gray-900 text-white">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
