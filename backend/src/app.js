@@ -16,8 +16,17 @@ const bibliotecaRoutes = require('./routes/biblioteca.routes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(helmet());
-app.use(cors());
+app.use(helmet({ crossOriginResourcePolicy: false }));
+app.use(cors({
+  origin: [
+    'http://localhost:3001',
+    'http://localhost:3000',
+    process.env.FRONTEND_URL,
+    'https://acaro.org',
+    'https://www.acaro.org',
+  ].filter(Boolean),
+  credentials: true,
+}));
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(defaultLimiter);
