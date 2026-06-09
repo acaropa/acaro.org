@@ -37,18 +37,18 @@ export default function LandingPage() {
   const publicos = proyectos.filter(p => p.estado !== 'cancelado');
 
   return (
-    <div className="min-h-screen bg-[chocolate]">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-gray-900 text-white">
+      <header className="bg-white border-b border-yellow-200 text-gray-900">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <span className="text-xl font-bold">ACARO</span>
+          <span className="text-xl font-bold text-yellow-600">ACARO</span>
           <div className="flex gap-4 items-center">
-            <Link href="/biblioteca" className="text-sm text-gray-300 hover:text-white transition-colors">
+            <Link href="/biblioteca" className="text-sm text-gray-600 hover:text-yellow-600 transition-colors">
               Biblioteca
             </Link>
             <Link
               href="/login"
-              className="text-sm bg-blue-600 hover:bg-blue-700 px-4 py-1.5 rounded-md transition-colors"
+              className="text-sm bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-1.5 rounded-md transition-colors shadow-sm"
             >
               Ingresar
             </Link>
@@ -57,10 +57,10 @@ export default function LandingPage() {
       </header>
 
       {/* Hero */}
-      <section className="bg-gray-900 text-white py-20 px-6">
+      <section className="bg-gradient-to-b from-yellow-50 to-white text-gray-900 py-20 px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <h1 className="text-4xl font-bold mb-4">Asociación ACARO</h1>
-          <p className="text-gray-300 text-lg">
+          <h1 className="text-4xl font-bold mb-4 text-yellow-700">Asociación ACARO</h1>
+          <p className="text-gray-600 text-lg">
             Gestión de proyectos, técnicos y documentación de la asociación.
           </p>
         </div>
@@ -68,14 +68,14 @@ export default function LandingPage() {
 
       {/* Proyectos */}
       <section className="max-w-6xl mx-auto px-6 py-16">
-        <h2 className="text-2xl font-bold text-gray-900 mb-8">Proyectos</h2>
+        <h2 className="text-2xl font-bold text-yellow-700 mb-8">Proyectos</h2>
 
         {publicos.length === 0 ? (
           <p className="text-gray-500 text-sm">No hay proyectos disponibles.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {publicos.map(p => (
-              <div key={p.id} className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+              <div key={p.id} className="border border-yellow-200 bg-white rounded-lg p-6 hover:shadow-lg hover:border-yellow-400 transition-all duration-300">
                 <div className="flex items-start justify-between mb-3">
                   <h3 className="font-semibold text-gray-900 leading-snug">{p.nombre}</h3>
                   <span className={`ml-2 shrink-0 text-xs font-medium px-2 py-0.5 rounded-full ${estadoColor[p.estado]}`}>
@@ -83,7 +83,7 @@ export default function LandingPage() {
                   </span>
                 </div>
                 {p.clasificacion && (
-                  <p className="text-xs text-gray-400 mb-2">{p.clasificacion}</p>
+                  <p className="text-xs text-yellow-600 font-medium mb-2">{p.clasificacion}</p>
                 )}
                 {p.descripcion && (
                   <p className="text-sm text-gray-600 line-clamp-3">{p.descripcion}</p>
@@ -100,7 +100,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-gray-200 py-6 text-center text-xs text-gray-400">
+      <footer className="border-t border-yellow-200 py-6 text-center text-xs text-gray-500">
         © {new Date().getFullYear()} ACARO. Todos los derechos reservados.
       </footer>
     </div>
