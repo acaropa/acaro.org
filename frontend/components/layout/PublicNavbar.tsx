@@ -9,11 +9,12 @@ import { cn } from "@/lib/utils"
 import { Logo } from "@/components/Logo"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { Button } from "@/components/ui/button"
+import { SocialIcon, SocialNetwork, socialNetworks } from "@/components/SocialNetworks"
 
 type NavItem = {
   href?: string;
   label: string;
-  submenu?: { href: string; label: string; info?: string }[];
+  submenu?: { href: string; label: string; info?: string; social?: SocialNetwork }[];
 };
 
 const navItems: NavItem[] = [
@@ -37,19 +38,13 @@ const navItems: NavItem[] = [
   { href: "/biblioteca", label: "Biblioteca" },
   { 
     label: "Redes", 
-    submenu: [
-      { href: "#", label: "Próximamente", info: "Enlaces a redes sociales en construcción." }
-    ]
+    submenu: socialNetworks.map(network => ({ ...network, social: network.id }))
   },
 ]
 
 export function PublicNavbar() {
   const pathname = usePathname()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false)
-
-  React.useEffect(() => {
-    setIsMobileMenuOpen(false)
-  }, [pathname])
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-surface/80 backdrop-blur supports-[backdrop-filter]:bg-surface/60">
@@ -72,9 +67,22 @@ export function PublicNavbar() {
                   <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity">
                     <div className="bg-surface border border-border rounded-xl shadow-xl p-3 w-72 flex flex-col gap-1 relative before:absolute before:-top-2 before:left-1/2 before:-translate-x-1/2 before:border-8 before:border-transparent before:border-b-surface">
                       {item.submenu.map(sub => (
-                        <Link key={sub.href} href={sub.href} className="group/sub flex flex-col p-3 rounded-lg hover:bg-accent/10 transition-colors">
-                          <span className="text-sm font-semibold text-foreground group-hover/sub:text-accent">{sub.label}</span>
-                          {sub.info && <span className="text-xs text-muted mt-1 leading-snug">{sub.info}</span>}
+                        <Link
+                          key={sub.href}
+                          href={sub.href}
+                          target={sub.href.startsWith("http") ? "_blank" : undefined}
+                          rel={sub.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                          className="group/sub flex items-start gap-3 p-3 rounded-lg hover:bg-accent/10 transition-colors"
+                        >
+                          {sub.social && (
+                            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent/10 text-accent">
+                              <SocialIcon network={sub.social} className="h-5 w-5" />
+                            </span>
+                          )}
+                          <span className="flex flex-col">
+                            <span className="text-sm font-semibold text-foreground group-hover/sub:text-accent">{sub.label}</span>
+                            {sub.info && <span className="text-xs text-muted mt-1 leading-snug">{sub.info}</span>}
+                          </span>
                         </Link>
                       ))}
                     </div>
@@ -128,7 +136,15 @@ export function PublicNavbar() {
                   </div>
                   <div className="pl-4 space-y-1 border-l-2 border-border/50 ml-4 py-2">
                     {item.submenu.map(sub => (
-                      <Link key={sub.href} href={sub.href} className="block px-3 py-2 rounded-md text-sm font-medium text-muted hover:text-accent hover:bg-accent/10 transition-colors">
+                      <Link
+                        key={sub.href}
+                        href={sub.href}
+                        target={sub.href.startsWith("http") ? "_blank" : undefined}
+                        rel={sub.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-muted hover:text-accent hover:bg-accent/10 transition-colors"
+                      >
+                        {sub.social && <SocialIcon network={sub.social} className="h-5 w-5 shrink-0" />}
                         {sub.label}
                       </Link>
                     ))}
@@ -138,6 +154,7 @@ export function PublicNavbar() {
                 <Link
                   key={item.href}
                   href={item.href!}
+                  onClick={() => setIsMobileMenuOpen(false)}
                   className={cn(
                     "block px-3 py-3 rounded-md text-base font-medium transition-colors",
                     pathname === item.href
@@ -151,7 +168,7 @@ export function PublicNavbar() {
             ))}
             <div className="pt-6 pb-2 px-3">
               <Button asChild variant="secondary" className="w-full justify-center shadow-sm">
-                <Link href="/login">Acceso interno</Link>
+                <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>Acceso interno</Link>
               </Button>
             </div>
           </div>

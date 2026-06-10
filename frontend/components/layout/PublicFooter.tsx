@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { Logo } from "@/components/Logo"
+import { SocialIcon, socialNetworks } from "@/components/SocialNetworks"
 
 export function PublicFooter() {
   return (
@@ -11,6 +12,21 @@ export function PublicFooter() {
             <p className="mt-4 text-sm text-[#B8A99A] max-w-sm">
               Impulsando el desarrollo del café robusta con organización, tecnología y visión productiva en la región.
             </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              {socialNetworks.map(network => (
+                <a
+                  key={network.id}
+                  href={network.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={network.label}
+                  title={network.label}
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-[#4A382C] text-[#B8A99A] transition-colors hover:border-[#D7A24A] hover:bg-[#D7A24A] hover:text-[#120C08]"
+                >
+                  <SocialIcon network={network.id} className="h-5 w-5" />
+                </a>
+              ))}
+            </div>
           </div>
           
           <div>
