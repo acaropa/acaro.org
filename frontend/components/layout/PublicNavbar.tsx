@@ -3,42 +3,41 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Menu, X, ChevronDown } from "lucide-react"
+import { ChevronDown, Menu, X } from "lucide-react"
 
-import { cn } from "@/lib/utils"
 import { Logo } from "@/components/Logo"
-import { ThemeToggle } from "@/components/ui/theme-toggle"
-import { Button } from "@/components/ui/button"
 import { SocialIcon, SocialNetwork, socialNetworks } from "@/components/SocialNetworks"
+import { ThemeToggle } from "@/components/ui/theme-toggle"
+import { cn } from "@/lib/utils"
 
 type NavItem = {
-  href?: string;
-  label: string;
-  submenu?: { href: string; label: string; info?: string; social?: SocialNetwork }[];
-};
+  href?: string
+  label: string
+  submenu?: { href: string; label: string; info?: string; social?: SocialNetwork }[]
+}
 
 const navItems: NavItem[] = [
   { href: "/", label: "Inicio" },
-  { 
-    label: "Nosotros", 
+  {
+    label: "Nosotros",
     submenu: [
       { href: "/nosotros", label: "Acerca de la Asociación", info: "Conoce nuestra historia, misión y propósito." },
       { href: "/nosotros/equipo", label: "Mesa Directiva", info: "Conoce al equipo que lidera nuestra organización." },
-      { href: "/nosotros/transparencia", label: "Transparencia", info: "Informes y documentación oficial." }
-    ]
+      { href: "/nosotros/transparencia", label: "Transparencia", info: "Informes y documentación oficial." },
+    ],
   },
-  { 
-    label: "Proyectos", 
+  {
+    label: "Proyectos",
     submenu: [
       { href: "/proyectos", label: "Todos los proyectos", info: "Explora todas nuestras iniciativas." },
       { href: "/proyectos/ejecucion", label: "En ejecución", info: "Proyectos actualmente activos." },
-      { href: "/proyectos/completados", label: "Completados", info: "Casos de éxito y resultados alcanzados." }
-    ]
+      { href: "/proyectos/completados", label: "Completados", info: "Casos de éxito y resultados alcanzados." },
+    ],
   },
   { href: "/biblioteca", label: "Biblioteca" },
-  { 
-    label: "Redes", 
-    submenu: socialNetworks.map(network => ({ ...network, social: network.id }))
+  {
+    label: "Redes",
+    submenu: socialNetworks.map((network) => ({ ...network, social: network.id })),
   },
 ]
 
@@ -47,41 +46,39 @@ export function PublicNavbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false)
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-surface/80 backdrop-blur supports-[backdrop-filter]:bg-surface/60">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex-shrink-0">
-            <Link href="/" className="flex items-center">
-              <Logo />
-            </Link>
-          </div>
-          
-          <nav className="hidden md:flex items-center gap-6">
-            {navItems.map((item, idx) => (
+    <header className="sticky top-0 z-50 w-full border-b border-[#ded2c4]/80 bg-[#fffdf8]/95 text-[#2b1710] backdrop-blur-xl">
+      <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+        <div className="flex h-[72px] items-center justify-between">
+          <Link href="/" aria-label="Ir al inicio" className="transition-opacity hover:opacity-80">
+            <Logo className="[&_span]:text-[16px] [&_span]:leading-[0.95]" />
+          </Link>
+
+          <nav className="hidden items-center gap-7 md:flex">
+            {navItems.map((item) =>
               item.submenu ? (
-                <div key={idx} className="relative group">
-                  <button className="flex items-center gap-1 text-sm font-medium transition-colors hover:text-accent text-muted py-4">
+                <div key={item.label} className="group relative">
+                  <button className="flex items-center gap-1.5 py-6 text-sm font-medium text-[#604a3e] transition-colors hover:text-[#a66f2e]">
                     {item.label}
-                    <ChevronDown className="w-4 h-4 transition-transform group-hover:rotate-180" />
+                    <ChevronDown className="h-3.5 w-3.5 transition-transform duration-300 group-hover:rotate-180" />
                   </button>
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity">
-                    <div className="bg-surface border border-border rounded-xl shadow-xl p-3 w-72 flex flex-col gap-1 relative before:absolute before:-top-2 before:left-1/2 before:-translate-x-1/2 before:border-8 before:border-transparent before:border-b-surface">
-                      {item.submenu.map(sub => (
+                  <div className="invisible absolute left-1/2 top-full w-72 -translate-x-1/2 -translate-y-2 pt-2 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+                    <div className="border border-[#ded2c4] bg-[#fffdf8] p-2 shadow-[0_20px_60px_rgba(43,23,16,0.14)]">
+                      {item.submenu.map((sub) => (
                         <Link
                           key={sub.href}
                           href={sub.href}
                           target={sub.href.startsWith("http") ? "_blank" : undefined}
                           rel={sub.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                          className="group/sub flex items-start gap-3 p-3 rounded-lg hover:bg-accent/10 transition-colors"
+                          className="group/sub flex items-start gap-3 border-b border-[#ece3da] p-3 transition-colors last:border-0 hover:bg-[#f6efe5]"
                         >
                           {sub.social && (
-                            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent/10 text-accent">
-                              <SocialIcon network={sub.social} className="h-5 w-5" />
+                            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center bg-[#efe1cf] text-[#a66f2e] transition-colors group-hover/sub:bg-[#c28a3a] group-hover/sub:text-[#24130d]">
+                              <SocialIcon network={sub.social} className="h-4 w-4" />
                             </span>
                           )}
                           <span className="flex flex-col">
-                            <span className="text-sm font-semibold text-foreground group-hover/sub:text-accent">{sub.label}</span>
-                            {sub.info && <span className="text-xs text-muted mt-1 leading-snug">{sub.info}</span>}
+                            <span className="text-sm font-semibold text-[#2b1710] group-hover/sub:text-[#a66f2e]">{sub.label}</span>
+                            {sub.info && <span className="mt-1 text-xs leading-snug text-[#806b5f]">{sub.info}</span>}
                           </span>
                         </Link>
                       ))}
@@ -93,87 +90,74 @@ export function PublicNavbar() {
                   key={item.href}
                   href={item.href!}
                   className={cn(
-                    "text-sm font-medium transition-colors hover:text-accent py-4",
-                    pathname === item.href ? "text-accent" : "text-muted"
+                    "relative py-6 text-sm font-medium transition-colors hover:text-[#a66f2e]",
+                    pathname === item.href ? "text-[#a66f2e]" : "text-[#604a3e]"
                   )}
                 >
                   {item.label}
+                  {pathname === item.href && <span className="absolute inset-x-0 bottom-4 mx-auto h-px w-4 bg-[#c28a3a]" />}
                 </Link>
               )
-            ))}
+            )}
           </nav>
 
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden items-center gap-3 md:flex">
             <ThemeToggle />
-            <Button asChild variant="secondary" className="font-semibold shadow-sm">
-              <Link href="/login">Acceso interno</Link>
-            </Button>
+            <Link href="/login" className="inline-flex min-h-10 items-center justify-center rounded-md bg-[#2b1710] px-5 text-sm font-semibold text-[#fffdf8] transition-all hover:-translate-y-0.5 hover:bg-[#5a3424] active:translate-y-0">
+              Acceso interno
+            </Link>
           </div>
 
-          <div className="flex items-center md:hidden gap-2">
+          <div className="flex items-center gap-2 md:hidden">
             <ThemeToggle />
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="text-foreground"
+            <button
+              type="button"
+              onClick={() => setIsMobileMenuOpen((open) => !open)}
+              className="flex h-11 w-11 items-center justify-center rounded-md border border-[#ded2c4] transition-colors hover:bg-[#f6efe5]"
+              aria-label={isMobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
+              aria-expanded={isMobileMenuOpen}
             >
-              {isMobileMenuOpen ? <X /> : <Menu />}
-            </Button>
+              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile menu */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden border-t border-border bg-surface shadow-inner">
-          <div className="px-4 pt-4 pb-6 space-y-2 max-h-[80vh] overflow-y-auto">
-            {navItems.map((item, idx) => (
+      <div className={cn("grid border-t border-[#ded2c4] bg-[#fffdf8] transition-[grid-template-rows,opacity] duration-300 md:hidden", isMobileMenuOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0")}>
+        <div className="overflow-hidden">
+          <div className="max-h-[80vh] overflow-y-auto px-5 py-5 sm:px-8">
+            {navItems.map((item) =>
               item.submenu ? (
-                <div key={idx} className="space-y-1 mb-2">
-                  <div className="px-3 py-2 text-base font-semibold text-foreground border-b border-border/50">
-                    {item.label}
-                  </div>
-                  <div className="pl-4 space-y-1 border-l-2 border-border/50 ml-4 py-2">
-                    {item.submenu.map(sub => (
+                <div key={item.label} className="border-b border-[#e9e0d7] py-3">
+                  <p className="py-2 font-serif text-xl font-semibold">{item.label}</p>
+                  <div className="border-l border-[#c9ad8b] pl-4">
+                    {item.submenu.map((sub) => (
                       <Link
                         key={sub.href}
                         href={sub.href}
                         target={sub.href.startsWith("http") ? "_blank" : undefined}
                         rel={sub.href.startsWith("http") ? "noopener noreferrer" : undefined}
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-muted hover:text-accent hover:bg-accent/10 transition-colors"
+                        className="flex items-center gap-3 py-2.5 text-sm text-[#765e50] transition-colors hover:text-[#a66f2e]"
                       >
-                        {sub.social && <SocialIcon network={sub.social} className="h-5 w-5 shrink-0" />}
+                        {sub.social && <SocialIcon network={sub.social} className="h-4 w-4" />}
                         {sub.label}
                       </Link>
                     ))}
                   </div>
                 </div>
               ) : (
-                <Link
-                  key={item.href}
-                  href={item.href!}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={cn(
-                    "block px-3 py-3 rounded-md text-base font-medium transition-colors",
-                    pathname === item.href
-                      ? "bg-accent/10 text-accent"
-                      : "text-muted hover:bg-surface/80 hover:text-foreground"
-                  )}
-                >
+                <Link key={item.href} href={item.href!} onClick={() => setIsMobileMenuOpen(false)} className="block border-b border-[#e9e0d7] py-4 font-serif text-xl font-semibold">
                   {item.label}
                 </Link>
               )
-            ))}
-            <div className="pt-6 pb-2 px-3">
-              <Button asChild variant="secondary" className="w-full justify-center shadow-sm">
-                <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>Acceso interno</Link>
-              </Button>
-            </div>
+            )}
+            <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-md bg-[#2b1710] px-5 text-sm font-semibold text-[#fffdf8]">
+              Acceso interno
+            </Link>
           </div>
         </div>
-      )}
+      </div>
     </header>
   )
 }

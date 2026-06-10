@@ -1,56 +1,68 @@
 import Link from "next/link"
+import { Mail, MapPin } from "lucide-react"
+
 import { Logo } from "@/components/Logo"
+import { ScrollReveal } from "@/components/landing/LandingMotion"
 import { SocialIcon, socialNetworks } from "@/components/SocialNetworks"
 
 export function PublicFooter() {
   return (
-    <footer className="bg-[#120C08] text-[#F8EFE3] pt-16 pb-8 border-t border-[#3A2A20]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
-          <div className="col-span-1 md:col-span-2">
+    <footer className="border-t border-[#3a2a20] bg-[#120c08] text-[#f8efe3]">
+      <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-20 lg:px-10">
+        <div className="grid gap-14 lg:grid-cols-[1.3fr_0.7fr_0.8fr]">
+          <ScrollReveal distance="sm">
             <Logo variant="white" />
-            <p className="mt-4 text-sm text-[#B8A99A] max-w-sm">
-              Impulsando el desarrollo del café robusta con organización, tecnología y visión productiva en la región.
+            <p className="mt-6 max-w-md text-sm leading-7 text-[#b8a99a]">
+              Organización de productores comprometida con el desarrollo técnico, sostenible y competitivo del café robusta en Panamá.
             </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              {socialNetworks.map(network => (
-                <a
-                  key={network.id}
-                  href={network.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={network.label}
-                  title={network.label}
-                  className="flex h-10 w-10 items-center justify-center rounded-full border border-[#4A382C] text-[#B8A99A] transition-colors hover:border-[#D7A24A] hover:bg-[#D7A24A] hover:text-[#120C08]"
-                >
-                  <SocialIcon network={network.id} className="h-5 w-5" />
-                </a>
-              ))}
+            <div className="mt-7">
+              <p className="text-sm font-semibold text-[#f8efe3]">Redes Sociales</p>
+              <div className="mt-3 flex items-center gap-3">
+                {socialNetworks.map((network) => (
+                  <a
+                    key={network.id}
+                    href={network.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={network.label}
+                    title={network.label}
+                    className="text-[#b8a99a] transition-all duration-300 hover:-translate-y-0.5 hover:text-[#d7a24a]"
+                  >
+                    <SocialIcon network={network.id} className="h-4 w-4" />
+                  </a>
+                ))}
+              </div>
             </div>
-          </div>
-          
-          <div>
-            <h4 className="font-semibold text-white mb-4">Enlaces Rápidos</h4>
-            <ul className="space-y-2 text-sm text-[#B8A99A]">
-              <li><Link href="/nosotros" className="hover:text-[#D7A24A] transition-colors">Nosotros</Link></li>
-              <li><Link href="/proyectos" className="hover:text-[#D7A24A] transition-colors">Proyectos</Link></li>
-              <li><Link href="/biblioteca" className="hover:text-[#D7A24A] transition-colors">Biblioteca</Link></li>
-              <li><Link href="/noticias" className="hover:text-[#D7A24A] transition-colors">Noticias</Link></li>
-            </ul>
-          </div>
-          
-          <div>
-            <h4 className="font-semibold text-white mb-4">Contacto</h4>
-            <ul className="space-y-2 text-sm text-[#B8A99A]">
-              <li>contacto@acaro.org</li>
-              <li>República de Panamá</li>
-            </ul>
-          </div>
+          </ScrollReveal>
+
+          <ScrollReveal delay={100} distance="sm">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#d7a24a]">Enlaces rápidos</p>
+            <nav className="mt-6 flex flex-col gap-4 text-sm text-[#d8c9bb]">
+              <Link href="/" className="hover:text-white">Inicio</Link>
+              <Link href="/nosotros" className="hover:text-white">Nosotros</Link>
+              <Link href="/proyectos" className="hover:text-white">Proyectos</Link>
+              <Link href="/biblioteca" className="hover:text-white">Biblioteca</Link>
+              <Link href="/contacto" className="hover:text-white">Contacto</Link>
+            </nav>
+          </ScrollReveal>
+
+          <ScrollReveal delay={200} distance="sm">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#d7a24a]">Contacto</p>
+            <div className="mt-6 space-y-5 text-sm leading-6 text-[#d8c9bb]">
+              <a href="mailto:contacto@acaro.org" className="flex items-start gap-3 hover:text-white">
+                <Mail className="mt-0.5 h-4 w-4 shrink-0 text-[#d7a24a]" />contacto@acaro.org
+              </a>
+              <p className="flex items-start gap-3">
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#d7a24a]" />República de Panamá
+              </p>
+            </div>
+          </ScrollReveal>
         </div>
-        
-        <div className="mt-12 pt-8 border-t border-[#3A2A20] text-center text-xs text-[#B8A99A]">
+
+        <ScrollReveal className="mt-16 flex flex-col gap-3 border-t border-[#3a2a20] pt-7 text-xs text-[#82766d] sm:flex-row sm:items-center sm:justify-between" delay={260} distance="sm">
           <p>© {new Date().getFullYear()} Asociación Café Robusta OBC. Todos los derechos reservados.</p>
-        </div>
+          <p>Organización · Conocimiento · Producción</p>
+        </ScrollReveal>
       </div>
     </footer>
   )

@@ -351,13 +351,15 @@ function SearchCatalog() {
               </p>
               <form
                 onSubmit={submitSearch}
-                className="mx-auto mt-8 flex max-w-4xl rounded-lg border-2 border-[#d3c3bd] bg-white p-1.5 shadow-sm transition-shadow focus-within:border-[#a99a8f] focus-within:shadow-md"
+                className="group mx-auto mt-8 flex min-h-16 max-w-4xl items-center rounded-xl border border-[#ead9c6] bg-[#fffaf1]/95 p-1.5 shadow-[0_18px_55px_rgba(13,24,12,0.28)] backdrop-blur-md transition-all duration-300 focus-within:border-[#d3a75f] focus-within:bg-white focus-within:shadow-[0_22px_65px_rgba(13,24,12,0.38),0_0_0_3px_rgba(211,167,95,0.16)]"
               >
-                <Search className="ml-3 mt-3 h-5 w-5 shrink-0 text-[#81756f]" />
+                <span className="ml-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[#f1e5d6] text-[#8a5c25] transition-colors group-focus-within:bg-[#ead7bd] group-focus-within:text-[#5f3a18]">
+                  <Search className="h-5 w-5" />
+                </span>
                 <input
                   value={query}
                   onChange={event => setQuery(event.target.value)}
-                  className="min-w-0 flex-1 bg-transparent px-3 text-sm text-[#25160e] caret-[#243120] outline-none placeholder:text-[#81756f]"
+                  className="min-w-0 flex-1 bg-transparent px-4 text-[15px] font-medium text-[#25160e] caret-[#a66f20] outline-none placeholder:font-normal placeholder:text-[#8d7c70]"
                   placeholder="Buscar documentos, manuales, investigaciones..."
                 />
                 {query && (
@@ -365,7 +367,7 @@ function SearchCatalog() {
                     type="button"
                     onClick={clearQuery}
                     aria-label="Limpiar búsqueda"
-                    className="my-auto mr-1 flex h-8 w-8 items-center justify-center rounded-full text-[#81756f] hover:bg-[#f5f3ef] hover:text-[#25160e]"
+                    className="my-auto mr-1 flex h-9 w-9 items-center justify-center rounded-full text-[#81756f] transition-colors hover:bg-[#f1e5d6] hover:text-[#25160e]"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -373,21 +375,21 @@ function SearchCatalog() {
                 <button
                   type="submit"
                   disabled={isSearching}
-                  className="flex min-w-24 items-center justify-center gap-2 rounded-md bg-[#243120] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#34452f] disabled:cursor-wait disabled:opacity-80"
+                  className="flex min-h-12 min-w-28 items-center justify-center gap-2 rounded-lg bg-[#243120] px-6 text-sm font-semibold text-white transition-all duration-300 hover:bg-[#34452f] hover:shadow-[0_8px_24px_rgba(36,49,32,0.24)] active:scale-[0.98] disabled:cursor-wait disabled:opacity-80"
                 >
                   {isSearching && <LoaderCircle className="h-4 w-4 animate-spin" />}
                   {isSearching ? "Buscando" : "Buscar"}
                 </button>
               </form>
-              <div className="mt-5 flex flex-wrap justify-center gap-2">
+              <div className="mt-6 flex flex-wrap justify-center gap-2.5">
                 {["Todos", ...libraryCategories].map(item => (
                   <button
                     key={item}
                     onClick={() => selectCategory(item)}
-                    className={`rounded-full border px-4 py-1.5 text-[10px] font-semibold uppercase tracking-wide ${
+                    className={`rounded-full border px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.08em] transition-all duration-200 ${
                       category === item
-                        ? "border-[#243120] bg-[#243120] text-white"
-                        : "border-white/25 bg-white/10 text-white/85 backdrop-blur hover:border-white/45 hover:bg-white/15"
+                        ? "border-[#fffaf1] bg-[#fffaf1] text-[#243120] shadow-[0_6px_18px_rgba(0,0,0,0.16)]"
+                        : "border-white/30 bg-black/15 text-white/90 backdrop-blur-md hover:border-white/55 hover:bg-white/15"
                     }`}
                   >
                     {item}
