@@ -35,8 +35,12 @@ const navItems: NavItem[] = [
     ]
   },
   { href: "/biblioteca", label: "Biblioteca" },
-  { href: "/noticias", label: "Noticias" },
-  { href: "/contacto", label: "Contacto" },
+  { 
+    label: "Redes", 
+    submenu: [
+      { href: "#", label: "Próximamente", info: "Enlaces a redes sociales en construcción." }
+    ]
+  },
 ]
 
 export function PublicNavbar() {

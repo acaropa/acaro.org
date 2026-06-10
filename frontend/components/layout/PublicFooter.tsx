@@ -26,9 +26,8 @@ export function PublicFooter() {
           <div>
             <h4 className="font-semibold text-white mb-4">Contacto</h4>
             <ul className="space-y-2 text-sm text-[#B8A99A]">
-              <li>contacto@asociacioncaferobusta.org</li>
-              <li>+593 99 999 9999</li>
-              <li>Oficina Central, Ecuador</li>
+              <li>contacto@acaro.org</li>
+              <li>República de Panamá</li>
             </ul>
           </div>
         </div>
