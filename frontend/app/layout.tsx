@@ -1,20 +1,28 @@
 import type { Metadata } from 'next';
-import { Geist } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
+import { ThemeProvider } from '@/components/ThemeProvider';
 
-const geist = Geist({ subsets: ['latin'], variable: '--font-geist' });
+const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
-  title: 'ACARO',
-  description: 'Sistema de gestión ACARO',
+  title: 'Asociación Café Robusta OBC',
+  description: 'Portal Web Institucional de la Asociación Café Robusta OBC',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className={`${geist.variable} h-full`}>
-      <body className="h-full bg-gray-50 antialiased">
-        <AuthProvider>{children}</AuthProvider>
+    <html lang="es" className={`${inter.variable} h-full`} suppressHydrationWarning>
+      <body className="h-full bg-background text-foreground antialiased font-sans">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <AuthProvider>{children}</AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

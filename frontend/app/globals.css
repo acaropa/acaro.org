@@ -1,26 +1,70 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
+@theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  /* Core Palette */
+  --color-chocolate: #2B1710;
+  --color-coffee: #5A3424;
+  --color-caramel: #C28A3A;
+  --color-cream: #F6EFE5;
+  --color-ivory: #FFFDF8;
+  --color-leaf: #2F5D3A;
+  --color-earth: #8B6A4F;
+
+  --color-dark-bg: #120C08;
+  --color-dark-surface: #1F140E;
+  --color-dark-card: #2A1A12;
+  --color-dark-text: #F8EFE3;
+  --color-dark-muted: #B8A99A;
+  --color-dark-accent: #D7A24A;
+  --color-dark-green: #355B3E;
+
+  /* Theme-aware generic colors */
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-surface: var(--surface);
+  --color-card: var(--card);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-muted: var(--muted);
+  --color-brand-green: var(--brand-green);
+  --color-border: var(--border);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  --background: var(--color-ivory);
+  --foreground: var(--color-chocolate);
+  --primary: var(--color-chocolate);
+  --primary-foreground: var(--color-ivory);
+  --surface: var(--color-cream);
+  --card: #ffffff;
+  --accent: var(--color-caramel);
+  --accent-hover: #D7A24A; /* slightly lighter caramel */
+  --muted: var(--color-earth);
+  --brand-green: var(--color-leaf);
+  --border: #e6dfd5; /* light beige border */
+}
+
+.dark {
+  --background: var(--color-dark-bg);
+  --foreground: var(--color-dark-text);
+  --primary: var(--color-dark-text);
+  --primary-foreground: var(--color-dark-bg);
+  --surface: var(--color-dark-surface);
+  --card: var(--color-dark-card);
+  --accent: var(--color-dark-accent);
+  --accent-hover: #E8B661; /* lighter for dark mode hover */
+  --muted: var(--color-dark-muted);
+  --brand-green: var(--color-dark-green);
+  --border: #3A2A20; /* dark brown border */
+}
+
+@layer base {
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    @apply antialiased transition-colors duration-300;
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }
