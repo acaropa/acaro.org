@@ -1,387 +1,305 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import { PublicLayout } from '@/components/layout/PublicLayout';
-import { api } from '@/lib/api';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { EmptyState } from '@/components/ui/EmptyState';
-import { Search, Library, Upload, Grid, List, ArrowDownAZ, ArrowRight, FileText, PlayCircle, ExternalLink } from 'lucide-react';
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import {
+  ArrowRight,
+  CalendarDays,
+  Download,
+  ExternalLink,
+  FileText,
+  Leaf,
+  Library,
+  PlayCircle,
+  Search,
+  SlidersHorizontal,
+} from "lucide-react";
 
-interface LibraryRecord {
-  id: number;
-  titulo: string;
-  descripcion: string | null;
-  autor: string;
-  fecha: string;
-  link: string;
+import { PublicLayout } from "@/components/layout/PublicLayout";
+import { LibraryPageTransition } from "@/components/library/LibraryPageTransition";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { mockLibraryRecords } from "@/data/mock-documents";
+import { api } from "@/lib/api";
+import {
+  LibraryDocument,
+  LibraryRecord,
+  libraryCategories,
+  toLibraryDocument,
+} from "@/lib/library";
+
+function ResourceIcon({
+  document,
+  className = "h-5 w-5",
+}: {
+  document: LibraryDocument;
+  className?: string;
+}) {
+  const Icon =
+    document.resourceType === "link"
+      ? ExternalLink
+      : document.resourceType === "video"
+        ? PlayCircle
+        : FileText;
+  return <Icon className={className} />;
 }
 
-interface Document {
-  id: number;
-  resourceType: 'pdf' | 'video' | 'link' | 'doc';
-  type: string;
-  title: string;
-  description: string;
-  category: string;
-  date: string;
-  contributor: string;
-  meta: string;
-  link: string;
-  featured?: boolean;
-}
-
-const documentCategories = ['Todos'];
-
-function toDocument(record: LibraryRecord, index: number): Document {
-  const pathname = (() => {
-    try { return new URL(record.link).pathname.toLowerCase(); }
-    catch { return ''; }
-  })();
-  const resourceType = pathname.endsWith('.pdf') ? 'pdf'
-    : /\.(mp4|webm|mov)$/.test(pathname) ? 'video'
-    : /\.(doc|docx|odt)$/.test(pathname) ? 'doc'
-    : 'link';
-
-  return {
-    id: record.id,
-    resourceType,
-    type: resourceType === 'pdf' ? 'PDF' : resourceType === 'video' ? 'Video' : resourceType === 'doc' ? 'Documento' : 'Enlace',
-    title: record.titulo,
-    description: record.descripcion || 'Recurso disponible en la biblioteca de ACARO.',
-    category: 'Biblioteca',
-    date: new Date(`${record.fecha.slice(0, 10)}T00:00:00`).toLocaleDateString('es-PA', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    }),
-    contributor: record.autor,
-    meta: resourceType === 'link' ? 'Enlace externo' : 'Abrir recurso',
-    link: record.link,
-    featured: index < 3,
-  };
-}
-
-function FeaturedCard({ doc }: { doc: Document }) {
-  const TypeIcon = doc.resourceType === 'link' ? ExternalLink : doc.resourceType === 'video' ? PlayCircle : FileText;
-
+function MainFeature({ document }: { document: LibraryDocument }) {
   return (
-    <a href={doc.link} target="_blank" rel="noopener noreferrer" className="block">
-      <Card className="flex h-full flex-col cursor-pointer overflow-hidden group hover:shadow-lg transition-all hover:-translate-y-1 hover:border-accent">
-      <div className="h-32 relative bg-gradient-to-br from-primary to-[#2c1a12] p-5 flex items-end">
-        <div className="absolute top-4 right-4">
-          <Badge variant="warning">Destacado</Badge>
-        </div>
-        <div className="w-12 h-12 rounded-lg bg-[#b67332]/30 text-[#b67332] flex items-center justify-center">
-          <TypeIcon size={24} />
-        </div>
-      </div>
-      <CardContent className="p-6 flex flex-col gap-3 flex-1">
-        <span className="text-xs font-semibold tracking-wider uppercase text-accent">
-          {doc.type} · {doc.category}
+    <a
+      href={document.link}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group relative min-h-[410px] overflow-hidden rounded-lg bg-[#21130d] shadow-sm md:col-span-8"
+    >
+      <div
+        className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+        style={{ backgroundImage: "url('/assets/library-hero-v2.png')" }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-[#2b1710]/45 to-black/5" />
+      <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
+        <span className="inline-flex rounded bg-[#3d4b37]/90 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white">
+          {document.category}
         </span>
-        <h3 className="font-bold text-xl leading-tight text-foreground group-hover:text-accent transition-colors">
-          {doc.title}
-        </h3>
-        <p className="text-sm text-muted line-clamp-2 flex-1">
-          {doc.description}
+        <h2 className="mt-4 max-w-3xl font-serif text-3xl font-bold leading-tight text-white sm:text-4xl">
+          {document.title}
+        </h2>
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-white/90">
+          {document.description}
         </p>
-        <div className="pt-4 mt-2 border-t border-border flex items-center justify-between">
-          <span className="text-xs font-medium text-muted">Aportado por {doc.contributor}</span>
-          <span className="flex items-center gap-1 text-sm font-semibold text-accent">
-            Abrir <ArrowRight size={16} />
+        <div className="mt-5 flex flex-wrap items-center gap-5 text-xs text-white/75">
+          <span className="flex items-center gap-1.5">
+            <CalendarDays className="h-4 w-4" /> {document.date}
           </span>
+          <span>{document.contributor}</span>
         </div>
-      </CardContent>
-      </Card>
+      </div>
     </a>
   );
 }
 
-function DocumentCard({ doc }: { doc: Document }) {
-  const TypeIcon = doc.resourceType === 'link' ? ExternalLink : doc.resourceType === 'video' ? PlayCircle : FileText;
-
+function SecondaryFeature({ document }: { document: LibraryDocument }) {
   return (
-    <a href={doc.link} target="_blank" rel="noopener noreferrer" className="block">
-      <Card className="flex h-full flex-col cursor-pointer overflow-hidden group hover:shadow-md transition-all hover:border-accent">
-      <CardContent className="p-5 flex flex-col gap-3 flex-1">
-        <div className="flex items-center justify-between">
-          <Badge variant="outline" className="text-accent border-accent/30 bg-accent/5">
-            {doc.type}
-          </Badge>
-          <div className="w-8 h-8 rounded-md bg-surface text-muted flex items-center justify-center group-hover:bg-accent/10 group-hover:text-accent transition-colors">
-            <TypeIcon size={18} />
-          </div>
+    <a
+      href={document.link}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group flex min-h-[410px] flex-col overflow-hidden rounded-lg border border-[#ded6cc] bg-white shadow-sm transition-shadow hover:shadow-md dark:border-border dark:bg-card md:col-span-4"
+    >
+      <div className="relative h-44 overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-[center_58%] transition-transform duration-700 group-hover:scale-105"
+          style={{ backgroundImage: "url('/assets/hero-bg.jpg')" }}
+        />
+        <div className="absolute inset-0 bg-[#25160e]/30" />
+      </div>
+      <div className="flex flex-1 flex-col p-6">
+        <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#705a4f]">
+          {document.category}
+        </span>
+        <h3 className="mt-2 font-serif text-2xl font-bold leading-tight text-[#25160e] dark:text-foreground">
+          {document.title}
+        </h3>
+        <p className="mt-3 line-clamp-3 text-sm leading-6 text-[#5f514a] dark:text-muted">
+          {document.description}
+        </p>
+        <div className="mt-auto flex items-center justify-between border-t border-[#e5ddd4] pt-4 text-xs text-[#81756f] dark:border-border">
+          <span>Por {document.contributor}</span>
+          <ArrowRight className="h-5 w-5 text-[#25160e] transition-transform group-hover:translate-x-1 dark:text-accent" />
         </div>
-        <div className="flex-1">
-          <span className="text-xs font-semibold tracking-wider uppercase text-muted mb-1 block">
-            {doc.category}
-          </span>
-          <h4 className="font-semibold text-lg leading-tight mb-2 group-hover:text-accent transition-colors">
-            {doc.title}
-          </h4>
-          <p className="text-sm text-muted line-clamp-2">
-            {doc.description}
-          </p>
-        </div>
-        <div className="pt-4 mt-auto border-t border-border flex items-center justify-between text-xs text-muted">
-          <span>{doc.meta}</span>
-          <span className="flex items-center gap-1 font-medium group-hover:text-accent transition-colors">
-            Abrir <ArrowRight size={14} />
-          </span>
-        </div>
-      </CardContent>
-      </Card>
+      </div>
     </a>
   );
 }
 
-function DocumentRow({ doc }: { doc: Document }) {
-  const TypeIcon = doc.resourceType === 'link' ? ExternalLink : doc.resourceType === 'video' ? PlayCircle : FileText;
-
+function TechnicalRow({ document }: { document: LibraryDocument }) {
   return (
-    <a href={doc.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 p-4 border-b border-border last:border-0 hover:bg-surface/50 transition-colors cursor-pointer group">
-      <div className="w-10 h-10 shrink-0 rounded-md bg-surface text-muted flex items-center justify-center group-hover:bg-accent/10 group-hover:text-accent transition-colors">
-        <TypeIcon size={20} />
+    <a
+      href={document.link}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group flex items-center gap-4 border-b border-[#e7dfd6] p-4 last:border-0 hover:bg-[#faf7f2] dark:border-border dark:hover:bg-surface"
+    >
+      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded bg-[#f7decc] text-[#705a4f] dark:bg-accent/15 dark:text-accent">
+        <ResourceIcon document={document} />
+      </span>
+      <div className="min-w-0 flex-1">
+        <h4 className="truncate font-medium text-[#25160e] dark:text-foreground">{document.title}</h4>
+        <p className="mt-1 text-xs text-[#81756f] dark:text-muted">
+          {document.type} · {document.date}
+        </p>
       </div>
-      <div className="flex-1 min-w-0">
-        <h4 className="font-semibold text-base leading-tight truncate group-hover:text-accent transition-colors">
-          {doc.title}
-        </h4>
-        <div className="flex items-center gap-3 mt-1 text-xs text-muted">
-          <span>{doc.category}</span>
-          <span className="hidden sm:inline">&bull;</span>
-          <span className="hidden sm:inline">{doc.type}</span>
-          <span className="hidden sm:inline">&bull;</span>
-          <span>{doc.meta}</span>
-        </div>
-      </div>
-      <div className="shrink-0 pl-4 hidden md:block text-sm text-muted">
-        {doc.date}
-      </div>
+      {document.resourceType === "link" ? (
+        <ExternalLink className="h-4 w-4 text-[#25160e] dark:text-accent" />
+      ) : (
+        <Download className="h-4 w-4 text-[#25160e] dark:text-accent" />
+      )}
     </a>
   );
 }
 
 export default function Biblioteca() {
-  const [documents, setDocuments] = useState<Document[]>([]);
+  const router = useRouter();
+  const [documents, setDocuments] = useState<LibraryDocument[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState('');
-  const [query, setQuery] = useState('');
-  const [cat, setCat] = useState('Todos');
-  const [view, setView] = useState<'grid' | 'list'>('grid');
-  const [sort, setSort] = useState<'recent' | 'az'>('recent');
+  const [loadError, setLoadError] = useState("");
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState("Todos");
+  const [sort, setSort] = useState<"recent" | "az">("recent");
+  const [isLeaving, setIsLeaving] = useState(false);
+  const navigationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    api.get<LibraryRecord[]>('/biblioteca')
-      .then(data => setDocuments(data.map(toDocument)))
-      .catch(err => setLoadError(err instanceof Error ? err.message : 'No se pudo cargar la biblioteca'))
+    api
+      .get<LibraryRecord[]>("/biblioteca")
+      .then(data => setDocuments((data.length ? data : mockLibraryRecords).map(toLibraryDocument)))
+      .catch(() => {
+        setDocuments(mockLibraryRecords.map(toLibraryDocument));
+        setLoadError("");
+      })
       .finally(() => setLoading(false));
   }, []);
 
-  const featured = documents.filter(d => d.featured).slice(0, 3);
+  useEffect(() => () => {
+    if (navigationTimer.current) clearTimeout(navigationTimer.current);
+  }, []);
 
-  let filtered = documents.filter(d => {
-    const okCat = cat === 'Todos' || d.category === cat;
-    const q = query.trim().toLowerCase();
-    const okQ = !q || (d.title + ' ' + d.description + ' ' + d.type + ' ' + d.contributor).toLowerCase().includes(q);
-    return okCat && okQ;
-  });
+  const visible = useMemo(() => {
+    const matches = category === "Todos"
+      ? documents
+      : documents.filter(document => document.category === category);
+    return [...matches].sort((a, b) =>
+      sort === "az" ? a.title.localeCompare(b.title, "es") : b.dateValue.localeCompare(a.dateValue),
+    );
+  }, [category, documents, sort]);
 
-  if (sort === 'az') {
-    filtered = [...filtered].sort((a, b) => a.title.localeCompare(b.title, 'es'));
+  function submitSearch(event: FormEvent) {
+    event.preventDefault();
+    const params = new URLSearchParams();
+    if (query.trim()) params.set("q", query.trim());
+    setIsLeaving(true);
+    navigationTimer.current = setTimeout(() => {
+      router.push(`/biblioteca/buscar${params.size ? `?${params}` : ""}`);
+    }, 820);
   }
 
-  const grouped: [string, Document[]][] = [];
-  if (view === 'list' && sort === 'az') {
-    const map: Record<string, Document[]> = {};
-    filtered.forEach(d => {
-      const L = d.title[0].toUpperCase();
-      (map[L] = map[L] || []).push(d);
-    });
-    Object.keys(map).sort((a, b) => a.localeCompare(b, 'es')).forEach(L => {
-      grouped.push([L, map[L]]);
-    });
-  }
+  const primary = visible[0];
+  const secondary = visible[1];
+  const recent = visible.slice(2, 5);
 
   return (
     <PublicLayout>
-      {/* HERO */}
-      <section className="relative overflow-hidden bg-[#2c1a12]">
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-b from-[#2c1a12]/70 to-[#2c1a12] z-10" />
-        </div>
-        <div className="relative z-20 max-w-7xl mx-auto px-6 py-20 pb-16">
-          <div className="max-w-2xl">
-            <span className="inline-flex items-center gap-2 text-xs font-semibold tracking-wider uppercase text-[#b67332]">
-              <Library size={16} /> Centro de recursos &middot; Biblioteca pública
-            </span>
-            <h1 className="mt-4 font-bold text-4xl md:text-5xl lg:text-6xl tracking-tight text-white leading-[1.1]">
-              Biblioteca técnica
-            </h1>
-            <p className="mt-5 text-lg text-[#E7D9C6] leading-relaxed max-w-xl">
-              Recursos, documentos y guías para fortalecer la producción, organización y desarrollo del café robusta. Acceso público a materiales aportados por la asociación y sus colaboradores.
-            </p>
-            <div className="mt-8 max-w-lg relative">
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground z-10">
-                <Search size={20} />
-              </div>
-              <Input
-                className="pl-10 h-12 bg-white/95 text-black placeholder:text-gray-500 border-0 ring-offset-0 focus-visible:ring-accent"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Buscar documentos, guías o recursos…"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FILTERS */}
-      <div className="border-b border-border bg-background sticky top-[72px] z-30">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-2 overflow-x-auto no-scrollbar">
-          {documentCategories.map(c => (
-            <button
-              key={c}
-              onClick={() => setCat(c)}
-              className={`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-colors border ${
-                cat === c
-                  ? 'bg-primary text-primary-foreground border-primary'
-                  : 'bg-transparent text-foreground border-border hover:bg-surface'
-              }`}
-            >
-              {c}
+      <LibraryPageTransition active={isLeaving} />
+      <div className="library-page-enter">
+      <header className="relative isolate min-h-[560px] overflow-hidden bg-[#25160e] md:min-h-[620px]">
+        <div
+          className="absolute inset-0 scale-105 bg-cover bg-center blur-[1px]"
+          style={{ backgroundImage: "url('/assets/library-hero-v2.png')" }}
+        />
+        <div className="absolute inset-0 bg-[#182216]/45" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-transparent to-black/60" />
+        <div className="relative mx-auto flex min-h-[560px] max-w-7xl flex-col items-center justify-center px-6 text-center md:min-h-[620px]">
+          <span className="rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold text-white/85 backdrop-blur">
+            Cultivando conocimiento
+          </span>
+          <h1 className="mt-5 max-w-4xl font-serif text-4xl font-bold text-white drop-shadow md:text-6xl">
+            El legado del café robusta
+          </h1>
+          <p className="mt-4 max-w-2xl text-sm leading-6 text-white/90 md:text-base">
+            Explora nuestra biblioteca técnica, un viaje editorial por la ciencia, sostenibilidad
+            e historia del cultivo de café robusta.
+          </p>
+          <form onSubmit={submitSearch} className="mt-8 flex w-full max-w-xl rounded-lg bg-white p-1.5 shadow-xl">
+            <Search className="ml-3 mt-3 h-5 w-5 shrink-0 text-[#81756f]" />
+            <input
+              value={query}
+              onChange={event => setQuery(event.target.value)}
+              className="min-w-0 flex-1 bg-transparent px-3 text-sm text-[#25160e] outline-none"
+              placeholder="Buscar documentos, manuales, investigaciones..."
+              aria-label="Buscar en la biblioteca"
+            />
+            <button className="rounded-md bg-[#243120] px-5 py-3 text-sm font-semibold text-white hover:bg-[#34452f]">
+              Buscar
             </button>
-          ))}
+          </form>
         </div>
-      </div>
+      </header>
 
-      {/* FEATURED */}
-      {cat === 'Todos' && !query && (
-        <section className="bg-background pt-16 pb-2">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="mb-8">
-              <span className="text-sm font-semibold tracking-wider uppercase text-accent">Recursos destacados</span>
-              <h2 className="text-3xl font-bold mt-1">Documentos recomendados</h2>
-              <p className="text-muted mt-2">Una selección curada de las guías y estudios más consultados por las y los asociados.</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {featured.map(d => <FeaturedCard key={d.id} doc={d} />)}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* LISTADO */}
-      <section className="bg-background py-16 pb-24">
-        <div className="max-w-7xl mx-auto px-6">
-          {/* Toolbar */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 pb-5 border-b border-border">
-            <div className="flex flex-col gap-1">
-              <span className="text-xs font-semibold tracking-wider uppercase text-accent">
-                {cat === 'Todos' ? 'Todos los recursos' : cat}
-              </span>
-              <div className="flex items-baseline gap-3">
-                <h2 className="text-2xl md:text-3xl font-bold">Listado de documentos</h2>
-                <span className="text-sm text-muted font-medium">{filtered.length} {filtered.length === 1 ? 'recurso' : 'recursos'}</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              {/* Sort Seg */}
-              <div className="inline-flex p-1 gap-0.5 bg-surface border border-border rounded-lg">
+      <main className="bg-[#fbf9f5] py-10 text-[#1b1c1a] dark:bg-background dark:text-foreground">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="mb-8 flex flex-col gap-5 border-b border-[#e3ddd5] pb-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-wrap gap-2">
+              {["Todos", ...libraryCategories].map(item => (
                 <button
-                  onClick={() => setSort('recent')}
-                  className={`px-3 py-1.5 rounded-md text-sm font-semibold flex items-center gap-1.5 transition-colors ${sort === 'recent' ? 'bg-card text-foreground shadow-sm' : 'text-muted hover:text-foreground'}`}
+                  key={item}
+                  type="button"
+                  onClick={() => setCategory(item)}
+                  className={`inline-flex items-center gap-2 rounded-md border px-4 py-2 text-xs font-semibold transition-colors ${
+                    category === item
+                      ? "border-[#243120] bg-[#243120] text-white"
+                      : "border-[#ded6cc] bg-white text-[#25160e] hover:border-[#81756f] dark:border-border dark:bg-card dark:text-foreground"
+                  }`}
                 >
-                  Recientes
+                  {item === "Agronomía" && <Leaf className="h-3.5 w-3.5" />}
+                  {item}
                 </button>
-                <button
-                  onClick={() => setSort('az')}
-                  className={`px-3 py-1.5 rounded-md text-sm font-semibold flex items-center gap-1.5 transition-colors ${sort === 'az' ? 'bg-card text-foreground shadow-sm' : 'text-muted hover:text-foreground'}`}
-                >
-                  <ArrowDownAZ size={15} /> A-Z
-                </button>
-              </div>
-              {/* View Seg */}
-              <div className="inline-flex p-1 gap-0.5 bg-surface border border-border rounded-lg">
-                <button
-                  onClick={() => setView('grid')}
-                  className={`p-1.5 rounded-md transition-colors ${view === 'grid' ? 'bg-card text-foreground shadow-sm' : 'text-muted hover:text-foreground'}`}
-                >
-                  <Grid size={16} />
-                </button>
-                <button
-                  onClick={() => setView('list')}
-                  className={`p-1.5 rounded-md transition-colors ${view === 'list' ? 'bg-card text-foreground shadow-sm' : 'text-muted hover:text-foreground'}`}
-                >
-                  <List size={16} />
-                </button>
-              </div>
+              ))}
             </div>
+            <button
+              type="button"
+              onClick={() => setSort(current => (current === "recent" ? "az" : "recent"))}
+              className="flex shrink-0 items-center gap-2 text-xs text-[#5f514a] dark:text-muted"
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+              Ordenar: {sort === "recent" ? "más recientes" : "A-Z"}
+            </button>
           </div>
 
           {loading ? (
-            <p className="py-12 text-center text-sm text-muted">Cargando biblioteca...</p>
+            <div className="py-24 text-center text-sm text-[#81756f]">Cargando biblioteca...</div>
           ) : loadError ? (
             <EmptyState
-              icon={<Library className="w-8 h-8" />}
+              icon={<Library className="h-8 w-8" />}
               title="No se pudo cargar la biblioteca"
               description={loadError}
             />
-          ) : filtered.length === 0 ? (
+          ) : visible.length === 0 ? (
             <EmptyState
-              icon={<Search className="w-8 h-8" />}
-              title="Aún no hay documentos disponibles"
-              description="Estamos sumando nuevos recursos técnicos. Vuelve a consultar pronto."
+              icon={<Search className="h-8 w-8" />}
+              title="No hay recursos en esta sección"
+              description="Prueba con otra categoría o consulta el catálogo completo."
             />
-          ) : view === 'grid' ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {filtered.map(d => <DocumentCard key={d.id} doc={d} />)}
-            </div>
-          ) : sort === 'az' ? (
-            <div className="flex flex-col gap-8">
-              {grouped.map(([letter, docs]) => (
-                <div key={letter}>
-                  <div className="flex items-center gap-4 mb-4">
-                    <span className="font-bold text-xl text-accent w-6">{letter}</span>
-                    <div className="flex-1 h-px bg-border" />
-                  </div>
-                  <Card className="overflow-hidden">
-                    {docs.map(d => <DocumentRow key={d.id} doc={d} />)}
-                  </Card>
-                </div>
-              ))}
-            </div>
           ) : (
-            <Card className="overflow-hidden">
-              {filtered.map(d => <DocumentRow key={d.id} doc={d} />)}
-            </Card>
+            <>
+              <section className="grid grid-cols-1 gap-6 md:grid-cols-12">
+                {primary && <MainFeature document={primary} />}
+                {secondary && <SecondaryFeature document={secondary} />}
+              </section>
+
+              {recent.length > 0 && (
+                <section className="mt-12">
+                  <div className="mb-4 flex items-end justify-between border-b border-[#e3ddd5] pb-3">
+                    <h2 className="font-serif text-2xl font-bold">Especificaciones técnicas recientes</h2>
+                  </div>
+                  <div className="overflow-hidden rounded-lg border border-[#e3ddd5] bg-white dark:border-border dark:bg-card">
+                    {recent.map(document => <TechnicalRow key={document.id} document={document} />)}
+                  </div>
+                  <div className="mt-6 flex justify-center">
+                    <Link
+                      href="/biblioteca/buscar"
+                      className="group inline-flex items-center gap-2 rounded-md bg-[#243120] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#34452f]"
+                    >
+                      Explorar catálogo completo
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </Link>
+                  </div>
+                </section>
+              )}
+            </>
           )}
         </div>
-      </section>
-
-      {/* CTA */}
-      <section className="bg-[#2c1a12] py-20">
-        <div className="max-w-3xl mx-auto px-6 text-center">
-          <span className="text-xs font-semibold tracking-wider uppercase text-[#b67332]">Contribuye</span>
-          <h2 className="mt-4 font-bold text-3xl md:text-4xl text-white leading-tight">
-            ¿Tienes un documento técnico para compartir?
-          </h2>
-          <p className="mt-4 text-lg text-[#D9C7B2]">
-            Contribuye al crecimiento de la biblioteca de la asociación y fortalece el conocimiento del sector cafetalero.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-4 justify-center">
-            <Button variant="secondary" size="lg" className="gap-2 bg-[#b67332] hover:bg-[#b67332]/90 text-white border-0">
-              <Upload size={18} /> Enviar recurso
-            </Button>
-            <Button variant="outline" size="lg" className="text-white border-white/30 hover:bg-white/10 hover:text-white">
-              Contactar asociación
-            </Button>
-          </div>
-        </div>
-      </section>
+      </main>
+      </div>
     </PublicLayout>
   );
 }

@@ -1,71 +1,142 @@
-export interface Document {
-  id: string;
-  resourceType: 'pdf' | 'video' | 'link' | 'doc';
-  type: string;
-  title: string;
-  description: string;
-  category: string;
-  date: string;
-  contributor: string;
-  meta: string;
-  featured?: boolean;
-}
+import type { LibraryRecord } from "@/lib/library";
 
-export const documentCategories = ['Todos', 'Producción', 'Calidad', 'Organización', 'Comercialización', 'Investigación'];
-
-export const mockDocuments: Document[] = [
+export const mockLibraryRecords: LibraryRecord[] = [
   {
-    id: '1', resourceType: 'pdf', type: 'Manual',
-    title: 'Manual de Buenas Prácticas Agrícolas',
-    description: 'Protocolo de manejo agronómico para el cultivo de café robusta: suelos, sombra, nutrición y cosecha.',
-    category: 'Producción', date: '10 Ene, 2026', contributor: 'ACARO', meta: '2.4 MB', featured: true,
+    id: 1001,
+    titulo: "Estrategias de adaptación climática para fincas de café robusta",
+    descripcion:
+      "Estudio sobre integración de sombra, conservación de suelos y retención de humedad para afrontar temporadas secas.",
+    autor: "Comité Técnico ACARO",
+    fecha: "2026-05-18",
+    link: "https://example.com/documentos/adaptacion-climatica.pdf",
   },
   {
-    id: '2', resourceType: 'pdf', type: 'Guía técnica',
-    title: 'Guía de Manejo de Plagas — Broca del café',
-    description: 'Estrategias de monitoreo y control integrado de la broca para reducir pérdidas en finca.',
-    category: 'Producción', date: '22 Feb, 2026', contributor: 'Comité Técnico', meta: '3.5 MB', featured: true,
+    id: 1002,
+    titulo: "Perfil sensorial del robusta fino panameño",
+    descripcion:
+      "Metodología para evaluar fragancia, cuerpo, dulzor y notas de taza en muestras regionales.",
+    autor: "Laboratorio de Calidad",
+    fecha: "2026-04-26",
+    link: "https://example.com/documentos/perfil-sensorial.pdf",
   },
   {
-    id: '3', resourceType: 'pdf', type: 'Investigación',
-    title: 'Perfil de taza del Robusta Fino regional',
-    description: 'Resultados del estudio sensorial de micro-lotes y su potencial en mercados de especialidad.',
-    category: 'Calidad', date: '18 Mar, 2026', contributor: 'Laboratorio de Calidad', meta: '5.1 MB', featured: true,
+    id: 1003,
+    titulo: "Calendario de fertilización 2026-2027",
+    descripcion:
+      "Programa nutricional por etapa productiva con recomendaciones para suelos de la región.",
+    autor: "Ing. Mariana Quirós",
+    fecha: "2026-04-10",
+    link: "https://example.com/documentos/calendario-fertilizacion.xlsx",
   },
   {
-    id: '4', resourceType: 'pdf', type: 'Documento',
-    title: 'Estatutos — Asociación Café Robusta OBC',
-    description: 'Marco normativo, derechos y deberes de las y los asociados de la organización.',
-    category: 'Organización', date: '05 Mar, 2025', contributor: 'Junta Directiva', meta: '1.1 MB',
+    id: 1004,
+    titulo: "Manual de poda para plantaciones de alta densidad",
+    descripcion:
+      "Guía práctica para poda de formación, mantenimiento y renovación de tejidos productivos.",
+    autor: "Equipo de Extensión Agrícola",
+    fecha: "2026-03-22",
+    link: "https://example.com/documentos/manual-poda.pdf",
   },
   {
-    id: '5', resourceType: 'video', type: 'Capacitación',
-    title: 'Técnicas de Poda y Manejo de Sombra',
-    description: 'Video formativo grabado en finca demostrativa para productores asociados.',
-    category: 'Producción', date: '02 Feb, 2026', contributor: 'Ing. M. Quirós', meta: '12 min',
+    id: 1005,
+    titulo: "Protocolo de fermentación anaeróbica controlada",
+    descripcion:
+      "Procedimiento para controlar temperatura, tiempo y pH durante la fermentación del café robusta.",
+    autor: "Comité de Procesamiento",
+    fecha: "2026-03-08",
+    link: "https://example.com/documentos/fermentacion-anaerobica.docx",
   },
   {
-    id: '6', resourceType: 'link', type: 'Guía técnica',
-    title: 'Calculadora de Costos de Producción',
-    description: 'Hoja de cálculo en línea para estimar costos por hectárea y el punto de equilibrio.',
-    category: 'Comercialización', date: '14 Ene, 2026', contributor: 'Área de Gestión', meta: 'Enlace externo',
+    id: 1006,
+    titulo: "Manejo integrado de la broca del café",
+    descripcion:
+      "Identificación, monitoreo y control biológico de la broca en sistemas agroforestales.",
+    autor: "Dra. Elena Ríos",
+    fecha: "2026-02-19",
+    link: "https://example.com/documentos/manejo-broca.pdf",
   },
   {
-    id: '7', resourceType: 'pdf', type: 'Manual',
-    title: 'Protocolo de Beneficiado y Secado',
-    description: 'Buenas prácticas de procesamiento húmedo y seco para preservar la calidad del grano.',
-    category: 'Calidad', date: '20 Dic, 2025', contributor: 'Comité Técnico', meta: '2.0 MB',
+    id: 1007,
+    titulo: "Técnicas de secado en camas africanas",
+    descripcion:
+      "Capacitación audiovisual sobre volteo, medición de humedad y almacenamiento del grano.",
+    autor: "Centro de Beneficiado ACARO",
+    fecha: "2026-02-03",
+    link: "https://example.com/videos/secado-camas-africanas.mp4",
   },
   {
-    id: '8', resourceType: 'link', type: 'Investigación',
-    title: 'Portal de Precios Internacionales del Robusta',
-    description: 'Referencia de cotizaciones diarias del mercado internacional para la planeación comercial.',
-    category: 'Comercialización', date: '08 Dic, 2025', contributor: 'Área Comercial', meta: 'Enlace externo',
+    id: 1008,
+    titulo: "Reporte de precios internacionales del robusta",
+    descripcion:
+      "Análisis trimestral de cotizaciones, tendencias de exportación y oportunidades comerciales.",
+    autor: "Área de Mercados",
+    fecha: "2026-01-25",
+    link: "https://example.com/documentos/precios-robusta.pdf",
   },
   {
-    id: '9', resourceType: 'pdf', type: 'Documento',
-    title: 'Acta de Asamblea General 2025',
-    description: 'Resoluciones y acuerdos de la asamblea anual de las y los asociados.',
-    category: 'Organización', date: '15 Nov, 2025', contributor: 'Secretaría', meta: '780 KB',
+    id: 1009,
+    titulo: "Matriz de clasificación de defectos físicos v2.1",
+    descripcion:
+      "Estándar OBC para clasificar humedad, tamaño de zaranda y defectos primarios del café verde.",
+    autor: "Consejo de Calidad OBC",
+    fecha: "2026-01-12",
+    link: "https://example.com/documentos/matriz-defectos.xlsx",
+  },
+  {
+    id: 1010,
+    titulo: "Guía para la conservación de fuentes de agua",
+    descripcion:
+      "Prácticas de protección de nacientes, manejo de aguas mieles y reducción del consumo en finca.",
+    autor: "Programa de Sostenibilidad",
+    fecha: "2025-12-14",
+    link: "https://example.com/documentos/conservacion-agua.pdf",
+  },
+  {
+    id: 1011,
+    titulo: "Calculadora de costos de producción por hectárea",
+    descripcion:
+      "Herramienta para estimar mano de obra, insumos, rendimiento y punto de equilibrio.",
+    autor: "Área de Gestión",
+    fecha: "2025-11-28",
+    link: "https://example.com/herramientas/calculadora-costos",
+  },
+  {
+    id: 1012,
+    titulo: "Buenas prácticas para el beneficiado húmedo",
+    descripcion:
+      "Manual para recepción, despulpado, lavado y gestión responsable de residuos del proceso.",
+    autor: "Comité de Procesamiento",
+    fecha: "2025-10-16",
+    link: "https://example.com/documentos/beneficiado-humedo.pdf",
+  },
+  {
+    id: 1013,
+    titulo: "Norma de trazabilidad para lotes de café robusta",
+    descripcion:
+      "Requisitos mínimos de identificación, registro y seguimiento desde la finca hasta el comprador.",
+    autor: "Consejo de Calidad OBC",
+    fecha: "2025-09-05",
+    link: "https://example.com/documentos/norma-trazabilidad.pdf",
+  },
+  {
+    id: 1014,
+    titulo: "Introducción a sistemas agroforestales",
+    descripcion:
+      "Video sobre selección de especies de sombra y diseño de arreglos para fincas sostenibles.",
+    autor: "Programa de Sostenibilidad",
+    fecha: "2025-07-21",
+    link: "https://example.com/videos/sistemas-agroforestales.webm",
+  },
+  {
+    id: 1015,
+    titulo: "Boletín de oportunidades de exportación",
+    descripcion:
+      "Resumen de compradores, requisitos de acceso y tendencias de consumo para café robusta.",
+    autor: "Área Comercial",
+    fecha: "2025-05-30",
+    link: "https://example.com/mercados/oportunidades-exportacion",
   },
 ];
+
+// Conserva compatibilidad con el contador usado por el dashboard administrativo.
+export const mockDocuments = mockLibraryRecords;

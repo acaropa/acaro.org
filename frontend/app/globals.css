@@ -68,3 +68,154 @@
     @apply antialiased transition-colors duration-300;
   }
 }
+
+@keyframes library-page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes coffee-pour {
+  0% {
+    opacity: 0;
+    stroke-dashoffset: 64;
+    stroke-width: 3;
+  }
+  18% {
+    opacity: 1;
+  }
+  35%, 72% {
+    stroke-dashoffset: 0;
+    stroke-width: 5;
+  }
+  100% {
+    opacity: 0;
+    stroke-dashoffset: 0;
+    stroke-width: 1.5;
+  }
+}
+
+@keyframes coffee-pot-pour {
+  0% {
+    transform: rotate(-2deg);
+  }
+  22%, 72% {
+    transform: rotate(-5deg);
+  }
+  100% {
+    transform: rotate(0);
+  }
+}
+
+@keyframes coffee-fill {
+  0%, 18% {
+    transform: translateY(45px);
+  }
+  78%, 100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes coffee-top-rise {
+  0%, 18% {
+    opacity: 0;
+    transform: translateY(45px) scaleX(0.8);
+  }
+  75% {
+    opacity: 1;
+    transform: translateY(0) scaleX(1);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scaleX(1);
+  }
+}
+
+@keyframes coffee-ripple {
+  0%, 55% {
+    opacity: 0;
+    transform: scaleX(0.4);
+  }
+  72% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: scaleX(1.7);
+  }
+}
+
+@keyframes coffee-loader-finish {
+  0%, 82% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-3px) scale(0.96);
+  }
+}
+
+.library-page-enter {
+  animation: library-page-enter 420ms ease-out both;
+}
+
+.coffee-loader {
+  color: #7b3f12;
+  animation: coffee-loader-finish 820ms ease-out both;
+}
+
+.coffee-stream {
+  stroke-dasharray: 64;
+  stroke-dashoffset: 64;
+  animation: coffee-pour 820ms ease-in-out both;
+}
+
+.coffee-pot {
+  transform-box: fill-box;
+  transform-origin: 44px 54px;
+  animation: coffee-pot-pour 820ms ease-in-out both;
+}
+
+.coffee-level {
+  animation: coffee-fill 820ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.coffee-top {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: coffee-top-rise 820ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.coffee-ripple {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: coffee-ripple 820ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .library-page-enter,
+  .coffee-loader,
+  .coffee-pot,
+  .coffee-stream,
+  .coffee-level,
+  .coffee-top,
+  .coffee-ripple {
+    animation: none;
+  }
+
+  .coffee-stream {
+    stroke-dashoffset: 0;
+  }
+
+  .coffee-level,
+  .coffee-top {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
