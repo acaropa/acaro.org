@@ -1,19 +1,20 @@
 const db = require('../config/db');
 
-async function getAll() {
+async function getAll(includeInactive = false) {
   const [rows] = await db.query(
-    `SELECT id, titulo, descripcion, autor, fecha, link, created_at
+    `SELECT id, titulo, descripcion, autor, fecha, link, activo, created_at
      FROM biblioteca
-     WHERE activo = TRUE
+     ${includeInactive ? '' : 'WHERE activo = TRUE'}
      ORDER BY fecha DESC`
   );
   return rows;
 }
 
-async function getById(id) {
+async function getById(id, includeInactive = false) {
   const [rows] = await db.query(
     `SELECT id, titulo, descripcion, autor, fecha, link, activo, created_at
-     FROM biblioteca WHERE id = ?`,
+     FROM biblioteca
+     WHERE id = ? ${includeInactive ? '' : 'AND activo = TRUE'}`,
     [id]
   );
   return rows[0] || null;
@@ -26,7 +27,7 @@ async function create(data) {
      VALUES (?, ?, ?, ?, ?)`,
     [titulo, descripcion, autor, fecha, link]
   );
-  return getById(result.insertId);
+  return getById(result.insertId, true);
 }
 
 async function update(id, data) {
@@ -41,7 +42,7 @@ async function update(id, data) {
 
   const set = fields.map(k => `${k} = ?`).join(', ');
   await db.query(`UPDATE biblioteca SET ${set} WHERE id = ?`, [...fields.map(k => data[k]), id]);
-  return getById(id);
+  return getById(id, true);
 }
 
 async function remove(id) {
