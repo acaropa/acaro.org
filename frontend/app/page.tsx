@@ -3,29 +3,32 @@ import Link from "next/link"
 import {
   ArrowDown,
   ArrowRight,
-  FlaskConical,
   MapPin,
   Newspaper,
-  Sprout,
-  Waypoints,
 } from "lucide-react"
 
 import { PublicLayout } from "@/components/layout/PublicLayout"
 import { HeroParallaxImage, ScrollReveal, ScrollScene } from "@/components/landing/LandingMotion"
 import { mockNews } from "@/data/mock-news"
 import { mockProjects } from "@/data/mock-projects"
-
-const projectIcons = [Sprout, FlaskConical, Waypoints]
+import { cn } from "@/lib/utils"
 
 const projectStatusLabel = (status: string) => status === "Planificación" ? "Planificado" : status
 
+const projectStatusDot: Record<string, string> = {
+  "Activo": "bg-[#86d99c]",
+  "En seguimiento": "bg-[#d7a24a]",
+  "Planificación": "bg-[#9ab0c4]",
+  "Finalizado": "bg-[#b8a99a]",
+}
+
 export default function Home() {
-  const featuredProjects = mockProjects.slice(0, 3)
+  const featuredProjects = mockProjects.slice(0, 4)
   const [featuredNews, ...secondaryNews] = mockNews
 
   return (
     <PublicLayout className="landing-typography">
-      <section className="relative isolate flex min-h-[calc(100svh-72px)] items-end overflow-hidden bg-[#24130d] text-[#fffaf1]">
+      <section className="relative isolate -mt-18 flex min-h-[100svh] items-end overflow-hidden bg-[#24130d] text-[#fffaf1]">
         <HeroParallaxImage />
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(24,12,8,0.94)_0%,rgba(42,24,16,0.78)_42%,rgba(42,24,16,0.18)_76%,rgba(18,12,8,0.38)_100%)]" />
         <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(18,12,8,0.78)_0%,transparent_48%)]" />
@@ -112,62 +115,64 @@ export default function Home() {
         </div>
       </ScrollScene>
 
-      <ScrollScene className="overflow-hidden bg-[#24130d] py-24 text-[#f3e8d8] sm:py-32">
-        <div className="absolute inset-0 scale-105">
-          <Image
-            src="/assets/hero-bg.jpg"
-            alt=""
-            fill
-            className="scene-scale object-cover object-center opacity-55 saturate-[0.7]"
-            sizes="100vw"
-          />
-        </div>
-        <div className="absolute inset-0 bg-[#24130d]/68" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_54%_28%,rgba(124,76,48,0.32),transparent_46%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(18,9,6,0.82),rgba(43,23,16,0.28),rgba(18,9,6,0.72))]" />
-        <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
-          <ScrollReveal className="relative z-10 text-center" distance="sm">
-            <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#d7a24a]">Nuestra excelencia</p>
-            <h2 className="mt-4 font-serif text-4xl font-semibold tracking-[-0.025em] text-[#f4f0dc] sm:text-5xl">Proyectos destacados</h2>
+      <ScrollScene className="relative overflow-hidden bg-[#15100a] py-24 text-[#f3e8d8] sm:py-32">
+        <div
+          className="absolute inset-0 opacity-[0.07]"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(248,239,227,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(248,239,227,0.6) 1px, transparent 1px)",
+            backgroundSize: "46px 46px",
+          }}
+        />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(124,76,48,0.28),transparent_55%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_0%,rgba(15,11,7,0.92)_100%)]" />
+
+        <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+          <ScrollReveal className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between" distance="sm">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#d7a24a]">Iniciativas activas</p>
+              <h2 className="mt-4 font-serif text-4xl font-semibold tracking-[-0.025em] text-[#f4f0dc] sm:text-5xl">Proyectos destacados</h2>
+            </div>
+            <Link href="/proyectos" className="group inline-flex items-center gap-2 border-b border-[#d7a24a]/40 pb-1 text-sm font-semibold text-[#d7a24a] transition-all hover:gap-4 hover:border-[#d7a24a]">
+              Ver registro completo <ArrowRight className="h-4 w-4" />
+            </Link>
           </ScrollReveal>
 
-          <div className="relative z-10 mt-14 grid gap-5 md:grid-cols-3">
+          <div className="mt-14 grid gap-6 md:grid-cols-2">
             {featuredProjects.map((project, index) => {
-              const Icon = projectIcons[index] ?? FlaskConical
+              const image = index % 2 === 0 ? "/assets/hero-bg.jpg" : "/assets/coffee-beans-texture.png"
               return (
                 <ScrollReveal
                   key={project.id}
-                  delay={index * 130}
-                  className="premium-project group relative flex min-h-[390px] flex-col overflow-hidden rounded-xl border border-[#dfd0bf] bg-[#f8f1e8]/95 p-7 backdrop-blur-md hover:border-[#cda96f] hover:bg-[#fffaf1]"
+                  delay={index * 110}
+                  className="premium-project group flex flex-col overflow-hidden rounded-xl border border-[#3a2a20] bg-[#1c140d]"
                 >
-                  {index === 1 && (
-                    <div className="absolute inset-0 opacity-[0.045]">
-                      <Image src="/assets/hero-bg.jpg" alt="" fill className="object-cover" sizes="33vw" />
+                  <div className="relative h-56 overflow-hidden">
+                    <Image
+                      src={image}
+                      alt=""
+                      fill
+                      className="scene-scale object-cover transition-transform duration-700 group-hover:scale-105"
+                      sizes="(min-width: 768px) 50vw, 100vw"
+                    />
+                    <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(15,11,7,0.85),transparent_60%)]" />
+                    <div className="absolute left-4 top-4 flex items-center gap-2 rounded-full border border-[#f8efe3]/15 bg-[#15100a]/70 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#f3e8d8] backdrop-blur-sm">
+                      <span className={cn("h-1.5 w-1.5 rounded-full", projectStatusDot[project.status])} />
+                      Estado: {projectStatusLabel(project.status)}
                     </div>
-                  )}
-                  <div className="relative flex h-full flex-col">
-                    <Icon className="h-8 w-8 text-[#a66f20]" strokeWidth={1.6} />
-                    <p className="mt-6 text-[10px] font-bold uppercase tracking-[0.18em] text-[#a66f20]">{project.category}</p>
-                    <h3 className="mt-3 font-serif text-2xl font-semibold leading-tight text-[#321b13]">{project.title}</h3>
-                    <p className="mt-4 text-sm leading-6 text-[#715e52]">{project.description}</p>
-                    <div className="mt-auto pt-8">
-                      <div className="h-px w-full bg-[#dfd0bf] transition-colors group-hover:bg-[#cda96f]" />
-                      <div className="mt-4 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.15em] text-[#897568]">
-                        <span>Iniciativa 0{index + 1}</span>
-                        <span className="text-[#a66f20]">{projectStatusLabel(project.status)}</span>
-                      </div>
+                  </div>
+                  <div className="flex flex-1 flex-col p-7">
+                    <h3 className="font-serif text-2xl font-semibold leading-tight text-[#f8efe3]">{project.title}</h3>
+                    <p className="mt-3 flex-1 text-sm leading-6 text-[#b8a99a]">{project.description}</p>
+                    <div className="mt-6 flex flex-wrap gap-2">
+                      <span className="rounded-full border border-[#3a2a20] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[#d7a24a]">{project.category}</span>
+                      <span className="rounded-full border border-[#3a2a20] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[#d8c9bb]">Iniciativa 0{index + 1}</span>
                     </div>
                   </div>
                 </ScrollReveal>
               )
             })}
           </div>
-
-          <ScrollReveal className="relative z-10 mt-10 text-center" delay={360} distance="sm">
-            <Link href="/proyectos" className="group inline-flex items-center gap-2 border-b border-[#d7a24a]/40 pb-1 text-sm font-semibold text-[#d7a24a] transition-all hover:gap-4 hover:border-[#d7a24a]">
-              Ver todos los proyectos <ArrowRight className="h-4 w-4" />
-            </Link>
-          </ScrollReveal>
         </div>
       </ScrollScene>
 

@@ -43,42 +43,60 @@ const navItems: NavItem[] = [
 
 export function PublicNavbar() {
   const pathname = usePathname()
+  const isHome = pathname === "/"
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false)
+  const [isScrolled, setIsScrolled] = React.useState(false)
+
+  React.useEffect(() => {
+    const onScroll = () => setIsScrolled(window.scrollY > 8)
+    onScroll()
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [])
+
+  const isTransparent = isHome && !isScrolled && !isMobileMenuOpen
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-[#ded2c4]/80 bg-[#fffdf8]/95 text-[#2b1710] backdrop-blur-xl">
+    <header
+      className={cn(
+        "sticky top-0 z-50 w-full text-[#f8efe3] transition-colors duration-300",
+        isTransparent
+          ? "border-b border-transparent bg-transparent"
+          : "border-b border-[#3a2a20]/80 bg-[#120c08]/95 backdrop-blur-xl"
+      )}
+    >
       <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
         <div className="flex h-[72px] items-center justify-between">
           <Link href="/" aria-label="Ir al inicio" className="transition-opacity hover:opacity-80">
-            <Logo className="[&_span]:text-[16px] [&_span]:leading-[0.95]" />
+            <Logo variant="white" className="[&_span]:text-[16px] [&_span]:leading-[0.95]" />
           </Link>
 
           <nav className="hidden items-center gap-7 md:flex">
             {navItems.map((item) =>
               item.submenu ? (
                 <div key={item.label} className="group relative">
-                  <button className="flex items-center gap-1.5 py-6 text-sm font-medium text-[#604a3e] transition-colors hover:text-[#a66f2e]">
+                  <button className="flex items-center gap-1.5 py-6 text-sm font-medium text-[#d8c9bb] transition-colors hover:text-[#d7a24a]">
                     {item.label}
                     <ChevronDown className="h-3.5 w-3.5 transition-transform duration-300 group-hover:rotate-180" />
                   </button>
                   <div className="invisible absolute left-1/2 top-full w-72 -translate-x-1/2 -translate-y-2 pt-2 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
-                    <div className="border border-[#ded2c4] bg-[#fffdf8] p-2 shadow-[0_20px_60px_rgba(43,23,16,0.14)]">
+                    <div className="border border-[#3a2a20] bg-[#1f140e] p-2 shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
                       {item.submenu.map((sub) => (
                         <Link
                           key={sub.href}
                           href={sub.href}
                           target={sub.href.startsWith("http") ? "_blank" : undefined}
                           rel={sub.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                          className="group/sub flex items-start gap-3 border-b border-[#ece3da] p-3 transition-colors last:border-0 hover:bg-[#f6efe5]"
+                          className="group/sub flex items-start gap-3 border-b border-[#3a2a20] p-3 transition-colors last:border-0 hover:bg-[#2a1a12]"
                         >
                           {sub.social && (
-                            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center bg-[#efe1cf] text-[#a66f2e] transition-colors group-hover/sub:bg-[#c28a3a] group-hover/sub:text-[#24130d]">
+                            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center bg-[#2a1a12] text-[#d7a24a] transition-colors group-hover/sub:bg-[#d7a24a] group-hover/sub:text-[#120c08]">
                               <SocialIcon network={sub.social} className="h-4 w-4" />
                             </span>
                           )}
                           <span className="flex flex-col">
-                            <span className="text-sm font-semibold text-[#2b1710] group-hover/sub:text-[#a66f2e]">{sub.label}</span>
-                            {sub.info && <span className="mt-1 text-xs leading-snug text-[#806b5f]">{sub.info}</span>}
+                            <span className="text-sm font-semibold text-[#f8efe3] group-hover/sub:text-[#d7a24a]">{sub.label}</span>
+                            {sub.info && <span className="mt-1 text-xs leading-snug text-[#b8a99a]">{sub.info}</span>}
                           </span>
                         </Link>
                       ))}
@@ -90,30 +108,30 @@ export function PublicNavbar() {
                   key={item.href}
                   href={item.href!}
                   className={cn(
-                    "relative py-6 text-sm font-medium transition-colors hover:text-[#a66f2e]",
-                    pathname === item.href ? "text-[#a66f2e]" : "text-[#604a3e]"
+                    "relative py-6 text-sm font-medium transition-colors hover:text-[#d7a24a]",
+                    pathname === item.href ? "text-[#d7a24a]" : "text-[#d8c9bb]"
                   )}
                 >
                   {item.label}
-                  {pathname === item.href && <span className="absolute inset-x-0 bottom-4 mx-auto h-px w-4 bg-[#c28a3a]" />}
+                  {pathname === item.href && <span className="absolute inset-x-0 bottom-4 mx-auto h-px w-4 bg-[#d7a24a]" />}
                 </Link>
               )
             )}
           </nav>
 
           <div className="hidden items-center gap-3 md:flex">
-            <ThemeToggle />
-            <Link href="/login" className="inline-flex min-h-10 items-center justify-center rounded-md bg-[#2b1710] px-5 text-sm font-semibold text-[#fffdf8] transition-all hover:-translate-y-0.5 hover:bg-[#5a3424] active:translate-y-0">
+            <ThemeToggle className="text-[#d8c9bb] hover:text-[#d7a24a]" />
+            <Link href="/login" className="inline-flex min-h-10 items-center justify-center rounded-md bg-[#d7a24a] px-5 text-sm font-semibold text-[#120c08] transition-all hover:-translate-y-0.5 hover:bg-[#e8b661] active:translate-y-0">
               Acceso interno
             </Link>
           </div>
 
           <div className="flex items-center gap-2 md:hidden">
-            <ThemeToggle />
+            <ThemeToggle className="text-[#d8c9bb] hover:text-[#d7a24a]" />
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen((open) => !open)}
-              className="flex h-11 w-11 items-center justify-center rounded-md border border-[#ded2c4] transition-colors hover:bg-[#f6efe5]"
+              className="flex h-11 w-11 items-center justify-center rounded-md border border-[#3a2a20] transition-colors hover:bg-[#2a1a12]"
               aria-label={isMobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
               aria-expanded={isMobileMenuOpen}
             >
@@ -123,14 +141,14 @@ export function PublicNavbar() {
         </div>
       </div>
 
-      <div className={cn("grid border-t border-[#ded2c4] bg-[#fffdf8] transition-[grid-template-rows,opacity] duration-300 md:hidden", isMobileMenuOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0")}>
+      <div className={cn("grid border-t border-[#3a2a20] bg-[#120c08] transition-[grid-template-rows,opacity] duration-300 md:hidden", isMobileMenuOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0")}>
         <div className="overflow-hidden">
           <div className="max-h-[80vh] overflow-y-auto px-5 py-5 sm:px-8">
             {navItems.map((item) =>
               item.submenu ? (
-                <div key={item.label} className="border-b border-[#e9e0d7] py-3">
+                <div key={item.label} className="border-b border-[#3a2a20] py-3">
                   <p className="py-2 font-serif text-xl font-semibold">{item.label}</p>
-                  <div className="border-l border-[#c9ad8b] pl-4">
+                  <div className="border-l border-[#5a3424] pl-4">
                     {item.submenu.map((sub) => (
                       <Link
                         key={sub.href}
@@ -138,7 +156,7 @@ export function PublicNavbar() {
                         target={sub.href.startsWith("http") ? "_blank" : undefined}
                         rel={sub.href.startsWith("http") ? "noopener noreferrer" : undefined}
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className="flex items-center gap-3 py-2.5 text-sm text-[#765e50] transition-colors hover:text-[#a66f2e]"
+                        className="flex items-center gap-3 py-2.5 text-sm text-[#d8c9bb] transition-colors hover:text-[#d7a24a]"
                       >
                         {sub.social && <SocialIcon network={sub.social} className="h-4 w-4" />}
                         {sub.label}
@@ -147,12 +165,12 @@ export function PublicNavbar() {
                   </div>
                 </div>
               ) : (
-                <Link key={item.href} href={item.href!} onClick={() => setIsMobileMenuOpen(false)} className="block border-b border-[#e9e0d7] py-4 font-serif text-xl font-semibold">
+                <Link key={item.href} href={item.href!} onClick={() => setIsMobileMenuOpen(false)} className="block border-b border-[#3a2a20] py-4 font-serif text-xl font-semibold">
                   {item.label}
                 </Link>
               )
             )}
-            <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-md bg-[#2b1710] px-5 text-sm font-semibold text-[#fffdf8]">
+            <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-md bg-[#d7a24a] px-5 text-sm font-semibold text-[#120c08]">
               Acceso interno
             </Link>
           </div>
