@@ -22,16 +22,12 @@ const navItems: NavItem[] = [
     label: "Nosotros",
     submenu: [
       { href: "/nosotros", label: "Acerca de la Asociación", info: "Conoce nuestra historia, misión y propósito." },
-      { href: "/nosotros/equipo", label: "Mesa Directiva", info: "Conoce al equipo que lidera nuestra organización." },
-      { href: "/nosotros/transparencia", label: "Transparencia", info: "Informes y documentación oficial." },
     ],
   },
   {
     label: "Proyectos",
     submenu: [
       { href: "/proyectos", label: "Todos los proyectos", info: "Explora todas nuestras iniciativas." },
-      { href: "/proyectos/ejecucion", label: "En ejecución", info: "Proyectos actualmente activos." },
-      { href: "/proyectos/completados", label: "Completados", info: "Casos de éxito y resultados alcanzados." },
     ],
   },
   { href: "/biblioteca", label: "Biblioteca" },

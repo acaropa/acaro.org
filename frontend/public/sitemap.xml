@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://acaro.org/</loc>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://acaro.org/biblioteca</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://acaro.org/biblioteca/buscar</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://acaro.org/contacto</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://acaro.org/nosotros</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://acaro.org/noticias</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://acaro.org/proyectos</loc>
+    <priority>0.8</priority>
+  </url>
+</urlset>

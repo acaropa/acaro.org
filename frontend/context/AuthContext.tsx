@@ -38,7 +38,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const data = await api.post<{ token: string; user: AuthUser }>('/auth/login', { email, password });
     localStorage.setItem('token', data.token);
     setUser(data.user);
-    router.push('/dashboard');
+    router.push('/admin');
   }
 
   function logout() {
