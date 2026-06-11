@@ -23,7 +23,7 @@ const projectStatusDot: Record<string, string> = {
 }
 
 export default function Home() {
-  const featuredProjects = mockProjects.slice(0, 4)
+  const featuredProjects = mockProjects.slice(0, 2)
   const [featuredNews, ...secondaryNews] = mockNews
 
   return (
@@ -115,30 +115,26 @@ export default function Home() {
         </div>
       </ScrollScene>
 
-      <ScrollScene className="relative overflow-hidden bg-[#15100a] py-24 text-[#f3e8d8] sm:py-32">
-        <div
-          className="absolute inset-0 opacity-[0.07]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(248,239,227,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(248,239,227,0.6) 1px, transparent 1px)",
-            backgroundSize: "46px 46px",
-          }}
-        />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(124,76,48,0.28),transparent_55%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_0%,rgba(15,11,7,0.92)_100%)]" />
+      <ScrollScene className="relative overflow-hidden bg-[#160d08] py-24 text-[#f3e8d8] sm:py-32">
+        <div className="absolute -inset-8">
+          <Image
+            src="/assets/hero-bg.jpg"
+            alt=""
+            fill
+            className="scene-scale scale-105 object-cover blur-[3px]"
+            sizes="100vw"
+          />
+        </div>
+        <div className="absolute inset-0 bg-[#160d08]/75" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_38%,rgba(116,55,30,0.25),rgba(16,9,6,0.9)_82%)]" />
 
         <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
-          <ScrollReveal className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between" distance="sm">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#d7a24a]">Iniciativas activas</p>
-              <h2 className="mt-4 font-serif text-4xl font-semibold tracking-[-0.025em] text-[#f4f0dc] sm:text-5xl">Proyectos destacados</h2>
-            </div>
-            <Link href="/proyectos" className="group inline-flex items-center gap-2 border-b border-[#d7a24a]/40 pb-1 text-sm font-semibold text-[#d7a24a] transition-all hover:gap-4 hover:border-[#d7a24a]">
-              Ver registro completo <ArrowRight className="h-4 w-4" />
-            </Link>
+          <ScrollReveal className="text-center" distance="sm">
+            <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#d7a24a]">Nuestra excelencia</p>
+            <h2 className="mt-4 font-serif text-4xl font-semibold tracking-[-0.025em] text-[#fff8eb] sm:text-5xl lg:text-6xl">Proyectos destacados</h2>
           </ScrollReveal>
 
-          <div className="mt-14 grid gap-6 md:grid-cols-2">
+          <div className="mx-auto mt-14 grid max-w-5xl gap-6 md:grid-cols-2">
             {featuredProjects.map((project, index) => {
               const image = index % 2 === 0 ? "/assets/hero-bg.jpg" : "/assets/coffee-beans-texture.png"
               return (
@@ -173,6 +169,12 @@ export default function Home() {
               )
             })}
           </div>
+
+          <ScrollReveal className="mt-10 flex justify-center" delay={240} distance="sm">
+            <Link href="/proyectos" className="group inline-flex items-center gap-2 border-b border-[#d7a24a]/55 pb-1.5 text-sm font-semibold text-[#e0ad55] transition-all hover:gap-4 hover:border-[#e0ad55] hover:text-[#f0c87e]">
+              Ver todos los proyectos <ArrowRight className="h-4 w-4" />
+            </Link>
+          </ScrollReveal>
         </div>
       </ScrollScene>
 
@@ -182,11 +184,11 @@ export default function Home() {
             src="/assets/coffee-beans-texture.png"
             alt=""
             fill
-            className="scene-scale -scale-x-100 object-cover opacity-[0.14] mix-blend-multiply"
+            className="scene-scale -scale-x-100 object-cover opacity-[0.22] mix-blend-multiply"
             sizes="100vw"
           />
         </div>
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(251,247,240,0.78),rgba(255,253,248,0.97)_27%,rgba(255,253,248,0.97)_73%,rgba(251,247,240,0.78))]" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(251,247,240,0.62),rgba(255,253,248,0.9)_27%,rgba(255,253,248,0.9)_73%,rgba(251,247,240,0.62))]" />
         <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
           <ScrollReveal className="flex flex-col gap-5 border-b border-[#d8cabb] pb-8 sm:flex-row sm:items-end sm:justify-between" distance="sm">
             <div>

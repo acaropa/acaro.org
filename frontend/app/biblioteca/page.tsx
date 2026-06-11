@@ -191,7 +191,7 @@ export default function Biblioteca() {
     <PublicLayout>
       <LibraryPageTransition active={isLeaving} />
       <div className="library-page-enter">
-      <header className="relative isolate min-h-[560px] overflow-hidden bg-[#25160e] md:min-h-[620px]">
+      <header className="relative isolate -mt-18 min-h-[560px] overflow-hidden bg-[#25160e] md:min-h-[620px]">
         <div
           className="absolute inset-0 scale-105 bg-cover bg-center blur-[1px]"
           style={{ backgroundImage: "url('/assets/library-hero-v2.png')" }}

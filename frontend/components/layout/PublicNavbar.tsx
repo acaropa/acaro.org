@@ -44,6 +44,7 @@ const navItems: NavItem[] = [
 export function PublicNavbar() {
   const pathname = usePathname()
   const isHome = pathname === "/"
+  const hasTransparentHero = isHome || pathname === "/biblioteca"
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false)
   const [isScrolled, setIsScrolled] = React.useState(false)
 
@@ -54,7 +55,7 @@ export function PublicNavbar() {
     return () => window.removeEventListener("scroll", onScroll)
   }, [])
 
-  const isTransparent = isHome && !isScrolled && !isMobileMenuOpen
+  const isTransparent = hasTransparentHero && !isScrolled && !isMobileMenuOpen
 
   return (
     <header
