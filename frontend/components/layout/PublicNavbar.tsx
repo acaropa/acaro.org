@@ -43,8 +43,8 @@ const navItems: NavItem[] = [
 
 export function PublicNavbar() {
   const pathname = usePathname()
-  const isHome = pathname === "/"
-  const hasTransparentHero = isHome || pathname === "/biblioteca"
+  const isHome = pathname === "/" || pathname === ""
+  const hasTransparentHero = isHome || pathname === "/biblioteca" || pathname === "/biblioteca/"
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false)
   const [isScrolled, setIsScrolled] = React.useState(false)
 
@@ -60,14 +60,14 @@ export function PublicNavbar() {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 w-full text-[#f8efe3] transition-colors duration-300",
+        "sticky top-0 z-50 h-[72px] w-full text-[#f8efe3] transition-colors duration-300",
         isTransparent
           ? "border-b border-transparent bg-transparent"
           : "border-b border-[#3a2a20]/80 bg-[#120c08]/95 backdrop-blur-xl"
       )}
     >
-      <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
-        <div className="flex h-[72px] items-center justify-between">
+      <div className="mx-auto h-full max-w-7xl px-5 sm:px-8 lg:px-10">
+        <div className="flex h-full items-center justify-between">
           <Link href="/" aria-label="Ir al inicio" className="transition-opacity hover:opacity-80">
             <Logo variant="white" className="[&_span]:text-[16px] [&_span]:leading-[0.95]" />
           </Link>

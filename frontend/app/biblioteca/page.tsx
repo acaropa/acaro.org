@@ -190,15 +190,15 @@ export default function Biblioteca() {
   return (
     <PublicLayout>
       <LibraryPageTransition active={isLeaving} />
-      <div className="library-page-enter">
-      <header className="relative isolate -mt-18 min-h-[560px] overflow-hidden bg-[#25160e] md:min-h-[620px]">
+      <div className="library-page-enter -mt-18">
+      <header className="relative isolate min-h-[560px] overflow-hidden bg-[#25160e] md:min-h-[620px]">
         <div
           className="absolute inset-0 scale-105 bg-cover bg-center blur-[1px]"
           style={{ backgroundImage: "url('/assets/library-hero-v2.png')" }}
         />
         <div className="absolute inset-0 bg-[#182216]/45" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-transparent to-black/60" />
-        <div className="relative mx-auto flex min-h-[560px] max-w-7xl flex-col items-center justify-center px-6 text-center md:min-h-[620px]">
+        <div className="relative mx-auto flex min-h-[560px] max-w-7xl flex-col items-center justify-center px-6 pt-18 text-center md:min-h-[620px]">
           <span className="rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold text-white/85 backdrop-blur">
             Cultivando conocimiento
           </span>
