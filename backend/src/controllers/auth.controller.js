@@ -3,9 +3,8 @@ const {
   createUser,
   verifyPassword,
   generateToken,
+  publicUser,
 } = require('../services/auth.service');
-
-const VALID_ROLES = ['admin', 'supervisor', 'tecnico', 'visitante'];
 
 async function login(req, res, next) {
   try {
@@ -25,7 +24,7 @@ async function login(req, res, next) {
     }
 
     const token = generateToken(user);
-    res.json({ token, user: { id: user.id, email: user.email, role: user.role } });
+    res.json({ token, user: publicUser(user) });
   } catch (err) {
     next(err);
   }
@@ -33,7 +32,7 @@ async function login(req, res, next) {
 
 async function register(req, res, next) {
   try {
-    const { email, password, role } = req.body;
+    const { email, password } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ error: 'Email y contraseña requeridos' });
@@ -43,13 +42,9 @@ async function register(req, res, next) {
       return res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres' });
     }
 
-    if (role && !VALID_ROLES.includes(role)) {
-      return res.status(400).json({ error: 'Rol inválido' });
-    }
-
-    const user = await createUser(email, password, role);
+    const user = await createUser(email, password, 'visitante');
     const token = generateToken(user);
-    res.status(201).json({ token, user });
+    res.status(201).json({ token, user: publicUser({ ...user, activo: true }) });
   } catch (err) {
     next(err);
   }

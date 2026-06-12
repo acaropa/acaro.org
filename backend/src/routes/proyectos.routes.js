@@ -1,29 +1,78 @@
 const router = require('express').Router();
 const ctrl = require('../controllers/proyectos.controller');
-const { verifyToken, requireRole, optionalAuth } = require('../middlewares/auth.middleware');
+const {
+  verifyToken,
+  requirePermission,
+  optionalAuth,
+} = require('../middlewares/auth.middleware');
+const { PERMISSIONS } = require('../config/permissions');
 
-const canRead   = [verifyToken, requireRole('admin', 'supervisor', 'tecnico')];
-const canWrite  = [verifyToken, requireRole('admin', 'supervisor')];
-const adminOnly = [verifyToken, requireRole('admin')];
+router.get('/', optionalAuth, ctrl.getAll);
+router.get(
+  '/:id',
+  optionalAuth,
+  ctrl.getById
+);
+router.post(
+  '/',
+  verifyToken,
+  requirePermission(PERMISSIONS.PROYECTOS_CREATE),
+  ctrl.create
+);
+router.put(
+  '/:id',
+  verifyToken,
+  requirePermission(PERMISSIONS.PROYECTOS_UPDATE_ASSIGNED, PERMISSIONS.PROYECTOS_UPDATE_ALL),
+  ctrl.update
+);
+router.delete(
+  '/:id',
+  verifyToken,
+  requirePermission(PERMISSIONS.PROYECTOS_DELETE),
+  ctrl.remove
+);
 
-// Proyectos
-router.get('/',    optionalAuth, ctrl.getAll);   // público: solo devuelve tipo=publico; con token: todos
-router.get('/:id', canRead,  ctrl.getById);
-router.post('/',   canWrite, ctrl.create);
-router.put('/:id', canWrite, ctrl.update);
-router.delete('/:id', adminOnly, ctrl.remove);
-
-// Técnicos en proyecto
-router.post('/:id/tecnicos',                canWrite, ctrl.assignTecnico);
-router.delete('/:id/tecnicos/:tecnicoId',   canWrite, ctrl.removeTecnico);
-
-// Fases
-router.post('/:id/fases',                   canWrite,  ctrl.createFase);
-router.put('/:id/fases/:faseId',            canWrite,  ctrl.updateFase);
-router.delete('/:id/fases/:faseId',         adminOnly, ctrl.removeFase);
-
-// Imágenes de fase
-router.post('/:id/fases/:faseId/imagenes',              canWrite,  ctrl.addImagen);
-router.delete('/:id/fases/:faseId/imagenes/:imagenId',  adminOnly, ctrl.removeImagen);
+router.post(
+  '/:id/tecnicos',
+  verifyToken,
+  requirePermission(PERMISSIONS.PROYECTOS_UPDATE_ASSIGNED, PERMISSIONS.PROYECTOS_UPDATE_ALL),
+  ctrl.assignTecnico
+);
+router.delete(
+  '/:id/tecnicos/:tecnicoId',
+  verifyToken,
+  requirePermission(PERMISSIONS.PROYECTOS_UPDATE_ASSIGNED, PERMISSIONS.PROYECTOS_UPDATE_ALL),
+  ctrl.removeTecnico
+);
+router.post(
+  '/:id/fases',
+  verifyToken,
+  requirePermission(PERMISSIONS.PROYECTOS_UPDATE_ASSIGNED, PERMISSIONS.PROYECTOS_UPDATE_ALL),
+  ctrl.createFase
+);
+router.put(
+  '/:id/fases/:faseId',
+  verifyToken,
+  requirePermission(PERMISSIONS.PROYECTOS_UPDATE_ASSIGNED, PERMISSIONS.PROYECTOS_UPDATE_ALL),
+  ctrl.updateFase
+);
+router.delete(
+  '/:id/fases/:faseId',
+  verifyToken,
+  requirePermission(PERMISSIONS.PROYECTOS_DELETE),
+  ctrl.removeFase
+);
+router.post(
+  '/:id/fases/:faseId/imagenes',
+  verifyToken,
+  requirePermission(PERMISSIONS.PROYECTOS_UPDATE_ASSIGNED, PERMISSIONS.PROYECTOS_UPDATE_ALL),
+  ctrl.addImagen
+);
+router.delete(
+  '/:id/fases/:faseId/imagenes/:imagenId',
+  verifyToken,
+  requirePermission(PERMISSIONS.PROYECTOS_DELETE),
+  ctrl.removeImagen
+);
 
 module.exports = router;

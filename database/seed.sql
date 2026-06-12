@@ -12,8 +12,11 @@ INSERT INTO users (email, password_hash, role) VALUES
 INSERT INTO tecnicos (user_id, nombre, apellido, especialidad, telefono) VALUES
   (3, 'Juan', 'Pérez', 'Electricidad', '099-000-001');
 
-INSERT INTO biblioteca (titulo, descripcion, autor, fecha, link) VALUES
-  ('Manual de instalaciones eléctricas', 'Guía técnica para instalaciones residenciales', 'ACARO', '2026-01-15', 'https://drive.google.com/ejemplo');
+INSERT INTO biblioteca
+  (titulo, descripcion, archivo_url, categoria, estado, visibilidad, creado_por, revisado_por, fecha_revision)
+VALUES
+  ('Manual de instalaciones eléctricas', 'Guía técnica para instalaciones residenciales',
+   'https://drive.google.com/ejemplo', 'Manuales', 'aprobado', 'publica', 1, 1, CURRENT_TIMESTAMP);
 
 INSERT INTO proyectos (nombre, descripcion, tipo, clasificacion, estado, fecha_inicio, responsable_id) VALUES
   ('Instalación Oficina Central', 'Cableado estructurado sede principal', 'privado', 'Infraestructura', 'en_progreso', '2026-06-10', 1);

@@ -12,6 +12,8 @@ const sociosRoutes   = require('./routes/socios.routes');
 const tecnicosRoutes  = require('./routes/tecnicos.routes');
 const proyectosRoutes  = require('./routes/proyectos.routes');
 const bibliotecaRoutes = require('./routes/biblioteca.routes');
+const usuariosRoutes = require('./routes/usuarios.routes');
+const noticiasRoutes = require('./routes/noticias.routes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -37,6 +39,8 @@ app.use('/api/socios',   sociosRoutes);
 app.use('/api/tecnicos',  tecnicosRoutes);
 app.use('/api/proyectos',  proyectosRoutes);
 app.use('/api/biblioteca', bibliotecaRoutes);
+app.use('/api/usuarios', usuariosRoutes);
+app.use('/api/noticias', noticiasRoutes);
 
 app.use(errorHandler);
 

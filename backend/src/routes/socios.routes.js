@@ -1,15 +1,12 @@
 const router = require('express').Router();
 const ctrl = require('../controllers/socios.controller');
-const { verifyToken, requireRole } = require('../middlewares/auth.middleware');
+const { verifyToken, requirePermission } = require('../middlewares/auth.middleware');
+const { PERMISSIONS } = require('../config/permissions');
 
-const canRead   = [verifyToken, requireRole('admin', 'supervisor')];
-const canWrite  = [verifyToken, requireRole('admin', 'supervisor')];
-const adminOnly = [verifyToken, requireRole('admin')];
-
-router.get('/',    canRead,   ctrl.getAll);
-router.get('/:id', canRead,   ctrl.getById);
-router.post('/',   canWrite,  ctrl.create);
-router.put('/:id', canWrite,  ctrl.update);
-router.delete('/:id', adminOnly, ctrl.remove);
+router.get('/', verifyToken, requirePermission(PERMISSIONS.SOCIOS_READ), ctrl.getAll);
+router.get('/:id', verifyToken, requirePermission(PERMISSIONS.SOCIOS_READ), ctrl.getById);
+router.post('/', verifyToken, requirePermission(PERMISSIONS.SOCIOS_CREATE), ctrl.create);
+router.put('/:id', verifyToken, requirePermission(PERMISSIONS.SOCIOS_UPDATE), ctrl.update);
+router.delete('/:id', verifyToken, requirePermission(PERMISSIONS.SOCIOS_DELETE), ctrl.remove);
 
 module.exports = router;

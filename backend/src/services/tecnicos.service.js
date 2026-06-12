@@ -1,13 +1,26 @@
 const bcrypt = require('bcryptjs');
 const db = require('../config/db');
 
-async function getAll() {
+async function getAll(user = null) {
+  let where = '';
+  const values = [];
+  if (user?.role === 'supervisor') {
+    where = 'WHERE st.supervisor_id = ?';
+    values.push(user.id);
+  } else if (user?.role === 'tecnico') {
+    where = 'WHERE u.id = ?';
+    values.push(user.id);
+  }
   const [rows] = await db.query(
     `SELECT t.id, t.nombre, t.apellido, t.especialidad, t.telefono, t.disponible,
-            t.created_at, u.email
+            t.created_at, u.email, st.supervisor_id, su.email AS supervisor_email
      FROM tecnicos t
      JOIN users u ON u.id = t.user_id
+     LEFT JOIN supervisor_tecnicos st ON st.tecnico_id = t.id
+     LEFT JOIN users su ON su.id = st.supervisor_id
+     ${where}
      ORDER BY t.apellido, t.nombre`
+    , values
   );
   return rows;
 }
@@ -98,4 +111,23 @@ async function remove(id) {
   }
 }
 
-module.exports = { getAll, getById, create, update, remove };
+async function assignSupervisor(tecnicoId, supervisorId) {
+  const [supervisors] = await db.query(
+    "SELECT id FROM users WHERE id = ? AND role = 'supervisor' AND activo = TRUE",
+    [supervisorId]
+  );
+  if (supervisors.length === 0) {
+    const err = new Error('El supervisor indicado no existe o no está activo');
+    err.status = 400;
+    throw err;
+  }
+  await db.query(
+    `INSERT INTO supervisor_tecnicos (supervisor_id, tecnico_id)
+     VALUES (?, ?)
+     ON DUPLICATE KEY UPDATE supervisor_id = VALUES(supervisor_id), assigned_at = CURRENT_TIMESTAMP`,
+    [supervisorId, tecnicoId]
+  );
+  return getById(tecnicoId);
+}
+
+module.exports = { getAll, getById, create, update, remove, assignSupervisor };

@@ -1,40 +1,71 @@
 const jwt = require('jsonwebtoken');
+const db = require('../config/db');
+const { permissionsForRole } = require('../config/permissions');
 
-function verifyToken(req, res, next) {
-  const header = req.headers['authorization'];
-  if (!header || !header.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'Token requerido' });
-  }
+async function loadActiveUser(payload) {
+  const [rows] = await db.query(
+    'SELECT id, email, role, activo FROM users WHERE id = ? LIMIT 1',
+    [payload.id]
+  );
+  const user = rows[0];
+  if (!user || !user.activo) return null;
 
-  const token = header.slice(7);
-  try {
-    req.user = jwt.verify(token, process.env.JWT_SECRET);
-    next();
-  } catch {
-    res.status(401).json({ error: 'Token inválido o expirado' });
-  }
+  return {
+    id: user.id,
+    email: user.email,
+    role: user.role,
+    permissions: permissionsForRole(user.role),
+  };
 }
 
-function requireRole(...roles) {
+async function verifyToken(req, res, next) {
+  const header = req.headers['authorization'];
+  if (!header || !header.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Autenticación requerida' });
+  }
+
+  let payload;
+  try {
+    payload = jwt.verify(header.slice(7), process.env.JWT_SECRET);
+  } catch {
+    return res.status(401).json({ error: 'Token inválido o expirado' });
+  }
+
+  try {
+    const user = await loadActiveUser(payload);
+    if (!user) {
+      return res.status(401).json({ error: 'La cuenta no existe o está desactivada' });
+    }
+    req.user = user;
+    next();
+  } catch (err) { next(err); }
+}
+
+function requirePermission(...permissions) {
   return (req, res, next) => {
-    if (!roles.includes(req.user?.role)) {
-      return res.status(403).json({ error: 'Acceso denegado' });
+    const allowed = permissions.some(permission => req.user?.permissions?.includes(permission));
+    if (!allowed) {
+      return res.status(403).json({ error: 'No tienes permiso para realizar esta acción' });
     }
     next();
   };
 }
 
-// No falla si no hay token — solo setea req.user si el token es válido
-function optionalAuth(req, res, next) {
+async function optionalAuth(req, res, next) {
   const header = req.headers['authorization'];
   if (header && header.startsWith('Bearer ')) {
+    let payload;
     try {
-      req.user = jwt.verify(header.slice(7), process.env.JWT_SECRET);
+      payload = jwt.verify(header.slice(7), process.env.JWT_SECRET);
     } catch {
-      // token inválido → continúa sin usuario
+      req.user = null;
+      return next();
     }
+    try {
+      req.user = await loadActiveUser(payload);
+    } catch (err) { return next(err); }
   }
   next();
 }
 
-module.exports = { verifyToken, requireRole, optionalAuth };
+module.exports = { verifyToken, requirePermission, optionalAuth };

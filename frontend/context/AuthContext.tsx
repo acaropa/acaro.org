@@ -4,10 +4,12 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 
-interface AuthUser {
+export interface AuthUser {
   id: number;
   email: string;
   role: 'admin' | 'supervisor' | 'tecnico' | 'visitante';
+  activo: boolean;
+  permissions: string[];
 }
 
 interface AuthContextValue {
@@ -15,6 +17,7 @@ interface AuthContextValue {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  can: (...permissions: string[]) => boolean;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -26,7 +29,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!token) { setLoading(false); return; }
+    if (!token) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setLoading(false);
+      return;
+    }
 
     api.get<{ user: AuthUser }>('/auth/me')
       .then(data => setUser(data.user))
@@ -34,11 +41,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    function handleUnauthorized() {
+      setUser(null);
+      router.replace('/login');
+    }
+    window.addEventListener('acaro:unauthorized', handleUnauthorized);
+    return () => window.removeEventListener('acaro:unauthorized', handleUnauthorized);
+  }, [router]);
+
   async function login(email: string, password: string) {
     const data = await api.post<{ token: string; user: AuthUser }>('/auth/login', { email, password });
     localStorage.setItem('token', data.token);
     setUser(data.user);
-    router.push('/admin');
+    router.push(data.user.role === 'visitante' ? '/' : '/admin');
   }
 
   function logout() {
@@ -47,8 +63,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.push('/login');
   }
 
+  function can(...permissions: string[]) {
+    return permissions.some(permission => user?.permissions.includes(permission));
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, can }}>
       {children}
     </AuthContext.Provider>
   );

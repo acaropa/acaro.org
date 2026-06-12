@@ -2,7 +2,7 @@ const tecnicos = require('../services/tecnicos.service');
 
 async function getAll(req, res, next) {
   try {
-    res.json(await tecnicos.getAll());
+    res.json(await tecnicos.getAll(req.user));
   } catch (err) {
     next(err);
   }
@@ -56,4 +56,12 @@ async function remove(req, res, next) {
   }
 }
 
-module.exports = { getAll, getById, create, update, remove };
+async function assignSupervisor(req, res, next) {
+  try {
+    const { supervisor_id } = req.body || {};
+    if (!supervisor_id) return res.status(400).json({ error: 'supervisor_id es requerido' });
+    res.json(await tecnicos.assignSupervisor(req.params.id, supervisor_id));
+  } catch (err) { next(err); }
+}
+
+module.exports = { getAll, getById, create, update, remove, assignSupervisor };

@@ -1,48 +1,166 @@
 const db = require('../config/db');
 
-async function getAll(includeInactive = false) {
+const STATES = [
+  'borrador',
+  'pendiente_revision',
+  'requiere_correccion',
+  'aprobado',
+  'rechazado',
+  'archivado',
+];
+
+const VISIBILITIES = ['publica', 'interna'];
+
+const BASE_SELECT = `
+  SELECT b.id, b.titulo, b.descripcion, b.archivo_url, b.categoria,
+         b.estado, b.visibilidad, b.creado_por, b.revisado_por,
+         b.fecha_creacion, b.fecha_revision, b.observacion_revision,
+         creator.email AS creado_por_email,
+         reviewer.email AS revisado_por_email
+  FROM biblioteca b
+  JOIN users creator ON creator.id = b.creado_por
+  LEFT JOIN users reviewer ON reviewer.id = b.revisado_por
+`;
+
+async function getAll({ user = null, status = null, scope = null }) {
+  const conditions = [];
+  const values = [];
+
+  if (!user || user.role === 'visitante') {
+    conditions.push("b.estado = 'aprobado'", "b.visibilidad = 'publica'");
+  } else if (user.role === 'tecnico') {
+    if (scope === 'mine') {
+      conditions.push('b.creado_por = ?');
+      values.push(user.id);
+    } else {
+      conditions.push("((b.estado = 'aprobado') OR b.creado_por = ?)");
+      values.push(user.id);
+    }
+  } else if (user.role === 'supervisor') {
+    if (scope === 'mine') {
+      conditions.push('b.creado_por = ?');
+      values.push(user.id);
+    } else {
+      conditions.push(`(
+        b.creado_por = ?
+        OR EXISTS (
+          SELECT 1
+          FROM supervisor_tecnicos st
+          JOIN tecnicos t ON t.id = st.tecnico_id
+          WHERE st.supervisor_id = ? AND t.user_id = b.creado_por
+        )
+      )`);
+      values.push(user.id, user.id);
+    }
+  } else if (scope === 'mine') {
+    conditions.push('b.creado_por = ?');
+    values.push(user.id);
+  }
+
+  if (status) {
+    conditions.push('b.estado = ?');
+    values.push(status);
+  }
+
+  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
   const [rows] = await db.query(
-    `SELECT id, titulo, descripcion, autor, fecha, link, activo, created_at
-     FROM biblioteca
-     ${includeInactive ? '' : 'WHERE activo = TRUE'}
-     ORDER BY fecha DESC`
+    `${BASE_SELECT} ${where} ORDER BY b.fecha_creacion DESC`,
+    values
   );
   return rows;
 }
 
-async function getById(id, includeInactive = false) {
+async function canSupervisorAccess(documentId, supervisorId) {
   const [rows] = await db.query(
-    `SELECT id, titulo, descripcion, autor, fecha, link, activo, created_at
-     FROM biblioteca
-     WHERE id = ? ${includeInactive ? '' : 'AND activo = TRUE'}`,
-    [id]
+    `SELECT 1
+     FROM biblioteca b
+     WHERE b.id = ?
+       AND (
+         b.creado_por = ?
+         OR EXISTS (
+           SELECT 1
+           FROM supervisor_tecnicos st
+           JOIN tecnicos t ON t.id = st.tecnico_id
+           WHERE st.supervisor_id = ? AND t.user_id = b.creado_por
+         )
+       )`,
+    [documentId, supervisorId, supervisorId]
   );
+  return rows.length > 0;
+}
+
+async function getById(id) {
+  const [rows] = await db.query(`${BASE_SELECT} WHERE b.id = ?`, [id]);
   return rows[0] || null;
 }
 
-async function create(data) {
-  const { titulo, descripcion = null, autor, fecha, link } = data;
+async function create(data, actor) {
+  const initialState =
+    actor.role === 'tecnico'
+      ? 'pendiente_revision'
+      : data.estado && STATES.includes(data.estado)
+        ? data.estado
+        : 'aprobado';
+
+  const reviewer = initialState === 'aprobado' ? actor.id : null;
+  const reviewDate = initialState === 'aprobado' ? new Date() : null;
   const [result] = await db.query(
-    `INSERT INTO biblioteca (titulo, descripcion, autor, fecha, link)
-     VALUES (?, ?, ?, ?, ?)`,
-    [titulo, descripcion, autor, fecha, link]
+    `INSERT INTO biblioteca
+      (titulo, descripcion, archivo_url, categoria, estado, visibilidad,
+       creado_por, revisado_por, fecha_revision, observacion_revision)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      data.titulo,
+      data.descripcion || null,
+      data.archivo_url,
+      data.categoria,
+      initialState,
+      data.visibilidad,
+      actor.id,
+      reviewer,
+      reviewDate,
+      data.observacion_revision || null,
+    ]
   );
-  return getById(result.insertId, true);
+  return getById(result.insertId);
 }
 
 async function update(id, data) {
-  const allowed = ['titulo', 'descripcion', 'autor', 'fecha', 'link', 'activo'];
-  const fields = Object.keys(data).filter(k => allowed.includes(k));
-
+  const allowed = ['titulo', 'descripcion', 'archivo_url', 'categoria', 'visibilidad'];
+  const fields = Object.keys(data).filter(field => allowed.includes(field));
   if (fields.length === 0) {
     const err = new Error('Sin campos válidos para actualizar');
     err.status = 400;
     throw err;
   }
 
-  const set = fields.map(k => `${k} = ?`).join(', ');
-  await db.query(`UPDATE biblioteca SET ${set} WHERE id = ?`, [...fields.map(k => data[k]), id]);
-  return getById(id, true);
+  await db.query(
+    `UPDATE biblioteca SET ${fields.map(field => `${field} = ?`).join(', ')} WHERE id = ?`,
+    [...fields.map(field => data[field]), id]
+  );
+  return getById(id);
+}
+
+async function resubmit(id) {
+  await db.query(
+    `UPDATE biblioteca
+     SET estado = 'pendiente_revision', revisado_por = NULL,
+         fecha_revision = NULL, observacion_revision = NULL
+     WHERE id = ?`,
+    [id]
+  );
+  return getById(id);
+}
+
+async function review(id, { state, reviewerId, observation }) {
+  await db.query(
+    `UPDATE biblioteca
+     SET estado = ?, revisado_por = ?, fecha_revision = CURRENT_TIMESTAMP,
+         observacion_revision = ?
+     WHERE id = ?`,
+    [state, reviewerId, observation || null, id]
+  );
+  return getById(id);
 }
 
 async function remove(id) {
@@ -50,4 +168,15 @@ async function remove(id) {
   return result.affectedRows > 0;
 }
 
-module.exports = { getAll, getById, create, update, remove };
+module.exports = {
+  STATES,
+  VISIBILITIES,
+  getAll,
+  getById,
+  create,
+  update,
+  resubmit,
+  review,
+  remove,
+  canSupervisorAccess,
+};

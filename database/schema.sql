@@ -65,13 +65,36 @@ CREATE TABLE IF NOT EXISTS biblioteca (
   id            INT UNSIGNED    NOT NULL AUTO_INCREMENT,
   titulo        VARCHAR(255)    NOT NULL,
   descripcion   TEXT                     DEFAULT NULL,
-  autor         VARCHAR(150)    NOT NULL,
-  fecha         DATE            NOT NULL,
-  link          VARCHAR(1000)   NOT NULL,
-  activo        BOOLEAN         NOT NULL DEFAULT TRUE,
-  created_at    TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  archivo_url   VARCHAR(1000)   NOT NULL,
+  categoria     VARCHAR(150)    NOT NULL,
+  estado        ENUM('borrador','pendiente_revision','requiere_correccion','aprobado','rechazado','archivado') NOT NULL DEFAULT 'pendiente_revision',
+  visibilidad   ENUM('publica','interna') NOT NULL DEFAULT 'interna',
+  creado_por    INT UNSIGNED    NOT NULL,
+  revisado_por  INT UNSIGNED             DEFAULT NULL,
+  fecha_creacion TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  fecha_revision TIMESTAMP               DEFAULT NULL,
+  observacion_revision TEXT               DEFAULT NULL,
   updated_at    TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id)
+  ,FOREIGN KEY (creado_por) REFERENCES users(id) ON DELETE RESTRICT
+  ,FOREIGN KEY (revisado_por) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS noticias (
+  id              INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  titulo          VARCHAR(255) NOT NULL,
+  resumen         TEXT DEFAULT NULL,
+  contenido       LONGTEXT NOT NULL,
+  estado          ENUM('borrador','publicada','archivada') NOT NULL DEFAULT 'borrador',
+  visibilidad     ENUM('publica','interna') NOT NULL DEFAULT 'publica',
+  creado_por      INT UNSIGNED NOT NULL,
+  publicado_por   INT UNSIGNED DEFAULT NULL,
+  fecha_creacion  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  fecha_publicacion TIMESTAMP NULL DEFAULT NULL,
+  updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  FOREIGN KEY (creado_por) REFERENCES users(id) ON DELETE RESTRICT,
+  FOREIGN KEY (publicado_por) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ─────────────────────────────────────────
@@ -87,10 +110,21 @@ CREATE TABLE IF NOT EXISTS proyectos (
   fecha_inicio    DATE                     DEFAULT NULL,
   fecha_fin       DATE                     DEFAULT NULL,
   responsable_id  INT UNSIGNED             DEFAULT NULL,
+  supervisor_id   INT UNSIGNED             DEFAULT NULL,
   created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
-  FOREIGN KEY (responsable_id) REFERENCES users(id) ON DELETE SET NULL
+  FOREIGN KEY (responsable_id) REFERENCES users(id) ON DELETE SET NULL,
+  FOREIGN KEY (supervisor_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS supervisor_tecnicos (
+  supervisor_id INT UNSIGNED NOT NULL,
+  tecnico_id INT UNSIGNED NOT NULL UNIQUE,
+  assigned_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (supervisor_id, tecnico_id),
+  FOREIGN KEY (supervisor_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (tecnico_id) REFERENCES tecnicos(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ─────────────────────────────────────────

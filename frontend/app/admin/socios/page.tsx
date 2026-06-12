@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
+import { PERMISSIONS } from '@/lib/permissions';
 
 interface Socio {
   id: number;
@@ -18,8 +19,10 @@ interface Socio {
 const empty = { nombre: '', apellido: '', dni: '', telefono: '', email: '', direccion: '', fecha_ingreso: '' };
 
 export default function SociosPage() {
-  const { user } = useAuth();
-  const isAdmin = user?.role === 'admin' || user?.role === 'supervisor';
+  const { can } = useAuth();
+  const canCreate = can(PERMISSIONS.SOCIOS_CREATE);
+  const canUpdate = can(PERMISSIONS.SOCIOS_UPDATE);
+  const canDelete = can(PERMISSIONS.SOCIOS_DELETE);
 
   const [socios, setSocios]     = useState<Socio[]>([]);
   const [loading, setLoading]   = useState(true);
@@ -35,7 +38,10 @@ export default function SociosPage() {
     setLoading(false);
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    load();
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -69,7 +75,7 @@ export default function SociosPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Socios</h1>
-        {isAdmin && (
+        {canCreate && (
           <button onClick={() => setShowForm(v => !v)}
             className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-md transition-colors">
             {showForm ? 'Cancelar' : '+ Nuevo socio'}
@@ -133,14 +139,18 @@ export default function SociosPage() {
                       {s.estado}
                     </span>
                   </td>
-                  {isAdmin && (
+                  {(canUpdate || canDelete) && (
                     <td className="px-4 py-3 flex gap-2 justify-end">
-                      <button onClick={() => toggleEstado(s)} className="text-xs text-blue-600 hover:underline">
-                        {s.estado === 'activo' ? 'Desactivar' : 'Activar'}
-                      </button>
-                      <button onClick={() => handleDelete(s.id)} className="text-xs text-red-500 hover:underline">
-                        Eliminar
-                      </button>
+                      {canUpdate && (
+                        <button onClick={() => toggleEstado(s)} className="text-xs text-blue-600 hover:underline">
+                          {s.estado === 'activo' ? 'Desactivar' : 'Activar'}
+                        </button>
+                      )}
+                      {canDelete && (
+                        <button onClick={() => handleDelete(s.id)} className="text-xs text-red-500 hover:underline">
+                          Eliminar
+                        </button>
+                      )}
                     </td>
                   )}
                 </tr>

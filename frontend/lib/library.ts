@@ -2,9 +2,13 @@ export interface LibraryRecord {
   id: number;
   titulo: string;
   descripcion: string | null;
-  autor: string;
-  fecha: string;
-  link: string;
+  archivo_url?: string;
+  categoria?: string;
+  fecha_creacion?: string;
+  creado_por_email?: string;
+  autor?: string;
+  fecha?: string;
+  link?: string;
 }
 
 export type ResourceType = "pdf" | "video" | "link" | "doc";
@@ -21,7 +25,7 @@ export interface LibraryDocument {
   type: string;
   title: string;
   description: string;
-  category: LibraryCategory;
+  category: string;
   date: string;
   dateValue: string;
   year: string;
@@ -53,11 +57,12 @@ function inferCategory(text: string): LibraryCategory {
 }
 
 export function toLibraryDocument(record: LibraryRecord): LibraryDocument {
+  const link = record.archivo_url || record.link || "";
   const pathname = (() => {
     try {
-      return new URL(record.link).pathname.toLowerCase();
+      return new URL(link).pathname.toLowerCase();
     } catch {
-      return record.link.toLowerCase();
+      return link.toLowerCase();
     }
   })();
 
@@ -79,7 +84,7 @@ export function toLibraryDocument(record: LibraryRecord): LibraryDocument {
           : "Recurso externo";
   const description =
     record.descripcion || "Recurso disponible en la biblioteca técnica de ACARO.";
-  const dateValue = record.fecha.slice(0, 10);
+  const dateValue = (record.fecha_creacion || record.fecha || new Date().toISOString()).slice(0, 10);
 
   return {
     id: record.id,
@@ -87,7 +92,7 @@ export function toLibraryDocument(record: LibraryRecord): LibraryDocument {
     type,
     title: record.titulo,
     description,
-    category: inferCategory(`${record.titulo} ${description}`),
+    category: record.categoria || inferCategory(`${record.titulo} ${description}`),
     date: new Date(`${dateValue}T00:00:00`).toLocaleDateString("es-PA", {
       day: "2-digit",
       month: "short",
@@ -95,9 +100,9 @@ export function toLibraryDocument(record: LibraryRecord): LibraryDocument {
     }),
     dateValue,
     year: dateValue.slice(0, 4),
-    contributor: record.autor,
+    contributor: record.creado_por_email || record.autor || "ACARO",
     meta: resourceType === "link" ? "Enlace externo" : "Abrir documento",
-    link: record.link,
+    link,
   };
 }
 

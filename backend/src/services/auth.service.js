@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../config/db');
+const { permissionsForRole } = require('../config/permissions');
 
 async function findUserByEmail(email) {
   const [rows] = await db.query(
@@ -26,6 +27,14 @@ async function createUser(email, password, role = 'visitante') {
   return { id: result.insertId, email, role };
 }
 
+async function findUserById(id) {
+  const [rows] = await db.query(
+    'SELECT id, email, role, activo, created_at, updated_at FROM users WHERE id = ?',
+    [id]
+  );
+  return rows[0] || null;
+}
+
 async function verifyPassword(plain, hash) {
   return bcrypt.compare(plain, hash);
 }
@@ -38,4 +47,21 @@ function generateToken(user) {
   );
 }
 
-module.exports = { findUserByEmail, createUser, verifyPassword, generateToken };
+function publicUser(user) {
+  return {
+    id: user.id,
+    email: user.email,
+    role: user.role,
+    activo: Boolean(user.activo),
+    permissions: permissionsForRole(user.role),
+  };
+}
+
+module.exports = {
+  findUserByEmail,
+  findUserById,
+  createUser,
+  verifyPassword,
+  generateToken,
+  publicUser,
+};

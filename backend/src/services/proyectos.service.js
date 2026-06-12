@@ -2,17 +2,35 @@ const db = require('../config/db');
 
 // ─── PROYECTOS ────────────────────────────────────────────────────────────────
 
-// soloPublicos=true cuando lo llama la landing sin sesión
-async function getAll(soloPublicos = false) {
-  const where = soloPublicos ? "WHERE p.tipo = 'publico' AND p.estado != 'cancelado'" : '';
+async function getAll(user = null) {
+  let where = "WHERE p.tipo = 'publico' AND p.estado != 'cancelado'";
+  const values = [];
+
+  if (user?.role === 'admin') {
+    where = '';
+  } else if (user?.role === 'supervisor') {
+    where = 'WHERE p.supervisor_id = ?';
+    values.push(user.id);
+  } else if (user?.role === 'tecnico') {
+    where = `WHERE EXISTS (
+      SELECT 1
+      FROM proyecto_tecnicos pt
+      JOIN tecnicos t ON t.id = pt.tecnico_id
+      WHERE pt.proyecto_id = p.id AND t.user_id = ?
+    )`;
+    values.push(user.id);
+  }
+
   const [rows] = await db.query(
     `SELECT p.id, p.nombre, p.descripcion, p.tipo, p.clasificacion,
-            p.estado, p.fecha_inicio, p.fecha_fin, p.created_at,
-            u.email AS responsable_email
+            p.estado, p.fecha_inicio, p.fecha_fin, p.supervisor_id, p.created_at,
+            u.email AS responsable_email, s.email AS supervisor_email
      FROM proyectos p
      LEFT JOIN users u ON u.id = p.responsable_id
+     LEFT JOIN users s ON s.id = p.supervisor_id
      ${where}
-     ORDER BY p.created_at DESC`
+     ORDER BY p.created_at DESC`,
+    values
   );
   return rows;
 }
@@ -20,10 +38,12 @@ async function getAll(soloPublicos = false) {
 async function getById(id) {
   const [proyectos] = await db.query(
     `SELECT p.id, p.nombre, p.descripcion, p.tipo, p.clasificacion,
-            p.estado, p.fecha_inicio, p.fecha_fin, p.responsable_id, p.created_at,
-            u.email AS responsable_email
+            p.estado, p.fecha_inicio, p.fecha_fin, p.responsable_id,
+            p.supervisor_id, p.created_at,
+            u.email AS responsable_email, s.email AS supervisor_email
      FROM proyectos p
      LEFT JOIN users u ON u.id = p.responsable_id
+     LEFT JOIN users s ON s.id = p.supervisor_id
      WHERE p.id = ?`,
     [id]
   );
@@ -31,7 +51,7 @@ async function getById(id) {
   const proyecto = proyectos[0];
 
   const [tecnicos] = await db.query(
-    `SELECT t.id, t.nombre, t.apellido, t.especialidad, pt.fecha_asignacion
+    `SELECT t.id, t.user_id, t.nombre, t.apellido, t.especialidad, pt.fecha_asignacion
      FROM tecnicos t
      JOIN proyecto_tecnicos pt ON pt.tecnico_id = t.id
      WHERE pt.proyecto_id = ?`,
@@ -68,24 +88,50 @@ async function create(data) {
   const {
     nombre, descripcion = null, tipo = 'publico', clasificacion = null,
     estado = 'pendiente', fecha_inicio = null, fecha_fin = null, responsable_id = null,
+    supervisor_id = null,
   } = data;
 
+  if (supervisor_id) {
+    const [supervisors] = await db.query(
+      "SELECT id FROM users WHERE id = ? AND role = 'supervisor' AND activo = TRUE",
+      [supervisor_id]
+    );
+    if (supervisors.length === 0) {
+      const err = new Error('El supervisor indicado no existe o no está activo');
+      err.status = 400;
+      throw err;
+    }
+  }
+
   const [result] = await db.query(
-    `INSERT INTO proyectos (nombre, descripcion, tipo, clasificacion, estado, fecha_inicio, fecha_fin, responsable_id)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-    [nombre, descripcion, tipo, clasificacion, estado, fecha_inicio, fecha_fin, responsable_id]
+    `INSERT INTO proyectos
+      (nombre, descripcion, tipo, clasificacion, estado, fecha_inicio, fecha_fin, responsable_id, supervisor_id)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [nombre, descripcion, tipo, clasificacion, estado, fecha_inicio, fecha_fin, responsable_id, supervisor_id]
   );
   return getById(result.insertId);
 }
 
 async function update(id, data) {
-  const allowed = ['nombre', 'descripcion', 'tipo', 'clasificacion', 'estado', 'fecha_inicio', 'fecha_fin', 'responsable_id'];
+  const allowed = ['nombre', 'descripcion', 'tipo', 'clasificacion', 'estado', 'fecha_inicio', 'fecha_fin', 'responsable_id', 'supervisor_id'];
   const fields = Object.keys(data).filter(k => allowed.includes(k));
 
   if (fields.length === 0) {
     const err = new Error('Sin campos válidos para actualizar');
     err.status = 400;
     throw err;
+  }
+
+  if (fields.includes('supervisor_id') && data.supervisor_id) {
+    const [supervisors] = await db.query(
+      "SELECT id FROM users WHERE id = ? AND role = 'supervisor' AND activo = TRUE",
+      [data.supervisor_id]
+    );
+    if (supervisors.length === 0) {
+      const err = new Error('El supervisor indicado no existe o no está activo');
+      err.status = 400;
+      throw err;
+    }
   }
 
   const set = fields.map(k => `${k} = ?`).join(', ');
@@ -115,6 +161,32 @@ async function removeTecnico(proyectoId, tecnicoId) {
     [proyectoId, tecnicoId]
   );
   return result.affectedRows > 0;
+}
+
+async function isTecnicoAssignedToSupervisor(tecnicoId, supervisorId) {
+  const [rows] = await db.query(
+    `SELECT 1
+     FROM supervisor_tecnicos
+     WHERE tecnico_id = ? AND supervisor_id = ?`,
+    [tecnicoId, supervisorId]
+  );
+  return rows.length > 0;
+}
+
+async function phaseBelongsToProject(faseId, proyectoId) {
+  const [rows] = await db.query(
+    'SELECT 1 FROM proyecto_fases WHERE id = ? AND proyecto_id = ?',
+    [faseId, proyectoId]
+  );
+  return rows.length > 0;
+}
+
+async function imageBelongsToPhase(imagenId, faseId) {
+  const [rows] = await db.query(
+    'SELECT 1 FROM fase_imagenes WHERE id = ? AND fase_id = ?',
+    [imagenId, faseId]
+  );
+  return rows.length > 0;
 }
 
 // ─── FASES ────────────────────────────────────────────────────────────────────
@@ -173,6 +245,9 @@ async function removeImagen(imagenId) {
 module.exports = {
   getAll, getById, create, update, remove,
   assignTecnico, removeTecnico,
+  isTecnicoAssignedToSupervisor,
+  phaseBelongsToProject,
+  imageBelongsToPhase,
   createFase, updateFase, removeFase,
   addImagen, removeImagen,
 };

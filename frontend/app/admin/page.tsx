@@ -1,6 +1,5 @@
 'use client';
 
-import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FolderKanban, BookOpen, Newspaper, Users, Activity } from 'lucide-react';
 import { mockProjects } from '@/data/mock-projects';
@@ -9,8 +8,6 @@ import { mockDocuments } from '@/data/mock-documents';
 import { Badge } from '@/components/ui/badge';
 
 export default function AdminDashboardPage() {
-  const { user } = useAuth();
-
   const stats = [
     { label: 'Proyectos Activos', value: mockProjects.filter(p => p.status === 'Activo').length, icon: FolderKanban, color: 'text-accent' },
     { label: 'Documentos', value: mockDocuments.length, icon: BookOpen, color: 'text-brand-green' },
