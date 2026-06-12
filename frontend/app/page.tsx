@@ -36,7 +36,6 @@ export default function Home() {
         <div className="relative mx-auto w-full max-w-7xl px-5 pb-12 pt-32 sm:px-8 sm:pb-16 lg:px-10 lg:pb-20">
           <div className="max-w-4xl -translate-y-6 sm:-translate-y-8 lg:-translate-y-10">
             <div className="hero-reveal mb-7 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.24em] text-[#e2b86f]" style={{ animationDelay: "80ms" }}>
-              <span className="h-px w-10 bg-[#c28a3a]" />
               Café Robusta · Panamá
             </div>
             <h1 className="landing-hero-title hero-reveal max-w-4xl text-5xl leading-[0.92] tracking-[-0.055em] sm:text-6xl lg:text-[5.5rem]" style={{ animationDelay: "170ms" }}>
