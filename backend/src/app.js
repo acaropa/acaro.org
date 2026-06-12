@@ -18,6 +18,10 @@ const noticiasRoutes = require('./routes/noticias.routes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Hostinger/LiteSpeed terminates HTTPS before forwarding requests to Node.
+// Trust one proxy hop so rate limiting uses the visitor IP instead of the proxy IP.
+app.set('trust proxy', 1);
+
 app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(cors({
   origin: [
