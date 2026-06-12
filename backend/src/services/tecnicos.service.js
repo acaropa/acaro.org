@@ -40,12 +40,13 @@ async function getById(id) {
 // Crea user (role=tecnico) + perfil tecnico en una transacción
 async function create(data) {
   const { email, password, nombre, apellido, especialidad = null, telefono = null } = data;
+  const normalizedEmail = email.trim().toLowerCase();
 
   const conn = await db.getConnection();
   try {
     await conn.beginTransaction();
 
-    const [existing] = await conn.query('SELECT id FROM users WHERE email = ?', [email]);
+    const [existing] = await conn.query('SELECT id FROM users WHERE email = ?', [normalizedEmail]);
     if (existing.length > 0) {
       const err = new Error('El email ya está registrado');
       err.status = 409;
@@ -55,7 +56,7 @@ async function create(data) {
     const password_hash = await bcrypt.hash(password, 10);
     const [userResult] = await conn.query(
       'INSERT INTO users (email, password_hash, role) VALUES (?, ?, ?)',
-      [email, password_hash, 'tecnico']
+      [normalizedEmail, password_hash, 'tecnico']
     );
     const user_id = userResult.insertId;
 

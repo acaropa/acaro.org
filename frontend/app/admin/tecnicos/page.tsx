@@ -108,13 +108,13 @@ export default function TecnicosPage() {
             { name: 'nombre',       label: 'Nombre *',     type: 'text',     required: true },
             { name: 'apellido',     label: 'Apellido *',   type: 'text',     required: true },
             { name: 'email',        label: 'Email *',      type: 'email',    required: true },
-            { name: 'password',     label: 'Contraseña *', type: 'password', required: true },
+            { name: 'password',     label: 'Contraseña * (mínimo 12 caracteres)', type: 'password', required: true },
             { name: 'especialidad', label: 'Especialidad', type: 'text',     required: false },
             { name: 'telefono',     label: 'Teléfono',     type: 'text',     required: false },
           ].map(f => (
             <div key={f.name}>
               <label className="block text-xs font-medium text-gray-600 mb-1">{f.label}</label>
-              <input type={f.type} required={f.required}
+              <input type={f.type} required={f.required} minLength={f.name === 'password' ? 12 : undefined}
                 value={(form as Record<string, string>)[f.name]}
                 onChange={e => setForm(v => ({ ...v, [f.name]: e.target.value }))}
                 className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />

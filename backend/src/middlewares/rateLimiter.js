@@ -9,7 +9,7 @@ const defaultLimiter = rateLimit({
   skip: req => req.path === '/api/health',
 });
 
-const authLimiter = rateLimit({
+const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
   standardHeaders: true,
@@ -18,4 +18,12 @@ const authLimiter = rateLimit({
   message: { error: 'Demasiados intentos fallidos. Intenta nuevamente en 15 minutos.' },
 });
 
-module.exports = { defaultLimiter, authLimiter };
+const registerLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiados registros desde esta dirección. Intenta nuevamente más tarde.' },
+});
+
+module.exports = { defaultLimiter, loginLimiter, registerLimiter };

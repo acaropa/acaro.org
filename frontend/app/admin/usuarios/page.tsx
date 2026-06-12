@@ -88,7 +88,7 @@ export default function AdminUsuarios() {
           <input required type="email" placeholder="Correo" value={form.email}
             onChange={event => setForm(current => ({ ...current, email: event.target.value }))}
             className="rounded-md border border-border bg-background px-3 py-2 text-sm" />
-          <input required minLength={8} type="password" placeholder="Contraseña" value={form.password}
+          <input required minLength={12} type="password" placeholder="Contraseña (mínimo 12 caracteres)" value={form.password}
             onChange={event => setForm(current => ({ ...current, password: event.target.value }))}
             className="rounded-md border border-border bg-background px-3 py-2 text-sm" />
           <select value={form.role} onChange={event => setForm(current => ({ ...current, role: event.target.value }))}

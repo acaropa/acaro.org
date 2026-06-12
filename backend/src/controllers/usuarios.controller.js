@@ -1,4 +1,5 @@
 const usuarios = require('../services/usuarios.service');
+const { validateNewPassword } = require('../utils/password');
 
 async function getAll(req, res, next) {
   try {
@@ -12,9 +13,8 @@ async function create(req, res, next) {
     if (!email || !password || !role) {
       return res.status(400).json({ error: 'email, password y role son requeridos' });
     }
-    if (password.length < 8) {
-      return res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres' });
-    }
+    const passwordError = validateNewPassword(password);
+    if (passwordError) return res.status(400).json({ error: passwordError });
     res.status(201).json(await usuarios.create({ email, password, role }));
   } catch (err) { next(err); }
 }

@@ -28,10 +28,11 @@ async function create({ email, password, role }) {
     throw err;
   }
 
+  const normalizedEmail = email.trim().toLowerCase();
   const passwordHash = await bcrypt.hash(password, 10);
   const [result] = await db.query(
     'INSERT INTO users (email, password_hash, role) VALUES (?, ?, ?)',
-    [email, passwordHash, role]
+    [normalizedEmail, passwordHash, role]
   );
   return getById(result.insertId);
 }

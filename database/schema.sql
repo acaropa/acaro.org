@@ -16,6 +16,10 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash VARCHAR(255)    NOT NULL,
   role          ENUM('admin','supervisor','tecnico','visitante') NOT NULL DEFAULT 'visitante',
   activo        BOOLEAN         NOT NULL DEFAULT TRUE,
+  failed_login_attempts SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  locked_until  DATETIME                 DEFAULT NULL,
+  last_failed_login DATETIME             DEFAULT NULL,
+  last_login_at DATETIME                 DEFAULT NULL,
   created_at    TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at    TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id)
