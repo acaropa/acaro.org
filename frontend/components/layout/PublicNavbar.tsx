@@ -59,7 +59,7 @@ export function PublicNavbar() {
         "sticky top-0 z-50 h-[72px] w-full text-[#f8efe3] transition-colors duration-300",
         isTransparent
           ? "border-b border-transparent bg-transparent"
-          : "border-b border-[#3a2a20]/80 bg-[#120c08]/95 backdrop-blur-xl"
+          : "border-b border-[#3a2a20]/80 bg-[#120c08]/60 backdrop-blur-xl"
       )}
     >
       <div className="mx-auto h-full max-w-7xl px-5 sm:px-8 lg:px-10">
