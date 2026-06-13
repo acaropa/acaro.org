@@ -8,13 +8,17 @@ import {
   ChevronRight,
   Download,
   ExternalLink,
+  Eye,
+  FileSpreadsheet,
   FileText,
   Filter,
   Grid2X2,
   Library,
+  Link as LinkIcon,
   List,
   LoaderCircle,
   Search,
+  Video,
   X,
 } from "lucide-react";
 
@@ -60,43 +64,74 @@ function HighlightText({ text, query }: { text: string; query: string }) {
 
 function DocumentAction({ document }: { document: LibraryDocument }) {
   return (
-    <a
-      href={document.link}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex shrink-0 items-center gap-1.5 text-xs font-semibold text-[#243120] dark:text-accent"
-    >
-      {document.resourceType === "link" ? "Abrir" : "Descargar"}
-      {document.resourceType === "link" ? (
-        <ExternalLink className="h-4 w-4" />
-      ) : (
-        <Download className="h-4 w-4" />
+    <div className="flex items-center gap-3 text-[#2a3b25] dark:text-accent">
+      <a
+        href={document.link}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Ver documento"
+        className="transition-opacity hover:opacity-70"
+      >
+        {document.resourceType === "link" ? (
+          <ExternalLink className="h-4 w-4" />
+        ) : (
+          <Eye className="h-4 w-4" />
+        )}
+      </a>
+      {document.resourceType !== "link" && (
+        <a
+          href={document.link}
+          download
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Descargar documento"
+          className="transition-opacity hover:opacity-70"
+        >
+          <Download className="h-4 w-4" />
+        </a>
       )}
-    </a>
+    </div>
   );
 }
 
 function ResultCard({ document, query }: { document: LibraryDocument; query: string }) {
+  const getBadgeStyle = (category: string) => {
+    if (category === "Estándares OBC" || category === "Sostenibilidad") {
+      return "bg-[#eef3f0] text-[#426a50]";
+    }
+    if (category === "Mercados" || category === "Procesamiento") {
+      return "border border-[#d7a24a] text-[#b88022] bg-transparent";
+    }
+    return "bg-[#fdf4ed] text-[#b46830]";
+  };
+
+  const simulatedSize = (document.id % 15 + 1.2).toFixed(1);
+
   return (
-    <article className="flex min-h-64 flex-col rounded-lg border border-[#ded6cc] bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-md dark:border-border dark:bg-card">
+    <article className="flex min-h-[260px] flex-col rounded-xl border border-[#f0ebe1] bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:border-border dark:bg-card">
       <div className="flex items-start justify-between gap-3">
-        <span className="rounded bg-[#243120]/10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[#243120] dark:text-accent">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center text-[#1a1a1a] dark:text-foreground">
+          <DocumentIcon type={document.resourceType} className="h-6 w-6" />
+        </div>
+        <span className={`shrink-0 rounded-md px-2.5 py-1 text-[11px] font-semibold tracking-wide ${getBadgeStyle(document.category)}`}>
           {document.category}
         </span>
-        <span className="flex items-center gap-1 text-[10px] text-[#81756f]">
-          <FileText className="h-3.5 w-3.5" /> {document.type}
-        </span>
       </div>
-      <h2 className="mt-4 font-serif text-xl font-bold leading-snug text-[#25160e] dark:text-foreground">
+
+      <h2 className="mt-5 font-sans text-[17px] font-semibold leading-snug tracking-tight text-[#1a1a1a] dark:text-foreground">
         <HighlightText text={document.title} query={query} />
       </h2>
-      <p className="mt-2 line-clamp-3 text-sm leading-6 text-[#6d5b4d] dark:text-muted">
+
+      <p className="mt-2.5 line-clamp-3 text-[13px] leading-[1.6] text-[#666666] dark:text-muted">
         <HighlightText text={document.description} query={query} />
       </p>
-      <div className="mt-auto flex items-end justify-between border-t border-[#eee7df] pt-4 dark:border-border">
-        <div className="text-[10px] uppercase tracking-wide text-[#81756f]">
-          <span className="block">Publicado</span>
-          <span className="mt-1 block normal-case text-[#25160e] dark:text-foreground">{document.date}</span>
+
+      <div className="mt-auto flex items-end justify-between pt-6">
+        <div className="flex flex-col gap-0.5 text-[11px] font-medium text-[#888888] dark:text-muted/80">
+          <span>{document.date}</span>
+          <span className="uppercase">
+            {document.resourceType} • {simulatedSize} MB
+          </span>
         </div>
         <DocumentAction document={document} />
       </div>
@@ -104,11 +139,26 @@ function ResultCard({ document, query }: { document: LibraryDocument; query: str
   );
 }
 
+function DocumentIcon({ type, className }: { type: string; className?: string }) {
+  switch (type) {
+    case "pdf":
+      return <FileText className={className} />;
+    case "doc":
+      return <FileSpreadsheet className={className} />;
+    case "video":
+      return <Video className={className} />;
+    case "link":
+      return <LinkIcon className={className} />;
+    default:
+      return <FileText className={className} />;
+  }
+}
+
 function ResultRow({ document, query }: { document: LibraryDocument; query: string }) {
   return (
     <article className="flex flex-col gap-4 rounded-lg border border-[#ded6cc] bg-white p-5 transition hover:border-[#b8a99d] sm:flex-row sm:items-center dark:border-border dark:bg-card">
-      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-[#f7decc] text-[#705a4f]">
-        <FileText className="h-5 w-5" />
+      <span className="flex shrink-0 items-center justify-center text-[#705a4f]">
+        <DocumentIcon type={document.resourceType} className="h-6 w-6" />
       </span>
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-[#705a4f]">
@@ -351,13 +401,15 @@ function SearchCatalog() {
               </p>
               <form
                 onSubmit={submitSearch}
-                className="mx-auto mt-8 flex w-full max-w-xl items-center rounded-lg bg-white p-1.5 shadow-xl transition-shadow focus-within:shadow-2xl"
+                className="group mx-auto mt-8 flex min-h-16 max-w-4xl items-center rounded-xl border border-[#ead9c6] bg-[#fffaf1]/95 p-1.5 shadow-[0_18px_55px_rgba(13,24,12,0.28)] backdrop-blur-md transition-all duration-300 focus-within:border-[#d3a75f] focus-within:bg-white focus-within:shadow-[0_22px_65px_rgba(13,24,12,0.38),0_0_0_3px_rgba(211,167,95,0.16)]"
               >
-                <Search className="ml-3 h-5 w-5 shrink-0 text-[#81756f]" />
+                <span className="ml-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[#f1e5d6] text-[#8a5c25] transition-colors group-focus-within:bg-[#ead7bd] group-focus-within:text-[#5f3a18]">
+                  <Search className="h-5 w-5" />
+                </span>
                 <input
                   value={query}
                   onChange={event => setQuery(event.target.value)}
-                  className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm text-[#25160e] outline-none placeholder:text-[#81756f]"
+                  className="min-w-0 flex-1 bg-transparent px-4 text-[15px] font-medium text-[#25160e] caret-[#a66f20] outline-none placeholder:font-normal placeholder:text-[#8d7c70]"
                   placeholder="Buscar documentos, manuales, investigaciones..."
                 />
                 {query && (
@@ -365,7 +417,7 @@ function SearchCatalog() {
                     type="button"
                     onClick={clearQuery}
                     aria-label="Limpiar búsqueda"
-                    className="my-auto mr-2 flex h-8 w-8 items-center justify-center rounded-full text-[#81756f] transition-colors hover:bg-[#f1e5d6] hover:text-[#25160e]"
+                    className="my-auto mr-1 flex h-9 w-9 items-center justify-center rounded-full text-[#81756f] transition-colors hover:bg-[#f1e5d6] hover:text-[#25160e]"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -373,7 +425,7 @@ function SearchCatalog() {
                 <button
                   type="submit"
                   disabled={isSearching}
-                  className="flex items-center justify-center gap-2 rounded-md bg-[#243120] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#34452f] disabled:cursor-wait disabled:opacity-80"
+                  className="flex min-h-12 min-w-28 items-center justify-center gap-2 rounded-lg bg-[#243120] px-6 text-sm font-semibold text-white transition-all duration-300 hover:bg-[#34452f] hover:shadow-[0_8px_24px_rgba(36,49,32,0.24)] active:scale-[0.98] disabled:cursor-wait disabled:opacity-80"
                 >
                   {isSearching && <LoaderCircle className="h-4 w-4 animate-spin" />}
                   {isSearching ? "Buscando" : "Buscar"}
@@ -384,11 +436,10 @@ function SearchCatalog() {
                   <button
                     key={item}
                     onClick={() => selectCategory(item)}
-                    className={`rounded-full border px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.08em] transition-all duration-200 ${
-                      category === item
-                        ? "border-[#fffaf1] bg-[#fffaf1] text-[#243120] shadow-[0_6px_18px_rgba(0,0,0,0.16)]"
-                        : "border-white/30 bg-black/15 text-white/90 backdrop-blur-md hover:border-white/55 hover:bg-white/15"
-                    }`}
+                    className={`rounded-full border px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.08em] transition-all duration-200 ${category === item
+                      ? "border-[#fffaf1] bg-[#fffaf1] text-[#243120] shadow-[0_6px_18px_rgba(0,0,0,0.16)]"
+                      : "border-white/30 bg-black/15 text-white/90 backdrop-blur-md hover:border-white/55 hover:bg-white/15"
+                      }`}
                   >
                     {item}
                   </button>
@@ -444,9 +495,8 @@ function SearchCatalog() {
 
             <div
               aria-busy={isSearching}
-              className={`min-w-0 transition-all duration-300 motion-reduce:transform-none motion-reduce:transition-none ${
-                showResults ? "translate-y-0 opacity-100" : "translate-y-2 opacity-30"
-              }`}
+              className={`min-w-0 transition-all duration-300 motion-reduce:transform-none motion-reduce:transition-none ${showResults ? "translate-y-0 opacity-100" : "translate-y-2 opacity-30"
+                }`}
             >
               <div className="flex flex-col gap-4 border-b border-[#e3ddd5] pb-4 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm text-[#6d5b4d] dark:text-muted">
@@ -522,9 +572,8 @@ function SearchCatalog() {
                     <button
                       key={item}
                       onClick={() => selectPage(item)}
-                      className={`h-9 min-w-9 rounded border px-2 text-xs font-semibold ${
-                        item === currentPage ? "border-[#243120] bg-[#243120] text-white" : "border-[#ded6cc] dark:border-border"
-                      }`}
+                      className={`h-9 min-w-9 rounded border px-2 text-xs font-semibold ${item === currentPage ? "border-[#243120] bg-[#243120] text-white" : "border-[#ded6cc] dark:border-border"
+                        }`}
                     >
                       {item}
                     </button>

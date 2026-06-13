@@ -85,7 +85,7 @@ export default function Nosotros() {
                     <img
                       alt="Farmer in field"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuDz0Dk1Vc_722Upmhhhuz8-hRm5_gAAZ6R35MyYzBpDLnNzF8-m8yqrxiVUrrk3Np0XDIvFVBXxnbhmoEU2u-RUxtZqIQXVi1cXsudwhlLs2Qpkat8WZjOg78SLEFaRf1CgkP4RDhoMvEgGq8a7Fu6W7lnXAtV_iJUdoVZPzzYLGZwUnsuwxXnP0wvwyI8IRg95eqhRrvjXy5xGrcluArrzegOnV3fLl6YkcRlFPGG1ivZ1ynNjNKr3RlQw0F6S9DYIkVTLmXOvcV3u"
+                      src="/assets/landing-hero-v2.jpg"
                     />
                     <div className="absolute bottom-0 left-0 p-8 md:p-16 bg-gradient-to-t from-[#120c08]/90 to-transparent w-full">
                       <h4 className="font-semibold text-[24px] leading-[1.3] text-[#fdf9f4]">Los Productores</h4>
