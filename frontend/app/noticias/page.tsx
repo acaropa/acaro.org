@@ -11,7 +11,7 @@ export default function Noticias() {
         {/* Header Section */}
         <header className="mb-[40px]">
           <ScrollReveal delay={0} distance="sm">
-            <h1 className="landing-hero-title text-[48px] md:text-[72px] leading-[1.1] tracking-[-0.02em] text-primary max-w-4xl mb-[32px]">
+            <h1 className="landing-hero-title text-[48px] md:text-[72px] leading-[1.1] tracking-[-0.04em] text-primary max-w-4xl mb-[32px]">
               Noticias y novedades de la Asociación
             </h1>
             <p className="text-[20px] leading-[1.6] text-muted max-w-3xl">

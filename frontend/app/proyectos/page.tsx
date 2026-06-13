@@ -195,7 +195,7 @@ export default function Proyectos() {
         {/* Header Section */}
         <header className="mb-24 grid grid-cols-1 md:grid-cols-12 gap-[24px] items-end">
           <ScrollReveal delay={0} distance="sm" className="md:col-span-8">
-            <h1 className="landing-hero-title font-serif text-[40px] leading-[1.1] md:text-[64px] md:leading-[1.1] tracking-[-0.02em] text-primary mb-6">
+            <h1 className="landing-hero-title font-serif text-[40px] leading-[1.1] md:text-[64px] md:leading-[1.1] tracking-[-0.04em] text-primary mb-6">
               Iniciativas de<br />Desarrollo Rural.
             </h1>
           </ScrollReveal>

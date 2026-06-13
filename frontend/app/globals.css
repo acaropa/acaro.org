@@ -115,7 +115,7 @@ a,
 
 .landing-typography .landing-hero-title {
   font-family: var(--font-display), Montserrat, var(--font-sans), sans-serif;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .landing-typography header,
@@ -167,6 +167,7 @@ a,
 .scroll-reveal[data-visible="true"] {
   opacity: 1;
   transform: translate3d(0, 0, 0);
+  will-change: auto;
 }
 
 .motion-scene {
@@ -181,17 +182,14 @@ a,
 
 .scene-drift-up {
   transform: translate3d(0, calc((0.5 - var(--scene-progress)) * 44px), 0);
-  will-change: transform;
 }
 
 .scene-drift-side {
   transform: translate3d(calc((0.5 - var(--scene-progress)) * 34px), 0, 0);
-  will-change: transform;
 }
 
 .scene-scale {
   transform: scale(calc(1.055 - (var(--scene-progress) * 0.055)));
-  will-change: transform;
 }
 
 .scene-depth {
