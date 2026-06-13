@@ -38,11 +38,20 @@ export function PublicFooter() {
           <ScrollReveal delay={100} distance="sm">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#d7a24a]">Enlaces rápidos</p>
             <nav className="mt-6 flex flex-col gap-4 text-sm text-[#d8c9bb]">
-              <Link href="/" className="hover:text-white">Inicio</Link>
-              <Link href="/nosotros" className="hover:text-white">Nosotros</Link>
-              <Link href="/proyectos" className="hover:text-white">Proyectos</Link>
-              <Link href="/biblioteca" className="hover:text-white">Biblioteca</Link>
-              <Link href="/contacto" className="hover:text-white">Contacto</Link>
+              <Link href="/" className="hover:text-white transition-colors">Inicio</Link>
+              <Link href="/nosotros" className="hover:text-white transition-colors">Nosotros</Link>
+              <Link href="/proyectos" className="hover:text-white transition-colors">Proyectos</Link>
+              <Link href="/biblioteca" className="hover:text-white transition-colors">Biblioteca</Link>
+              <Link href="/contacto" className="hover:text-white transition-colors">Contacto</Link>
+              <a 
+                href="https://acaro.vercel.app/" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="mt-2 inline-flex items-center gap-1.5 font-semibold text-[#d7a24a] transition-colors hover:text-[#fffaf1]"
+              >
+                Acceso a Plataforma
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+              </a>
             </nav>
           </ScrollReveal>
 

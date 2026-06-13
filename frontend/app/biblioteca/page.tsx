@@ -15,9 +15,8 @@ import {
   Search,
   SlidersHorizontal,
 } from "lucide-react";
-
 import { PublicLayout } from "@/components/layout/PublicLayout";
-import { LibraryPageTransition } from "@/components/library/LibraryPageTransition";
+import { ScrollReveal } from "@/components/landing/LandingMotion";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { mockLibraryRecords } from "@/data/mock-documents";
 import { api } from "@/lib/api";
@@ -46,11 +45,12 @@ function ResourceIcon({
 
 function MainFeature({ document }: { document: LibraryDocument }) {
   return (
+    <ScrollReveal delay={100} distance="sm" className="md:col-span-8">
     <a
       href={document.link}
       target="_blank"
       rel="noopener noreferrer"
-      className="group relative min-h-[410px] overflow-hidden rounded-lg bg-[#21130d] shadow-sm md:col-span-8"
+      className="group relative flex min-h-[410px] h-full w-full overflow-hidden rounded-lg bg-[#21130d] shadow-sm"
     >
       <div
         className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
@@ -75,16 +75,18 @@ function MainFeature({ document }: { document: LibraryDocument }) {
         </div>
       </div>
     </a>
+    </ScrollReveal>
   );
 }
 
 function SecondaryFeature({ document }: { document: LibraryDocument }) {
   return (
+    <ScrollReveal delay={200} distance="sm" className="md:col-span-4">
     <a
       href={document.link}
       target="_blank"
       rel="noopener noreferrer"
-      className="group flex min-h-[410px] flex-col overflow-hidden rounded-lg border border-[#ded6cc] bg-white shadow-sm transition-shadow hover:shadow-md dark:border-border dark:bg-card md:col-span-4"
+      className="group flex min-h-[410px] h-full w-full flex-col overflow-hidden rounded-lg border border-[#ded6cc] bg-white shadow-sm transition-shadow hover:shadow-md dark:border-border dark:bg-card"
     >
       <div className="relative h-44 overflow-hidden">
         <div
@@ -109,16 +111,18 @@ function SecondaryFeature({ document }: { document: LibraryDocument }) {
         </div>
       </div>
     </a>
+    </ScrollReveal>
   );
 }
 
-function TechnicalRow({ document }: { document: LibraryDocument }) {
+function TechnicalRow({ document, index }: { document: LibraryDocument, index: number }) {
   return (
+    <ScrollReveal delay={100 * index} distance="sm">
     <a
       href={document.link}
       target="_blank"
       rel="noopener noreferrer"
-      className="group flex items-center gap-4 border-b border-[#e7dfd6] p-4 last:border-0 hover:bg-[#faf7f2] dark:border-border dark:hover:bg-surface"
+      className="group flex items-center gap-4 border-b border-[#e7dfd6] p-4 last:border-0 hover:bg-[#faf7f2] dark:border-border dark:hover:bg-surface w-full"
     >
       <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded bg-[#f7decc] text-[#705a4f] dark:bg-accent/15 dark:text-accent">
         <ResourceIcon document={document} />
@@ -135,6 +139,7 @@ function TechnicalRow({ document }: { document: LibraryDocument }) {
         <Download className="h-4 w-4 text-[#25160e] dark:text-accent" />
       )}
     </a>
+    </ScrollReveal>
   );
 }
 
@@ -146,8 +151,6 @@ export default function Biblioteca() {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("Todos");
   const [sort, setSort] = useState<"recent" | "az">("recent");
-  const [isLeaving, setIsLeaving] = useState(false);
-  const navigationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     api
@@ -158,10 +161,6 @@ export default function Biblioteca() {
         setLoadError("");
       })
       .finally(() => setLoading(false));
-  }, []);
-
-  useEffect(() => () => {
-    if (navigationTimer.current) clearTimeout(navigationTimer.current);
   }, []);
 
   const visible = useMemo(() => {
@@ -177,10 +176,7 @@ export default function Biblioteca() {
     event.preventDefault();
     const params = new URLSearchParams();
     if (query.trim()) params.set("q", query.trim());
-    setIsLeaving(true);
-    navigationTimer.current = setTimeout(() => {
-      router.push(`/biblioteca/buscar${params.size ? `?${params}` : ""}`);
-    }, 820);
+    router.push(`/biblioteca/buscar${params.size ? `?${params}` : ""}`);
   }
 
   const primary = visible[0];
@@ -189,8 +185,7 @@ export default function Biblioteca() {
 
   return (
     <PublicLayout>
-      <LibraryPageTransition active={isLeaving} />
-      <div className="library-page-enter -mt-18">
+      <div className="-mt-18">
       <header className="relative isolate min-h-[560px] overflow-hidden bg-[#25160e] md:min-h-[620px]">
         <div
           className="absolute inset-0 scale-105 bg-cover bg-center blur-[1px]"
@@ -199,29 +194,33 @@ export default function Biblioteca() {
         <div className="absolute inset-0 bg-[#182216]/45" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-transparent to-black/60" />
         <div className="relative mx-auto flex min-h-[560px] max-w-7xl flex-col items-center justify-center px-6 pt-18 text-center md:min-h-[620px]">
-          <span className="rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold text-white/85 backdrop-blur">
-            Cultivando conocimiento
-          </span>
-          <h1 className="mt-5 max-w-4xl font-serif text-4xl font-bold text-white drop-shadow md:text-6xl">
-            El legado del café robusta
-          </h1>
-          <p className="mt-4 max-w-2xl text-sm leading-6 text-white/90 md:text-base">
-            Explora nuestra biblioteca técnica, un viaje editorial por la ciencia, sostenibilidad
-            e historia del cultivo de café robusta.
-          </p>
-          <form onSubmit={submitSearch} className="mt-8 flex w-full max-w-xl rounded-lg bg-white p-1.5 shadow-xl">
-            <Search className="ml-3 mt-3 h-5 w-5 shrink-0 text-[#81756f]" />
-            <input
-              value={query}
-              onChange={event => setQuery(event.target.value)}
-              className="min-w-0 flex-1 bg-transparent px-3 text-sm text-[#25160e] outline-none"
-              placeholder="Buscar documentos, manuales, investigaciones..."
-              aria-label="Buscar en la biblioteca"
-            />
-            <button className="rounded-md bg-[#243120] px-5 py-3 text-sm font-semibold text-white hover:bg-[#34452f]">
-              Buscar
-            </button>
-          </form>
+          <ScrollReveal delay={0} distance="md" className="flex flex-col items-center">
+            <span className="rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold text-white/85 backdrop-blur">
+              Cultivando conocimiento
+            </span>
+            <h1 className="mt-5 max-w-4xl font-serif text-4xl font-bold text-white drop-shadow md:text-6xl">
+              El legado del café robusta
+            </h1>
+            <p className="mt-4 max-w-2xl text-sm leading-6 text-white/90 md:text-base">
+              Explora nuestra biblioteca técnica, un viaje editorial por la ciencia, sostenibilidad
+              e historia del cultivo de café robusta.
+            </p>
+          </ScrollReveal>
+          <ScrollReveal delay={200} distance="sm" className="w-full flex justify-center">
+            <form onSubmit={submitSearch} className="mt-8 flex w-full max-w-xl rounded-lg bg-white p-1.5 shadow-xl">
+              <Search className="ml-3 mt-3 h-5 w-5 shrink-0 text-[#81756f]" />
+              <input
+                value={query}
+                onChange={event => setQuery(event.target.value)}
+                className="min-w-0 flex-1 bg-transparent px-3 text-sm text-[#25160e] outline-none"
+                placeholder="Buscar documentos, manuales, investigaciones..."
+                aria-label="Buscar en la biblioteca"
+              />
+              <button className="rounded-md bg-[#243120] px-5 py-3 text-sm font-semibold text-white hover:bg-[#34452f]">
+                Buscar
+              </button>
+            </form>
+          </ScrollReveal>
         </div>
       </header>
 
@@ -282,7 +281,7 @@ export default function Biblioteca() {
                     <h2 className="font-serif text-2xl font-bold">Especificaciones técnicas recientes</h2>
                   </div>
                   <div className="overflow-hidden rounded-lg border border-[#e3ddd5] bg-white dark:border-border dark:bg-card">
-                    {recent.map(document => <TechnicalRow key={document.id} document={document} />)}
+                    {recent.map((document, index) => <TechnicalRow key={document.id} document={document} index={index} />)}
                   </div>
                   <div className="mt-6 flex justify-center">
                     <Link

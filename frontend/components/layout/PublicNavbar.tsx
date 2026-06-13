@@ -7,7 +7,6 @@ import { ChevronDown, Menu, X } from "lucide-react"
 
 import { Logo } from "@/components/Logo"
 import { SocialIcon, SocialNetwork, socialNetworks } from "@/components/SocialNetworks"
-import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { cn } from "@/lib/utils"
 
 type NavItem = {
@@ -22,6 +21,7 @@ const navItems: NavItem[] = [
     label: "Nosotros",
     submenu: [
       { href: "/nosotros", label: "Acerca de la Asociación", info: "Conoce nuestra historia, misión y propósito." },
+      { href: "/noticias", label: "Noticias y Novedades", info: "Explora los últimos avances y eventos de la comunidad." },
     ],
   },
   {
@@ -40,7 +40,7 @@ const navItems: NavItem[] = [
 export function PublicNavbar() {
   const pathname = usePathname()
   const isHome = pathname === "/" || pathname === ""
-  const hasTransparentHero = isHome || pathname === "/biblioteca" || pathname === "/biblioteca/"
+  const hasTransparentHero = isHome || pathname === "/biblioteca" || pathname === "/biblioteca/" || pathname === "/nosotros" || pathname === "/nosotros/"
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false)
   const [isScrolled, setIsScrolled] = React.useState(false)
 
@@ -117,14 +117,12 @@ export function PublicNavbar() {
           </nav>
 
           <div className="hidden items-center gap-3 md:flex">
-            <ThemeToggle className="text-[#d8c9bb] hover:text-[#d7a24a]" />
             <Link href="/login" className="inline-flex min-h-10 items-center justify-center rounded-md bg-[#d7a24a] px-5 text-sm font-semibold text-[#120c08] transition-all hover:-translate-y-0.5 hover:bg-[#e8b661] active:translate-y-0">
               Acceso interno
             </Link>
           </div>
 
           <div className="flex items-center gap-2 md:hidden">
-            <ThemeToggle className="text-[#d8c9bb] hover:text-[#d7a24a]" />
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen((open) => !open)}

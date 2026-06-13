@@ -42,8 +42,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="h-full bg-background text-foreground antialiased font-sans">
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="light"
+          forcedTheme="light"
           disableTransitionOnChange
         >
           <AuthProvider>{children}</AuthProvider>
