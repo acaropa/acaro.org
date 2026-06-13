@@ -195,9 +195,7 @@ export default function Biblioteca() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-transparent to-black/60" />
         <div className="relative mx-auto flex min-h-[560px] max-w-7xl flex-col items-center justify-center px-6 pt-18 text-center md:min-h-[620px]">
           <ScrollReveal delay={0} distance="md" className="flex flex-col items-center">
-            <span className="rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold text-white/85 backdrop-blur">
-              Cultivando conocimiento
-            </span>
+
             <h1 className="mt-5 max-w-4xl font-serif text-4xl font-bold text-white drop-shadow md:text-6xl">
               El legado del café robusta
             </h1>

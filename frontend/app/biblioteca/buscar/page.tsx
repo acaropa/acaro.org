@@ -386,14 +386,12 @@ function SearchCatalog() {
             <button
               type="button"
               onClick={returnToLibrary}
-              className="group inline-flex items-center gap-3 rounded-full border border-white/20 bg-black/20 py-1.5 pl-1.5 pr-4 text-xs font-semibold text-white/85 shadow-sm backdrop-blur transition hover:border-white/40 hover:bg-black/30 hover:text-white"
+              className="group mb-4 inline-flex items-center gap-2 text-[13px] font-semibold text-white/70 transition-colors hover:text-white"
             >
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-[#243120] transition-transform group-hover:-translate-x-0.5">
-                <ArrowLeft className="h-3.5 w-3.5" />
-              </span>
-              Portada de biblioteca
+              <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+              Volver a Portada
             </button>
-            <div className="mt-7 text-center">
+            <div className="mt-4 text-center">
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#f7decc]">Catálogo documental</span>
               <h1 className="mt-2 font-serif text-4xl font-bold md:text-5xl">Biblioteca técnica</h1>
               <p className="mx-auto mt-3 max-w-2xl text-sm text-white/85">

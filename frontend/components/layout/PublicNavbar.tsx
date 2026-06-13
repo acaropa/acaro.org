@@ -31,10 +31,6 @@ const navItems: NavItem[] = [
     ],
   },
   { href: "/biblioteca", label: "Biblioteca" },
-  {
-    label: "Redes",
-    submenu: socialNetworks.map((network) => ({ ...network, social: network.id })),
-  },
 ]
 
 export function PublicNavbar() {
@@ -76,24 +72,30 @@ export function PublicNavbar() {
                     {item.label}
                     <ChevronDown className="h-3.5 w-3.5 transition-transform duration-300 group-hover:rotate-180" />
                   </button>
-                  <div className="invisible absolute left-1/2 top-full w-72 -translate-x-1/2 -translate-y-2 pt-2 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
-                    <div className="border border-[#3a2a20] bg-[#1f140e] p-2 shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
+                  <div className="invisible absolute left-1/2 top-full w-[340px] -translate-x-1/2 -translate-y-2 pt-3 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+                    <div className="rounded-2xl border border-[#2a1a12] bg-[#120a06]/95 p-2 shadow-[0_20px_60px_rgba(0,0,0,0.6)] backdrop-blur-xl">
                       {item.submenu.map((sub) => (
                         <Link
                           key={sub.href}
                           href={sub.href}
                           target={sub.href.startsWith("http") ? "_blank" : undefined}
                           rel={sub.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                          className="group/sub flex items-start gap-3 border-b border-[#3a2a20] p-3 transition-colors last:border-0 hover:bg-[#2a1a12]"
+                          className="group/sub flex items-start gap-3 rounded-xl p-4 transition-colors hover:bg-white/5"
                         >
                           {sub.social && (
-                            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center bg-[#2a1a12] text-[#d7a24a] transition-colors group-hover/sub:bg-[#d7a24a] group-hover/sub:text-[#120c08]">
+                            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/5 text-[#d8c9bb] transition-colors group-hover/sub:bg-white/10 group-hover/sub:text-white">
                               <SocialIcon network={sub.social} className="h-4 w-4" />
                             </span>
                           )}
                           <span className="flex flex-col">
-                            <span className="text-sm font-semibold text-[#f8efe3] group-hover/sub:text-[#d7a24a]">{sub.label}</span>
-                            {sub.info && <span className="mt-1 text-xs leading-snug text-[#b8a99a]">{sub.info}</span>}
+                            <span className="text-[15px] font-bold tracking-tight text-white transition-colors">
+                              {sub.label}
+                            </span>
+                            {sub.info && (
+                              <span className="mt-1.5 text-[13px] leading-relaxed text-[#9ca3af] transition-colors group-hover/sub:text-[#d1d5db]">
+                                {sub.info}
+                              </span>
+                            )}
                           </span>
                         </Link>
                       ))}
