@@ -1,25 +1,17 @@
 const jwt = require('jsonwebtoken');
-const db = require('../config/db');
 const { permissionsForRole } = require('../config/permissions');
 const { getActiveSession } = require('../services/sessions.service');
 
 async function loadActiveUser(payload) {
   if (payload.type !== 'access' || !payload.sid) return null;
   const session = await getActiveSession(payload.sid, payload.id);
-  if (!session) return null;
-
-  const [rows] = await db.query(
-    'SELECT id, email, role, activo FROM users WHERE id = ? LIMIT 1',
-    [payload.id]
-  );
-  const user = rows[0];
-  if (!user || !user.activo) return null;
+  if (!session || !session.activo) return null;
 
   return {
-    id: user.id,
-    email: user.email,
-    role: user.role,
-    permissions: permissionsForRole(user.role),
+    id: session.user_id,
+    email: session.email,
+    role: session.role,
+    permissions: permissionsForRole(session.role),
     sessionId: payload.sid,
   };
 }

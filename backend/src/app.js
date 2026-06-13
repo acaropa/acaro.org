@@ -5,6 +5,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 
 const { defaultLimiter } = require('./middlewares/rateLimiter');
+const idempotency = require('./middlewares/idempotency.middleware');
 const errorHandler = require('./middlewares/errorHandler');
 const healthRoutes = require('./routes/health.routes');
 const authRoutes   = require('./routes/auth.routes');
@@ -38,6 +39,7 @@ app.use(cors({
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(defaultLimiter);
+app.use(idempotency);
 
 app.use('/api/health', healthRoutes);
 app.use('/api/auth',   authRoutes);

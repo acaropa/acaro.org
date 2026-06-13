@@ -16,6 +16,21 @@ function setAccessToken(token: string | null) {
   accessToken = token;
 }
 
+function idempotencyKey() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`;
+}
+
+function mutationOptions(method: string, body?: unknown): RequestInit {
+  return {
+    method,
+    headers: { 'Idempotency-Key': idempotencyKey() },
+    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+  };
+}
+
 async function parseResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
@@ -90,7 +105,7 @@ async function request<T>(
 async function login<TUser>(email: string, password: string) {
   const session = await request<SessionResponse<TUser>>(
     '/auth/login',
-    { method: 'POST', body: JSON.stringify({ email, password }) },
+    mutationOptions('POST', { email, password }),
     false
   );
   setAccessToken(session.accessToken);
@@ -101,7 +116,7 @@ async function logout(allSessions = false) {
   try {
     await request(
       allSessions ? '/auth/logout-all' : '/auth/logout',
-      { method: 'POST' },
+      mutationOptions('POST'),
       allSessions
     );
   } finally {
@@ -115,8 +130,8 @@ export const api = {
   login,
   logout,
   get:    <T>(path: string)                    => request<T>(path),
-  post:   <T>(path: string, body: unknown)     => request<T>(path, { method: 'POST',   body: JSON.stringify(body) }),
-  put:    <T>(path: string, body: unknown)     => request<T>(path, { method: 'PUT',    body: JSON.stringify(body) }),
-  patch:  <T>(path: string, body: unknown)     => request<T>(path, { method: 'PATCH',  body: JSON.stringify(body) }),
-  delete: <T>(path: string)                    => request<T>(path, { method: 'DELETE' }),
+  post:   <T>(path: string, body: unknown)     => request<T>(path, mutationOptions('POST', body)),
+  put:    <T>(path: string, body: unknown)     => request<T>(path, mutationOptions('PUT', body)),
+  patch:  <T>(path: string, body: unknown)     => request<T>(path, mutationOptions('PATCH', body)),
+  delete: <T>(path: string)                    => request<T>(path, mutationOptions('DELETE')),
 };

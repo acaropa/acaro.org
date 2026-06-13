@@ -156,10 +156,11 @@ async function rotateSession(refreshToken, req) {
 
 async function getActiveSession(sessionId, userId) {
   const [rows] = await db.query(
-    `SELECT id
-     FROM user_sessions
-     WHERE id = ? AND user_id = ? AND revoked_at IS NULL
-       AND expires_at > CURRENT_TIMESTAMP
+    `SELECT s.id, u.id AS user_id, u.email, u.role, u.activo
+     FROM user_sessions s
+     JOIN users u ON u.id = s.user_id
+     WHERE s.id = ? AND s.user_id = ? AND s.revoked_at IS NULL
+       AND s.expires_at > CURRENT_TIMESTAMP
      LIMIT 1`,
     [sessionId, userId]
   );

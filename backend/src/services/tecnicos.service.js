@@ -1,5 +1,11 @@
 const bcrypt = require('bcryptjs');
 const db = require('../config/db');
+const cache = require('../utils/memoryCache');
+
+function invalidateRelatedCaches() {
+  cache.invalidatePrefix('projects:');
+  cache.invalidatePrefix('library:');
+}
 
 async function getAll(user = null) {
   let where = '';
@@ -66,6 +72,7 @@ async function create(data) {
     );
 
     await conn.commit();
+    invalidateRelatedCaches();
     return getById(tecResult.insertId);
   } catch (err) {
     await conn.rollback();
@@ -89,6 +96,7 @@ async function update(id, data) {
   const set = fields.map(k => `${k} = ?`).join(', ');
 
   await db.query(`UPDATE tecnicos SET ${set} WHERE id = ?`, [...values, id]);
+  invalidateRelatedCaches();
   return getById(id);
 }
 
@@ -103,6 +111,7 @@ async function remove(id) {
     await conn.query('DELETE FROM tecnicos WHERE id = ?', [id]);
     await conn.query('DELETE FROM users WHERE id = ?', [tecnico.user_id]);
     await conn.commit();
+    invalidateRelatedCaches();
     return true;
   } catch (err) {
     await conn.rollback();
@@ -128,6 +137,7 @@ async function assignSupervisor(tecnicoId, supervisorId) {
      ON DUPLICATE KEY UPDATE supervisor_id = VALUES(supervisor_id), assigned_at = CURRENT_TIMESTAMP`,
     [supervisorId, tecnicoId]
   );
+  invalidateRelatedCaches();
   return getById(tecnicoId);
 }
 

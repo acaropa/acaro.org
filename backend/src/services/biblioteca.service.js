@@ -1,4 +1,12 @@
 const db = require('../config/db');
+const cache = require('../utils/memoryCache');
+
+const PUBLIC_CACHE_TTL_MS = 60 * 1000;
+const PRIVATE_CACHE_TTL_MS = 15 * 1000;
+
+function invalidateLibraryCache() {
+  cache.invalidatePrefix('library:');
+}
 
 const STATES = [
   'borrador',
@@ -23,6 +31,16 @@ const BASE_SELECT = `
 `;
 
 async function getAll({ user = null, status = null, scope = null }) {
+  const audience = user ? `${user.role}:${user.id}` : 'public';
+  const key = `library:list:${audience}:${status || 'all'}:${scope || 'all'}`;
+  return cache.getOrSet(
+    key,
+    () => queryAll({ user, status, scope }),
+    user ? PRIVATE_CACHE_TTL_MS : PUBLIC_CACHE_TTL_MS
+  );
+}
+
+async function queryAll({ user = null, status = null, scope = null }) {
   const conditions = [];
   const values = [];
 
@@ -90,6 +108,14 @@ async function canSupervisorAccess(documentId, supervisorId) {
 }
 
 async function getById(id) {
+  return cache.getOrSet(
+    `library:item:${id}`,
+    () => queryById(id),
+    PRIVATE_CACHE_TTL_MS
+  );
+}
+
+async function queryById(id) {
   const [rows] = await db.query(`${BASE_SELECT} WHERE b.id = ?`, [id]);
   return rows[0] || null;
 }
@@ -122,6 +148,7 @@ async function create(data, actor) {
       data.observacion_revision || null,
     ]
   );
+  invalidateLibraryCache();
   return getById(result.insertId);
 }
 
@@ -138,6 +165,7 @@ async function update(id, data) {
     `UPDATE biblioteca SET ${fields.map(field => `${field} = ?`).join(', ')} WHERE id = ?`,
     [...fields.map(field => data[field]), id]
   );
+  invalidateLibraryCache();
   return getById(id);
 }
 
@@ -149,6 +177,7 @@ async function resubmit(id) {
      WHERE id = ?`,
     [id]
   );
+  invalidateLibraryCache();
   return getById(id);
 }
 
@@ -160,11 +189,13 @@ async function review(id, { state, reviewerId, observation }) {
      WHERE id = ?`,
     [state, reviewerId, observation || null, id]
   );
+  invalidateLibraryCache();
   return getById(id);
 }
 
 async function remove(id) {
   const [result] = await db.query('DELETE FROM biblioteca WHERE id = ?', [id]);
+  if (result.affectedRows > 0) invalidateLibraryCache();
   return result.affectedRows > 0;
 }
 

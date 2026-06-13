@@ -1,7 +1,14 @@
 const bcrypt = require('bcryptjs');
 const db = require('../config/db');
+const cache = require('../utils/memoryCache');
 
 const VALID_ROLES = ['admin', 'supervisor', 'tecnico', 'visitante'];
+
+function invalidateContentCaches() {
+  cache.invalidatePrefix('projects:');
+  cache.invalidatePrefix('library:');
+  cache.invalidatePrefix('news:');
+}
 
 async function getAll() {
   const [rows] = await db.query(
@@ -34,6 +41,7 @@ async function create({ email, password, role }) {
     'INSERT INTO users (email, password_hash, role) VALUES (?, ?, ?)',
     [normalizedEmail, passwordHash, role]
   );
+  invalidateContentCaches();
   return getById(result.insertId);
 }
 
@@ -50,6 +58,7 @@ async function update(id, data) {
     `UPDATE users SET ${fields.map(field => `${field} = ?`).join(', ')} WHERE id = ?`,
     [...fields.map(field => data[field]), id]
   );
+  invalidateContentCaches();
   return getById(id);
 }
 
@@ -60,6 +69,7 @@ async function assignRole(id, role) {
     throw err;
   }
   await db.query('UPDATE users SET role = ? WHERE id = ?', [role, id]);
+  invalidateContentCaches();
   return getById(id);
 }
 

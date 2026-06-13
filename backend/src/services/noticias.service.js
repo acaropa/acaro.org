@@ -1,6 +1,19 @@
 const db = require('../config/db');
+const cache = require('../utils/memoryCache');
+
+function invalidateNewsCache() {
+  cache.invalidatePrefix('news:');
+}
 
 async function getAll(includeInternal = false) {
+  return cache.getOrSet(
+    `news:list:${includeInternal ? 'internal' : 'public'}`,
+    () => queryAll(includeInternal),
+    includeInternal ? 15 * 1000 : 60 * 1000
+  );
+}
+
+async function queryAll(includeInternal = false) {
   const [rows] = await db.query(
     `SELECT n.id, n.titulo, n.resumen, n.contenido, n.estado, n.visibilidad,
             n.creado_por, n.publicado_por, n.fecha_creacion, n.fecha_publicacion,
@@ -14,6 +27,14 @@ async function getAll(includeInternal = false) {
 }
 
 async function getById(id) {
+  return cache.getOrSet(
+    `news:item:${id}`,
+    () => queryById(id),
+    15 * 1000
+  );
+}
+
+async function queryById(id) {
   const [rows] = await db.query('SELECT * FROM noticias WHERE id = ?', [id]);
   return rows[0] || null;
 }
@@ -24,6 +45,7 @@ async function create(data, userId) {
      VALUES (?, ?, ?, ?, ?)`,
     [data.titulo, data.resumen || null, data.contenido, data.visibilidad || 'publica', userId]
   );
+  invalidateNewsCache();
   return getById(result.insertId);
 }
 
@@ -39,6 +61,7 @@ async function update(id, data) {
     `UPDATE noticias SET ${fields.map(field => `${field} = ?`).join(', ')} WHERE id = ?`,
     [...fields.map(field => data[field]), id]
   );
+  invalidateNewsCache();
   return getById(id);
 }
 
@@ -49,11 +72,13 @@ async function publish(id, userId) {
      WHERE id = ?`,
     [userId, id]
   );
+  invalidateNewsCache();
   return getById(id);
 }
 
 async function remove(id) {
   const [result] = await db.query('DELETE FROM noticias WHERE id = ?', [id]);
+  if (result.affectedRows > 0) invalidateNewsCache();
   return result.affectedRows > 0;
 }
 

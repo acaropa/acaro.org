@@ -1,8 +1,25 @@
 const db = require('../config/db');
+const cache = require('../utils/memoryCache');
+
+const PUBLIC_CACHE_TTL_MS = 60 * 1000;
+const PRIVATE_CACHE_TTL_MS = 15 * 1000;
+
+function invalidateProjectCache() {
+  cache.invalidatePrefix('projects:');
+}
 
 // ─── PROYECTOS ────────────────────────────────────────────────────────────────
 
 async function getAll(user = null) {
+  const audience = user ? `${user.role}:${user.id}` : 'public';
+  return cache.getOrSet(
+    `projects:list:${audience}`,
+    () => queryAll(user),
+    user ? PRIVATE_CACHE_TTL_MS : PUBLIC_CACHE_TTL_MS
+  );
+}
+
+async function queryAll(user = null) {
   let where = "WHERE p.tipo = 'publico' AND p.estado != 'cancelado'";
   const values = [];
 
@@ -36,6 +53,14 @@ async function getAll(user = null) {
 }
 
 async function getById(id) {
+  return cache.getOrSet(
+    `projects:item:${id}`,
+    () => queryById(id),
+    PRIVATE_CACHE_TTL_MS
+  );
+}
+
+async function queryById(id) {
   const [proyectos] = await db.query(
     `SELECT p.id, p.nombre, p.descripcion, p.tipo, p.clasificacion,
             p.estado, p.fecha_inicio, p.fecha_fin, p.responsable_id,
@@ -109,6 +134,7 @@ async function create(data) {
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [nombre, descripcion, tipo, clasificacion, estado, fecha_inicio, fecha_fin, responsable_id, supervisor_id]
   );
+  invalidateProjectCache();
   return getById(result.insertId);
 }
 
@@ -136,11 +162,13 @@ async function update(id, data) {
 
   const set = fields.map(k => `${k} = ?`).join(', ');
   await db.query(`UPDATE proyectos SET ${set} WHERE id = ?`, [...fields.map(k => data[k]), id]);
+  invalidateProjectCache();
   return getById(id);
 }
 
 async function remove(id) {
   const [result] = await db.query('DELETE FROM proyectos WHERE id = ?', [id]);
+  if (result.affectedRows > 0) invalidateProjectCache();
   return result.affectedRows > 0;
 }
 
@@ -153,6 +181,7 @@ async function assignTecnico(proyectoId, tecnicoId, fecha_asignacion) {
      ON DUPLICATE KEY UPDATE fecha_asignacion = VALUES(fecha_asignacion)`,
     [proyectoId, tecnicoId, fecha_asignacion]
   );
+  invalidateProjectCache();
 }
 
 async function removeTecnico(proyectoId, tecnicoId) {
@@ -160,6 +189,7 @@ async function removeTecnico(proyectoId, tecnicoId) {
     'DELETE FROM proyecto_tecnicos WHERE proyecto_id = ? AND tecnico_id = ?',
     [proyectoId, tecnicoId]
   );
+  if (result.affectedRows > 0) invalidateProjectCache();
   return result.affectedRows > 0;
 }
 
@@ -200,6 +230,7 @@ async function createFase(proyectoId, data) {
     [proyectoId, nombre, descripcion, orden, estado, fecha_inicio, fecha_fin]
   );
 
+  invalidateProjectCache();
   const [rows] = await db.query('SELECT * FROM proyecto_fases WHERE id = ?', [result.insertId]);
   return rows[0];
 }
@@ -217,12 +248,14 @@ async function updateFase(faseId, data) {
   const set = fields.map(k => `${k} = ?`).join(', ');
   await db.query(`UPDATE proyecto_fases SET ${set} WHERE id = ?`, [...fields.map(k => data[k]), faseId]);
 
+  invalidateProjectCache();
   const [rows] = await db.query('SELECT * FROM proyecto_fases WHERE id = ?', [faseId]);
   return rows[0] || null;
 }
 
 async function removeFase(faseId) {
   const [result] = await db.query('DELETE FROM proyecto_fases WHERE id = ?', [faseId]);
+  if (result.affectedRows > 0) invalidateProjectCache();
   return result.affectedRows > 0;
 }
 
@@ -233,12 +266,14 @@ async function addImagen(faseId, url, descripcion = null) {
     'INSERT INTO fase_imagenes (fase_id, url, descripcion) VALUES (?, ?, ?)',
     [faseId, url, descripcion]
   );
+  invalidateProjectCache();
   const [rows] = await db.query('SELECT * FROM fase_imagenes WHERE id = ?', [result.insertId]);
   return rows[0];
 }
 
 async function removeImagen(imagenId) {
   const [result] = await db.query('DELETE FROM fase_imagenes WHERE id = ?', [imagenId]);
+  if (result.affectedRows > 0) invalidateProjectCache();
   return result.affectedRows > 0;
 }
 
