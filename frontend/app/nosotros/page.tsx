@@ -11,7 +11,7 @@ export default function Nosotros() {
             <img 
               alt="Coffee Plantation Hero" 
               className="w-full h-full object-cover" 
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuATogPneQ9nBijlzZ36QKcw4-IWjplwJBcTmFoBfdkmNh3d-WoUs17-hZEVgaphkv35uyEzjxMxYGi3FplAeeBuWy0Y-3gV2E_4DlyWA4nS8o9Lv4Z3WO6fA-uxa7KWswjuV3Fz6Mz4abBCaDQ4NTdC6HpKA1mRG4kR7YecGKIAqysVodSPS9CwqA9fQYY2ZJqSL-ilROAsQ2q7fb_jXJxJkLtSoQHi7HiSKNc5YRlCUkd2RxiwExNWXq454BHcbRyavkmKRW7BjBoT"
+              src="/assets/landing-hero-v2.jpg"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#120C08] via-[#120C08]/40 to-transparent"></div>
           </div>
