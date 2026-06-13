@@ -8,10 +8,10 @@ export default function Nosotros() {
         {/* Hero Section */}
         <section className="relative h-[819px] flex items-end pb-[8rem] px-[20px] md:px-[64px] -mt-24 md:-mt-32">
           <div className="absolute inset-0 z-0">
-            <img 
-              alt="Coffee Plantation Hero" 
-              className="w-full h-full object-cover" 
-              src="/assets/landing-hero-v2.jpg"
+            <img
+              alt="Coffee Plantation Hero"
+              className="w-full h-full object-cover"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuATogPneQ9nBijlzZ36QKcw4-IWjplwJBcTmFoBfdkmNh3d-WoUs17-hZEVgaphkv35uyEzjxMxYGi3FplAeeBuWy0Y-3gV2E_4DlyWA4nS8o9Lv4Z3WO6fA-uxa7KWswjuV3Fz6Mz4abBCaDQ4NTdC6HpKA1mRG4kR7YecGKIAqysVodSPS9CwqA9fQYY2ZJqSL-ilROAsQ2q7fb_jXJxJkLtSoQHi7HiSKNc5YRlCUkd2RxiwExNWXq454BHcbRyavkmKRW7BjBoT"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#120C08] via-[#120C08]/40 to-transparent"></div>
           </div>
@@ -30,9 +30,9 @@ export default function Nosotros() {
           <div className="px-[20px] md:px-[64px] max-w-[1280px] mx-auto grid grid-cols-1 md:grid-cols-12 gap-[24px] items-center">
             <div className="md:col-span-5">
               <ScrollReveal delay={0} distance="md">
-                <img 
-                  alt="Hands holding coffee beans" 
-                  className="w-full h-[600px] object-cover rounded-none grayscale hover:grayscale-0 transition-all duration-700" 
+                <img
+                  alt="Hands holding coffee beans"
+                  className="w-full h-[600px] object-cover rounded-none grayscale hover:grayscale-0 transition-all duration-700"
                   src="https://lh3.googleusercontent.com/aida-public/AB6AXuCHafrxwpiLPrptQN7mXGoFg-3DVeBESHNxSWqvFQi491KAbvvBo422XEi-CJ7whKPJ4Ctv9x_Lq7ZfDwa1rigTY_mGk5vZqpEuw3KmpjMWt2FcM4VmBvqhbvRlu8YLrURbzG77ZpVbVsKBgdgEh11OG-2weAlkWjcERJSad3ki2wIT155TQc0wz8fgoU4IOVmd5ujNwFiZddV-frYJcKkHfrSOMR9j71DnNJ9nAL_nckZDoc2RPCdLKoBo_X2UxILdsZo4ZgBnu00F"
                 />
               </ScrollReveal>
@@ -82,9 +82,9 @@ export default function Nosotros() {
               <div className="md:col-span-8">
                 <ScrollReveal delay={100} distance="sm" className="h-full">
                   <div className="relative h-[500px] overflow-hidden group">
-                    <img 
-                      alt="Farmer in field" 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" 
+                    <img
+                      alt="Farmer in field"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
                       src="https://lh3.googleusercontent.com/aida-public/AB6AXuDz0Dk1Vc_722Upmhhhuz8-hRm5_gAAZ6R35MyYzBpDLnNzF8-m8yqrxiVUrrk3Np0XDIvFVBXxnbhmoEU2u-RUxtZqIQXVi1cXsudwhlLs2Qpkat8WZjOg78SLEFaRf1CgkP4RDhoMvEgGq8a7Fu6W7lnXAtV_iJUdoVZPzzYLGZwUnsuwxXnP0wvwyI8IRg95eqhRrvjXy5xGrcluArrzegOnV3fLl6YkcRlFPGG1ivZ1ynNjNKr3RlQw0F6S9DYIkVTLmXOvcV3u"
                     />
                     <div className="absolute bottom-0 left-0 p-8 md:p-16 bg-gradient-to-t from-[#120c08]/90 to-transparent w-full">
@@ -96,9 +96,9 @@ export default function Nosotros() {
               <div className="md:col-span-4">
                 <ScrollReveal delay={300} distance="sm" className="h-full">
                   <div className="relative h-[500px] overflow-hidden group">
-                    <img 
-                      alt="Coffee processing" 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" 
+                    <img
+                      alt="Coffee processing"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
                       src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhoDhWSudZYLXtKLnjmwvfQwKNIv2DAnOeVpEHVNsA0KRSOTmgOKpyagVPpYx5r1_80XIZQa9Pd_lE1ym7pI5AGzJMWayyzRjUv_SwSalV5yrcaLjGq91c7QXLWGT1vvmEGvhH6l-tjKZKEo812qnsV2YDvyq9COLNp3nJovMswp44yMrMzgmTVFLng7gWDRF7xHeUhAPRbBdDzRDbGhU5rHp1TITnVzWFnApyDqvc3xNQj4FOmwhoYG8dP5hPlXCPcBf79i1lcWDR"
                     />
                     <div className="absolute bottom-0 left-0 p-8 md:p-16 bg-gradient-to-t from-[#120c08]/90 to-transparent w-full">

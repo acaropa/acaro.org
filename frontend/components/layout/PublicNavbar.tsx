@@ -67,18 +67,18 @@ export function PublicNavbar() {
             : "border border-[#3a2a20]/80 bg-[#120c08]/60 shadow-[0_8px_32px_rgba(0,0,0,0.4)] backdrop-blur-xl"
         )}
       >
-        <Link href="/" aria-label="Ir al inicio" className="transition-opacity hover:opacity-80">
-          <Logo variant="white" className="[&_span]:text-[16px] [&_span]:leading-[0.95]" />
-        </Link>
+          <Link href="/" aria-label="Ir al inicio" className="transition-opacity hover:opacity-80">
+            <Logo variant="white" className="[&_span]:text-[16px] [&_span]:leading-[0.95]" />
+          </Link>
 
-        <nav className="hidden items-center gap-7 md:flex">
-          {navItems.map((item) =>
-            item.submenu ? (
-              <div key={item.label} className="group relative">
-                <button className="flex items-center gap-1.5 py-5 text-sm font-medium text-[#d8c9bb] transition-colors hover:text-[#d7a24a]">
-                  {item.label}
-                  <ChevronDown className="h-3.5 w-3.5 transition-transform duration-300 group-hover:rotate-180" />
-                </button>
+          <nav className="hidden items-center gap-7 md:flex">
+            {navItems.map((item) =>
+              item.submenu ? (
+                <div key={item.label} className="group relative">
+                  <button className="flex items-center gap-1.5 py-6 text-sm font-medium text-[#d8c9bb] transition-colors hover:text-[#d7a24a]">
+                    {item.label}
+                    <ChevronDown className="h-3.5 w-3.5 transition-transform duration-300 group-hover:rotate-180" />
+                  </button>
                 <div className="invisible absolute left-1/2 top-[calc(100%-8px)] w-72 -translate-x-1/2 pt-2 opacity-0 transition-all duration-300 group-hover:visible group-hover:translate-y-2 group-hover:opacity-100">
                   <div className="overflow-hidden rounded-2xl border border-[#3a2a20]/80 bg-[#120c08]/90 p-2 shadow-[0_20px_60px_rgba(0,0,0,0.6)] backdrop-blur-xl">
                     {item.submenu.map((sub) => (
@@ -89,21 +89,21 @@ export function PublicNavbar() {
                         rel={sub.href.startsWith("http") ? "noopener noreferrer" : undefined}
                         className="group/sub flex items-start gap-3 rounded-xl p-3 transition-colors hover:bg-[#2a1a12]/80"
                       >
-                        {sub.social && (
-                          <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#2a1a12] text-[#d7a24a] transition-colors group-hover/sub:bg-[#d7a24a] group-hover/sub:text-[#120c08]">
-                            <SocialIcon network={sub.social} className="h-4 w-4" />
+                          {sub.social && (
+                            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#2a1a12] text-[#d7a24a] transition-colors group-hover/sub:bg-[#d7a24a] group-hover/sub:text-[#120c08]">
+                              <SocialIcon network={sub.social} className="h-4 w-4" />
+                            </span>
+                          )}
+                          <span className="flex flex-col">
+                            <span className="text-sm font-semibold text-[#f8efe3] group-hover/sub:text-[#d7a24a]">{sub.label}</span>
+                            {sub.info && <span className="mt-1 text-xs leading-snug text-[#b8a99a]">{sub.info}</span>}
                           </span>
-                        )}
-                        <span className="flex flex-col">
-                          <span className="text-sm font-semibold text-[#f8efe3] group-hover/sub:text-[#d7a24a]">{sub.label}</span>
-                          {sub.info && <span className="mt-1 text-xs leading-snug text-[#b8a99a]">{sub.info}</span>}
-                        </span>
-                      </Link>
-                    ))}
+                        </Link>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ) : (
+              ) : (
                 <Link
                   key={item.href}
                   href={item.href!}
@@ -134,7 +134,6 @@ export function PublicNavbar() {
               aria-expanded={isMobileMenuOpen}
             >
               {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
           </div>
         </div>
       </div>
