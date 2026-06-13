@@ -3,6 +3,11 @@ const db = require('../config/db');
 
 const REFRESH_COOKIE = 'acaro_refresh';
 const SESSION_HOURS = Number(process.env.SESSION_HOURS || 8);
+const configuredRetentionDays = Number(process.env.SESSION_RETENTION_DAYS || 30);
+const SESSION_RETENTION_DAYS = Number.isFinite(configuredRetentionDays)
+  ? Math.max(1, configuredRetentionDays)
+  : 30;
+const CLEANUP_BATCH_SIZE = 1000;
 
 function createRefreshToken() {
   return crypto.randomBytes(48).toString('base64url');
@@ -195,6 +200,28 @@ async function revokeAllUserSessions(userId) {
   );
 }
 
+async function cleanupOldSessions() {
+  let deleted = 0;
+  let batchDeleted;
+  const cutoff = new Date(
+    Date.now() - SESSION_RETENTION_DAYS * 24 * 60 * 60 * 1000
+  );
+
+  do {
+    const [result] = await db.query(
+      `DELETE FROM user_sessions
+       WHERE (revoked_at IS NOT NULL AND revoked_at < ?)
+          OR expires_at < ?
+       LIMIT ?`,
+      [cutoff, cutoff, CLEANUP_BATCH_SIZE]
+    );
+    batchDeleted = result.affectedRows;
+    deleted += batchDeleted;
+  } while (batchDeleted === CLEANUP_BATCH_SIZE);
+
+  return deleted;
+}
+
 module.exports = {
   REFRESH_COOKIE,
   setRefreshCookie,
@@ -205,4 +232,5 @@ module.exports = {
   revokeSessionByRefreshToken,
   revokeSessionById,
   revokeAllUserSessions,
+  cleanupOldSessions,
 };
