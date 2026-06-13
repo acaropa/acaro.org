@@ -56,17 +56,14 @@ export function PublicNavbar() {
   return (
     <header
       className={cn(
-        "fixed top-4 left-0 right-0 z-50 mx-auto w-full max-w-6xl px-4 text-[#f8efe3] transition-all duration-300",
+        "sticky top-0 z-50 h-[72px] w-full text-[#f8efe3] transition-colors duration-300",
+        isTransparent
+          ? "border-b border-transparent bg-transparent"
+          : "border-b border-[#3a2a20]/80 bg-[#120c08]/95 backdrop-blur-xl"
       )}
     >
-      <div
-        className={cn(
-          "relative flex h-[64px] items-center justify-between rounded-full px-6 transition-all duration-300",
-          isTransparent && !isMobileMenuOpen
-            ? "border border-transparent bg-transparent"
-            : "border border-[#3a2a20]/80 bg-[#120c08]/60 shadow-[0_8px_32px_rgba(0,0,0,0.4)] backdrop-blur-xl"
-        )}
-      >
+      <div className="mx-auto h-full max-w-7xl px-5 sm:px-8 lg:px-10">
+        <div className="flex h-full items-center justify-between">
           <Link href="/" aria-label="Ir al inicio" className="transition-opacity hover:opacity-80">
             <Logo variant="white" className="[&_span]:text-[16px] [&_span]:leading-[0.95]" />
           </Link>
@@ -79,18 +76,18 @@ export function PublicNavbar() {
                     {item.label}
                     <ChevronDown className="h-3.5 w-3.5 transition-transform duration-300 group-hover:rotate-180" />
                   </button>
-                <div className="invisible absolute left-1/2 top-[calc(100%-8px)] w-72 -translate-x-1/2 pt-2 opacity-0 transition-all duration-300 group-hover:visible group-hover:translate-y-2 group-hover:opacity-100">
-                  <div className="overflow-hidden rounded-2xl border border-[#3a2a20]/80 bg-[#120c08]/90 p-2 shadow-[0_20px_60px_rgba(0,0,0,0.6)] backdrop-blur-xl">
-                    {item.submenu.map((sub) => (
-                      <Link
-                        key={sub.href}
-                        href={sub.href}
-                        target={sub.href.startsWith("http") ? "_blank" : undefined}
-                        rel={sub.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                        className="group/sub flex items-start gap-3 rounded-xl p-3 transition-colors hover:bg-[#2a1a12]/80"
-                      >
+                  <div className="invisible absolute left-1/2 top-full w-72 -translate-x-1/2 -translate-y-2 pt-2 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+                    <div className="border border-[#3a2a20] bg-[#1f140e] p-2 shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
+                      {item.submenu.map((sub) => (
+                        <Link
+                          key={sub.href}
+                          href={sub.href}
+                          target={sub.href.startsWith("http") ? "_blank" : undefined}
+                          rel={sub.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                          className="group/sub flex items-start gap-3 border-b border-[#3a2a20] p-3 transition-colors last:border-0 hover:bg-[#2a1a12]"
+                        >
                           {sub.social && (
-                            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#2a1a12] text-[#d7a24a] transition-colors group-hover/sub:bg-[#d7a24a] group-hover/sub:text-[#120c08]">
+                            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center bg-[#2a1a12] text-[#d7a24a] transition-colors group-hover/sub:bg-[#d7a24a] group-hover/sub:text-[#120c08]">
                               <SocialIcon network={sub.social} className="h-4 w-4" />
                             </span>
                           )}
@@ -136,16 +133,12 @@ export function PublicNavbar() {
               {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
+        </div>
       </div>
 
-      <div
-        className={cn(
-          "absolute left-4 right-4 top-[80px] origin-top grid rounded-3xl border border-[#3a2a20]/80 bg-[#120c08]/95 shadow-[0_20px_60px_rgba(0,0,0,0.6)] backdrop-blur-xl transition-all duration-300 md:hidden",
-          isMobileMenuOpen ? "grid-rows-[1fr] opacity-100 scale-y-100" : "grid-rows-[0fr] opacity-0 scale-y-95 pointer-events-none"
-        )}
-      >
+      <div className={cn("grid border-t border-[#3a2a20] bg-[#120c08] transition-[grid-template-rows,opacity] duration-300 md:hidden", isMobileMenuOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0")}>
         <div className="overflow-hidden">
-          <div className="max-h-[75vh] overflow-y-auto px-6 py-6">
+          <div className="max-h-[80vh] overflow-y-auto px-5 py-5 sm:px-8">
             {navItems.map((item) =>
               item.submenu ? (
                 <div key={item.label} className="border-b border-[#3a2a20] py-3">
@@ -172,7 +165,7 @@ export function PublicNavbar() {
                 </Link>
               )
             )}
-            <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-[#d7a24a] px-5 text-sm font-semibold text-[#120c08] transition-colors hover:bg-[#e8b661]">
+            <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-md bg-[#d7a24a] px-5 text-sm font-semibold text-[#120c08]">
               Acceso interno
             </Link>
           </div>
