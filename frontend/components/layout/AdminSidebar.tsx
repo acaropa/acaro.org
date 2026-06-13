@@ -103,12 +103,14 @@ export function AdminSidebar() {
             <LogOut className="mr-3 h-5 w-5 shrink-0 text-primary-foreground/60 dark:text-muted group-hover:text-red-400" />
             Cerrar sesión
           </button>
-          <button
-            onClick={() => void logout(true)}
-            className="mt-1 w-full px-3 py-2 text-left text-xs text-primary-foreground/60 hover:text-red-300 dark:text-muted"
-          >
-            Cerrar todas las sesiones
-          </button>
+          {user?.role === 'admin' && (
+            <button
+              onClick={() => void logout(true)}
+              className="mt-1 w-full px-3 py-2 text-left text-xs text-primary-foreground/60 hover:text-red-300 dark:text-muted"
+            >
+              Cerrar todas las sesiones
+            </button>
+          )}
         </div>
       </div>
     </div>
