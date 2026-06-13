@@ -7,9 +7,20 @@ const {
   clearExpiredLoginLock,
   recordFailedLogin,
   resetLoginSecurity,
-  generateToken,
+  generateAccessToken,
   publicUser,
 } = require('../services/auth.service');
+const {
+  REFRESH_COOKIE,
+  setRefreshCookie,
+  clearRefreshCookie,
+  createSession,
+  rotateSession,
+  revokeSessionByRefreshToken,
+  revokeSessionById,
+  revokeAllUserSessions,
+} = require('../services/sessions.service');
+const { parseCookies } = require('../utils/cookies');
 const { validateNewPassword, isLoginPasswordValid } = require('../utils/password');
 
 const INVALID_LOGIN_MESSAGE = 'No se pudo iniciar sesión con las credenciales proporcionadas';
@@ -50,8 +61,12 @@ async function login(req, res, next) {
     }
 
     await resetLoginSecurity(user.id);
-    const token = generateToken(user);
-    res.json({ token, user: publicUser(user) });
+    const session = await createSession(user.id, req);
+    setRefreshCookie(res, session.refreshToken);
+    res.json({
+      accessToken: generateAccessToken(user, session.id),
+      user: publicUser(user),
+    });
   } catch (err) {
     next(err);
   }
@@ -74,8 +89,13 @@ async function register(req, res, next) {
     if (passwordError) return res.status(400).json({ error: passwordError });
 
     const user = await createUser(email, password, 'visitante');
-    const token = generateToken(user);
-    res.status(201).json({ token, user: publicUser({ ...user, activo: true }) });
+    const activeUser = { ...user, activo: true };
+    const session = await createSession(user.id, req);
+    setRefreshCookie(res, session.refreshToken);
+    res.status(201).json({
+      accessToken: generateAccessToken(activeUser, session.id),
+      user: publicUser(activeUser),
+    });
   } catch (err) {
     next(err);
   }
@@ -85,4 +105,49 @@ async function me(req, res) {
   res.json({ user: req.user });
 }
 
-module.exports = { login, register, me };
+async function refresh(req, res, next) {
+  try {
+    const refreshToken = parseCookies(req)[REFRESH_COOKIE];
+    if (!refreshToken) {
+      clearRefreshCookie(res);
+      return res.status(401).json({ error: 'Sesión no disponible' });
+    }
+
+    const session = await rotateSession(refreshToken, req);
+    if (session?.retry) {
+      return res.status(409).json({ error: 'Renovación concurrente; reintenta' });
+    }
+    if (!session) {
+      clearRefreshCookie(res);
+      return res.status(401).json({ error: 'Sesión expirada o revocada' });
+    }
+
+    setRefreshCookie(res, session.refreshToken);
+    res.json({
+      accessToken: generateAccessToken(session.user, session.id),
+      user: publicUser(session.user),
+    });
+  } catch (err) { next(err); }
+}
+
+async function logout(req, res, next) {
+  try {
+    const refreshToken = parseCookies(req)[REFRESH_COOKIE];
+    if (refreshToken) await revokeSessionByRefreshToken(refreshToken);
+    if (req.user?.sessionId) {
+      await revokeSessionById(req.user.sessionId, req.user.id);
+    }
+    clearRefreshCookie(res);
+    res.status(204).send();
+  } catch (err) { next(err); }
+}
+
+async function logoutAll(req, res, next) {
+  try {
+    await revokeAllUserSessions(req.user.id);
+    clearRefreshCookie(res);
+    res.status(204).send();
+  } catch (err) { next(err); }
+}
+
+module.exports = { login, register, me, refresh, logout, logoutAll };

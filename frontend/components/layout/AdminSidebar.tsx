@@ -97,11 +97,17 @@ export function AdminSidebar() {
         </nav>
         <div className="border-t border-white/10 dark:border-border p-4">
           <button
-            onClick={logout}
+            onClick={() => void logout()}
             className="group flex w-full items-center rounded-md px-3 py-2.5 text-sm font-medium text-primary-foreground/80 dark:text-muted hover:bg-red-500/10 hover:text-red-400 dark:hover:text-red-400 transition-colors"
           >
             <LogOut className="mr-3 h-5 w-5 shrink-0 text-primary-foreground/60 dark:text-muted group-hover:text-red-400" />
             Cerrar sesión
+          </button>
+          <button
+            onClick={() => void logout(true)}
+            className="mt-1 w-full px-3 py-2 text-left text-xs text-primary-foreground/60 hover:text-red-300 dark:text-muted"
+          >
+            Cerrar todas las sesiones
           </button>
         </div>
       </div>

@@ -16,7 +16,7 @@ interface AuthContextValue {
   user: AuthUser | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: (allSessions?: boolean) => Promise<void>;
   can: (...permissions: string[]) => boolean;
 }
 
@@ -28,39 +28,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLoading(false);
-      return;
-    }
-
-    api.get<{ user: AuthUser }>('/auth/me')
+    localStorage.removeItem('token');
+    api.restoreSession<AuthUser>()
       .then(data => setUser(data.user))
-      .catch(() => localStorage.removeItem('token'))
+      .catch(() => setUser(null))
       .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
+    const channel = typeof BroadcastChannel !== 'undefined'
+      ? new BroadcastChannel('acaro-auth')
+      : null;
     function handleUnauthorized() {
+      api.forgetSession();
       setUser(null);
       router.replace('/login');
     }
+    function handleMessage(event: MessageEvent) {
+      if (event.data === 'logout') handleUnauthorized();
+    }
     window.addEventListener('acaro:unauthorized', handleUnauthorized);
-    return () => window.removeEventListener('acaro:unauthorized', handleUnauthorized);
+    channel?.addEventListener('message', handleMessage);
+    return () => {
+      window.removeEventListener('acaro:unauthorized', handleUnauthorized);
+      channel?.removeEventListener('message', handleMessage);
+      channel?.close();
+    };
   }, [router]);
 
   async function login(email: string, password: string) {
-    const data = await api.post<{ token: string; user: AuthUser }>('/auth/login', { email, password });
-    localStorage.setItem('token', data.token);
+    const data = await api.login<AuthUser>(email, password);
     setUser(data.user);
     router.push(data.user.role === 'visitante' ? '/' : '/admin');
   }
 
-  function logout() {
-    localStorage.removeItem('token');
-    setUser(null);
-    router.push('/login');
+  async function logout(allSessions = false) {
+    try {
+      await api.logout(allSessions);
+    } finally {
+      setUser(null);
+      if (typeof BroadcastChannel !== 'undefined') {
+        const channel = new BroadcastChannel('acaro-auth');
+        channel.postMessage('logout');
+        channel.close();
+      }
+      router.push('/login');
+    }
   }
 
   function can(...permissions: string[]) {

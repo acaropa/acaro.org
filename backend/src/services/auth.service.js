@@ -96,11 +96,16 @@ async function resetLoginSecurity(userId) {
   );
 }
 
-function generateToken(user) {
+function generateAccessToken(user, sessionId) {
   return jwt.sign(
-    { id: user.id, email: user.email, role: user.role },
+    { id: user.id, sid: sessionId, type: 'access' },
     process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+    {
+      expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN || '15m',
+      algorithm: 'HS256',
+      issuer: 'acaro-api',
+      audience: 'acaro-web',
+    }
   );
 }
 
@@ -124,6 +129,6 @@ module.exports = {
   clearExpiredLoginLock,
   recordFailedLogin,
   resetLoginSecurity,
-  generateToken,
+  generateAccessToken,
   publicUser,
 };

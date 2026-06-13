@@ -1,5 +1,6 @@
 const usuarios = require('../services/usuarios.service');
 const { validateNewPassword } = require('../utils/password');
+const { revokeAllUserSessions } = require('../services/sessions.service');
 
 async function getAll(req, res, next) {
   try {
@@ -23,6 +24,7 @@ async function update(req, res, next) {
   try {
     const user = await usuarios.update(req.params.id, req.body || {});
     if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+    await revokeAllUserSessions(user.id);
     res.json(user);
   } catch (err) { next(err); }
 }
@@ -33,6 +35,7 @@ async function assignRole(req, res, next) {
     if (!role) return res.status(400).json({ error: 'role es requerido' });
     const user = await usuarios.assignRole(req.params.id, role);
     if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+    await revokeAllUserSessions(user.id);
     res.json(user);
   } catch (err) { next(err); }
 }
@@ -44,6 +47,7 @@ async function disable(req, res, next) {
     }
     const user = await usuarios.update(req.params.id, { activo: false });
     if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+    await revokeAllUserSessions(user.id);
     res.json(user);
   } catch (err) { next(err); }
 }

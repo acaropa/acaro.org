@@ -1,8 +1,13 @@
 const jwt = require('jsonwebtoken');
 const db = require('../config/db');
 const { permissionsForRole } = require('../config/permissions');
+const { getActiveSession } = require('../services/sessions.service');
 
 async function loadActiveUser(payload) {
+  if (payload.type !== 'access' || !payload.sid) return null;
+  const session = await getActiveSession(payload.sid, payload.id);
+  if (!session) return null;
+
   const [rows] = await db.query(
     'SELECT id, email, role, activo FROM users WHERE id = ? LIMIT 1',
     [payload.id]
@@ -15,6 +20,7 @@ async function loadActiveUser(payload) {
     email: user.email,
     role: user.role,
     permissions: permissionsForRole(user.role),
+    sessionId: payload.sid,
   };
 }
 
@@ -26,7 +32,11 @@ async function verifyToken(req, res, next) {
 
   let payload;
   try {
-    payload = jwt.verify(header.slice(7), process.env.JWT_SECRET);
+    payload = jwt.verify(header.slice(7), process.env.JWT_SECRET, {
+      algorithms: ['HS256'],
+      issuer: 'acaro-api',
+      audience: 'acaro-web',
+    });
   } catch {
     return res.status(401).json({ error: 'Token inválido o expirado' });
   }
@@ -56,7 +66,11 @@ async function optionalAuth(req, res, next) {
   if (header && header.startsWith('Bearer ')) {
     let payload;
     try {
-      payload = jwt.verify(header.slice(7), process.env.JWT_SECRET);
+      payload = jwt.verify(header.slice(7), process.env.JWT_SECRET, {
+        algorithms: ['HS256'],
+        issuer: 'acaro-api',
+        audience: 'acaro-web',
+      });
     } catch {
       req.user = null;
       return next();
