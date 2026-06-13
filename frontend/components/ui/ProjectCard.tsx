@@ -5,12 +5,14 @@ import { Badge } from "./badge"
 import { Project } from "@/data/mock-projects"
 
 export function ProjectCard({ project }: { project: Project }) {
-  const statusColor = {
+  const statusColor: Record<Project["status"], "default" | "secondary" | "destructive" | "outline" | "success" | "warning"> = {
     'Planificación': 'secondary',
+    'Fase 1 - Piloto': 'secondary',
+    'Fase 2 - Ejecución': 'warning',
     'Activo': 'success',
     'En seguimiento': 'warning',
     'Finalizado': 'default'
-  } as const;
+  };
 
   return (
     <Card className="h-full flex flex-col hover:border-accent hover:shadow-md transition-all group overflow-hidden">

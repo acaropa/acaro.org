@@ -16,9 +16,11 @@ import { cn } from "@/lib/utils"
 const projectStatusLabel = (status: string) => status === "Planificación" ? "Planificado" : status
 
 const projectStatusDot: Record<string, string> = {
+  "Planificación": "bg-[#9ab0c4]",
+  "Fase 1 - Piloto": "bg-[#9ab0c4]",
+  "Fase 2 - Ejecución": "bg-[#d7a24a]",
   "Activo": "bg-[#86d99c]",
   "En seguimiento": "bg-[#d7a24a]",
-  "Planificación": "bg-[#9ab0c4]",
   "Finalizado": "bg-[#b8a99a]",
 }
 
