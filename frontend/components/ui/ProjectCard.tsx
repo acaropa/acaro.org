@@ -5,7 +5,7 @@ import { Badge } from "./badge"
 import { Project } from "@/data/mock-projects"
 
 export function ProjectCard({ project }: { project: Project }) {
-  const statusColor: Record<Project["status"], "default" | "secondary" | "destructive" | "outline" | "success" | "warning"> = {
+  const statusColor: Record<Project["status"], "default" | "secondary" | "danger" | "outline" | "success" | "warning"> = {
     'Planificación': 'secondary',
     'Fase 1 - Piloto': 'secondary',
     'Fase 2 - Ejecución': 'warning',
