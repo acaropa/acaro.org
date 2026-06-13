@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { Modal } from '@/components/ui/Modal';
 import { api } from '@/lib/api';
 import { PERMISSIONS } from '@/lib/permissions';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -72,75 +73,126 @@ export default function AdminProyectos() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Proyectos asignados</h1>
-          <p className="mt-1 text-sm text-muted">La lista respeta las asignaciones del usuario actual.</p>
+    <>
+      <section className="mb-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border pb-6">
+          <div className="max-w-2xl">
+            <h1 className="font-headline-lg text-[40px] md:text-[56px] text-foreground leading-tight mb-3 tracking-tight">
+              Proyectos asignados
+            </h1>
+            <p className="font-body-lg text-[16px] md:text-[18px] text-muted">
+              La lista respeta las asignaciones del usuario actual.
+            </p>
+          </div>
+          <div className="flex shrink-0">
+            {canCreate && (
+              <button
+                onClick={() => setShowForm(true)}
+                className="px-6 py-3 font-label-caps text-label-caps bg-primary text-primary-foreground hover:bg-accent transition-colors uppercase tracking-widest"
+              >
+                + Nuevo proyecto
+              </button>
+            )}
+          </div>
         </div>
-        {canCreate && (
-          <button onClick={() => setShowForm(value => !value)} className="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground">
-            {showForm ? 'Cancelar' : '+ Nuevo proyecto'}
-          </button>
-        )}
-      </div>
-      {showForm && (
-        <form onSubmit={create} className="grid gap-4 rounded-lg border border-border bg-card p-6">
-          <input required placeholder="Nombre" value={form.nombre}
-            onChange={event => setForm(current => ({ ...current, nombre: event.target.value }))}
-            className="rounded-md border border-border bg-background px-3 py-2 text-sm" />
-          <textarea placeholder="Descripción" value={form.descripcion}
-            onChange={event => setForm(current => ({ ...current, descripcion: event.target.value }))}
-            className="rounded-md border border-border bg-background px-3 py-2 text-sm" />
-          <select value={form.tipo} onChange={event => setForm(current => ({ ...current, tipo: event.target.value }))}
-            className="rounded-md border border-border bg-background px-3 py-2 text-sm">
-            <option value="privado">Privado</option>
-            <option value="publico">Público</option>
-          </select>
-          {user?.role === 'admin' && (
-            <select value={form.supervisor_id}
-              onChange={event => setForm(current => ({ ...current, supervisor_id: event.target.value }))}
-              className="rounded-md border border-border bg-background px-3 py-2 text-sm">
-              <option value="">Sin supervisor asignado</option>
-              {supervisors.map(supervisor => (
-                <option key={supervisor.id} value={supervisor.id}>{supervisor.email}</option>
-              ))}
-            </select>
-          )}
-          <button className="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground">Guardar proyecto</button>
-        </form>
-      )}
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      {projects.length === 0 ? (
-        <EmptyState title="No hay proyectos asignados" description="No tienes proyectos disponibles actualmente." />
-      ) : (
-        <div className="grid gap-4 md:grid-cols-2">
-          {projects.map(project => (
-            <article key={project.id} className="rounded-lg border border-border bg-card p-5">
-              <div className="flex justify-between gap-4">
-                <h2 className="font-semibold">{project.nombre}</h2>
-                <span className="text-xs capitalize text-muted">{project.tipo}</span>
-              </div>
-              <p className="mt-2 text-sm text-muted">{project.descripcion || 'Sin descripción'}</p>
-              <p className="mt-4 text-xs text-muted">Estado: {project.estado}</p>
-              {user?.role === 'admin' ? (
-                <select
-                  value={project.supervisor_id || ''}
-                  onChange={event => void assignSupervisor(project.id, event.target.value)}
-                  className="mt-3 rounded border border-border bg-background px-2 py-1 text-xs"
-                >
-                  <option value="">Sin supervisor</option>
+      </section>
+
+      <Modal isOpen={showForm} onClose={() => setShowForm(false)} title="Nuevo Proyecto">
+        <form onSubmit={create} className="relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+            <div className="md:col-span-2">
+              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Nombre del Proyecto</label>
+              <input required placeholder="Escribe el nombre aquí..." value={form.nombre}
+                onChange={event => setForm(current => ({ ...current, nombre: event.target.value }))}
+                className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Descripción</label>
+              <textarea placeholder="Detalles del proyecto..." value={form.descripcion}
+                onChange={event => setForm(current => ({ ...current, descripcion: event.target.value }))}
+                className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors resize-y" />
+            </div>
+            <div>
+              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Tipo</label>
+              <select value={form.tipo} onChange={event => setForm(current => ({ ...current, tipo: event.target.value }))}
+                className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors">
+                <option value="privado">Privado</option>
+                <option value="publico">Público</option>
+              </select>
+            </div>
+            {user?.role === 'admin' && (
+              <div>
+                <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Supervisor</label>
+                <select value={form.supervisor_id}
+                  onChange={event => setForm(current => ({ ...current, supervisor_id: event.target.value }))}
+                  className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors">
+                  <option value="">Sin supervisor asignado</option>
                   {supervisors.map(supervisor => (
                     <option key={supervisor.id} value={supervisor.id}>{supervisor.email}</option>
                   ))}
                 </select>
-              ) : project.supervisor_email ? (
-                <p className="mt-1 text-xs text-muted">Supervisor: {project.supervisor_email}</p>
-              ) : null}
+              </div>
+            )}
+            
+            <div className="md:col-span-2 flex justify-end mt-4">
+              <button className="px-8 py-3 bg-primary text-primary-foreground font-label-caps text-[12px] uppercase tracking-widest hover:bg-accent transition-colors">
+                Guardar proyecto
+              </button>
+            </div>
+          </div>
+        </form>
+      </Modal>
+
+      {error && <p className="rounded border-l-4 border-red-600 bg-red-50 p-4 font-body-md text-sm text-red-700 mb-8">{error}</p>}
+
+      {projects.length === 0 ? (
+        <div className="bg-surface/30 border border-border border-dashed p-16 flex flex-col items-center justify-center text-center">
+          <span className="material-symbols-outlined text-[48px] text-muted mb-4 opacity-50">folder_open</span>
+          <h3 className="font-headline-md text-xl font-bold text-foreground mb-2">Sin proyectos asignados</h3>
+          <p className="font-body-md text-muted max-w-md">No tienes proyectos disponibles actualmente en tu bandeja.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {projects.map(project => (
+            <article key={project.id} className="bg-card p-6 border border-border hover:border-primary/30 transition-colors flex flex-col group">
+              <div className="flex justify-between items-start gap-4 mb-3">
+                <h2 className="font-headline-md text-xl font-bold text-foreground group-hover:text-primary transition-colors">{project.nombre}</h2>
+                <span className={`font-label-caps text-[10px] tracking-widest uppercase px-2 py-1 rounded shrink-0 ${project.tipo === 'publico' ? 'bg-brand-green/10 text-brand-green' : 'bg-muted/10 text-muted'}`}>
+                  {project.tipo}
+                </span>
+              </div>
+              <p className="mt-1 text-sm text-muted font-body-md flex-1 mb-6">{project.descripcion || 'Sin descripción'}</p>
+              
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pt-4 border-t border-border/50 gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[16px] text-muted">info</span>
+                  <span className="font-label-caps text-[11px] uppercase tracking-widest text-muted">
+                    Estado: <span className="text-foreground">{project.estado}</span>
+                  </span>
+                </div>
+                
+                {user?.role === 'admin' ? (
+                  <select
+                    value={project.supervisor_id || ''}
+                    onChange={event => void assignSupervisor(project.id, event.target.value)}
+                    className="rounded border-b border-border bg-background px-3 py-1 font-body-md text-xs focus:outline-none focus:border-primary text-foreground"
+                  >
+                    <option value="">Sin supervisor</option>
+                    {supervisors.map(supervisor => (
+                      <option key={supervisor.id} value={supervisor.id}>{supervisor.email}</option>
+                    ))}
+                  </select>
+                ) : project.supervisor_email ? (
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[16px] text-muted">person</span>
+                    <span className="font-label-caps text-[11px] uppercase tracking-widest text-muted">{project.supervisor_email}</span>
+                  </div>
+                ) : null}
+              </div>
             </article>
           ))}
         </div>
       )}
-    </div>
+    </>
   );
 }

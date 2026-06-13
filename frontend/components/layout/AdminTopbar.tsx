@@ -1,38 +1,32 @@
 "use client"
 
 import { useAuth } from "@/context/AuthContext"
-import { ThemeToggle } from "@/components/ui/theme-toggle"
-import { Bell } from "lucide-react"
 
 export function AdminTopbar() {
   const { user } = useAuth()
 
   return (
-    <header className="flex h-16 shrink-0 items-center gap-x-4 border-b border-border bg-surface px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
-      <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-        <div className="flex flex-1" />
-        <div className="flex items-center gap-x-4 lg:gap-x-6">
-          <button type="button" className="-m-2.5 p-2.5 text-muted hover:text-foreground">
-            <span className="sr-only">Ver notificaciones</span>
-            <Bell className="h-5 w-5" aria-hidden="true" />
+    <header className="sticky top-0 z-50 flex justify-between items-center w-full px-5 py-4 bg-surface-bright/95 backdrop-blur-sm border-b border-outline-variant/30 md:px-16">
+      <div className="flex items-center gap-4">
+        <span className="md:hidden material-symbols-outlined text-primary cursor-pointer hover:text-primary transition-colors duration-200">menu</span>
+      </div>
+      <div className="flex items-center gap-6">
+        {/* Search Bar */}
+        <div className="hidden lg:flex items-center border-b border-outline-variant pb-1">
+          <span className="material-symbols-outlined text-secondary mr-2">search</span>
+          <input className="bg-transparent border-none focus:outline-none focus:ring-0 font-body-md text-[16px] text-primary placeholder:text-secondary w-48" placeholder="Buscar..." type="text" />
+        </div>
+        
+        <div className="flex items-center gap-4">
+          <button className="text-on-surface-variant hover:text-primary transition-colors duration-200">
+            <span className="material-symbols-outlined">notifications</span>
+          </button>
+          <button className="text-on-surface-variant hover:text-primary transition-colors duration-200">
+            <span className="material-symbols-outlined">settings</span>
           </button>
           
-          <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-border" aria-hidden="true" />
-          
-          <ThemeToggle />
-
-          <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-border" aria-hidden="true" />
-
-          <div className="flex items-center gap-x-4">
-            <span className="sr-only">Perfil</span>
-            <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center text-white font-bold text-sm">
-              {user?.email?.charAt(0).toUpperCase() || 'A'}
-            </div>
-            <span className="hidden lg:flex lg:items-center">
-              <span className="text-sm font-semibold leading-6 text-foreground" aria-hidden="true">
-                {user?.email || 'Administrador'}
-              </span>
-            </span>
+          <div className="h-8 w-8 rounded-full border border-outline-variant bg-primary-fixed flex items-center justify-center text-on-primary-fixed font-bold font-data-mono shrink-0">
+            {user?.email?.charAt(0).toUpperCase() || 'A'}
           </div>
         </div>
       </div>

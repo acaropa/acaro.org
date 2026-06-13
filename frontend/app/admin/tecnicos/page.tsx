@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
+import { Modal } from '@/components/ui/Modal';
 import { PERMISSIONS } from '@/lib/permissions';
 
 interface Tecnico {
@@ -91,102 +92,136 @@ export default function TecnicosPage() {
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Técnicos</h1>
-        {canCreate && (
-          <button onClick={() => setShowForm(v => !v)}
-            className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-md transition-colors">
-            {showForm ? 'Cancelar' : '+ Registrar técnico'}
-          </button>
-        )}
-      </div>
+    <>
+      <section className="mb-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border pb-6">
+          <div className="max-w-2xl">
+            <h1 className="font-headline-lg text-[40px] md:text-[56px] text-foreground leading-tight mb-3 tracking-tight">
+              Técnicos
+            </h1>
+            <p className="font-body-lg text-[16px] md:text-[18px] text-muted">
+              Personal técnico de campo y sus asignaciones.
+            </p>
+          </div>
+          <div className="flex shrink-0">
+            {canCreate && (
+              <button
+                onClick={() => setShowForm(true)}
+                className="px-6 py-3 font-label-caps text-label-caps bg-primary text-primary-foreground hover:bg-accent transition-colors uppercase tracking-widest"
+              >
+                + Registrar técnico
+              </button>
+            )}
+          </div>
+        </div>
+      </section>
 
-      {showForm && (
-        <form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-lg p-6 mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {[
-            { name: 'nombre',       label: 'Nombre *',     type: 'text',     required: true },
-            { name: 'apellido',     label: 'Apellido *',   type: 'text',     required: true },
-            { name: 'email',        label: 'Email *',      type: 'email',    required: true },
-            { name: 'password',     label: 'Contraseña * (mínimo 12 caracteres)', type: 'password', required: true },
-            { name: 'especialidad', label: 'Especialidad', type: 'text',     required: false },
-            { name: 'telefono',     label: 'Teléfono',     type: 'text',     required: false },
-          ].map(f => (
-            <div key={f.name}>
-              <label className="block text-xs font-medium text-gray-600 mb-1">{f.label}</label>
-              <input type={f.type} required={f.required} minLength={f.name === 'password' ? 12 : undefined}
-                value={(form as Record<string, string>)[f.name]}
-                onChange={e => setForm(v => ({ ...v, [f.name]: e.target.value }))}
-                className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      <Modal isOpen={showForm} onClose={() => setShowForm(false)} title="Registrar Técnico">
+        <form onSubmit={handleSubmit} className="relative z-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 relative z-10">
+            {[
+              { name: 'nombre',       label: 'Nombre *',     type: 'text',     required: true },
+              { name: 'apellido',     label: 'Apellido *',   type: 'text',     required: true },
+              { name: 'email',        label: 'Email *',      type: 'email',    required: true },
+              { name: 'password',     label: 'Contraseña * (mínimo 12 caracteres)', type: 'password', required: true },
+              { name: 'especialidad', label: 'Especialidad', type: 'text',     required: false },
+              { name: 'telefono',     label: 'Teléfono',     type: 'text',     required: false },
+            ].map(f => (
+              <div key={f.name}>
+                <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">{f.label}</label>
+                <input type={f.type} required={f.required} minLength={f.name === 'password' ? 12 : undefined}
+                  value={(form as Record<string, string>)[f.name]}
+                  onChange={e => setForm(v => ({ ...v, [f.name]: e.target.value }))}
+                  className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
+              </div>
+            ))}
+            {error && <p className="sm:col-span-2 rounded border-l-4 border-red-600 bg-red-50 p-4 font-body-md text-sm text-red-700">{error}</p>}
+            <div className="sm:col-span-2 flex justify-end mt-4">
+              <button type="submit" disabled={saving}
+                className="px-8 py-3 bg-primary text-primary-foreground font-label-caps text-[12px] uppercase tracking-widest hover:bg-accent transition-colors disabled:opacity-50">
+                {saving ? 'Guardando...' : 'Registrar'}
+              </button>
             </div>
-          ))}
-          {error && <p className="sm:col-span-2 text-sm text-red-600">{error}</p>}
-          <div className="sm:col-span-2 flex justify-end">
-            <button type="submit" disabled={saving}
-              className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm px-6 py-2 rounded-md">
-              {saving ? 'Guardando...' : 'Registrar'}
-            </button>
           </div>
         </form>
-      )}
+      </Modal>
 
       {loading ? (
-        <p className="text-sm text-gray-400">Cargando...</p>
+        <div className="py-12 text-center text-muted font-body-md animate-pulse">Cargando técnicos...</div>
       ) : tecnicos.length === 0 ? (
-        <p className="text-sm text-gray-500">No hay técnicos registrados.</p>
+        <div className="bg-surface/30 border border-border border-dashed p-16 flex flex-col items-center justify-center text-center">
+          <span className="material-symbols-outlined text-[48px] text-muted mb-4 opacity-50">engineering</span>
+          <h3 className="font-headline-md text-xl font-bold text-foreground mb-2">Sin técnicos registrados</h3>
+          <p className="font-body-md text-muted max-w-md">No hay personal técnico registrado en el sistema.</p>
+        </div>
       ) : (
-        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
-              <tr>
-                {['Nombre', 'Email', 'Especialidad', 'Supervisor', 'Disponible', ''].map(h => (
-                  <th key={h} className="px-4 py-3 text-left font-medium">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {tecnicos.map(t => (
-                <tr key={t.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 font-medium">{t.apellido}, {t.nombre}</td>
-                  <td className="px-4 py-3 text-gray-500">{t.email}</td>
-                  <td className="px-4 py-3 text-gray-500">{t.especialidad ?? '—'}</td>
-                  <td className="px-4 py-3 text-gray-500">
-                    {canAssign ? (
-                      <select
-                        value={t.supervisor_id || ''}
-                        onChange={event => void assignSupervisor(t.id, event.target.value)}
-                        className="rounded border border-gray-300 px-2 py-1 text-xs"
-                      >
-                        <option value="">Sin asignar</option>
-                        {supervisors.map(supervisor => (
-                          <option key={supervisor.id} value={supervisor.id}>{supervisor.email}</option>
-                        ))}
-                      </select>
-                    ) : (t.supervisor_email || '—')}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${t.disponible ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                      {t.disponible ? 'Disponible' : 'Ocupado'}
-                    </span>
-                  </td>
-                  {canWrite && (
-                    <td className="px-4 py-3 flex gap-2 justify-end">
-                      <button onClick={() => toggleDisponible(t)} className="text-xs text-blue-600 hover:underline">
-                        {t.disponible ? 'Marcar ocupado' : 'Marcar disponible'}
-                      </button>
-                      {canDelete && (
-                        <button onClick={() => handleDelete(t.id)} className="text-xs text-red-500 hover:underline">
-                          Eliminar
-                        </button>
-                      )}
-                    </td>
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          {tecnicos.map(t => (
+            <article key={t.id} className="bg-card p-6 border border-border hover:border-primary/30 transition-colors flex flex-col group">
+              <div className="flex justify-between items-start mb-4">
+                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-surface text-primary font-headline-md font-bold text-lg">
+                  {t.nombre.charAt(0)}{t.apellido.charAt(0)}
+                </div>
+                <span className={`font-label-caps text-[10px] tracking-widest uppercase px-2 py-1 rounded shrink-0 ${t.disponible ? 'bg-brand-green/10 text-brand-green' : 'bg-muted/10 text-muted'}`}>
+                  {t.disponible ? 'Disponible' : 'Ocupado'}
+                </span>
+              </div>
+              
+              <h2 className="font-headline-md text-lg font-bold text-foreground mb-1 group-hover:text-primary transition-colors">
+                {t.apellido}, {t.nombre}
+              </h2>
+              <p className="text-sm text-primary font-label-caps tracking-widest uppercase mb-4">{t.especialidad ?? 'General'}</p>
+              
+              <div className="flex flex-col gap-2 mb-6 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[16px] text-muted">mail</span>
+                  <span className="text-sm text-foreground font-body-md">{t.email}</span>
+                </div>
+                {t.telefono && (
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[16px] text-muted">call</span>
+                    <span className="text-sm text-foreground font-body-md">{t.telefono}</span>
+                  </div>
+                )}
+                
+                <div className="mt-2 pt-2 border-t border-border/30 flex flex-col gap-1">
+                  <span className="font-label-caps text-[10px] uppercase tracking-widest text-muted">Supervisor</span>
+                  {canAssign ? (
+                    <select
+                      value={t.supervisor_id || ''}
+                      onChange={event => void assignSupervisor(t.id, event.target.value)}
+                      className="rounded border-b border-border bg-background px-2 py-1 text-xs font-body-md text-foreground focus:outline-none focus:border-primary"
+                    >
+                      <option value="">Sin asignar</option>
+                      {supervisors.map(supervisor => (
+                        <option key={supervisor.id} value={supervisor.id}>{supervisor.email}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <span className="text-sm text-foreground font-body-md">{t.supervisor_email || 'Sin supervisor asignado'}</span>
                   )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                </div>
+              </div>
+              
+              {canWrite && (
+                <div className="flex justify-end gap-4 pt-4 border-t border-border/50">
+                  <button onClick={() => toggleDisponible(t)} className="flex items-center gap-1 text-sm font-medium text-foreground hover:text-primary transition-colors">
+                    <span className="material-symbols-outlined text-[16px]">
+                      {t.disponible ? 'do_not_disturb_on' : 'check_circle'}
+                    </span>
+                    {t.disponible ? 'Marcar ocupado' : 'Marcar disponible'}
+                  </button>
+                  {canDelete && (
+                    <button onClick={() => handleDelete(t.id)} className="flex items-center gap-1 text-sm font-medium text-red-600 hover:text-red-800 transition-colors">
+                      <span className="material-symbols-outlined text-[16px]">delete</span>
+                    </button>
+                  )}
+                </div>
+              )}
+            </article>
+          ))}
         </div>
       )}
-    </div>
+    </>
   );
 }

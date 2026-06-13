@@ -2,7 +2,6 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, FolderKanban, BookOpen, Newspaper, Users, Settings, LogOut, UserRoundCog, ContactRound } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Logo } from "@/components/Logo"
@@ -10,47 +9,47 @@ import { useAuth } from "@/context/AuthContext"
 import { PERMISSIONS, hasAnyPermission } from "@/lib/permissions"
 
 const navigation = [
-  { name: "Panel", href: "/admin", icon: LayoutDashboard, permissions: [] },
+  { name: "Inicio", href: "/admin", icon: "home", permissions: [] },
   {
     name: "Proyectos",
     href: "/admin/proyectos",
-    icon: FolderKanban,
+    icon: "account_tree",
     permissions: [PERMISSIONS.PROYECTOS_READ_ASSIGNED, PERMISSIONS.PROYECTOS_READ_PRIVATE],
   },
   {
     name: "Biblioteca",
     href: "/admin/biblioteca",
-    icon: BookOpen,
+    icon: "import_contacts",
     permissions: [PERMISSIONS.BIBLIOTECA_READ_INTERNAL, PERMISSIONS.BIBLIOTECA_UPLOAD_OWN],
   },
   {
     name: "Noticias",
     href: "/admin/noticias",
-    icon: Newspaper,
+    icon: "newspaper",
     permissions: [PERMISSIONS.NOTICIAS_CREATE, PERMISSIONS.NOTICIAS_UPDATE],
   },
   {
     name: "Técnicos",
     href: "/admin/tecnicos",
-    icon: UserRoundCog,
+    icon: "engineering",
     permissions: [PERMISSIONS.TECNICOS_READ],
   },
   {
     name: "Socios",
     href: "/admin/socios",
-    icon: ContactRound,
+    icon: "groups",
     permissions: [PERMISSIONS.SOCIOS_READ],
   },
   {
     name: "Usuarios",
     href: "/admin/usuarios",
-    icon: Users,
+    icon: "manage_accounts",
     permissions: [PERMISSIONS.USUARIOS_READ],
   },
   {
     name: "Configuración",
     href: "/admin/configuracion",
-    icon: Settings,
+    icon: "settings",
     permissions: [PERMISSIONS.CONFIGURACION_MANAGE],
   },
 ]
@@ -63,56 +62,62 @@ export function AdminSidebar() {
   )
 
   return (
-    <div className="flex h-full w-64 flex-col bg-primary dark:bg-card border-r border-border text-primary-foreground dark:text-foreground shadow-sm">
-      <div className="flex h-16 shrink-0 items-center px-6 border-b border-white/10 dark:border-border">
-        <Logo variant="white" className="dark:hidden" />
-        <Logo variant="normal" className="hidden dark:flex" />
-      </div>
-      <div className="flex flex-1 flex-col overflow-y-auto">
-        <nav className="flex-1 space-y-1 px-4 py-6">
-          {visibleNavigation.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={cn(
-                  "group flex items-center rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
-                  isActive
-                    ? "bg-accent text-white"
-                    : "text-primary-foreground/80 dark:text-muted hover:bg-white/10 dark:hover:bg-surface hover:text-white dark:hover:text-foreground"
-                )}
-              >
-                <item.icon
-                  className={cn(
-                    "mr-3 h-5 w-5 shrink-0",
-                    isActive ? "text-white" : "text-primary-foreground/60 dark:text-muted group-hover:text-white dark:group-hover:text-foreground"
-                  )}
-                  aria-hidden="true"
-                />
-                {item.name}
-              </Link>
-            )
-          })}
-        </nav>
-        <div className="border-t border-white/10 dark:border-border p-4">
-          <button
-            onClick={() => void logout()}
-            className="group flex w-full items-center rounded-md px-3 py-2.5 text-sm font-medium text-primary-foreground/80 dark:text-muted hover:bg-red-500/10 hover:text-red-400 dark:hover:text-red-400 transition-colors"
-          >
-            <LogOut className="mr-3 h-5 w-5 shrink-0 text-primary-foreground/60 dark:text-muted group-hover:text-red-400" />
-            Cerrar sesión
-          </button>
-          {user?.role === 'admin' && (
-            <button
-              onClick={() => void logout(true)}
-              className="mt-1 w-full px-3 py-2 text-left text-xs text-primary-foreground/60 hover:text-red-300 dark:text-muted"
-            >
-              Cerrar todas las sesiones
-            </button>
-          )}
+    <nav className="hidden md:flex flex-col fixed left-0 top-0 h-full w-64 bg-surface-container-lowest z-40 border-r border-outline-variant/30 py-8 shadow-sm">
+      <div className="px-5 mb-8">
+        <div className="flex items-center gap-3">
+          <div className="shrink-0 flex items-center justify-center">
+            <Logo variant="normal" showText={false} className="!gap-0" />
+          </div>
+          <div className="overflow-hidden">
+            <h2 className="font-headline-md text-[16px] leading-[1.2] font-bold text-primary tracking-widest whitespace-nowrap">
+              ACARO
+            </h2>
+          </div>
         </div>
       </div>
-    </div>
+      <div className="flex flex-col gap-2 w-full mt-4 flex-1 overflow-y-auto">
+        {visibleNavigation.map((item) => {
+          const isActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(`${item.href}/`))
+          return (
+            <Link
+              key={item.name}
+              href={item.href}
+              className={cn(
+                "flex items-center gap-3 py-3 w-full transition-all duration-200",
+                isActive
+                  ? "text-primary font-bold border-l-4 border-primary pl-4 scale-[0.99] bg-surface-container-low"
+                  : "text-secondary pl-5 hover:bg-surface-container-low"
+              )}
+            >
+              <span
+                className="material-symbols-outlined"
+                data-weight={isActive ? "fill" : undefined}
+                style={isActive ? { fontVariationSettings: "'FILL' 1" } : {}}
+              >
+                {item.icon}
+              </span>
+              <span className="font-label-caps text-label-caps">{item.name}</span>
+            </Link>
+          )
+        })}
+      </div>
+
+      {/* Logout options */}
+      <div className="border-t border-outline-variant/30 p-4 mt-auto">
+        <button
+          onClick={() => void logout()}
+          className="group flex w-full items-center gap-3 py-3 pl-1 text-secondary hover:bg-red-500/10 hover:text-red-700 transition-colors rounded-md"
+        >
+          <span className="material-symbols-outlined ml-4">logout</span>
+          <span className="font-label-caps text-label-caps">Cerrar sesión</span>
+        </button>
+        <button
+          onClick={() => void logout(true)}
+          className="mt-1 w-full px-5 py-2 text-left text-[10px] uppercase tracking-wider text-secondary/60 hover:text-red-500 font-bold"
+        >
+          Cerrar todas las sesiones
+        </button>
+      </div>
+    </nav>
   )
 }

@@ -77,14 +77,15 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className="min-h-screen theme-admin bg-background admin-background-noise flex flex-col md:flex-row">
+      {/* Sidebar - Fixed on desktop, hidden on mobile by default */}
       <AdminSidebar />
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <main className="flex-1 md:ml-64 w-full flex flex-col min-h-screen">
         <AdminTopbar />
-        <main className="flex-1 overflow-y-auto p-8 bg-surface">
-          <div className="mx-auto max-w-7xl">{children}</div>
-        </main>
-      </div>
+        <div className="flex-1 overflow-y-auto px-5 py-8 md:px-16 md:py-12 max-w-[1440px] mx-auto w-full space-y-12">
+          {children}
+        </div>
+      </main>
     </div>
   );
 }
