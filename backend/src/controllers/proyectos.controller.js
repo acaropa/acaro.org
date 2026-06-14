@@ -1,4 +1,5 @@
 const svc = require('../services/proyectos.service');
+const projectManagement = require('../services/project-management.service');
 const { hasPermission, PERMISSIONS } = require('../config/permissions');
 
 async function canAccessProject(user, project) {
@@ -116,7 +117,13 @@ async function createFase(req, res, next) {
     }
     const { nombre } = req.body;
     if (!nombre) return res.status(400).json({ error: 'nombre es requerido' });
-    res.status(201).json(await svc.createFase(req.params.id, req.body));
+    const fase = await svc.createFase(req.params.id, req.body);
+    await projectManagement.audit(
+      req.user, Number(req.params.id), 'proyecto_fases', 'crear', fase.id,
+      null, { ...fase, fase_id: fase.id },
+      { ip: req.ip, userAgent: req.get('user-agent') }
+    );
+    res.status(201).json(fase);
   } catch (err) { next(err); }
 }
 
@@ -130,8 +137,15 @@ async function updateFase(req, res, next) {
     if (!(await svc.phaseBelongsToProject(req.params.faseId, req.params.id))) {
       return res.status(404).json({ error: 'Fase no encontrada en este proyecto' });
     }
+    const previous = project.fases.find(item => Number(item.id) === Number(req.params.faseId));
     const fase = await svc.updateFase(req.params.faseId, req.body);
     if (!fase) return res.status(404).json({ error: 'Fase no encontrada' });
+    await projectManagement.audit(
+      req.user, Number(req.params.id), 'proyecto_fases', 'actualizar', fase.id,
+      previous ? { ...previous, fase_id: previous.id } : null,
+      { ...fase, fase_id: fase.id },
+      { ip: req.ip, userAgent: req.get('user-agent') }
+    );
     res.json(fase);
   } catch (err) { next(err); }
 }

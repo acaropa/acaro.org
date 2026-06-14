@@ -1,36 +1,49 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import Link from 'next/link';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
+import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/api';
 import { PERMISSIONS } from '@/lib/permissions';
-import { EmptyState } from '@/components/ui/EmptyState';
 
 interface Project {
   id: number;
   nombre: string;
   descripcion: string | null;
   tipo: 'publico' | 'privado';
+  clasificacion: string | null;
   estado: string;
+  fecha_inicio: string | null;
+  fecha_fin: string | null;
   supervisor_id: number | null;
   supervisor_email: string | null;
 }
 
+const emptyForm = {
+  nombre: '', descripcion: '', tipo: 'privado', clasificacion: '',
+  estado: 'pendiente', fecha_inicio: '', fecha_fin: '', supervisor_id: '',
+};
+
 export default function AdminProyectos() {
   const { user, can } = useAuth();
-  const canCreate = can(PERMISSIONS.PROYECTOS_CREATE);
   const [projects, setProjects] = useState<Project[]>([]);
   const [supervisors, setSupervisors] = useState<Array<{ id: number; email: string }>>([]);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ nombre: '', descripcion: '', tipo: 'privado', supervisor_id: '' });
+  const [form, setForm] = useState(emptyForm);
+  const [query, setQuery] = useState('');
+  const [status, setStatus] = useState('todos');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
     try {
+      setError('');
       setProjects(await api.get<Project[]>('/proyectos'));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudieron cargar los proyectos');
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -38,13 +51,17 @@ export default function AdminProyectos() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void load();
   }, [load]);
-
   useEffect(() => {
     if (user?.role !== 'admin') return;
     api.get<Array<{ id: number; email: string; role: string; activo: boolean | number }>>('/usuarios')
-      .then(records => setSupervisors(records.filter(record => record.role === 'supervisor' && Boolean(record.activo))))
+      .then(rows => setSupervisors(rows.filter(row => row.role === 'supervisor' && Boolean(row.activo))))
       .catch(() => setSupervisors([]));
   }, [user?.role]);
+
+  const visible = useMemo(() => projects.filter(project => {
+    const haystack = `${project.nombre} ${project.descripcion || ''} ${project.clasificacion || ''}`.toLowerCase();
+    return haystack.includes(query.toLowerCase()) && (status === 'todos' || project.estado === status);
+  }), [projects, query, status]);
 
   async function create(event: React.FormEvent) {
     event.preventDefault();
@@ -52,8 +69,10 @@ export default function AdminProyectos() {
       await api.post('/proyectos', {
         ...form,
         supervisor_id: form.supervisor_id ? Number(form.supervisor_id) : null,
+        fecha_inicio: form.fecha_inicio || null,
+        fecha_fin: form.fecha_fin || null,
       });
-      setForm({ nombre: '', descripcion: '', tipo: 'privado', supervisor_id: '' });
+      setForm(emptyForm);
       setShowForm(false);
       await load();
     } catch (err) {
@@ -63,9 +82,7 @@ export default function AdminProyectos() {
 
   async function assignSupervisor(projectId: number, supervisorId: string) {
     try {
-      await api.put(`/proyectos/${projectId}`, {
-        supervisor_id: supervisorId ? Number(supervisorId) : null,
-      });
+      await api.put(`/proyectos/${projectId}`, { supervisor_id: supervisorId ? Number(supervisorId) : null });
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo asignar el supervisor');
@@ -74,125 +91,92 @@ export default function AdminProyectos() {
 
   return (
     <>
-      <section className="mb-8">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border pb-6">
-          <div className="max-w-2xl">
-            <h1 className="font-headline-lg text-[40px] md:text-[56px] text-foreground leading-tight mb-3 tracking-tight">
-              Proyectos asignados
-            </h1>
-            <p className="font-body-lg text-[16px] md:text-[18px] text-muted">
-              La lista respeta las asignaciones del usuario actual.
-            </p>
+      <section className="mb-8 border-b border-border pb-7">
+        <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+          <div className="max-w-3xl">
+            <p className="font-label-caps text-[11px] uppercase tracking-[0.22em] text-accent">Portafolio institucional</p>
+            <h1 className="mt-3 font-headline-lg text-[40px] leading-none tracking-[-0.04em] text-foreground md:text-[56px]">Gestión de proyectos</h1>
+            <p className="mt-4 max-w-2xl font-body-lg text-muted">Planifica, ejecuta y documenta cada iniciativa desde un expediente operativo con trazabilidad completa.</p>
           </div>
-          <div className="flex shrink-0">
-            {canCreate && (
-              <button
-                onClick={() => setShowForm(true)}
-                className="px-6 py-3 font-label-caps text-label-caps bg-primary text-primary-foreground hover:bg-accent transition-colors uppercase tracking-widest"
-              >
-                + Nuevo proyecto
-              </button>
-            )}
-          </div>
+          {can(PERMISSIONS.PROYECTOS_CREATE) && (
+            <button onClick={() => setShowForm(true)} className="bg-primary px-6 py-3 font-label-caps text-[11px] uppercase tracking-[0.18em] text-primary-foreground transition-colors hover:bg-accent">
+              Nuevo proyecto
+            </button>
+          )}
         </div>
       </section>
 
-      <Modal isOpen={showForm} onClose={() => setShowForm(false)} title="Nuevo Proyecto">
-        <form onSubmit={create} className="relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
-            <div className="md:col-span-2">
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Nombre del Proyecto</label>
-              <input required placeholder="Escribe el nombre aquí..." value={form.nombre}
-                onChange={event => setForm(current => ({ ...current, nombre: event.target.value }))}
-                className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
-            </div>
-            <div className="md:col-span-2">
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Descripción</label>
-              <textarea placeholder="Detalles del proyecto..." value={form.descripcion}
-                onChange={event => setForm(current => ({ ...current, descripcion: event.target.value }))}
-                className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors resize-y" />
-            </div>
-            <div>
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Tipo</label>
-              <select value={form.tipo} onChange={event => setForm(current => ({ ...current, tipo: event.target.value }))}
-                className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors">
-                <option value="privado">Privado</option>
-                <option value="publico">Público</option>
-              </select>
-            </div>
-            {user?.role === 'admin' && (
-              <div>
-                <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Supervisor</label>
-                <select value={form.supervisor_id}
-                  onChange={event => setForm(current => ({ ...current, supervisor_id: event.target.value }))}
-                  className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors">
-                  <option value="">Sin supervisor asignado</option>
-                  {supervisors.map(supervisor => (
-                    <option key={supervisor.id} value={supervisor.id}>{supervisor.email}</option>
-                  ))}
-                </select>
-              </div>
-            )}
-            
-            <div className="md:col-span-2 flex justify-end mt-4">
-              <button className="px-8 py-3 bg-primary text-primary-foreground font-label-caps text-[12px] uppercase tracking-widest hover:bg-accent transition-colors">
-                Guardar proyecto
-              </button>
-            </div>
-          </div>
-        </form>
-      </Modal>
+      <div className="mb-7 grid gap-3 rounded-2xl border border-border bg-card p-4 md:grid-cols-[1fr_220px]">
+        <label className="flex items-center gap-3 rounded-xl bg-background px-4">
+          <span className="material-symbols-outlined text-[20px] text-muted">search</span>
+          <input value={query} onChange={event => setQuery(event.target.value)} placeholder="Buscar por nombre, descripción o categoría" className="w-full bg-transparent py-3 text-sm outline-none" />
+        </label>
+        <select value={status} onChange={event => setStatus(event.target.value)} className="border border-border bg-background px-4 py-3 text-sm outline-none">
+          <option value="todos">Todos los estados</option>
+          <option value="pendiente">Pendientes</option>
+          <option value="en_progreso">En progreso</option>
+          <option value="completado">Completados</option>
+          <option value="cancelado">Cancelados</option>
+        </select>
+      </div>
 
-      {error && <p className="rounded border-l-4 border-red-600 bg-red-50 p-4 font-body-md text-sm text-red-700 mb-8">{error}</p>}
-
-      {projects.length === 0 ? (
-        <div className="bg-surface/30 border border-border border-dashed p-16 flex flex-col items-center justify-center text-center">
-          <span className="material-symbols-outlined text-[48px] text-muted mb-4 opacity-50">folder_open</span>
-          <h3 className="font-headline-md text-xl font-bold text-foreground mb-2">Sin proyectos asignados</h3>
-          <p className="font-body-md text-muted max-w-md">No tienes proyectos disponibles actualmente en tu bandeja.</p>
+      {error && <p className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</p>}
+      {loading ? (
+        <div className="py-20 text-center text-muted">Cargando portafolio...</div>
+      ) : visible.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-border p-16 text-center">
+          <span className="material-symbols-outlined text-[48px] text-muted">folder_open</span>
+          <h2 className="mt-3 font-headline-md text-xl">No hay proyectos para mostrar</h2>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {projects.map(project => (
-            <article key={project.id} className="bg-card p-6 border border-border hover:border-primary/30 transition-colors flex flex-col group">
-              <div className="flex justify-between items-start gap-4 mb-3">
-                <h2 className="font-headline-md text-xl font-bold text-foreground group-hover:text-primary transition-colors">{project.nombre}</h2>
-                <span className={`font-label-caps text-[10px] tracking-widest uppercase px-2 py-1 rounded shrink-0 ${project.tipo === 'publico' ? 'bg-brand-green/10 text-brand-green' : 'bg-muted/10 text-muted'}`}>
-                  {project.tipo}
-                </span>
-              </div>
-              <p className="mt-1 text-sm text-muted font-body-md flex-1 mb-6">{project.descripcion || 'Sin descripción'}</p>
-              
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pt-4 border-t border-border/50 gap-4">
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[16px] text-muted">info</span>
-                  <span className="font-label-caps text-[11px] uppercase tracking-widest text-muted">
-                    Estado: <span className="text-foreground">{project.estado}</span>
-                  </span>
+        <div className="grid gap-5 lg:grid-cols-2">
+          {visible.map(project => (
+            <article key={project.id} className="group flex min-h-[280px] flex-col rounded-2xl border border-border bg-card p-6 transition-all hover:-translate-y-1 hover:border-accent/50 hover:shadow-[0_24px_60px_rgba(43,23,16,0.09)]">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <span className="font-label-caps text-[10px] uppercase tracking-[0.18em] text-accent">{project.clasificacion || 'Proyecto ACARO'}</span>
+                  <h2 className="mt-2 font-headline-md text-2xl tracking-tight text-foreground">{project.nombre}</h2>
                 </div>
-                
+                <span className="rounded-full border border-border px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-muted">{project.tipo}</span>
+              </div>
+              <p className="mt-4 line-clamp-3 flex-1 text-sm leading-6 text-muted">{project.descripcion || 'Sin descripción registrada.'}</p>
+              <div className="mt-6 grid grid-cols-2 gap-3 border-y border-border/70 py-4 text-xs">
+                <div><span className="block uppercase tracking-wider text-muted">Estado</span><strong className="mt-1 block capitalize text-foreground">{project.estado.replace('_', ' ')}</strong></div>
+                <div><span className="block uppercase tracking-wider text-muted">Periodo</span><strong className="mt-1 block text-foreground">{project.fecha_inicio?.slice(0, 10) || 'Por definir'}{project.fecha_fin ? ` — ${project.fecha_fin.slice(0, 10)}` : ''}</strong></div>
+              </div>
+              <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 {user?.role === 'admin' ? (
-                  <select
-                    value={project.supervisor_id || ''}
-                    onChange={event => void assignSupervisor(project.id, event.target.value)}
-                    className="rounded border-b border-border bg-background px-3 py-1 font-body-md text-xs focus:outline-none focus:border-primary text-foreground"
-                  >
+                  <select value={project.supervisor_id || ''} onChange={event => void assignSupervisor(project.id, event.target.value)} className="max-w-[230px] border border-border bg-background px-3 py-2 text-xs">
                     <option value="">Sin supervisor</option>
-                    {supervisors.map(supervisor => (
-                      <option key={supervisor.id} value={supervisor.id}>{supervisor.email}</option>
-                    ))}
+                    {supervisors.map(supervisor => <option key={supervisor.id} value={supervisor.id}>{supervisor.email}</option>)}
                   </select>
-                ) : project.supervisor_email ? (
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[16px] text-muted">person</span>
-                    <span className="font-label-caps text-[11px] uppercase tracking-widest text-muted">{project.supervisor_email}</span>
-                  </div>
-                ) : null}
+                ) : <span className="text-xs text-muted">{project.supervisor_email || 'Sin supervisor asignado'}</span>}
+                <Link href={`/admin/proyectos/gestion?id=${project.id}`} className="inline-flex items-center gap-2 font-label-caps text-[11px] uppercase tracking-[0.16em] text-primary transition-all group-hover:gap-3">
+                  Abrir expediente <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                </Link>
               </div>
             </article>
           ))}
         </div>
       )}
+
+      <Modal isOpen={showForm} onClose={() => setShowForm(false)} title="Nuevo proyecto" maxWidth="max-w-3xl">
+        <form onSubmit={create} className="grid gap-5 md:grid-cols-2">
+          <Field label="Nombre" wide><input required value={form.nombre} onChange={event => setForm({ ...form, nombre: event.target.value })} className="form-control" /></Field>
+          <Field label="Descripción" wide><textarea rows={4} value={form.descripcion} onChange={event => setForm({ ...form, descripcion: event.target.value })} className="form-control resize-y" /></Field>
+          <Field label="Categoría"><input value={form.clasificacion} onChange={event => setForm({ ...form, clasificacion: event.target.value })} className="form-control" /></Field>
+          <Field label="Visibilidad"><select value={form.tipo} onChange={event => setForm({ ...form, tipo: event.target.value })} className="form-control"><option value="privado">Privado</option><option value="publico">Público</option></select></Field>
+          <Field label="Estado"><select value={form.estado} onChange={event => setForm({ ...form, estado: event.target.value })} className="form-control"><option value="pendiente">Pendiente</option><option value="en_progreso">En progreso</option><option value="completado">Completado</option></select></Field>
+          {user?.role === 'admin' && <Field label="Supervisor"><select value={form.supervisor_id} onChange={event => setForm({ ...form, supervisor_id: event.target.value })} className="form-control"><option value="">Sin supervisor</option>{supervisors.map(item => <option key={item.id} value={item.id}>{item.email}</option>)}</select></Field>}
+          <Field label="Fecha de inicio"><input type="date" value={form.fecha_inicio} onChange={event => setForm({ ...form, fecha_inicio: event.target.value })} className="form-control" /></Field>
+          <Field label="Fecha estimada de cierre"><input type="date" value={form.fecha_fin} onChange={event => setForm({ ...form, fecha_fin: event.target.value })} className="form-control" /></Field>
+          <div className="md:col-span-2 flex justify-end"><button className="bg-primary px-7 py-3 font-label-caps text-[11px] uppercase tracking-widest text-primary-foreground">Crear expediente</button></div>
+        </form>
+      </Modal>
     </>
   );
+}
+
+function Field({ label, wide, children }: { label: string; wide?: boolean; children: React.ReactNode }) {
+  return <label className={wide ? 'md:col-span-2' : ''}><span className="mb-2 block font-label-caps text-[10px] uppercase tracking-widest text-muted">{label}</span>{children}</label>;
 }

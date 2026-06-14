@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const ctrl = require('../controllers/proyectos.controller');
+const management = require('../controllers/project-management.controller');
 const {
   verifyToken,
   requirePermission,
@@ -19,6 +20,13 @@ router.post(
   requirePermission(PERMISSIONS.PROYECTOS_CREATE),
   ctrl.create
 );
+
+router.get('/:id/gestion', verifyToken, management.getAll);
+router.post('/:id/gestion/archivos', verifyToken, management.createFile);
+router.post('/:id/gestion/:kind', verifyToken, management.create);
+router.put('/:id/gestion/:kind/:entityId', verifyToken, management.update);
+router.delete('/:id/gestion/:kind/:entityId', verifyToken, management.remove);
+router.post('/:id/gestion/:kind/:entityId/revision', verifyToken, management.review);
 router.put(
   '/:id',
   verifyToken,

@@ -54,7 +54,12 @@ const navigation = [
   },
 ]
 
-export function AdminSidebar() {
+interface AdminSidebarProps {
+  isOpen: boolean
+  onClose: () => void
+}
+
+export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
   const pathname = usePathname()
   const { user, logout } = useAuth()
   const visibleNavigation = navigation.filter(item =>
@@ -62,7 +67,22 @@ export function AdminSidebar() {
   )
 
   return (
-    <nav className="hidden md:flex flex-col fixed left-0 top-0 h-full w-64 bg-surface-container-lowest z-40 border-r border-outline-variant/30 py-8 shadow-sm">
+    <>
+      {isOpen && (
+        <button
+          type="button"
+          aria-label="Cerrar menú"
+          onClick={onClose}
+          className="fixed inset-0 z-30 bg-black/25 backdrop-blur-[1px] md:hidden"
+        />
+      )}
+      <nav
+        aria-hidden={!isOpen}
+        className={cn(
+          "fixed left-0 top-0 z-40 flex h-full w-64 flex-col border-r border-outline-variant/30 bg-surface-container-lowest py-8 shadow-sm transition-transform duration-300 ease-out",
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
       <div className="px-5 mb-8">
         <div className="flex items-center gap-3">
           <div className="shrink-0 flex items-center justify-center">
@@ -82,6 +102,7 @@ export function AdminSidebar() {
             <Link
               key={item.name}
               href={item.href}
+              onClick={onClose}
               className={cn(
                 "flex items-center gap-3 py-3 w-full transition-all duration-200",
                 isActive
@@ -118,6 +139,7 @@ export function AdminSidebar() {
           Cerrar todas las sesiones
         </button>
       </div>
-    </nav>
+      </nav>
+    </>
   )
 }

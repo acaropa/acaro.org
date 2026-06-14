@@ -14,6 +14,8 @@ export const PERMISSIONS = {
   PROYECTOS_CREATE: 'proyectos.create',
   PROYECTOS_UPDATE_ASSIGNED: 'proyectos.update.assigned',
   PROYECTOS_UPDATE_ALL: 'proyectos.update.all',
+  PROYECTOS_OPERATE_ASSIGNED: 'proyectos.operate.assigned',
+  PROYECTOS_REVIEW_ASSIGNED: 'proyectos.review.assigned',
   PROYECTOS_DELETE: 'proyectos.delete',
   NOTICIAS_READ_PUBLIC: 'noticias.read.public',
   NOTICIAS_CREATE: 'noticias.create',

@@ -2,13 +2,26 @@
 
 import { useAuth } from "@/context/AuthContext"
 
-export function AdminTopbar() {
+interface AdminTopbarProps {
+  sidebarOpen: boolean
+  onToggleSidebar: () => void
+}
+
+export function AdminTopbar({ sidebarOpen, onToggleSidebar }: AdminTopbarProps) {
   const { user } = useAuth()
 
   return (
     <header className="sticky top-0 z-50 flex justify-between items-center w-full px-5 py-4 bg-surface-bright/95 backdrop-blur-sm border-b border-outline-variant/30 md:px-16">
       <div className="flex items-center gap-4">
-        <span className="md:hidden material-symbols-outlined text-primary cursor-pointer hover:text-primary transition-colors duration-200">menu</span>
+        <button
+          type="button"
+          onClick={onToggleSidebar}
+          aria-label={sidebarOpen ? "Cerrar menú lateral" : "Abrir menú lateral"}
+          aria-expanded={sidebarOpen}
+          className="flex h-10 w-10 items-center justify-center text-primary transition-colors duration-200 hover:bg-surface-container"
+        >
+          <span className="material-symbols-outlined">menu</span>
+        </button>
       </div>
       <div className="flex items-center gap-6">
         {/* Search Bar */}

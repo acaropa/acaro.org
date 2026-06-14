@@ -135,3 +135,9 @@ export const api = {
   patch:  <T>(path: string, body: unknown)     => request<T>(path, mutationOptions('PATCH', body)),
   delete: <T>(path: string)                    => request<T>(path, mutationOptions('DELETE')),
 };
+
+export function apiAssetUrl(path: string | null | undefined) {
+  if (!path) return '';
+  if (/^https?:\/\//.test(path)) return path;
+  return `${BASE.replace(/\/api\/?$/, '')}${path.startsWith('/') ? path : `/${path}`}`;
+}

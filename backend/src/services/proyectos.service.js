@@ -3,6 +3,7 @@ const cache = require('../utils/memoryCache');
 
 const PUBLIC_CACHE_TTL_MS = 60 * 1000;
 const PRIVATE_CACHE_TTL_MS = 15 * 1000;
+const MAX_PROJECT_PHASES = 6;
 
 function invalidateProjectCache() {
   cache.invalidatePrefix('projects:');
@@ -84,7 +85,8 @@ async function queryById(id) {
   );
 
   const [fases] = await db.query(
-    `SELECT id, nombre, descripcion, orden, estado, fecha_inicio, fecha_fin
+    `SELECT id, nombre, descripcion, orden, estado, porcentaje_avance, peso_porcentaje,
+            responsable_id, fecha_inicio, fecha_fin
      FROM proyecto_fases
      WHERE proyecto_id = ?
      ORDER BY orden`,
@@ -221,13 +223,53 @@ async function imageBelongsToPhase(imagenId, faseId) {
 
 // ─── FASES ────────────────────────────────────────────────────────────────────
 
+async function validatePhaseResponsible(proyectoId, responsableId) {
+  if (!responsableId) return;
+  const [rows] = await db.query(
+    `SELECT 1
+     FROM proyectos p
+     WHERE p.id = ?
+       AND (
+         p.supervisor_id = ?
+         OR EXISTS (
+           SELECT 1
+           FROM proyecto_tecnicos pt
+           JOIN tecnicos t ON t.id = pt.tecnico_id
+           WHERE pt.proyecto_id = p.id AND t.user_id = ?
+         )
+       )`,
+    [proyectoId, responsableId, responsableId]
+  );
+  if (!rows.length) {
+    const err = new Error('El responsable debe ser el supervisor o un técnico asignado al proyecto');
+    err.status = 400;
+    throw err;
+  }
+}
+
 async function createFase(proyectoId, data) {
-  const { nombre, descripcion = null, orden = 1, estado = 'pendiente', fecha_inicio = null, fecha_fin = null } = data;
+  const [phaseCount] = await db.query(
+    'SELECT COUNT(*) AS total FROM proyecto_fases WHERE proyecto_id = ?',
+    [proyectoId]
+  );
+  if (Number(phaseCount[0].total) >= MAX_PROJECT_PHASES) {
+    const err = new Error(`Cada proyecto puede tener un máximo de ${MAX_PROJECT_PHASES} fases`);
+    err.status = 409;
+    throw err;
+  }
+
+  const {
+    nombre, descripcion = null, orden = 1, estado = 'pendiente',
+    porcentaje_avance = 0, peso_porcentaje = 0, responsable_id = null,
+    fecha_inicio = null, fecha_fin = null,
+  } = data;
+  await validatePhaseResponsible(proyectoId, responsable_id);
 
   const [result] = await db.query(
-    `INSERT INTO proyecto_fases (proyecto_id, nombre, descripcion, orden, estado, fecha_inicio, fecha_fin)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [proyectoId, nombre, descripcion, orden, estado, fecha_inicio, fecha_fin]
+    `INSERT INTO proyecto_fases
+      (proyecto_id, nombre, descripcion, orden, estado, porcentaje_avance, peso_porcentaje, responsable_id, fecha_inicio, fecha_fin)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [proyectoId, nombre, descripcion, orden, estado, porcentaje_avance, peso_porcentaje, responsable_id, fecha_inicio, fecha_fin]
   );
 
   invalidateProjectCache();
@@ -236,13 +278,22 @@ async function createFase(proyectoId, data) {
 }
 
 async function updateFase(faseId, data) {
-  const allowed = ['nombre', 'descripcion', 'orden', 'estado', 'fecha_inicio', 'fecha_fin'];
+  const allowed = [
+    'nombre', 'descripcion', 'orden', 'estado', 'porcentaje_avance',
+    'peso_porcentaje', 'responsable_id', 'fecha_inicio', 'fecha_fin',
+  ];
   const fields = Object.keys(data).filter(k => allowed.includes(k));
 
   if (fields.length === 0) {
     const err = new Error('Sin campos válidos para actualizar');
     err.status = 400;
     throw err;
+  }
+
+  if (fields.includes('responsable_id')) {
+    const [phaseRows] = await db.query('SELECT proyecto_id FROM proyecto_fases WHERE id = ?', [faseId]);
+    if (!phaseRows[0]) return null;
+    await validatePhaseResponsible(phaseRows[0].proyecto_id, data.responsable_id);
   }
 
   const set = fields.map(k => `${k} = ?`).join(', ');

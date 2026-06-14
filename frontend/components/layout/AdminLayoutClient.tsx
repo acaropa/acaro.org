@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
@@ -35,6 +35,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
     if (!loading && !user) router.replace('/login');
@@ -78,10 +79,15 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen theme-admin bg-background admin-background-noise flex flex-col md:flex-row">
-      {/* Sidebar - Fixed on desktop, hidden on mobile by default */}
-      <AdminSidebar />
-      <main className="flex-1 md:ml-64 w-full flex flex-col min-h-screen">
-        <AdminTopbar />
+      <AdminSidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
+      <main className={`flex-1 w-full flex flex-col min-h-screen transition-[margin] duration-300 ${sidebarOpen ? 'md:ml-64' : 'md:ml-0'}`}>
+        <AdminTopbar
+          sidebarOpen={sidebarOpen}
+          onToggleSidebar={() => setSidebarOpen(current => !current)}
+        />
         <div className="flex-1 overflow-y-auto px-5 py-8 md:px-16 md:py-12 max-w-[1440px] mx-auto w-full space-y-12">
           {children}
         </div>
