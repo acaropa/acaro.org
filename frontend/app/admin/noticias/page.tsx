@@ -353,9 +353,9 @@ export default function AdminNoticias() {
                       <span className="material-symbols-outlined text-[16px]">edit</span> Editar
                     </button>
                   )}
-                  {canPublish && ['borrador', 'pendiente'].includes(item.estado) && (
+                  {canPublish && ['borrador', 'pendiente', 'archivada'].includes(item.estado) && (
                     <button onClick={() => void publish(item)} className="flex items-center gap-1 text-sm font-medium text-brand-green hover:underline">
-                      <span className="material-symbols-outlined text-[16px]">campaign</span> Publicar
+                      <span className="material-symbols-outlined text-[16px]">campaign</span> {item.estado === 'archivada' ? 'Republicar' : 'Publicar'}
                     </button>
                   )}
                   {canUpdateAll && item.estado !== 'archivada' && (
