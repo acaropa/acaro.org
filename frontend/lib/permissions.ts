@@ -19,6 +19,7 @@ export const PERMISSIONS = {
   PROYECTOS_DELETE: 'proyectos.delete',
   NOTICIAS_READ_PUBLIC: 'noticias.read.public',
   NOTICIAS_CREATE: 'noticias.create',
+  NOTICIAS_CREATE_OWN: 'noticias.create.own',
   NOTICIAS_UPDATE: 'noticias.update',
   NOTICIAS_PUBLISH: 'noticias.publish',
   NOTICIAS_DELETE: 'noticias.delete',

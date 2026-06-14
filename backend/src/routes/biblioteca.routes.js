@@ -8,6 +8,7 @@ const {
 const { PERMISSIONS } = require('../config/permissions');
 
 router.get('/', optionalAuth, ctrl.getAll);
+router.get('/slug/:slug', optionalAuth, ctrl.getBySlug);
 router.get('/:id', optionalAuth, ctrl.getById);
 router.post(
   '/',

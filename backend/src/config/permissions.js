@@ -19,6 +19,7 @@ const PERMISSIONS = Object.freeze({
   PROYECTOS_DELETE: 'proyectos.delete',
   NOTICIAS_READ_PUBLIC: 'noticias.read.public',
   NOTICIAS_CREATE: 'noticias.create',
+  NOTICIAS_CREATE_OWN: 'noticias.create.own',
   NOTICIAS_UPDATE: 'noticias.update',
   NOTICIAS_PUBLISH: 'noticias.publish',
   NOTICIAS_DELETE: 'noticias.delete',
@@ -75,6 +76,7 @@ const ROLE_PERMISSIONS = Object.freeze({
     PERMISSIONS.PROYECTOS_READ_ASSIGNED,
     PERMISSIONS.PROYECTOS_OPERATE_ASSIGNED,
     PERMISSIONS.NOTICIAS_READ_PUBLIC,
+    PERMISSIONS.NOTICIAS_CREATE_OWN,
   ],
   visitante: [
     PERMISSIONS.BIBLIOTECA_READ_PUBLIC,

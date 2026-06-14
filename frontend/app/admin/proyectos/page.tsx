@@ -6,13 +6,16 @@ import { Modal } from '@/components/ui/Modal';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/api';
 import { PERMISSIONS } from '@/lib/permissions';
+import { ImageUploadField, UploadedFile } from '@/components/admin/ImageUploadField';
 
 interface Project {
   id: number;
   nombre: string;
+  slug?: string;
   descripcion: string | null;
   tipo: 'publico' | 'privado';
   clasificacion: string | null;
+  imagen_portada: string | null;
   estado: string;
   fecha_inicio: string | null;
   fecha_fin: string | null;
@@ -31,6 +34,8 @@ export default function AdminProyectos() {
   const [supervisors, setSupervisors] = useState<Array<{ id: number; email: string }>>([]);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const [editing, setEditing] = useState<Project | null>(null);
+  const [cover, setCover] = useState<UploadedFile | null>(null);
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState('todos');
   const [error, setError] = useState('');
@@ -63,20 +68,56 @@ export default function AdminProyectos() {
     return haystack.includes(query.toLowerCase()) && (status === 'todos' || project.estado === status);
   }), [projects, query, status]);
 
-  async function create(event: React.FormEvent) {
+  function resetForm() {
+    setForm(emptyForm);
+    setEditing(null);
+    setCover(null);
+    setShowForm(false);
+  }
+
+  function startEdit(project: Project) {
+    setEditing(project);
+    setForm({
+      nombre: project.nombre,
+      descripcion: project.descripcion || '',
+      tipo: project.tipo,
+      clasificacion: project.clasificacion || '',
+      estado: project.estado,
+      fecha_inicio: project.fecha_inicio?.slice(0, 10) || '',
+      fecha_fin: project.fecha_fin?.slice(0, 10) || '',
+      supervisor_id: project.supervisor_id ? String(project.supervisor_id) : '',
+    });
+    setCover(null);
+    setShowForm(true);
+  }
+
+  function canEditProject(project: Project) {
+    if (can(PERMISSIONS.PROYECTOS_UPDATE_ALL)) return true;
+    return can(PERMISSIONS.PROYECTOS_UPDATE_ASSIGNED) && project.supervisor_id === user?.id;
+  }
+
+  async function save(event: React.FormEvent) {
     event.preventDefault();
     try {
-      await api.post('/proyectos', {
+      const payload: Record<string, unknown> = {
         ...form,
         supervisor_id: form.supervisor_id ? Number(form.supervisor_id) : null,
         fecha_inicio: form.fecha_inicio || null,
         fecha_fin: form.fecha_fin || null,
-      });
-      setForm(emptyForm);
-      setShowForm(false);
+      };
+      if (cover) {
+        payload.imagen_base64 = cover.base64;
+        payload.imagen_nombre = cover.fileName;
+      }
+      if (editing) {
+        await api.put(`/proyectos/${editing.id}`, payload);
+      } else {
+        await api.post('/proyectos', payload);
+      }
+      resetForm();
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'No se pudo crear el proyecto');
+      setError(err instanceof Error ? err.message : 'No se pudo guardar el proyecto');
     }
   }
 
@@ -99,7 +140,7 @@ export default function AdminProyectos() {
             <p className="mt-4 max-w-2xl font-body-lg text-muted">Planifica, ejecuta y documenta cada iniciativa desde un expediente operativo con trazabilidad completa.</p>
           </div>
           {can(PERMISSIONS.PROYECTOS_CREATE) && (
-            <button onClick={() => setShowForm(true)} className="bg-primary px-6 py-3 font-label-caps text-[11px] uppercase tracking-[0.18em] text-primary-foreground transition-colors hover:bg-accent">
+            <button onClick={() => { setEditing(null); setForm(emptyForm); setCover(null); setShowForm(true); }} className="bg-primary px-6 py-3 font-label-caps text-[11px] uppercase tracking-[0.18em] text-primary-foreground transition-colors hover:bg-accent">
               Nuevo proyecto
             </button>
           )}
@@ -151,26 +192,42 @@ export default function AdminProyectos() {
                     {supervisors.map(supervisor => <option key={supervisor.id} value={supervisor.id}>{supervisor.email}</option>)}
                   </select>
                 ) : <span className="text-xs text-muted">{project.supervisor_email || 'Sin supervisor asignado'}</span>}
-                <Link href={`/admin/proyectos/gestion?id=${project.id}`} className="inline-flex items-center gap-2 font-label-caps text-[11px] uppercase tracking-[0.16em] text-primary transition-all group-hover:gap-3">
-                  Abrir expediente <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-                </Link>
+                <div className="flex items-center gap-4">
+                  {canEditProject(project) && (
+                    <button onClick={() => startEdit(project)} className="inline-flex items-center gap-1 font-label-caps text-[11px] uppercase tracking-[0.16em] text-foreground transition-colors hover:text-primary">
+                      <span className="material-symbols-outlined text-[16px]">edit</span> Editar
+                    </button>
+                  )}
+                  <Link href={`/admin/proyectos/gestion?id=${project.id}`} className="inline-flex items-center gap-2 font-label-caps text-[11px] uppercase tracking-[0.16em] text-primary transition-all group-hover:gap-3">
+                    Abrir expediente <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                  </Link>
+                </div>
               </div>
             </article>
           ))}
         </div>
       )}
 
-      <Modal isOpen={showForm} onClose={() => setShowForm(false)} title="Nuevo proyecto" maxWidth="max-w-3xl">
-        <form onSubmit={create} className="grid gap-5 md:grid-cols-2">
+      <Modal isOpen={showForm} onClose={resetForm} title={editing ? 'Editar proyecto' : 'Nuevo proyecto'} maxWidth="max-w-3xl">
+        <form onSubmit={save} className="grid gap-5 md:grid-cols-2">
           <Field label="Nombre" wide><input required value={form.nombre} onChange={event => setForm({ ...form, nombre: event.target.value })} className="form-control" /></Field>
           <Field label="Descripción" wide><textarea rows={4} value={form.descripcion} onChange={event => setForm({ ...form, descripcion: event.target.value })} className="form-control resize-y" /></Field>
           <Field label="Categoría"><input value={form.clasificacion} onChange={event => setForm({ ...form, clasificacion: event.target.value })} className="form-control" /></Field>
           <Field label="Visibilidad"><select value={form.tipo} onChange={event => setForm({ ...form, tipo: event.target.value })} className="form-control"><option value="privado">Privado</option><option value="publico">Público</option></select></Field>
-          <Field label="Estado"><select value={form.estado} onChange={event => setForm({ ...form, estado: event.target.value })} className="form-control"><option value="pendiente">Pendiente</option><option value="en_progreso">En progreso</option><option value="completado">Completado</option></select></Field>
+          <Field label="Estado"><select value={form.estado} onChange={event => setForm({ ...form, estado: event.target.value })} className="form-control"><option value="pendiente">Pendiente</option><option value="en_progreso">En progreso</option><option value="completado">Completado</option>{editing && <option value="cancelado">Cancelado</option>}</select></Field>
           {user?.role === 'admin' && <Field label="Supervisor"><select value={form.supervisor_id} onChange={event => setForm({ ...form, supervisor_id: event.target.value })} className="form-control"><option value="">Sin supervisor</option>{supervisors.map(item => <option key={item.id} value={item.id}>{item.email}</option>)}</select></Field>}
           <Field label="Fecha de inicio"><input type="date" value={form.fecha_inicio} onChange={event => setForm({ ...form, fecha_inicio: event.target.value })} className="form-control" /></Field>
           <Field label="Fecha estimada de cierre"><input type="date" value={form.fecha_fin} onChange={event => setForm({ ...form, fecha_fin: event.target.value })} className="form-control" /></Field>
-          <div className="md:col-span-2 flex justify-end"><button className="bg-primary px-7 py-3 font-label-caps text-[11px] uppercase tracking-widest text-primary-foreground">Crear expediente</button></div>
+          <div className="md:col-span-2">
+            <ImageUploadField
+              label="Imagen de portada (Opcional)"
+              value={cover}
+              onChange={setCover}
+              existingUrl={editing?.imagen_portada}
+              helperText="Formatos JPG, PNG o WEBP, máximo 4 MB. Se muestra en la portada pública del proyecto."
+            />
+          </div>
+          <div className="md:col-span-2 flex justify-end"><button className="bg-primary px-7 py-3 font-label-caps text-[11px] uppercase tracking-widest text-primary-foreground">{editing ? 'Guardar cambios' : 'Crear expediente'}</button></div>
         </form>
       </Modal>
     </>

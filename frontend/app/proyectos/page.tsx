@@ -1,6 +1,13 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { PublicLayout } from '@/components/layout/PublicLayout';
 import { ScrollReveal } from '@/components/landing/LandingMotion';
-import { mockProjects, Project } from '@/data/mock-projects';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { Project } from '@/data/mock-projects';
+import { api } from '@/lib/api';
+import { ProyectoRecord, toProjectCard } from '@/lib/projects';
 
 // 1. Hero Right (Texto Izquierda, Imagen Derecha, 12 columnas)
 function HeroRightProject({ project, index }: { project: Project, index: number }) {
@@ -17,14 +24,14 @@ function HeroRightProject({ project, index }: { project: Project, index: number 
           <h2 className="font-serif text-[32px] font-semibold leading-[1.2] text-primary mb-4">{project.title}</h2>
           <p className="text-[16px] leading-[1.6] text-muted mb-8">{project.description}</p>
         </div>
-        <button className="self-start border border-primary text-primary px-6 py-3 text-[12px] font-semibold tracking-[0.1em] leading-none hover:bg-primary hover:text-primary-foreground transition-colors duration-300 rounded-none uppercase">
+        <Link href={`/proyectos/detalle/?slug=${project.slug || ''}`} className="self-start border border-primary text-primary px-6 py-3 text-[12px] font-semibold tracking-[0.1em] leading-none hover:bg-primary hover:text-primary-foreground transition-colors duration-300 rounded-none uppercase">
           Ver Detalles
-        </button>
+        </Link>
       </div>
       <div className="md:col-span-9 order-1 md:order-2">
         <div className="w-full h-[600px] bg-surface relative overflow-hidden">
           {project.imageUrl && (
-            <img alt={project.title} className="w-full h-full object-cover" src={project.imageUrl} />
+            <img alt={project.title} loading="lazy" className="w-full h-full object-cover" src={project.imageUrl} />
           )}
         </div>
       </div>
@@ -39,7 +46,7 @@ function HeroLeftProject({ project, index }: { project: Project, index: number }
       <div className="md:col-span-9 order-1 md:order-1">
         <div className="w-full h-[600px] bg-surface relative overflow-hidden">
           {project.imageUrl && (
-            <img alt={project.title} className="w-full h-full object-cover" src={project.imageUrl} />
+            <img alt={project.title} loading="lazy" className="w-full h-full object-cover" src={project.imageUrl} />
           )}
         </div>
       </div>
@@ -56,9 +63,9 @@ function HeroLeftProject({ project, index }: { project: Project, index: number }
           <h2 className="font-serif text-[32px] font-semibold leading-[1.2] text-primary mb-4 text-right">{project.title}</h2>
           <p className="text-[16px] leading-[1.6] text-muted mb-8 text-right">{project.description}</p>
         </div>
-        <button className="self-end border border-primary text-primary px-6 py-3 text-[12px] font-semibold tracking-[0.1em] leading-none hover:bg-primary hover:text-primary-foreground transition-colors duration-300 rounded-none uppercase">
+        <Link href={`/proyectos/detalle/?slug=${project.slug || ''}`} className="self-end border border-primary text-primary px-6 py-3 text-[12px] font-semibold tracking-[0.1em] leading-none hover:bg-primary hover:text-primary-foreground transition-colors duration-300 rounded-none uppercase">
           Ver Detalles
-        </button>
+        </Link>
       </div>
     </ScrollReveal>
   );
@@ -68,13 +75,14 @@ function HeroLeftProject({ project, index }: { project: Project, index: number }
 function WideProject({ project, index }: { project: Project, index: number }) {
   return (
     <ScrollReveal delay={100} distance="sm" className="md:col-span-8 flex flex-col md:flex-row bg-surface overflow-hidden mb-8 group">
-      <article className="flex flex-col md:flex-row w-full h-full">
+      <Link href={`/proyectos/detalle/?slug=${project.slug || ''}`} className="flex flex-col md:flex-row w-full h-full">
       <div className="md:w-1/2 h-80 md:h-auto relative">
         {project.imageUrl && (
-          <img 
-            alt={project.title} 
-            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" 
-            src={project.imageUrl} 
+          <img
+            alt={project.title}
+            loading="lazy"
+            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+            src={project.imageUrl}
           />
         )}
       </div>
@@ -89,7 +97,7 @@ function WideProject({ project, index }: { project: Project, index: number }) {
           <span className="text-accent">{project.status}</span>
         </div>
       </div>
-      </article>
+      </Link>
     </ScrollReveal>
   );
 }
@@ -98,13 +106,14 @@ function WideProject({ project, index }: { project: Project, index: number }) {
 function HalfProject({ project, index }: { project: Project, index: number }) {
   return (
     <ScrollReveal delay={150} distance="sm" className="md:col-span-6 flex flex-col mb-8">
-      <article className="flex flex-col w-full h-full">
+      <Link href={`/proyectos/detalle/?slug=${project.slug || ''}`} className="flex flex-col w-full h-full group">
       <div className="h-[400px] bg-surface mb-6 overflow-hidden relative">
         {project.imageUrl && (
-          <img 
-            alt={project.title} 
-            className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500" 
-            src={project.imageUrl} 
+          <img
+            alt={project.title}
+            loading="lazy"
+            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+            src={project.imageUrl}
           />
         )}
       </div>
@@ -125,7 +134,7 @@ function HalfProject({ project, index }: { project: Project, index: number }) {
           <span>{project.status}</span>
         </div>
       </div>
-      </article>
+      </Link>
     </ScrollReveal>
   );
 }
@@ -134,13 +143,14 @@ function HalfProject({ project, index }: { project: Project, index: number }) {
 function StandardProject({ project, index }: { project: Project, index: number }) {
   return (
     <ScrollReveal delay={200} distance="sm" className="md:col-span-4 flex flex-col mb-8">
-      <article className="flex flex-col w-full h-full">
+      <Link href={`/proyectos/detalle/?slug=${project.slug || ''}`} className="flex flex-col w-full h-full group">
       <div className="h-80 bg-surface mb-6 overflow-hidden relative">
         {project.imageUrl && (
-          <img 
-            alt={project.title} 
-            className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500" 
-            src={project.imageUrl} 
+          <img
+            alt={project.title}
+            loading="lazy"
+            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+            src={project.imageUrl}
           />
         )}
       </div>
@@ -154,7 +164,7 @@ function StandardProject({ project, index }: { project: Project, index: number }
         <span>Estado:</span>
         <span>{project.status}</span>
       </div>
-      </article>
+      </Link>
     </ScrollReveal>
   );
 }
@@ -163,7 +173,7 @@ function StandardProject({ project, index }: { project: Project, index: number }
 function SolidProject({ project, index }: { project: Project, index: number }) {
   return (
     <ScrollReveal delay={250} distance="sm" className="md:col-span-4 flex flex-col mb-8">
-      <article className="flex flex-col w-full h-full">
+      <Link href={`/proyectos/detalle/?slug=${project.slug || ''}`} className="flex flex-col w-full h-full">
       <div className="h-full min-h-[400px] bg-primary p-8 flex flex-col justify-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <span className="material-symbols-outlined text-[200px] absolute -bottom-10 -right-10" data-weight="fill">
@@ -179,16 +189,32 @@ function SolidProject({ project, index }: { project: Project, index: number }) {
         <p className="text-[16px] leading-[1.6] text-primary-foreground/80 relative z-10 mb-8 flex-grow">
           {project.description}
         </p>
-        <button className="self-start border border-primary-foreground text-primary-foreground px-4 py-2 text-[12px] font-semibold tracking-[0.1em] leading-none hover:bg-primary-foreground hover:text-primary transition-colors duration-300 rounded-none relative z-10 uppercase">
+        <span className="self-start border border-primary-foreground text-primary-foreground px-4 py-2 text-[12px] font-semibold tracking-[0.1em] leading-none hover:bg-primary-foreground hover:text-primary transition-colors duration-300 rounded-none relative z-10 uppercase">
           Conocer Más
-        </button>
+        </span>
       </div>
-      </article>
+      </Link>
     </ScrollReveal>
   );
 }
 
+const PAGE_SIZE = 6;
+
 export default function Proyectos() {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
+  useEffect(() => {
+    api.get<ProyectoRecord[]>('/proyectos')
+      .then(data => setProjects(data.map(toProjectCard)))
+      .catch(() => setProjects([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const visibleProjects = projects.slice(0, visibleCount);
+  const hasMore = projects.length > visibleCount;
+
   return (
     <PublicLayout className="landing-typography">
       <main className="flex-grow pt-32 pb-[120px] px-[20px] md:px-[64px] max-w-[1280px] mx-auto w-full">
@@ -208,32 +234,50 @@ export default function Proyectos() {
 
         <div className="w-full h-[1px] bg-primary/10 mb-12"></div>
 
-        {/* Dynamic Editorial Projects Grid */}
-        <section>
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-x-[24px] gap-y-16 items-stretch">
-            {mockProjects.map((project, i) => {
-              // El layout ahora está 100% definido por el dato del proyecto. 
-              // No hay patrones automáticos repetitivos, todo es diseño manual para la máxima libertad.
-              const style = project.layoutStyle || 'standard';
+        {loading ? (
+          <div className="py-24 text-center text-muted">Cargando proyectos...</div>
+        ) : projects.length === 0 ? (
+          <EmptyState
+            title="Sin proyectos disponibles"
+            description="Aún no se han publicado proyectos públicos. Vuelve a consultar más adelante."
+          />
+        ) : (
+          <section>
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-x-[24px] gap-y-16 items-stretch">
+              {visibleProjects.map((project, i) => {
+                const style = project.layoutStyle || 'standard';
 
-              switch (style) {
-                case 'hero-right':
-                  return <HeroRightProject key={project.id} project={project} index={i} />;
-                case 'hero-left':
-                  return <HeroLeftProject key={project.id} project={project} index={i} />;
-                case 'wide':
-                  return <WideProject key={project.id} project={project} index={i} />;
-                case 'half':
-                  return <HalfProject key={project.id} project={project} index={i} />;
-                case 'solid':
-                  return <SolidProject key={project.id} project={project} index={i} />;
-                case 'standard':
-                default:
-                  return <StandardProject key={project.id} project={project} index={i} />;
-              }
-            })}
-          </div>
-        </section>
+                switch (style) {
+                  case 'hero-right':
+                    return <HeroRightProject key={project.id} project={project} index={i} />;
+                  case 'hero-left':
+                    return <HeroLeftProject key={project.id} project={project} index={i} />;
+                  case 'wide':
+                    return <WideProject key={project.id} project={project} index={i} />;
+                  case 'half':
+                    return <HalfProject key={project.id} project={project} index={i} />;
+                  case 'solid':
+                    return <SolidProject key={project.id} project={project} index={i} />;
+                  case 'standard':
+                  default:
+                    return <StandardProject key={project.id} project={project} index={i} />;
+                }
+              })}
+            </div>
+
+            {hasMore && (
+              <div className="mt-16 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => setVisibleCount(count => count + PAGE_SIZE)}
+                  className="px-8 py-3 border border-primary text-primary text-xs font-bold tracking-widest uppercase hover:bg-primary hover:text-primary-foreground transition-colors"
+                >
+                  Cargar más
+                </button>
+              </div>
+            )}
+          </section>
+        )}
       </main>
     </PublicLayout>
   );

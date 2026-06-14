@@ -9,25 +9,10 @@ import {
 
 import { PublicLayout } from "@/components/layout/PublicLayout"
 import { HeroParallaxImage, ScrollReveal, ScrollScene } from "@/components/landing/LandingMotion"
-import { mockNews } from "@/data/mock-news"
-import { mockProjects } from "@/data/mock-projects"
-import { cn } from "@/lib/utils"
-
-const projectStatusLabel = (status: string) => status === "Planificación" ? "Planificado" : status
-
-const projectStatusDot: Record<string, string> = {
-  "Planificación": "bg-[#9ab0c4]",
-  "Fase 1 - Piloto": "bg-[#9ab0c4]",
-  "Fase 2 - Ejecución": "bg-[#d7a24a]",
-  "Activo": "bg-[#86d99c]",
-  "En seguimiento": "bg-[#d7a24a]",
-  "Finalizado": "bg-[#b8a99a]",
-}
+import { FeaturedProjects } from "@/components/home/FeaturedProjects"
+import { LatestNews } from "@/components/home/LatestNews"
 
 export default function Home() {
-  const featuredProjects = mockProjects.slice(0, 2)
-  const [featuredNews, ...secondaryNews] = mockNews
-
   return (
     <PublicLayout className="landing-typography">
       <section className="relative isolate -mt-18 flex min-h-[100svh] items-end overflow-hidden bg-[#24130d] text-[#fffaf1]">
@@ -135,41 +120,7 @@ export default function Home() {
             <h2 className="mt-4 font-serif text-4xl font-semibold tracking-[-0.025em] text-[#fff8eb] sm:text-5xl lg:text-6xl">Proyectos destacados</h2>
           </ScrollReveal>
 
-          <div className="mx-auto mt-14 grid max-w-5xl gap-6 md:grid-cols-2">
-            {featuredProjects.map((project, index) => {
-              const image = index % 2 === 0 ? "/assets/hero-bg.jpg" : "/assets/coffee-beans-texture.png"
-              return (
-                <ScrollReveal
-                  key={project.id}
-                  delay={index * 110}
-                  className="premium-project group flex flex-col overflow-hidden rounded-xl border border-[#3a2a20] bg-[#1c140d]"
-                >
-                  <div className="relative h-56 overflow-hidden">
-                    <Image
-                      src={image}
-                      alt=""
-                      fill
-                      className="scene-scale object-cover transition-transform duration-700 group-hover:scale-105"
-                      sizes="(min-width: 768px) 50vw, 100vw"
-                    />
-                    <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(15,11,7,0.85),transparent_60%)]" />
-                    <div className="absolute left-4 top-4 flex items-center gap-2 rounded-full border border-[#f8efe3]/15 bg-[#15100a]/70 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#f3e8d8] backdrop-blur-sm">
-                      <span className={cn("h-1.5 w-1.5 rounded-full", projectStatusDot[project.status])} />
-                      Estado: {projectStatusLabel(project.status)}
-                    </div>
-                  </div>
-                  <div className="flex flex-1 flex-col p-7">
-                    <h3 className="font-serif text-2xl font-semibold leading-tight text-[#f8efe3]">{project.title}</h3>
-                    <p className="mt-3 flex-1 text-sm leading-6 text-[#b8a99a]">{project.description}</p>
-                    <div className="mt-6 flex flex-wrap gap-2">
-                      <span className="rounded-full border border-[#3a2a20] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[#d7a24a]">{project.category}</span>
-                      <span className="rounded-full border border-[#3a2a20] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[#d8c9bb]">Iniciativa 0{index + 1}</span>
-                    </div>
-                  </div>
-                </ScrollReveal>
-              )
-            })}
-          </div>
+          <FeaturedProjects />
 
           <ScrollReveal className="mt-10 flex justify-center" delay={240} distance="sm">
             <Link href="/proyectos" className="group inline-flex items-center gap-2 border-b border-[#d7a24a]/55 pb-1.5 text-sm font-semibold text-[#e0ad55] transition-all hover:gap-4 hover:border-[#e0ad55] hover:text-[#f0c87e]">
@@ -204,46 +155,7 @@ export default function Home() {
             </Link>
           </ScrollReveal>
 
-          <div className="mt-10 grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-            <ScrollReveal className="premium-project group relative min-h-[500px] overflow-hidden rounded-[10px] bg-[#2b1710] p-8 text-[#fffaf1] sm:p-10" direction="left">
-              <div className="absolute inset-0 opacity-30">
-                <Image src="/assets/library-hero-v2.png" alt="" fill className="scene-scale object-cover" sizes="(min-width: 1024px) 58vw, 100vw" />
-              </div>
-              <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(31,17,11,0.98),rgba(31,17,11,0.25))]" />
-              <div className="relative flex h-full flex-col">
-                <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.18em] text-[#e7c792]">
-                  <span>{featuredNews.category}</span><span>{featuredNews.date}</span>
-                </div>
-                <div className="mt-auto">
-                  <h3 className="scene-drift-side max-w-2xl font-serif text-4xl font-semibold leading-[1.08] sm:text-5xl">{featuredNews.title}</h3>
-                  <p className="mt-6 max-w-xl text-base leading-7 text-[#f3e8d8]/78">{featuredNews.summary}</p>
-                  <Link href="/noticias" className="group/link mt-8 inline-flex items-center gap-2 border-b border-[#e7c792]/55 pb-1 text-sm font-semibold text-[#e7c792]">
-                    Leer comunicado <ArrowRight className="h-4 w-4 transition-transform group-hover/link:translate-x-1" />
-                  </Link>
-                </div>
-              </div>
-            </ScrollReveal>
-
-            <div className="scene-drift-up grid gap-4">
-              {secondaryNews.map((news, index) => (
-                <ScrollReveal key={news.id} delay={index * 120} className="premium-project group flex min-h-[238px] flex-col rounded-[10px] border border-[#d8cabb] bg-[#f6efe5]/65 p-6 hover:border-[#b57931]/60 hover:bg-[#f6efe5]" direction="right">
-                  <div className="flex items-start justify-between gap-4">
-                    <Newspaper className="h-6 w-6 text-[#b57931]" strokeWidth={1.5} />
-                    <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#9a755c]">{news.date}</span>
-                  </div>
-                  <div className="mt-6 flex-1">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.17em] text-[#a66f2e]">{news.category}</p>
-                    <h3 className="mt-3 font-serif text-2xl font-semibold leading-tight transition-colors group-hover:text-[#a66f2e]">{news.title}</h3>
-                    <p className="mt-3 line-clamp-2 text-sm leading-6 text-[#806b5f]">{news.summary}</p>
-                  </div>
-                  <div className="mt-5 flex items-center justify-between border-t border-[#d8cabb] pt-3">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#8e705e]">Comunicado 0{index + 2}</span>
-                    <ArrowRight className="h-4 w-4 text-[#9d7145] transition-transform group-hover:translate-x-1" />
-                  </div>
-                </ScrollReveal>
-              ))}
-            </div>
-          </div>
+          <LatestNews />
         </div>
       </ScrollScene>
 

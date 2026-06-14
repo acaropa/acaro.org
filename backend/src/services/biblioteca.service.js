@@ -1,5 +1,6 @@
 const db = require('../config/db');
 const cache = require('../utils/memoryCache');
+const { generateUniqueSlug } = require('../utils/slug');
 
 const PUBLIC_CACHE_TTL_MS = 60 * 1000;
 const PRIVATE_CACHE_TTL_MS = 15 * 1000;
@@ -20,7 +21,7 @@ const STATES = [
 const VISIBILITIES = ['publica', 'interna'];
 
 const BASE_SELECT = `
-  SELECT b.id, b.titulo, b.descripcion, b.archivo_url, b.categoria,
+  SELECT b.id, b.titulo, b.slug, b.descripcion, b.archivo_url, b.categoria, b.imagen_portada,
          b.estado, b.visibilidad, b.creado_por, b.revisado_por,
          b.fecha_creacion, b.fecha_revision, b.observacion_revision,
          creator.email AS creado_por_email,
@@ -120,6 +121,19 @@ async function queryById(id) {
   return rows[0] || null;
 }
 
+async function getBySlug(slug) {
+  return cache.getOrSet(
+    `library:slug:${slug}`,
+    () => queryBySlug(slug),
+    PRIVATE_CACHE_TTL_MS
+  );
+}
+
+async function queryBySlug(slug) {
+  const [rows] = await db.query(`${BASE_SELECT} WHERE b.slug = ?`, [slug]);
+  return rows[0] || null;
+}
+
 async function create(data, actor) {
   const initialState =
     actor.role === 'tecnico'
@@ -130,16 +144,19 @@ async function create(data, actor) {
 
   const reviewer = initialState === 'aprobado' ? actor.id : null;
   const reviewDate = initialState === 'aprobado' ? new Date() : null;
+  const slug = await generateUniqueSlug('biblioteca', data.titulo);
   const [result] = await db.query(
     `INSERT INTO biblioteca
-      (titulo, descripcion, archivo_url, categoria, estado, visibilidad,
+      (titulo, slug, descripcion, archivo_url, categoria, imagen_portada, estado, visibilidad,
        creado_por, revisado_por, fecha_revision, observacion_revision)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       data.titulo,
+      slug,
       data.descripcion || null,
       data.archivo_url,
       data.categoria,
+      data.imagen_portada || null,
       initialState,
       data.visibilidad,
       actor.id,
@@ -153,7 +170,7 @@ async function create(data, actor) {
 }
 
 async function update(id, data) {
-  const allowed = ['titulo', 'descripcion', 'archivo_url', 'categoria', 'visibilidad'];
+  const allowed = ['titulo', 'descripcion', 'archivo_url', 'categoria', 'imagen_portada', 'visibilidad'];
   const fields = Object.keys(data).filter(field => allowed.includes(field));
   if (fields.length === 0) {
     const err = new Error('Sin campos válidos para actualizar');
@@ -161,9 +178,15 @@ async function update(id, data) {
     throw err;
   }
 
+  const values = { ...data };
+  if (fields.includes('titulo')) {
+    values.slug = await generateUniqueSlug('biblioteca', data.titulo, id);
+    fields.push('slug');
+  }
+
   await db.query(
     `UPDATE biblioteca SET ${fields.map(field => `${field} = ?`).join(', ')} WHERE id = ?`,
-    [...fields.map(field => data[field]), id]
+    [...fields.map(field => values[field]), id]
   );
   invalidateLibraryCache();
   return getById(id);
@@ -204,6 +227,7 @@ module.exports = {
   VISIBILITIES,
   getAll,
   getById,
+  getBySlug,
   create,
   update,
   resubmit,

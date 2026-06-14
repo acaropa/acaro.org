@@ -86,9 +86,11 @@ CREATE TABLE IF NOT EXISTS tecnicos (
 CREATE TABLE IF NOT EXISTS biblioteca (
   id            INT UNSIGNED    NOT NULL AUTO_INCREMENT,
   titulo        VARCHAR(255)    NOT NULL,
+  slug          VARCHAR(220)             DEFAULT NULL,
   descripcion   TEXT                     DEFAULT NULL,
   archivo_url   VARCHAR(1000)   NOT NULL,
   categoria     VARCHAR(150)    NOT NULL,
+  imagen_portada VARCHAR(500)            DEFAULT NULL,
   estado        ENUM('borrador','pendiente_revision','requiere_correccion','aprobado','rechazado','archivado') NOT NULL DEFAULT 'pendiente_revision',
   visibilidad   ENUM('publica','interna') NOT NULL DEFAULT 'interna',
   creado_por    INT UNSIGNED    NOT NULL,
@@ -98,6 +100,7 @@ CREATE TABLE IF NOT EXISTS biblioteca (
   observacion_revision TEXT               DEFAULT NULL,
   updated_at    TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id)
+  ,UNIQUE KEY uq_biblioteca_slug (slug)
   ,FOREIGN KEY (creado_por) REFERENCES users(id) ON DELETE RESTRICT
   ,FOREIGN KEY (revisado_por) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -105,9 +108,12 @@ CREATE TABLE IF NOT EXISTS biblioteca (
 CREATE TABLE IF NOT EXISTS noticias (
   id              INT UNSIGNED NOT NULL AUTO_INCREMENT,
   titulo          VARCHAR(255) NOT NULL,
+  slug            VARCHAR(220) DEFAULT NULL,
   resumen         TEXT DEFAULT NULL,
   contenido       LONGTEXT NOT NULL,
-  estado          ENUM('borrador','publicada','archivada') NOT NULL DEFAULT 'borrador',
+  categoria       VARCHAR(100) NOT NULL DEFAULT 'General',
+  imagen_portada  VARCHAR(500) DEFAULT NULL,
+  estado          ENUM('borrador','pendiente','publicada','archivada') NOT NULL DEFAULT 'borrador',
   visibilidad     ENUM('publica','interna') NOT NULL DEFAULT 'publica',
   creado_por      INT UNSIGNED NOT NULL,
   publicado_por   INT UNSIGNED DEFAULT NULL,
@@ -115,6 +121,7 @@ CREATE TABLE IF NOT EXISTS noticias (
   fecha_publicacion TIMESTAMP NULL DEFAULT NULL,
   updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
+  UNIQUE KEY uq_noticias_slug (slug),
   FOREIGN KEY (creado_por) REFERENCES users(id) ON DELETE RESTRICT,
   FOREIGN KEY (publicado_por) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -125,9 +132,11 @@ CREATE TABLE IF NOT EXISTS noticias (
 CREATE TABLE IF NOT EXISTS proyectos (
   id              INT UNSIGNED    NOT NULL AUTO_INCREMENT,
   nombre          VARCHAR(200)    NOT NULL,
+  slug            VARCHAR(220)             DEFAULT NULL,
   descripcion     TEXT                     DEFAULT NULL,
   tipo            ENUM('publico','privado') NOT NULL DEFAULT 'publico',
   clasificacion   VARCHAR(100)             DEFAULT NULL,
+  imagen_portada  VARCHAR(500)             DEFAULT NULL,
   estado          ENUM('pendiente','en_progreso','completado','cancelado') NOT NULL DEFAULT 'pendiente',
   fecha_inicio    DATE                     DEFAULT NULL,
   fecha_fin       DATE                     DEFAULT NULL,
@@ -136,6 +145,7 @@ CREATE TABLE IF NOT EXISTS proyectos (
   created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
+  UNIQUE KEY uq_proyectos_slug (slug),
   FOREIGN KEY (responsable_id) REFERENCES users(id) ON DELETE SET NULL,
   FOREIGN KEY (supervisor_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -1,9 +1,11 @@
 export interface LibraryRecord {
   id: number;
   titulo: string;
+  slug?: string;
   descripcion: string | null;
   archivo_url?: string;
   categoria?: string;
+  imagen_portada?: string | null;
   fecha_creacion?: string;
   creado_por_email?: string;
   autor?: string;
@@ -21,11 +23,13 @@ export type LibraryCategory =
 
 export interface LibraryDocument {
   id: number;
+  slug?: string;
   resourceType: ResourceType;
   type: string;
   title: string;
   description: string;
   category: string;
+  coverImage: string | null;
   date: string;
   dateValue: string;
   year: string;
@@ -88,11 +92,13 @@ export function toLibraryDocument(record: LibraryRecord): LibraryDocument {
 
   return {
     id: record.id,
+    slug: record.slug,
     resourceType,
     type,
     title: record.titulo,
     description,
     category: record.categoria || inferCategory(`${record.titulo} ${description}`),
+    coverImage: record.imagen_portada || null,
     date: new Date(`${dateValue}T00:00:00`).toLocaleDateString("es-PA", {
       day: "2-digit",
       month: "short",
@@ -104,6 +110,19 @@ export function toLibraryDocument(record: LibraryRecord): LibraryDocument {
     meta: resourceType === "link" ? "Enlace externo" : "Abrir documento",
     link,
   };
+}
+
+const CATEGORY_GRADIENTS: Record<string, string> = {
+  "Agronomía": "from-[#3d4b37] to-[#8a9c7c]",
+  "Procesamiento": "from-[#6b4226] to-[#c98b4a]",
+  "Mercados": "from-[#8a5c25] to-[#e3bc7e]",
+  "Sostenibilidad": "from-[#1f3d2b] to-[#6fa384]",
+  "Estándares OBC": "from-[#4a3c30] to-[#b7a89c]",
+};
+const DEFAULT_GRADIENT = "from-[#25160e] to-[#8a766a]";
+
+export function categoryGradient(category: string) {
+  return CATEGORY_GRADIENTS[category] || DEFAULT_GRADIENT;
 }
 
 export function matchesLibraryQuery(document: LibraryDocument, query: string) {

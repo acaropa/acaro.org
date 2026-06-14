@@ -1,6 +1,21 @@
 const svc = require('../services/proyectos.service');
 const projectManagement = require('../services/project-management.service');
 const { hasPermission, PERMISSIONS } = require('../config/permissions');
+const { saveBase64Upload, IMAGE_EXTENSIONS } = require('../utils/uploads');
+
+const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
+
+async function uploadCoverImage(data) {
+  if (!data.imagen_base64 || !data.imagen_nombre) return undefined;
+  const uploaded = await saveBase64Upload({
+    base64: data.imagen_base64,
+    fileName: data.imagen_nombre,
+    subdir: 'proyectos-portada',
+    maxBytes: MAX_IMAGE_BYTES,
+    allowedExtensions: IMAGE_EXTENSIONS,
+  });
+  return uploaded.url;
+}
 
 async function canAccessProject(user, project) {
   if (!user) return project.tipo === 'publico' && project.estado !== 'cancelado';
@@ -36,12 +51,26 @@ async function getById(req, res, next) {
   } catch (err) { next(err); }
 }
 
+async function getBySlug(req, res, next) {
+  try {
+    const proyecto = await svc.getBySlug(req.params.slug);
+    if (!proyecto) return res.status(404).json({ error: 'Proyecto no encontrado' });
+    if (!(await canAccessProject(req.user, proyecto))) {
+      return res.status(404).json({ error: 'Proyecto no encontrado' });
+    }
+    proyecto.evidencias = await svc.getPublicArchivos(proyecto.id);
+    res.json(proyecto);
+  } catch (err) { next(err); }
+}
+
 async function create(req, res, next) {
   try {
     const { nombre } = req.body;
     if (!nombre) return res.status(400).json({ error: 'nombre es requerido' });
+    const imagen_portada = await uploadCoverImage(req.body);
     const data = {
       ...req.body,
+      imagen_portada,
       supervisor_id: req.user.role === 'supervisor' ? req.user.id : req.body.supervisor_id,
     };
     res.status(201).json(await svc.create(data));
@@ -55,7 +84,10 @@ async function update(req, res, next) {
     if (!canUpdateProject(req.user, current)) {
       return res.status(403).json({ error: 'Solo puedes editar proyectos asignados' });
     }
-    const proyecto = await svc.update(req.params.id, req.body);
+    const body = { ...req.body };
+    const imagen_portada = await uploadCoverImage(body);
+    if (imagen_portada) body.imagen_portada = imagen_portada;
+    const proyecto = await svc.update(req.params.id, body);
     if (!proyecto) return res.status(404).json({ error: 'Proyecto no encontrado' });
     res.json(proyecto);
   } catch (err) { next(err); }
@@ -194,7 +226,7 @@ async function removeImagen(req, res, next) {
 }
 
 module.exports = {
-  getAll, getById, create, update, remove,
+  getAll, getById, getBySlug, create, update, remove,
   assignTecnico, removeTecnico,
   createFase, updateFase, removeFase,
   addImagen, removeImagen,

@@ -1,5 +1,6 @@
 const db = require('../config/db');
 const cache = require('../utils/memoryCache');
+const { generateUniqueSlug } = require('../utils/slug');
 
 const PUBLIC_CACHE_TTL_MS = 60 * 1000;
 const PRIVATE_CACHE_TTL_MS = 15 * 1000;
@@ -40,7 +41,7 @@ async function queryAll(user = null) {
   }
 
   const [rows] = await db.query(
-    `SELECT p.id, p.nombre, p.descripcion, p.tipo, p.clasificacion,
+    `SELECT p.id, p.nombre, p.slug, p.descripcion, p.tipo, p.clasificacion, p.imagen_portada,
             p.estado, p.fecha_inicio, p.fecha_fin, p.supervisor_id, p.created_at,
             u.email AS responsable_email, s.email AS supervisor_email
      FROM proyectos p
@@ -63,7 +64,7 @@ async function getById(id) {
 
 async function queryById(id) {
   const [proyectos] = await db.query(
-    `SELECT p.id, p.nombre, p.descripcion, p.tipo, p.clasificacion,
+    `SELECT p.id, p.nombre, p.slug, p.descripcion, p.tipo, p.clasificacion, p.imagen_portada,
             p.estado, p.fecha_inicio, p.fecha_fin, p.responsable_id,
             p.supervisor_id, p.created_at,
             u.email AS responsable_email, s.email AS supervisor_email
@@ -111,11 +112,34 @@ async function queryById(id) {
   return proyecto;
 }
 
+async function getBySlug(slug) {
+  return cache.getOrSet(
+    `projects:slug:${slug}`,
+    async () => {
+      const [rows] = await db.query('SELECT id FROM proyectos WHERE slug = ?', [slug]);
+      if (!rows[0]) return null;
+      return queryById(rows[0].id);
+    },
+    PRIVATE_CACHE_TTL_MS
+  );
+}
+
+async function getPublicArchivos(proyectoId) {
+  const [rows] = await db.query(
+    `SELECT id, fase_id, titulo, descripcion, tipo, archivo_url, extension, mime_type, size_bytes, created_at
+     FROM proyecto_archivos
+     WHERE proyecto_id = ? AND estado = 'aprobado' AND visibilidad = 'publica'
+     ORDER BY created_at DESC`,
+    [proyectoId]
+  );
+  return rows;
+}
+
 async function create(data) {
   const {
     nombre, descripcion = null, tipo = 'publico', clasificacion = null,
     estado = 'pendiente', fecha_inicio = null, fecha_fin = null, responsable_id = null,
-    supervisor_id = null,
+    supervisor_id = null, imagen_portada = null,
   } = data;
 
   if (supervisor_id) {
@@ -130,18 +154,19 @@ async function create(data) {
     }
   }
 
+  const slug = await generateUniqueSlug('proyectos', nombre);
   const [result] = await db.query(
     `INSERT INTO proyectos
-      (nombre, descripcion, tipo, clasificacion, estado, fecha_inicio, fecha_fin, responsable_id, supervisor_id)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [nombre, descripcion, tipo, clasificacion, estado, fecha_inicio, fecha_fin, responsable_id, supervisor_id]
+      (nombre, slug, descripcion, tipo, clasificacion, imagen_portada, estado, fecha_inicio, fecha_fin, responsable_id, supervisor_id)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [nombre, slug, descripcion, tipo, clasificacion, imagen_portada, estado, fecha_inicio, fecha_fin, responsable_id, supervisor_id]
   );
   invalidateProjectCache();
   return getById(result.insertId);
 }
 
 async function update(id, data) {
-  const allowed = ['nombre', 'descripcion', 'tipo', 'clasificacion', 'estado', 'fecha_inicio', 'fecha_fin', 'responsable_id', 'supervisor_id'];
+  const allowed = ['nombre', 'descripcion', 'tipo', 'clasificacion', 'estado', 'fecha_inicio', 'fecha_fin', 'responsable_id', 'supervisor_id', 'imagen_portada'];
   const fields = Object.keys(data).filter(k => allowed.includes(k));
 
   if (fields.length === 0) {
@@ -162,8 +187,14 @@ async function update(id, data) {
     }
   }
 
+  const values = { ...data };
+  if (fields.includes('nombre')) {
+    values.slug = await generateUniqueSlug('proyectos', data.nombre, id);
+    fields.push('slug');
+  }
+
   const set = fields.map(k => `${k} = ?`).join(', ');
-  await db.query(`UPDATE proyectos SET ${set} WHERE id = ?`, [...fields.map(k => data[k]), id]);
+  await db.query(`UPDATE proyectos SET ${set} WHERE id = ?`, [...fields.map(k => values[k]), id]);
   invalidateProjectCache();
   return getById(id);
 }
@@ -329,7 +360,7 @@ async function removeImagen(imagenId) {
 }
 
 module.exports = {
-  getAll, getById, create, update, remove,
+  getAll, getById, getBySlug, getPublicArchivos, create, update, remove,
   assignTecnico, removeTecnico,
   isTecnicoAssignedToSupervisor,
   phaseBelongsToProject,

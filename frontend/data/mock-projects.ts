@@ -3,6 +3,7 @@ export type LayoutStyle = 'hero-right' | 'hero-left' | 'wide' | 'standard' | 'so
 
 export interface Project {
   id: string;
+  slug?: string;
   title: string;
   description: string;
   status: ProjectStatus;

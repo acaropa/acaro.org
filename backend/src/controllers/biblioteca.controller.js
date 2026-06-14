@@ -1,12 +1,40 @@
 const biblioteca = require('../services/biblioteca.service');
 const { hasPermission, PERMISSIONS } = require('../config/permissions');
+const { saveBase64Upload, DOCUMENT_EXTENSIONS, IMAGE_EXTENSIONS } = require('../utils/uploads');
+
+const MAX_DOCUMENT_BYTES = 8 * 1024 * 1024;
+const MAX_COVER_BYTES = 4 * 1024 * 1024;
+
+async function resolveFileUpload(body) {
+  if (!body.archivo_base64 || !body.archivo_nombre) return undefined;
+  const uploaded = await saveBase64Upload({
+    base64: body.archivo_base64,
+    fileName: body.archivo_nombre,
+    subdir: 'biblioteca',
+    maxBytes: MAX_DOCUMENT_BYTES,
+    allowedExtensions: DOCUMENT_EXTENSIONS,
+  });
+  return uploaded.url;
+}
+
+async function resolveCoverUpload(body) {
+  if (!body.portada_base64 || !body.portada_nombre) return undefined;
+  const uploaded = await saveBase64Upload({
+    base64: body.portada_base64,
+    fileName: body.portada_nombre,
+    subdir: 'biblioteca-portada',
+    maxBytes: MAX_COVER_BYTES,
+    allowedExtensions: IMAGE_EXTENSIONS,
+  });
+  return uploaded.url;
+}
 
 function parseId(value) {
   const id = Number(value);
   return Number.isInteger(id) && id > 0 ? id : null;
 }
 
-function validateDocument(data = {}, partial = false) {
+function validateDocument(data = {}, partial = false, trustedFileUrl = false) {
   const required = ['titulo', 'archivo_url', 'categoria', 'visibilidad'];
   for (const field of required) {
     if ((!partial || field in data) && (typeof data[field] !== 'string' || !data[field].trim())) {
@@ -14,7 +42,7 @@ function validateDocument(data = {}, partial = false) {
     }
   }
 
-  if ('archivo_url' in data) {
+  if ('archivo_url' in data && !trustedFileUrl) {
     try {
       const url = new URL(data.archivo_url);
       if (!['http:', 'https:'].includes(url.protocol)) throw new Error();
@@ -28,6 +56,9 @@ function validateDocument(data = {}, partial = false) {
   }
   if ('descripcion' in data && data.descripcion !== null && typeof data.descripcion !== 'string') {
     return 'descripcion debe ser texto';
+  }
+  if ('imagen_portada' in data && data.imagen_portada !== null && typeof data.imagen_portada !== 'string') {
+    return 'imagen_portada debe ser texto';
   }
   return null;
 }
@@ -69,10 +100,24 @@ async function getById(req, res, next) {
   } catch (err) { next(err); }
 }
 
+async function getBySlug(req, res, next) {
+  try {
+    const document = await biblioteca.getBySlug(req.params.slug);
+    if (!document || !(await canReadDocument(req.user, document))) {
+      return res.status(404).json({ error: 'Documento no encontrado' });
+    }
+    res.json(document);
+  } catch (err) { next(err); }
+}
+
 async function create(req, res, next) {
   try {
-    const body = req.body || {};
-    const error = validateDocument(body);
+    const body = { ...(req.body || {}) };
+    const uploadedUrl = await resolveFileUpload(body);
+    if (uploadedUrl) body.archivo_url = uploadedUrl;
+    const uploadedCoverUrl = await resolveCoverUpload(body);
+    body.imagen_portada = uploadedCoverUrl || body.imagen_portada || null;
+    const error = validateDocument(body, false, Boolean(uploadedUrl));
     if (error) return res.status(400).json({ error });
     res.status(201).json(await biblioteca.create({
       ...body,
@@ -80,6 +125,7 @@ async function create(req, res, next) {
       descripcion: body.descripcion?.trim() || null,
       archivo_url: body.archivo_url.trim(),
       categoria: body.categoria.trim(),
+      imagen_portada: body.imagen_portada?.trim() || null,
     }, req.user));
   } catch (err) { next(err); }
 }
@@ -102,9 +148,16 @@ async function update(req, res, next) {
       return res.status(403).json({ error: 'No puedes editar este documento en su estado actual' });
     }
 
-    const error = validateDocument(req.body || {}, true);
+    const body = { ...(req.body || {}) };
+    const uploadedUrl = await resolveFileUpload(body);
+    if (uploadedUrl) body.archivo_url = uploadedUrl;
+    const uploadedCoverUrl = await resolveCoverUpload(body);
+    if (uploadedCoverUrl) body.imagen_portada = uploadedCoverUrl;
+    if (typeof body.imagen_portada === 'string') body.imagen_portada = body.imagen_portada.trim() || null;
+
+    const error = validateDocument(body, true, Boolean(uploadedUrl));
     if (error) return res.status(400).json({ error });
-    res.json(await biblioteca.update(id, req.body || {}));
+    res.json(await biblioteca.update(id, body));
   } catch (err) { next(err); }
 }
 
@@ -179,4 +232,4 @@ async function remove(req, res, next) {
   } catch (err) { next(err); }
 }
 
-module.exports = { getAll, getById, create, update, resubmit, review, remove };
+module.exports = { getAll, getById, getBySlug, create, update, resubmit, review, remove };

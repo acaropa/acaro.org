@@ -18,11 +18,11 @@ import {
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { ScrollReveal } from "@/components/landing/LandingMotion";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { mockLibraryRecords } from "@/data/mock-documents";
-import { api } from "@/lib/api";
+import { api, apiAssetUrl } from "@/lib/api";
 import {
   LibraryDocument,
   LibraryRecord,
+  categoryGradient,
   libraryCategories,
   toLibraryDocument,
 } from "@/lib/library";
@@ -46,16 +46,18 @@ function ResourceIcon({
 function MainFeature({ document }: { document: LibraryDocument }) {
   return (
     <ScrollReveal delay={100} distance="sm" className="md:col-span-8">
-    <a
-      href={document.link}
-      target="_blank"
-      rel="noopener noreferrer"
+    <Link
+      href={`/biblioteca/detalle/?slug=${document.slug || ""}`}
       className="group relative flex min-h-[410px] h-full w-full overflow-hidden rounded-lg bg-[#21130d] shadow-sm"
     >
-      <div
-        className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-        style={{ backgroundImage: "url('/assets/library-hero-v2.png')" }}
-      />
+      {document.coverImage ? (
+        <div
+          className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+          style={{ backgroundImage: `url('${apiAssetUrl(document.coverImage)}')` }}
+        />
+      ) : (
+        <div className={`absolute inset-0 bg-gradient-to-br ${categoryGradient(document.category)} transition-transform duration-700 group-hover:scale-105`} />
+      )}
       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-[#2b1710]/45 to-black/5" />
       <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
         <span className="inline-flex rounded bg-[#3d4b37]/90 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white">
@@ -74,7 +76,7 @@ function MainFeature({ document }: { document: LibraryDocument }) {
           <span>{document.contributor}</span>
         </div>
       </div>
-    </a>
+    </Link>
     </ScrollReveal>
   );
 }
@@ -82,17 +84,19 @@ function MainFeature({ document }: { document: LibraryDocument }) {
 function SecondaryFeature({ document }: { document: LibraryDocument }) {
   return (
     <ScrollReveal delay={200} distance="sm" className="md:col-span-4">
-    <a
-      href={document.link}
-      target="_blank"
-      rel="noopener noreferrer"
+    <Link
+      href={`/biblioteca/detalle/?slug=${document.slug || ""}`}
       className="group flex min-h-[410px] h-full w-full flex-col overflow-hidden rounded-lg border border-[#ded6cc] bg-white shadow-sm transition-shadow hover:shadow-md dark:border-border dark:bg-card"
     >
       <div className="relative h-44 overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-[center_58%] transition-transform duration-700 group-hover:scale-105"
-          style={{ backgroundImage: "url('/assets/hero-bg.jpg')" }}
-        />
+        {document.coverImage ? (
+          <div
+            className="absolute inset-0 bg-cover bg-[center_58%] transition-transform duration-700 group-hover:scale-105"
+            style={{ backgroundImage: `url('${apiAssetUrl(document.coverImage)}')` }}
+          />
+        ) : (
+          <div className={`absolute inset-0 bg-gradient-to-br ${categoryGradient(document.category)} transition-transform duration-700 group-hover:scale-105`} />
+        )}
         <div className="absolute inset-0 bg-[#25160e]/30" />
       </div>
       <div className="flex flex-1 flex-col p-6">
@@ -110,7 +114,7 @@ function SecondaryFeature({ document }: { document: LibraryDocument }) {
           <ArrowRight className="h-5 w-5 text-[#25160e] transition-transform group-hover:translate-x-1 dark:text-accent" />
         </div>
       </div>
-    </a>
+    </Link>
     </ScrollReveal>
   );
 }
@@ -118,10 +122,8 @@ function SecondaryFeature({ document }: { document: LibraryDocument }) {
 function TechnicalRow({ document, index }: { document: LibraryDocument, index: number }) {
   return (
     <ScrollReveal delay={100 * index} distance="sm">
-    <a
-      href={document.link}
-      target="_blank"
-      rel="noopener noreferrer"
+    <Link
+      href={`/biblioteca/detalle/?slug=${document.slug || ""}`}
       className="group flex items-center gap-4 border-b border-[#e7dfd6] p-4 last:border-0 hover:bg-[#faf7f2] dark:border-border dark:hover:bg-surface w-full"
     >
       <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded bg-[#f7decc] text-[#705a4f] dark:bg-accent/15 dark:text-accent">
@@ -138,7 +140,7 @@ function TechnicalRow({ document, index }: { document: LibraryDocument, index: n
       ) : (
         <Download className="h-4 w-4 text-[#25160e] dark:text-accent" />
       )}
-    </a>
+    </Link>
     </ScrollReveal>
   );
 }
@@ -155,11 +157,8 @@ export default function Biblioteca() {
   useEffect(() => {
     api
       .get<LibraryRecord[]>("/biblioteca")
-      .then(data => setDocuments((data.length ? data : mockLibraryRecords).map(toLibraryDocument)))
-      .catch(() => {
-        setDocuments(mockLibraryRecords.map(toLibraryDocument));
-        setLoadError("");
-      })
+      .then(data => setDocuments(data.map(toLibraryDocument)))
+      .catch(err => setLoadError(err instanceof Error ? err.message : "No se pudo cargar la biblioteca"))
       .finally(() => setLoading(false));
   }, []);
 

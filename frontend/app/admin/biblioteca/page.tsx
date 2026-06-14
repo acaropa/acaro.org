@@ -6,6 +6,10 @@ import { Modal } from '@/components/ui/Modal';
 import { api } from '@/lib/api';
 import { PERMISSIONS } from '@/lib/permissions';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ImageUploadField, UploadedFile } from '@/components/admin/ImageUploadField';
+import { libraryCategories } from '@/lib/library';
+
+const DOCUMENT_ACCEPT = '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.jpg,.jpeg,.png,.webp';
 
 type DocumentState =
   | 'borrador'
@@ -21,6 +25,7 @@ interface LibraryRecord {
   descripcion: string | null;
   archivo_url: string;
   categoria: string;
+  imagen_portada: string | null;
   estado: DocumentState;
   visibilidad: 'publica' | 'interna';
   creado_por: number;
@@ -36,6 +41,7 @@ const emptyForm = {
   descripcion: '',
   archivo_url: '',
   categoria: '',
+  imagen_portada: '',
   visibilidad: 'interna' as 'publica' | 'interna',
 };
 
@@ -64,6 +70,10 @@ export default function AdminBiblioteca() {
   const [activeState, setActiveState] = useState<DocumentState>('pendiente_revision');
   const [mineOnly, setMineOnly] = useState(!canReview);
   const [form, setForm] = useState(emptyForm);
+  const [uploadMode, setUploadMode] = useState<'url' | 'file'>('url');
+  const [file, setFile] = useState<UploadedFile | null>(null);
+  const [coverMode, setCoverMode] = useState<'url' | 'file'>('url');
+  const [cover, setCover] = useState<UploadedFile | null>(null);
   const [editing, setEditing] = useState<LibraryRecord | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -95,6 +105,10 @@ export default function AdminBiblioteca() {
 
   function resetForm() {
     setForm(emptyForm);
+    setUploadMode('url');
+    setFile(null);
+    setCoverMode('url');
+    setCover(null);
     setEditing(null);
     setShowForm(false);
   }
@@ -106,8 +120,13 @@ export default function AdminBiblioteca() {
       descripcion: document.descripcion || '',
       archivo_url: document.archivo_url,
       categoria: document.categoria,
+      imagen_portada: document.imagen_portada || '',
       visibilidad: document.visibilidad,
     });
+    setUploadMode('url');
+    setFile(null);
+    setCoverMode('url');
+    setCover(null);
     setShowForm(true);
   }
 
@@ -116,13 +135,26 @@ export default function AdminBiblioteca() {
     setSaving(true);
     setError('');
     try {
+      const payload: Record<string, unknown> = { ...form };
+      if (uploadMode === 'file' && file) {
+        delete payload.archivo_url;
+        payload.archivo_base64 = file.base64;
+        payload.archivo_nombre = file.fileName;
+      }
+      if (coverMode === 'file' && cover) {
+        delete payload.imagen_portada;
+        payload.portada_base64 = cover.base64;
+        payload.portada_nombre = cover.fileName;
+      } else {
+        payload.imagen_portada = form.imagen_portada.trim() || null;
+      }
       if (editing) {
-        await api.put(`/biblioteca/${editing.id}`, form);
-        if (editing.estado === 'requiere_correccion') {
+        await api.put(`/biblioteca/${editing.id}`, payload);
+        if (editing.estado === 'requiere_correccion' && editing.creado_por === user?.id) {
           await api.post(`/biblioteca/${editing.id}/resubmit`, {});
         }
       } else {
-        await api.post('/biblioteca', form);
+        await api.post('/biblioteca', payload);
       }
       resetForm();
       await load();
@@ -224,7 +256,12 @@ export default function AdminBiblioteca() {
             </div>
             <div>
               <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Categoría</label>
-              <input required value={form.categoria} onChange={event => setForm(current => ({ ...current, categoria: event.target.value }))} className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
+              <select required value={form.categoria} onChange={event => setForm(current => ({ ...current, categoria: event.target.value }))} className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors">
+                <option value="" disabled>Selecciona una categoría</option>
+                {libraryCategories.map(item => (
+                  <option key={item} value={item}>{item}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Visibilidad</label>
@@ -234,8 +271,68 @@ export default function AdminBiblioteca() {
               </select>
             </div>
             <div className="md:col-span-2">
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">URL del archivo</label>
-              <input required type="url" value={form.archivo_url} onChange={event => setForm(current => ({ ...current, archivo_url: event.target.value }))} className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
+              <div className="flex items-center gap-2 mb-3">
+                <button
+                  type="button"
+                  onClick={() => setUploadMode('url')}
+                  className={`px-4 py-2 font-label-caps text-[11px] uppercase tracking-widest border transition-colors ${uploadMode === 'url' ? 'border-primary text-primary bg-primary/5' : 'border-border text-muted hover:bg-surface'}`}
+                >
+                  URL externa
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setUploadMode('file')}
+                  className={`px-4 py-2 font-label-caps text-[11px] uppercase tracking-widest border transition-colors ${uploadMode === 'file' ? 'border-primary text-primary bg-primary/5' : 'border-border text-muted hover:bg-surface'}`}
+                >
+                  Subir archivo
+                </button>
+              </div>
+              {uploadMode === 'url' ? (
+                <div>
+                  <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">URL del archivo</label>
+                  <input required type="url" value={form.archivo_url} onChange={event => setForm(current => ({ ...current, archivo_url: event.target.value }))} className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
+                </div>
+              ) : (
+                <ImageUploadField
+                  label="Archivo"
+                  value={file}
+                  onChange={setFile}
+                  existingUrl={editing?.archivo_url}
+                  accept={DOCUMENT_ACCEPT}
+                  maxSizeMb={8}
+                  showPreview={false}
+                  helperText="PDF, Word, Excel, PowerPoint, texto o imagen. Máximo 8 MB."
+                />
+              )}
+            </div>
+            <div className="md:col-span-2">
+              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Imagen de portada (opcional)</label>
+              <div className="flex items-center gap-2 mb-3">
+                <button
+                  type="button"
+                  onClick={() => setCoverMode('url')}
+                  className={`px-4 py-2 font-label-caps text-[11px] uppercase tracking-widest border transition-colors ${coverMode === 'url' ? 'border-primary text-primary bg-primary/5' : 'border-border text-muted hover:bg-surface'}`}
+                >
+                  URL externa
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCoverMode('file')}
+                  className={`px-4 py-2 font-label-caps text-[11px] uppercase tracking-widest border transition-colors ${coverMode === 'file' ? 'border-primary text-primary bg-primary/5' : 'border-border text-muted hover:bg-surface'}`}
+                >
+                  Subir archivo
+                </button>
+              </div>
+              {coverMode === 'url' ? (
+                <input type="url" value={form.imagen_portada} onChange={event => setForm(current => ({ ...current, imagen_portada: event.target.value }))} placeholder="https://..." className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
+              ) : (
+                <ImageUploadField
+                  value={cover}
+                  onChange={setCover}
+                  existingUrl={editing?.imagen_portada}
+                  helperText="Formatos JPG, PNG o WEBP, máximo 4 MB."
+                />
+              )}
             </div>
             <div className="md:col-span-2">
               <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Descripción</label>
@@ -293,7 +390,7 @@ export default function AdminBiblioteca() {
                   </span>
                   
                   <div className="flex flex-wrap gap-4 md:gap-3">
-                    {isOwner && editableStates.includes(document.estado) && (
+                    {(canReview || (isOwner && editableStates.includes(document.estado))) && (
                       <button onClick={() => startEdit(document)} className="flex items-center gap-1 text-sm font-medium text-foreground hover:text-primary transition-colors">
                         <span className="material-symbols-outlined text-[16px]">edit</span> Editar
                       </button>

@@ -1,12 +1,12 @@
 "use client";
 
 import { FormEvent, ReactNode, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
-  Download,
   ExternalLink,
   Eye,
   FileSpreadsheet,
@@ -25,11 +25,11 @@ import {
 import { LibraryPageTransition } from "@/components/library/LibraryPageTransition";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { mockLibraryRecords } from "@/data/mock-documents";
-import { api } from "@/lib/api";
+import { api, apiAssetUrl } from "@/lib/api";
 import {
   LibraryDocument,
   LibraryRecord,
+  categoryGradient,
   libraryCategories,
   matchesLibraryQuery,
   toLibraryDocument,
@@ -62,38 +62,6 @@ function HighlightText({ text, query }: { text: string; query: string }) {
   );
 }
 
-function DocumentAction({ document }: { document: LibraryDocument }) {
-  return (
-    <div className="flex items-center gap-3 text-[#2a3b25] dark:text-accent">
-      <a
-        href={document.link}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Ver documento"
-        className="transition-opacity hover:opacity-70"
-      >
-        {document.resourceType === "link" ? (
-          <ExternalLink className="h-4 w-4" />
-        ) : (
-          <Eye className="h-4 w-4" />
-        )}
-      </a>
-      {document.resourceType !== "link" && (
-        <a
-          href={document.link}
-          download
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Descargar documento"
-          className="transition-opacity hover:opacity-70"
-        >
-          <Download className="h-4 w-4" />
-        </a>
-      )}
-    </div>
-  );
-}
-
 function ResultCard({ document, query }: { document: LibraryDocument; query: string }) {
   const getBadgeStyle = (category: string) => {
     if (category === "Estándares OBC" || category === "Sostenibilidad") {
@@ -105,10 +73,22 @@ function ResultCard({ document, query }: { document: LibraryDocument; query: str
     return "bg-[#fdf4ed] text-[#b46830]";
   };
 
-  const simulatedSize = (document.id % 15 + 1.2).toFixed(1);
-
   return (
-    <article className="flex min-h-[260px] flex-col rounded-xl border border-[#f0ebe1] bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:border-border dark:bg-card">
+    <Link
+      href={`/biblioteca/detalle/?slug=${document.slug || ""}`}
+      className="group relative isolate flex min-h-[260px] flex-col overflow-hidden rounded-xl border border-[#f0ebe1] bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:border-border dark:bg-card"
+    >
+      <div className="absolute inset-0 -z-10">
+        {document.coverImage ? (
+          <div
+            className="absolute inset-0 bg-cover bg-center opacity-[0.12] transition-opacity duration-300 group-hover:opacity-20"
+            style={{ backgroundImage: `url('${apiAssetUrl(document.coverImage)}')` }}
+          />
+        ) : (
+          <div className={`absolute inset-0 bg-gradient-to-br ${categoryGradient(document.category)} opacity-[0.07]`} />
+        )}
+      </div>
+
       <div className="flex items-start justify-between gap-3">
         <div className="flex h-11 w-11 shrink-0 items-center justify-center text-[#1a1a1a] dark:text-foreground">
           <DocumentIcon type={document.resourceType} className="h-6 w-6" />
@@ -129,13 +109,13 @@ function ResultCard({ document, query }: { document: LibraryDocument; query: str
       <div className="mt-auto flex items-end justify-between pt-6">
         <div className="flex flex-col gap-0.5 text-[11px] font-medium text-[#888888] dark:text-muted/80">
           <span>{document.date}</span>
-          <span className="uppercase">
-            {document.resourceType} • {simulatedSize} MB
-          </span>
+          <span className="uppercase">{document.type}</span>
         </div>
-        <DocumentAction document={document} />
+        <div className="flex items-center gap-2 text-[#2a3b25] dark:text-accent">
+          {document.resourceType === "link" ? <ExternalLink className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+        </div>
       </div>
-    </article>
+    </Link>
   );
 }
 
@@ -156,7 +136,21 @@ function DocumentIcon({ type, className }: { type: string; className?: string })
 
 function ResultRow({ document, query }: { document: LibraryDocument; query: string }) {
   return (
-    <article className="flex flex-col gap-4 rounded-lg border border-[#ded6cc] bg-white p-5 transition hover:border-[#b8a99d] sm:flex-row sm:items-center dark:border-border dark:bg-card">
+    <Link
+      href={`/biblioteca/detalle/?slug=${document.slug || ""}`}
+      className="relative isolate flex flex-col gap-4 overflow-hidden rounded-lg border border-[#ded6cc] bg-white p-5 transition hover:border-[#b8a99d] sm:flex-row sm:items-center dark:border-border dark:bg-card"
+    >
+      <div className="absolute inset-0 -z-10">
+        {document.coverImage ? (
+          <div
+            className="absolute inset-0 bg-cover bg-center opacity-[0.1]"
+            style={{ backgroundImage: `url('${apiAssetUrl(document.coverImage)}')` }}
+          />
+        ) : (
+          <div className={`absolute inset-0 bg-gradient-to-r ${categoryGradient(document.category)} opacity-[0.06]`} />
+        )}
+      </div>
+
       <span className="flex shrink-0 items-center justify-center text-[#705a4f]">
         <DocumentIcon type={document.resourceType} className="h-6 w-6" />
       </span>
@@ -175,9 +169,11 @@ function ResultRow({ document, query }: { document: LibraryDocument; query: stri
       </div>
       <div className="flex shrink-0 items-center justify-between gap-6 border-t border-[#eee7df] pt-3 sm:border-l sm:border-t-0 sm:pl-5 sm:pt-0 dark:border-border">
         <span className="text-xs text-[#81756f]">{document.date}</span>
-        <DocumentAction document={document} />
+        <div className="flex items-center gap-2 text-[#2a3b25] dark:text-accent">
+          {document.resourceType === "link" ? <ExternalLink className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+        </div>
       </div>
-    </article>
+    </Link>
   );
 }
 
@@ -231,11 +227,8 @@ function SearchCatalog() {
   useEffect(() => {
     api
       .get<LibraryRecord[]>("/biblioteca")
-      .then(data => setDocuments((data.length ? data : mockLibraryRecords).map(toLibraryDocument)))
-      .catch(() => {
-        setDocuments(mockLibraryRecords.map(toLibraryDocument));
-        setLoadError("");
-      })
+      .then(data => setDocuments(data.map(toLibraryDocument)))
+      .catch(err => setLoadError(err instanceof Error ? err.message : "No se pudo cargar la biblioteca"))
       .finally(() => setLoading(false));
   }, []);
 
