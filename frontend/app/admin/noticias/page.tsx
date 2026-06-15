@@ -341,7 +341,7 @@ export default function AdminNoticias() {
                     </div>
                     <h2 className="font-headline-md text-xl font-bold text-foreground group-hover:text-primary transition-colors">{item.titulo}</h2>
                     <p className="text-xs text-muted font-mono">
-                      {item.creado_por_email} · {formatNoticiaDate(item)}
+                      {item.creado_por_nombre || item.creado_por_email} · {formatNoticiaDate(item)}
                     </p>
                   </div>
                 </div>

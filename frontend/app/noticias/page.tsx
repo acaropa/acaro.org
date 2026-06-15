@@ -6,7 +6,7 @@ import { PublicLayout } from '@/components/layout/PublicLayout';
 import { ScrollReveal } from '@/components/landing/LandingMotion';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { api, apiAssetUrl } from '@/lib/api';
-import { NoticiaRecord, formatNoticiaDate } from '@/lib/news';
+import { NoticiaRecord, formatNoticiaDate, getNoticiaAutor } from '@/lib/news';
 
 const PAGE_SIZE = 9;
 
@@ -119,6 +119,9 @@ export default function Noticias() {
                           {featured.resumen}
                         </p>
                       )}
+                      <p className="text-xs font-semibold tracking-wider text-muted mb-[16px]">
+                        Publicado por <span className="text-primary">{getNoticiaAutor(featured)}</span>
+                      </p>
                       <span className="mt-auto text-xs font-bold tracking-widest uppercase text-primary border-b border-accent w-max pb-1 group-hover:border-b-2 transition-all">
                         Leer noticia
                       </span>
@@ -152,6 +155,9 @@ export default function Noticias() {
                         {item.resumen && (
                           <p className="text-[15px] leading-[1.6] text-muted flex-grow line-clamp-3">{item.resumen}</p>
                         )}
+                        <p className="mt-[16px] text-xs font-semibold tracking-wider text-muted">
+                          Publicado por <span className="text-primary">{getNoticiaAutor(item)}</span>
+                        </p>
                       </div>
                     </Link>
                   </ScrollReveal>

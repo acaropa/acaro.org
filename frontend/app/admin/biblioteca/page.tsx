@@ -30,6 +30,7 @@ interface LibraryRecord {
   visibilidad: 'publica' | 'interna';
   creado_por: number;
   creado_por_email: string;
+  creado_por_nombre: string | null;
   revisado_por_email: string | null;
   fecha_creacion: string;
   fecha_revision: string | null;
@@ -374,7 +375,7 @@ export default function AdminBiblioteca() {
                   <a href={document.archivo_url} target="_blank" rel="noreferrer" className="block font-headline-md text-lg font-bold text-foreground hover:text-primary transition-colors mb-1">
                     {document.titulo}
                   </a>
-                  <p className="text-sm text-muted font-body-md">Subido por: <span className="text-foreground">{document.creado_por_email}</span></p>
+                  <p className="text-sm text-muted font-body-md">Subido por: <span className="text-foreground">{document.creado_por_nombre || document.creado_por_email}</span></p>
                   
                   {document.observacion_revision && (
                     <div className="mt-3 bg-red-50/50 border-l-2 border-red-500 p-3 text-sm text-red-800 font-body-md">

@@ -18,6 +18,10 @@ const routePermissions: Array<{ prefix: string; permissions: string[] }> = [
     permissions: [PERMISSIONS.TECNICOS_READ],
   },
   {
+    prefix: '/admin/productores',
+    permissions: [PERMISSIONS.PRODUCTORES_CREATE, PERMISSIONS.PRODUCTORES_UPDATE],
+  },
+  {
     prefix: '/admin/proyectos',
     permissions: [PERMISSIONS.PROYECTOS_READ_ASSIGNED, PERMISSIONS.PROYECTOS_READ_PRIVATE],
   },

@@ -1,6 +1,6 @@
 const db = require('../config/db');
 
-const SLUGGABLE_TABLES = new Set(['noticias', 'biblioteca', 'proyectos']);
+const SLUGGABLE_TABLES = new Set(['noticias', 'biblioteca', 'proyectos', 'productores']);
 
 function slugify(text) {
   return String(text || '')

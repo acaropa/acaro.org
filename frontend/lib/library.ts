@@ -8,6 +8,7 @@ export interface LibraryRecord {
   imagen_portada?: string | null;
   fecha_creacion?: string;
   creado_por_email?: string;
+  creado_por_nombre?: string | null;
   autor?: string;
   fecha?: string;
   link?: string;
@@ -106,7 +107,7 @@ export function toLibraryDocument(record: LibraryRecord): LibraryDocument {
     }),
     dateValue,
     year: dateValue.slice(0, 4),
-    contributor: record.creado_por_email || record.autor || "ACARO",
+    contributor: record.creado_por_nombre || record.creado_por_email || record.autor || "ACARO",
     meta: resourceType === "link" ? "Enlace externo" : "Abrir documento",
     link,
   };

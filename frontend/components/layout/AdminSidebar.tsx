@@ -29,6 +29,12 @@ const navigation = [
     permissions: [PERMISSIONS.NOTICIAS_CREATE, PERMISSIONS.NOTICIAS_UPDATE],
   },
   {
+    name: "Productores",
+    href: "/admin/productores",
+    icon: "agriculture",
+    permissions: [PERMISSIONS.PRODUCTORES_CREATE, PERMISSIONS.PRODUCTORES_UPDATE],
+  },
+  {
     name: "Técnicos",
     href: "/admin/tecnicos",
     icon: "engineering",

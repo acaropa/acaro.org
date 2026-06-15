@@ -43,7 +43,16 @@ async function queryAll(user = null) {
   const [rows] = await db.query(
     `SELECT p.id, p.nombre, p.slug, p.descripcion, p.tipo, p.clasificacion, p.imagen_portada,
             p.estado, p.fecha_inicio, p.fecha_fin, p.supervisor_id, p.created_at,
-            u.email AS responsable_email, s.email AS supervisor_email
+            u.email AS responsable_email, u.full_name AS responsable_nombre,
+            s.email AS supervisor_email, s.full_name AS supervisor_nombre,
+            (
+              SELECT CASE
+                WHEN SUM(pf.peso_porcentaje) > 0
+                  THEN ROUND(SUM(pf.porcentaje_avance * pf.peso_porcentaje) / SUM(pf.peso_porcentaje))
+                ELSE ROUND(AVG(pf.porcentaje_avance))
+              END
+              FROM proyecto_fases pf WHERE pf.proyecto_id = p.id
+            ) AS progreso
      FROM proyectos p
      LEFT JOIN users u ON u.id = p.responsable_id
      LEFT JOIN users s ON s.id = p.supervisor_id
@@ -67,7 +76,8 @@ async function queryById(id) {
     `SELECT p.id, p.nombre, p.slug, p.descripcion, p.tipo, p.clasificacion, p.imagen_portada,
             p.estado, p.fecha_inicio, p.fecha_fin, p.responsable_id,
             p.supervisor_id, p.created_at,
-            u.email AS responsable_email, s.email AS supervisor_email
+            u.email AS responsable_email, u.full_name AS responsable_nombre,
+            s.email AS supervisor_email, s.full_name AS supervisor_nombre
      FROM proyectos p
      LEFT JOIN users u ON u.id = p.responsable_id
      LEFT JOIN users s ON s.id = p.supervisor_id

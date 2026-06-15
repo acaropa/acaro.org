@@ -31,9 +31,11 @@ async function queryAll(includeInternal = false, user = null) {
     `SELECT n.id, n.titulo, n.slug, n.resumen, n.contenido, n.categoria, n.imagen_portada,
             n.estado, n.visibilidad,
             n.creado_por, n.publicado_por, n.fecha_creacion, n.fecha_publicacion,
-            creator.email AS creado_por_email
+            creator.email AS creado_por_email, creator.full_name AS creado_por_nombre,
+            publisher.email AS publicado_por_email, publisher.full_name AS publicado_por_nombre
      FROM noticias n
      JOIN users creator ON creator.id = n.creado_por
+     LEFT JOIN users publisher ON publisher.id = n.publicado_por
      ${where}
      ORDER BY COALESCE(n.fecha_publicacion, n.fecha_creacion) DESC`,
     values
@@ -67,9 +69,11 @@ async function queryBySlug(slug, includeInternal = false) {
     `SELECT n.id, n.titulo, n.slug, n.resumen, n.contenido, n.categoria, n.imagen_portada,
             n.estado, n.visibilidad,
             n.creado_por, n.publicado_por, n.fecha_creacion, n.fecha_publicacion,
-            creator.email AS creado_por_email
+            creator.email AS creado_por_email, creator.full_name AS creado_por_nombre,
+            publisher.email AS publicado_por_email, publisher.full_name AS publicado_por_nombre
      FROM noticias n
      JOIN users creator ON creator.id = n.creado_por
+     LEFT JOIN users publisher ON publisher.id = n.publicado_por
      WHERE n.slug = ?
      ${includeInternal ? '' : "AND n.estado = 'publicada' AND n.visibilidad = 'publica'"}`,
     [slug]

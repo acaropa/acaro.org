@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { PublicLayout } from '@/components/layout/PublicLayout';
 import { ScrollReveal } from '@/components/landing/LandingMotion';
 
@@ -20,7 +21,7 @@ export default function Nosotros() {
               Somos Asociación Café Robusta OBC
             </h1>
             <p className="text-[18px] leading-[1.6] text-[#fdf9f4]/80 mt-8 max-w-xl">
-              Cultivando un legado a través de robusta premium, con profundas raíces en la comunidad y el cuidado del medio ambiente.
+              Fortalecemos la producción de café robusta mediante calidad, innovación, comunidad y sostenibilidad.
             </p>
           </ScrollReveal>
         </section>
@@ -59,14 +60,14 @@ export default function Nosotros() {
               <span className="font-black text-[96px] leading-[1] tracking-[-0.04em] text-[#fdf9f4]/10 dark:text-[#120c08]/10 block mb-4 transition-colors duration-300">01</span>
               <h3 className="font-semibold text-[24px] leading-[1.3] text-[#fdf9f4] dark:text-[#120c08] mb-8 transition-colors duration-300">Misión</h3>
               <p className="text-[18px] leading-[1.6] text-[#fdf9f4]/80 dark:text-[#4f453f] transition-colors duration-300">
-                Producir y entregar café robusta de la más alta calidad, empoderando a nuestra comunidad de agricultores mediante prácticas sostenibles y económicamente viables que respetan la tierra.
+                Fortalecer el sector cafetero de la provincia de Panamá Oeste, promover su crecimiento con tecnología que sea sostenible, competitiva, y de calidad, amigable con el ambiente.
               </p>
             </ScrollReveal>
             <ScrollReveal delay={300} distance="sm">
               <span className="font-black text-[96px] leading-[1] tracking-[-0.04em] text-[#fdf9f4]/10 dark:text-[#120c08]/10 block mb-4 transition-colors duration-300">02</span>
               <h3 className="font-semibold text-[24px] leading-[1.3] text-[#fdf9f4] dark:text-[#120c08] mb-8 transition-colors duration-300">Visión</h3>
               <p className="text-[18px] leading-[1.6] text-[#fdf9f4]/80 dark:text-[#4f453f] transition-colors duration-300">
-                Ser el referente global de café robusta premium, reconocidos no solo por nuestro perfil en taza, sino por nuestro compromiso inquebrantable con los productores y el paisaje de nuestros orígenes.
+                Ser la organización líder de productores de café robusta de la región de Panamá Oeste y del país, prestando servicios a sus socios y promoviendo el Café Robusta a nivel nacional e internacional.
               </p>
             </ScrollReveal>
           </div>
@@ -81,16 +82,21 @@ export default function Nosotros() {
             <div className="grid grid-cols-1 md:grid-cols-12 gap-[24px]">
               <div className="md:col-span-8">
                 <ScrollReveal delay={100} distance="sm" className="h-full">
-                  <div className="relative h-[500px] overflow-hidden group">
+                  <Link href="/productores" className="relative h-[500px] overflow-hidden group block">
                     <img
                       alt="Farmer in field"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
                       src="/assets/landing-hero-v2.jpg"
                     />
+                    <div className="absolute inset-0 bg-[#120c08]/0 group-hover:bg-[#120c08]/20 transition-colors duration-500"></div>
                     <div className="absolute bottom-0 left-0 p-8 md:p-16 bg-gradient-to-t from-[#120c08]/90 to-transparent w-full">
-                      <h4 className="font-semibold text-[24px] leading-[1.3] text-[#fdf9f4]">Los Productores</h4>
+                      <h4 className="font-semibold text-[24px] leading-[1.3] text-[#fdf9f4] mb-3">Los Productores</h4>
+                      <span className="inline-flex items-center gap-2 text-[12px] font-semibold tracking-[0.1em] uppercase text-[#fdf9f4]/80 group-hover:text-accent transition-colors duration-300">
+                        Conocer sus historias
+                        <span className="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform duration-300">arrow_forward</span>
+                      </span>
                     </div>
-                  </div>
+                  </Link>
                 </ScrollReveal>
               </div>
               <div className="md:col-span-4">

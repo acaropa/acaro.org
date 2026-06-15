@@ -9,22 +9,25 @@ import { PERMISSIONS } from '@/lib/permissions';
 interface UserRecord {
   id: number;
   email: string;
+  full_name: string | null;
   role: 'admin' | 'supervisor' | 'tecnico' | 'visitante';
   activo: boolean | number;
   created_at: string;
 }
 
-const empty = { email: '', password: '', role: 'visitante' };
+const empty = { email: '', password: '', role: 'visitante', full_name: '' };
 
 export default function AdminUsuarios() {
   const { user, can } = useAuth();
   const canCreate = can(PERMISSIONS.USUARIOS_CREATE);
+  const canUpdate = can(PERMISSIONS.USUARIOS_UPDATE);
   const canAssignRoles = can(PERMISSIONS.USUARIOS_ASSIGN_ROLES);
   const canDisable = can(PERMISSIONS.USUARIOS_DISABLE);
   const [users, setUsers] = useState<UserRecord[]>([]);
   const [form, setForm] = useState(empty);
   const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState('');
+  const [nameDrafts, setNameDrafts] = useState<Record<number, string>>({});
 
   const load = useCallback(async () => {
     try {
@@ -48,6 +51,15 @@ export default function AdminUsuarios() {
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo crear el usuario');
+    }
+  }
+
+  async function saveFullName(id: number, fullName: string) {
+    try {
+      await api.put(`/usuarios/${id}`, { full_name: fullName.trim() || null });
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo actualizar el nombre visible');
     }
   }
 
@@ -105,6 +117,12 @@ export default function AdminUsuarios() {
                 className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
             </div>
             <div>
+              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Nombre visible</label>
+              <input type="text" placeholder="Nombre que verá el público" value={form.full_name}
+                onChange={event => setForm(current => ({ ...current, full_name: event.target.value }))}
+                className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
+            </div>
+            <div>
               <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Contraseña *</label>
               <input required minLength={12} type="password" placeholder="Mínimo 12 caracteres" value={form.password}
                 onChange={event => setForm(current => ({ ...current, password: event.target.value }))}
@@ -148,11 +166,39 @@ export default function AdminUsuarios() {
               </span>
             </div>
             
-            <h2 className="font-headline-md text-lg font-bold text-foreground mb-4 truncate" title={record.email}>
-              {record.email}
+            <h2 className="font-headline-md text-lg font-bold text-foreground mb-1 truncate" title={record.email}>
+              {record.full_name || record.email}
             </h2>
-            
+            {record.full_name && (
+              <p className="text-xs text-muted mb-3 truncate" title={record.email}>{record.email}</p>
+            )}
+
             <div className="flex flex-col gap-2 mb-6 flex-1">
+              <div className="flex flex-col gap-1">
+                <span className="font-label-caps text-[10px] uppercase tracking-widest text-muted">Nombre visible (público)</span>
+                {canUpdate ? (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      placeholder="Nombre completo"
+                      value={nameDrafts[record.id] ?? record.full_name ?? ''}
+                      onChange={event => setNameDrafts(current => ({ ...current, [record.id]: event.target.value }))}
+                      className="w-full bg-background border-b border-border py-2 text-sm font-body-md text-foreground focus:outline-none focus:border-primary transition-colors"
+                    />
+                    {nameDrafts[record.id] !== undefined && nameDrafts[record.id] !== (record.full_name ?? '') && (
+                      <button
+                        type="button"
+                        onClick={() => void saveFullName(record.id, nameDrafts[record.id])}
+                        className="shrink-0 px-3 py-1.5 font-label-caps text-[10px] uppercase tracking-widest bg-primary text-primary-foreground hover:bg-accent transition-colors"
+                      >
+                        Guardar
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <span className="text-sm text-foreground font-body-md">{record.full_name || '—'}</span>
+                )}
+              </div>
               <div className="flex flex-col gap-1">
                 <span className="font-label-caps text-[10px] uppercase tracking-widest text-muted">Rol de sistema</span>
                 {canAssignRoles && record.id !== user?.id ? (

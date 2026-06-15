@@ -7,7 +7,7 @@ import { PublicLayout } from '@/components/layout/PublicLayout';
 import { ScrollReveal } from '@/components/landing/LandingMotion';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { api, apiAssetUrl } from '@/lib/api';
-import { NoticiaRecord, formatNoticiaDate } from '@/lib/news';
+import { NoticiaRecord, formatNoticiaDate, getNoticiaAutor } from '@/lib/news';
 
 function NoticiaDetalle() {
   const searchParams = useSearchParams();
@@ -56,9 +56,13 @@ function NoticiaDetalle() {
                 <span className="text-xs font-bold tracking-widest uppercase text-muted">{formatNoticiaDate(noticia)}</span>
               </div>
 
-              <h1 className="landing-hero-title text-[40px] md:text-[64px] leading-[1.1] tracking-[-0.04em] text-primary mb-[40px]">
+              <h1 className="landing-hero-title text-[40px] md:text-[64px] leading-[1.1] tracking-[-0.04em] text-primary mb-[16px]">
                 {noticia.titulo}
               </h1>
+
+              <p className="text-xs font-semibold tracking-wider text-muted mb-[40px]">
+                Publicado por <span className="text-primary">{getNoticiaAutor(noticia)}</span>
+              </p>
 
               {noticia.imagen_portada && (
                 <div className="w-full h-[320px] md:h-[480px] bg-surface overflow-hidden mb-[48px]">

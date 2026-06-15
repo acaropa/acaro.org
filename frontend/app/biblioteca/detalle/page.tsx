@@ -70,7 +70,7 @@ function DocumentDetail() {
                   <span className="flex items-center gap-1.5">
                     <CalendarDays className="h-4 w-4" /> {document.date}
                   </span>
-                  <span>Por {document.contributor}</span>
+                  <span>Subido por {document.contributor}</span>
                   <span className="uppercase">{document.type}</span>
                 </div>
 

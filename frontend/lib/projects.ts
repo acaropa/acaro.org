@@ -59,7 +59,10 @@ export interface ProyectoRecord {
   supervisor_id: number | null;
   created_at: string;
   responsable_email?: string | null;
+  responsable_nombre?: string | null;
   supervisor_email?: string | null;
+  supervisor_nombre?: string | null;
+  progreso?: number | null;
   tecnicos?: ProyectoTecnico[];
   fases?: ProyectoFase[];
   evidencias?: ProyectoArchivo[];
@@ -102,5 +105,7 @@ export function toProjectCard(proyecto: ProyectoRecord, index: number): Project 
     category: (proyecto.clasificacion || "General").toUpperCase(),
     imageUrl: apiAssetUrl(proyecto.imagen_portada) || undefined,
     layoutStyle: LAYOUT_CYCLE[index % LAYOUT_CYCLE.length],
+    progress: proyecto.progreso ?? null,
+    responsable: proyecto.responsable_nombre || proyecto.responsable_email || null,
   };
 }

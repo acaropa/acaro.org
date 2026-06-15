@@ -13,6 +13,19 @@ export interface NoticiaRecord {
   fecha_creacion: string;
   fecha_publicacion: string | null;
   creado_por_email?: string;
+  creado_por_nombre?: string | null;
+  publicado_por_email?: string | null;
+  publicado_por_nombre?: string | null;
+}
+
+export function getNoticiaAutor(record: NoticiaRecord): string {
+  return (
+    record.publicado_por_nombre ||
+    record.publicado_por_email ||
+    record.creado_por_nombre ||
+    record.creado_por_email ||
+    "ACARO"
+  );
 }
 
 export const newsCategories = [

@@ -12,7 +12,7 @@ function invalidateContentCaches() {
 
 async function getAll() {
   const [rows] = await db.query(
-    `SELECT id, email, role, activo, created_at, updated_at
+    `SELECT id, email, full_name, role, activo, created_at, updated_at
      FROM users
      ORDER BY created_at DESC`
   );
@@ -21,14 +21,14 @@ async function getAll() {
 
 async function getById(id) {
   const [rows] = await db.query(
-    `SELECT id, email, role, activo, created_at, updated_at
+    `SELECT id, email, full_name, role, activo, created_at, updated_at
      FROM users WHERE id = ?`,
     [id]
   );
   return rows[0] || null;
 }
 
-async function create({ email, password, role }) {
+async function create({ email, password, role, full_name }) {
   if (!VALID_ROLES.includes(role)) {
     const err = new Error('Rol inválido');
     err.status = 400;
@@ -38,15 +38,15 @@ async function create({ email, password, role }) {
   const normalizedEmail = email.trim().toLowerCase();
   const passwordHash = await bcrypt.hash(password, 10);
   const [result] = await db.query(
-    'INSERT INTO users (email, password_hash, role) VALUES (?, ?, ?)',
-    [normalizedEmail, passwordHash, role]
+    'INSERT INTO users (email, password_hash, role, full_name) VALUES (?, ?, ?, ?)',
+    [normalizedEmail, passwordHash, role, full_name?.trim() || null]
   );
   invalidateContentCaches();
   return getById(result.insertId);
 }
 
 async function update(id, data) {
-  const allowed = ['email', 'activo'];
+  const allowed = ['email', 'activo', 'full_name'];
   const fields = Object.keys(data).filter(field => allowed.includes(field));
   if (fields.length === 0) {
     const err = new Error('Sin campos válidos para actualizar');

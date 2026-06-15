@@ -48,7 +48,7 @@ function MainFeature({ document }: { document: LibraryDocument }) {
     <ScrollReveal delay={100} distance="sm" className="md:col-span-8">
     <Link
       href={`/biblioteca/detalle/?slug=${document.slug || ""}`}
-      className="group relative flex min-h-[410px] h-full w-full overflow-hidden rounded-lg bg-[#21130d] shadow-sm"
+      className="group relative flex min-h-[410px] h-full w-full overflow-hidden rounded-none bg-[#21130d]"
     >
       {document.coverImage ? (
         <div
@@ -60,20 +60,20 @@ function MainFeature({ document }: { document: LibraryDocument }) {
       )}
       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-[#2b1710]/45 to-black/5" />
       <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
-        <span className="inline-flex rounded bg-[#3d4b37]/90 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white">
+        <span className="inline-flex bg-accent px-3 py-1 text-[12px] font-semibold uppercase tracking-[0.1em] leading-none text-primary-foreground">
           {document.category}
         </span>
-        <h2 className="mt-4 max-w-3xl font-serif text-3xl font-bold leading-tight text-white sm:text-4xl">
+        <h2 className="mt-4 max-w-3xl font-serif text-[32px] font-semibold leading-[1.2] text-[#fdf9f4] sm:text-[40px]">
           {document.title}
         </h2>
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-white/90">
+        <p className="mt-3 max-w-2xl text-[16px] leading-[1.6] text-[#fdf9f4]/80">
           {document.description}
         </p>
-        <div className="mt-5 flex flex-wrap items-center gap-5 text-xs text-white/75">
+        <div className="mt-5 flex flex-wrap items-center gap-5 text-xs text-[#fdf9f4]/70">
           <span className="flex items-center gap-1.5">
             <CalendarDays className="h-4 w-4" /> {document.date}
           </span>
-          <span>{document.contributor}</span>
+          <span>Subido por {document.contributor}</span>
         </div>
       </div>
     </Link>
@@ -86,7 +86,7 @@ function SecondaryFeature({ document }: { document: LibraryDocument }) {
     <ScrollReveal delay={200} distance="sm" className="md:col-span-4">
     <Link
       href={`/biblioteca/detalle/?slug=${document.slug || ""}`}
-      className="group flex min-h-[410px] h-full w-full flex-col overflow-hidden rounded-lg border border-[#ded6cc] bg-white shadow-sm transition-shadow hover:shadow-md dark:border-border dark:bg-card"
+      className="group flex min-h-[410px] h-full w-full flex-col overflow-hidden rounded-none border border-border bg-card transition-colors hover:border-primary/30"
     >
       <div className="relative h-44 overflow-hidden">
         {document.coverImage ? (
@@ -100,18 +100,18 @@ function SecondaryFeature({ document }: { document: LibraryDocument }) {
         <div className="absolute inset-0 bg-[#25160e]/30" />
       </div>
       <div className="flex flex-1 flex-col p-6">
-        <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#705a4f]">
+        <span className="text-[12px] font-semibold uppercase tracking-[0.1em] leading-none text-accent">
           {document.category}
         </span>
-        <h3 className="mt-2 font-serif text-2xl font-bold leading-tight text-[#25160e] dark:text-foreground">
+        <h3 className="mt-3 font-serif text-[24px] font-semibold leading-[1.3] text-primary">
           {document.title}
         </h3>
-        <p className="mt-3 line-clamp-3 text-sm leading-6 text-[#5f514a] dark:text-muted">
+        <p className="mt-3 line-clamp-3 text-[16px] leading-[1.6] text-muted">
           {document.description}
         </p>
-        <div className="mt-auto flex items-center justify-between border-t border-[#e5ddd4] pt-4 text-xs text-[#81756f] dark:border-border">
-          <span>Por {document.contributor}</span>
-          <ArrowRight className="h-5 w-5 text-[#25160e] transition-transform group-hover:translate-x-1 dark:text-accent" />
+        <div className="mt-auto flex items-center justify-between border-t border-primary/10 pt-4 text-xs text-muted">
+          <span>Subido por {document.contributor}</span>
+          <ArrowRight className="h-5 w-5 text-accent transition-transform group-hover:translate-x-1" />
         </div>
       </div>
     </Link>
@@ -124,21 +124,21 @@ function TechnicalRow({ document, index }: { document: LibraryDocument, index: n
     <ScrollReveal delay={100 * index} distance="sm">
     <Link
       href={`/biblioteca/detalle/?slug=${document.slug || ""}`}
-      className="group flex items-center gap-4 border-b border-[#e7dfd6] p-4 last:border-0 hover:bg-[#faf7f2] dark:border-border dark:hover:bg-surface w-full"
+      className="group flex items-center gap-4 border-b border-primary/10 p-4 last:border-0 hover:bg-surface w-full"
     >
-      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded bg-[#f7decc] text-[#705a4f] dark:bg-accent/15 dark:text-accent">
+      <span className="flex h-11 w-11 shrink-0 items-center justify-center bg-accent/10 text-accent">
         <ResourceIcon document={document} />
       </span>
       <div className="min-w-0 flex-1">
-        <h4 className="truncate font-medium text-[#25160e] dark:text-foreground">{document.title}</h4>
-        <p className="mt-1 text-xs text-[#81756f] dark:text-muted">
+        <h4 className="truncate font-medium text-primary">{document.title}</h4>
+        <p className="mt-1 text-xs text-muted">
           {document.type} · {document.date}
         </p>
       </div>
       {document.resourceType === "link" ? (
-        <ExternalLink className="h-4 w-4 text-[#25160e] dark:text-accent" />
+        <ExternalLink className="h-4 w-4 text-accent" />
       ) : (
-        <Download className="h-4 w-4 text-[#25160e] dark:text-accent" />
+        <Download className="h-4 w-4 text-accent" />
       )}
     </Link>
     </ScrollReveal>
@@ -204,7 +204,7 @@ export default function Biblioteca() {
             </p>
           </ScrollReveal>
           <ScrollReveal delay={200} distance="sm" className="w-full flex justify-center">
-            <form onSubmit={submitSearch} className="mt-8 flex w-full max-w-xl rounded-lg bg-white p-1.5 shadow-xl">
+            <form onSubmit={submitSearch} className="mt-8 flex w-full max-w-xl rounded-none bg-white p-1.5">
               <Search className="ml-3 mt-3 h-5 w-5 shrink-0 text-[#81756f]" />
               <input
                 value={query}
@@ -213,7 +213,7 @@ export default function Biblioteca() {
                 placeholder="Buscar documentos, manuales, investigaciones..."
                 aria-label="Buscar en la biblioteca"
               />
-              <button className="rounded-md bg-[#243120] px-5 py-3 text-sm font-semibold text-white hover:bg-[#34452f]">
+              <button className="rounded-none bg-primary px-5 py-3 text-[12px] font-semibold uppercase tracking-[0.1em] text-primary-foreground transition-colors hover:bg-accent">
                 Buscar
               </button>
             </form>
@@ -221,19 +221,19 @@ export default function Biblioteca() {
         </div>
       </header>
 
-      <main className="bg-[#fbf9f5] py-10 text-[#1b1c1a] dark:bg-background dark:text-foreground">
+      <main className="bg-background py-10 text-foreground">
         <div className="mx-auto max-w-7xl px-6">
-          <div className="mb-8 flex flex-col gap-5 border-b border-[#e3ddd5] pb-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mb-8 flex flex-col gap-5 border-b border-primary/10 pb-6 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-wrap gap-2">
               {["Todos", ...libraryCategories].map(item => (
                 <button
                   key={item}
                   type="button"
                   onClick={() => setCategory(item)}
-                  className={`inline-flex items-center gap-2 rounded-md border px-4 py-2 text-xs font-semibold transition-colors ${
+                  className={`inline-flex items-center gap-2 rounded-none border px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.08em] transition-colors ${
                     category === item
-                      ? "border-[#243120] bg-[#243120] text-white"
-                      : "border-[#ded6cc] bg-white text-[#25160e] hover:border-[#81756f] dark:border-border dark:bg-card dark:text-foreground"
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-card text-foreground hover:border-primary/40"
                   }`}
                 >
                   {item === "Agronomía" && <Leaf className="h-3.5 w-3.5" />}
@@ -244,7 +244,7 @@ export default function Biblioteca() {
             <button
               type="button"
               onClick={() => setSort(current => (current === "recent" ? "az" : "recent"))}
-              className="flex shrink-0 items-center gap-2 text-xs text-[#5f514a] dark:text-muted"
+              className="flex shrink-0 items-center gap-2 text-xs text-muted"
             >
               <SlidersHorizontal className="h-4 w-4" />
               Ordenar: {sort === "recent" ? "más recientes" : "A-Z"}
@@ -252,7 +252,7 @@ export default function Biblioteca() {
           </div>
 
           {loading ? (
-            <div className="py-24 text-center text-sm text-[#81756f]">Cargando biblioteca...</div>
+            <div className="py-24 text-center text-sm text-muted">Cargando biblioteca...</div>
           ) : loadError ? (
             <EmptyState
               icon={<Library className="h-8 w-8" />}
@@ -274,16 +274,16 @@ export default function Biblioteca() {
 
               {recent.length > 0 && (
                 <section className="mt-12">
-                  <div className="mb-4 flex items-end justify-between border-b border-[#e3ddd5] pb-3">
-                    <h2 className="font-serif text-2xl font-bold">Especificaciones técnicas recientes</h2>
+                  <div className="mb-4 flex items-end justify-between border-b border-primary/10 pb-3">
+                    <h2 className="font-serif text-[24px] font-semibold leading-[1.3] text-primary">Especificaciones técnicas recientes</h2>
                   </div>
-                  <div className="overflow-hidden rounded-lg border border-[#e3ddd5] bg-white dark:border-border dark:bg-card">
+                  <div className="overflow-hidden rounded-none border border-border bg-card">
                     {recent.map((document, index) => <TechnicalRow key={document.id} document={document} index={index} />)}
                   </div>
                   <div className="mt-6 flex justify-center">
                     <Link
                       href="/biblioteca/buscar"
-                      className="group inline-flex items-center gap-2 rounded-md bg-[#243120] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#34452f]"
+                      className="group inline-flex items-center gap-2 rounded-none bg-primary px-6 py-3 text-[12px] font-semibold uppercase tracking-[0.1em] text-primary-foreground transition-colors hover:bg-accent"
                     >
                       Explorar catálogo completo
                       <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />

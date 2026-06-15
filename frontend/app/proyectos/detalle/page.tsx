@@ -74,9 +74,15 @@ function ProyectoDetalle() {
                 )}
               </div>
 
-              <h1 className="landing-hero-title font-serif text-[40px] leading-[1.1] md:text-[64px] tracking-[-0.04em] text-primary mb-[40px]">
+              <h1 className={`landing-hero-title font-serif text-[40px] leading-[1.1] md:text-[64px] tracking-[-0.04em] text-primary ${(proyecto.responsable_nombre || proyecto.responsable_email) ? 'mb-[16px]' : 'mb-[40px]'}`}>
                 {proyecto.nombre}
               </h1>
+
+              {(proyecto.responsable_nombre || proyecto.responsable_email) && (
+                <p className="text-xs font-semibold tracking-wider text-muted mb-[40px]">
+                  Responsable: <span className="text-primary">{proyecto.responsable_nombre || proyecto.responsable_email}</span>
+                </p>
+              )}
 
               {proyecto.imagen_portada && (
                 <div className="w-full h-[320px] md:h-[480px] bg-surface overflow-hidden mb-[48px]">

@@ -24,8 +24,8 @@ const BASE_SELECT = `
   SELECT b.id, b.titulo, b.slug, b.descripcion, b.archivo_url, b.categoria, b.imagen_portada,
          b.estado, b.visibilidad, b.creado_por, b.revisado_por,
          b.fecha_creacion, b.fecha_revision, b.observacion_revision,
-         creator.email AS creado_por_email,
-         reviewer.email AS revisado_por_email
+         creator.email AS creado_por_email, creator.full_name AS creado_por_nombre,
+         reviewer.email AS revisado_por_email, reviewer.full_name AS revisado_por_nombre
   FROM biblioteca b
   JOIN users creator ON creator.id = b.creado_por
   LEFT JOIN users reviewer ON reviewer.id = b.revisado_por

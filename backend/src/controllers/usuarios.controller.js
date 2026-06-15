@@ -10,13 +10,13 @@ async function getAll(req, res, next) {
 
 async function create(req, res, next) {
   try {
-    const { email, password, role } = req.body || {};
+    const { email, password, role, full_name } = req.body || {};
     if (!email || !password || !role) {
       return res.status(400).json({ error: 'email, password y role son requeridos' });
     }
     const passwordError = validateNewPassword(password);
     if (passwordError) return res.status(400).json({ error: passwordError });
-    res.status(201).json(await usuarios.create({ email, password, role }));
+    res.status(201).json(await usuarios.create({ email, password, role, full_name }));
   } catch (err) { next(err); }
 }
 

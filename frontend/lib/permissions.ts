@@ -38,6 +38,10 @@ export const PERMISSIONS = {
   TECNICOS_UPDATE: 'tecnicos.update',
   TECNICOS_ASSIGN: 'tecnicos.assign',
   TECNICOS_DELETE: 'tecnicos.delete',
+  PRODUCTORES_READ_PUBLIC: 'productores.read.public',
+  PRODUCTORES_CREATE: 'productores.create',
+  PRODUCTORES_UPDATE: 'productores.update',
+  PRODUCTORES_DELETE: 'productores.delete',
 } as const;
 
 export type Permission = typeof PERMISSIONS[keyof typeof PERMISSIONS];

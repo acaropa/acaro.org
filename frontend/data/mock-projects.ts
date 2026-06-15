@@ -12,6 +12,8 @@ export interface Project {
   imageUrl?: string;
   icon?: string;
   layoutStyle: LayoutStyle;
+  progress?: number | null;
+  responsable?: string | null;
 }
 
 export const mockProjects: Project[] = [
