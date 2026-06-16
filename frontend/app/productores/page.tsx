@@ -1,18 +1,22 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { PublicLayout } from '@/components/layout/PublicLayout';
 import { ScrollReveal } from '@/components/landing/LandingMotion';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { api } from '@/lib/api';
-import { ProductorRecord, producerImage, formatExperience, formatProducerDate } from '@/lib/producers';
+import { ProductorRecord, producerImage, formatExperience } from '@/lib/producers';
 
 function ProducerCard({ producer, index }: { producer: ProductorRecord; index: number }) {
   const experience = formatExperience(producer.anios_experiencia);
 
   return (
     <ScrollReveal delay={Math.min(index, 4) * 50} distance="sm" className="md:col-span-4 flex flex-col mb-8">
-      <div className="flex flex-col w-full h-full group">
+      <Link
+        href={`/productores/detalle?slug=${encodeURIComponent(producer.slug)}`}
+        className="flex flex-col w-full h-full group"
+      >
         <div className="h-80 bg-surface mb-6 overflow-hidden relative">
           <img
             alt={producer.nombre}
@@ -47,9 +51,14 @@ function ProducerCard({ producer, index }: { producer: ProductorRecord; index: n
         <div className="h-[1px] bg-primary/10 mb-4 mt-auto"></div>
         <div className="flex justify-between items-center text-[12px] font-semibold tracking-[0.1em] leading-none text-primary/80 uppercase">
           <span>{experience || 'Productor asociado'}</span>
-          <span>Desde {formatProducerDate(producer.created_at)}</span>
+          <span className="inline-flex items-center gap-1">
+            Ver perfil
+            <span className="material-symbols-outlined text-[14px] transition-transform duration-300 group-hover:translate-x-1">
+              arrow_forward
+            </span>
+          </span>
         </div>
-      </div>
+      </Link>
     </ScrollReveal>
   );
 }
