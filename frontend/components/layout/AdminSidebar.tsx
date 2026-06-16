@@ -23,6 +23,12 @@ const navigation = [
     permissions: [PERMISSIONS.BIBLIOTECA_READ_INTERNAL, PERMISSIONS.BIBLIOTECA_UPLOAD_OWN],
   },
   {
+    name: "Notas conceptuales",
+    href: "/admin/notas-conceptuales",
+    icon: "contract_edit",
+    permissions: [],
+  },
+  {
     name: "Noticias",
     href: "/admin/noticias",
     icon: "newspaper",

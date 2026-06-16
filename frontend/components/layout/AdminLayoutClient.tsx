@@ -33,6 +33,10 @@ const routePermissions: Array<{ prefix: string; permissions: string[] }> = [
       PERMISSIONS.BIBLIOTECA_REVIEW,
     ],
   },
+  {
+    prefix: '/admin/notas-conceptuales',
+    permissions: [],
+  },
 ];
 
 export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
@@ -60,6 +64,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   const allowed = isInternalUser && (
     pathname === '/admin' ||
     !routeRule ||
+    routeRule.permissions.length === 0 ||
     hasAnyPermission(user.permissions, routeRule.permissions)
   );
 

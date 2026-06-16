@@ -1,0 +1,32 @@
+-- Notas Conceptuales — documentos formales de actividades ACARO
+
+CREATE TABLE IF NOT EXISTS notas_conceptuales (
+  id                        INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+  asociacion                VARCHAR(255)  NOT NULL,
+  titulo                    VARCHAR(255)  NOT NULL DEFAULT 'NOTA CONCEPTUAL',
+  subtitulo                 TEXT          NOT NULL,
+  fecha                     VARCHAR(100)  NOT NULL,
+  lugar                     VARCHAR(500)  NOT NULL,
+  horario                   VARCHAR(100)  NOT NULL,
+  introduccion              LONGTEXT      NOT NULL,
+  objetivo                  LONGTEXT      NOT NULL,
+  participantes_acaro       TEXT          NOT NULL,
+  participantes_contraparte TEXT          NOT NULL,
+  temas                     LONGTEXT      NOT NULL,
+  metodologia               LONGTEXT      NOT NULL,
+  agenda                    JSON          NOT NULL,
+  resultados                LONGTEXT      NOT NULL,
+  productos                 LONGTEXT      NOT NULL,
+  aprobacion                LONGTEXT      NOT NULL,
+  firmante_acaro            VARCHAR(255)  NOT NULL,
+  cargo_acaro               VARCHAR(255)  NOT NULL,
+  firmante_tecnico          VARCHAR(255)  NOT NULL,
+  cargo_tecnico             VARCHAR(255)  NOT NULL,
+  realizado_por             VARCHAR(500)  NOT NULL,
+  fecha_documento           VARCHAR(100)  NOT NULL,
+  creado_por                INT UNSIGNED  NOT NULL,
+  created_at                TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at                TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  FOREIGN KEY (creado_por) REFERENCES users(id) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

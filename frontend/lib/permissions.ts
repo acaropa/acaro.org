@@ -42,6 +42,9 @@ export const PERMISSIONS = {
   PRODUCTORES_CREATE: 'productores.create',
   PRODUCTORES_UPDATE: 'productores.update',
   PRODUCTORES_DELETE: 'productores.delete',
+  NOTAS_CONCEPTUALES_CREATE: 'notas_conceptuales.create',
+  NOTAS_CONCEPTUALES_UPDATE: 'notas_conceptuales.update',
+  NOTAS_CONCEPTUALES_DELETE: 'notas_conceptuales.delete',
 } as const;
 
 export type Permission = typeof PERMISSIONS[keyof typeof PERMISSIONS];
