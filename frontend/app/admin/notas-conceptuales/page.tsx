@@ -175,7 +175,7 @@ function slugify(value: string) {
   );
 }
 
-function buildDocumentHtml(form: ConceptNoteForm, logoUrl = '') {
+function buildDocumentHtml(form: ConceptNoteForm, logoUrl = '', autoPrint = false) {
   const p = (text: string) =>
     paragraphsFromText(text).map(item => `<p>${escapeHtml(item)}</p>`).join('');
   const ul = (text: string) =>
@@ -193,16 +193,17 @@ function buildDocumentHtml(form: ConceptNoteForm, logoUrl = '') {
 <head>
   <meta charset="utf-8" />
   <title>${escapeHtml(form.titulo)} - ${escapeHtml(form.fechaDocumento)}</title>
+  ${autoPrint ? '<script>window.addEventListener("load",function(){setTimeout(function(){window.print();},600);});<\/script>' : ''}
   <style>
     @page { size: letter; margin: 15mm 18mm 15mm 18mm; }
     * { box-sizing: border-box; }
     body { margin: 0; padding: 0 18mm 15mm; color: #1a1a1a; font-family: Arial, Helvetica, sans-serif; font-size: 10.5pt; line-height: 1.45; background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .page { max-width: 760px; margin: 0 auto; }
     @media print { body { padding: 0; } .page { max-width: none; margin: 0; } }
-    .top-bar { height: 6px; background: #8B5E3C !important; margin-bottom: 14px; }
+    .top-bar { height: 6px; background: #8B5E3C !important; margin-bottom: 6px; }
     .bottom-bar { height: 5px; background: #8B5E3C !important; margin-top: 24px; }
-    header { text-align: center; margin-bottom: 14px; page-break-inside: avoid; }
-    .logo { width: 72px; height: 72px; margin: 0 auto 8px; display: block; }
+    header { text-align: center; margin-bottom: 10px; page-break-inside: avoid; }
+    .logo { width: 66px; height: 66px; margin: 0 auto 6px; display: block; }
     .association { font-weight: 700; font-size: 11.5pt; margin-bottom: 2px; }
     .doc-title { font-size: 17pt; font-weight: 900; margin: 4px 0 6px; letter-spacing: .06em; text-transform: uppercase; }
     .subtitle-box { background: #8B5E3C !important; color: #fff !important; font-weight: 700; font-size: 11pt; padding: 9px 22px; text-align: center; line-height: 1.32; }
@@ -387,28 +388,22 @@ export default function AdminNotasConceptualesPage() {
 
   function savePdf() {
     if (!previewForm) return;
-    const blob = new Blob([preview], { type: 'text/html;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const win = window.open(url, '_blank', 'noopener,noreferrer');
-    if (!win) { URL.revokeObjectURL(url); return; }
-    win.addEventListener('load', () => {
-      win.print();
-      URL.revokeObjectURL(url);
-    });
+    const html = buildDocumentHtml(previewForm, logoUrl);
+
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:816px;height:1px;border:0;visibility:hidden;';
+    document.body.appendChild(iframe);
+
+    iframe.addEventListener('load', () => {
+      setTimeout(() => {
+        iframe.contentWindow?.focus();
+        iframe.contentWindow?.print();
+      }, 600);
+    }, { once: true });
+
+    iframe.srcdoc = html;
   }
 
-  function downloadWord() {
-    if (!previewForm) return;
-    const blob = new Blob([preview], { type: 'application/msword;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${slugify(previewForm.subtitulo)}.doc`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
-  }
 
   return (
     <>
@@ -437,14 +432,6 @@ export default function AdminNotasConceptualesPage() {
               className="px-6 py-3 font-label-caps text-label-caps border border-border text-foreground hover:bg-surface transition-colors uppercase tracking-widest disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Guardar PDF
-            </button>
-            <button
-              type="button"
-              onClick={downloadWord}
-              disabled={!selectedRecord}
-              className="px-6 py-3 font-label-caps text-label-caps border border-border text-foreground hover:bg-surface transition-colors uppercase tracking-widest disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              Descargar Word
             </button>
           </div>
         </div>
