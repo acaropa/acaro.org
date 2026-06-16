@@ -1,4 +1,4 @@
-import { EmptyState } from '@/components/ui/EmptyState';
+import Link from 'next/link';
 
 export default function AdminConfiguracion() {
   return (
@@ -16,10 +16,49 @@ export default function AdminConfiguracion() {
         </div>
       </section>
 
-      <div className="bg-surface/30 border border-border border-dashed p-16 flex flex-col items-center justify-center text-center">
-        <span className="material-symbols-outlined text-[48px] text-muted mb-4 opacity-50">settings</span>
-        <h3 className="font-headline-md text-xl font-bold text-foreground mb-2">Próximamente</h3>
-        <p className="font-body-md text-muted max-w-md">Las configuraciones de la plataforma estarán disponibles en futuras actualizaciones.</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <Link
+          href="/admin/configuracion/logs"
+          className="group flex flex-col gap-4 p-6 rounded-xl border border-border bg-surface/30 hover:bg-surface/60 hover:border-primary/40 transition-all duration-200"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-zinc-900 border border-zinc-700 group-hover:border-zinc-600 transition-colors">
+              <span className="material-symbols-outlined text-green-400 text-[20px]">terminal</span>
+            </div>
+            <h2 className="font-headline-md text-[18px] font-bold text-foreground">Logs</h2>
+          </div>
+          <p className="font-body-md text-[14px] text-muted leading-relaxed">
+            Visualiza el registro de actividad de auditoría y sesiones del sistema en tiempo real.
+          </p>
+          <div className="mt-auto flex items-center gap-1 text-primary text-sm font-medium group-hover:gap-2 transition-all">
+            <span>Ver logs</span>
+            <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+          </div>
+        </Link>
+
+        <div className="flex flex-col gap-4 p-6 rounded-xl border border-border border-dashed bg-surface/10 opacity-50">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-surface-container border border-border">
+              <span className="material-symbols-outlined text-muted text-[20px]">tune</span>
+            </div>
+            <h2 className="font-headline-md text-[18px] font-bold text-foreground">Ajustes generales</h2>
+          </div>
+          <p className="font-body-md text-[14px] text-muted leading-relaxed">
+            Próximamente disponible.
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-4 p-6 rounded-xl border border-border border-dashed bg-surface/10 opacity-50">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-surface-container border border-border">
+              <span className="material-symbols-outlined text-muted text-[20px]">shield</span>
+            </div>
+            <h2 className="font-headline-md text-[18px] font-bold text-foreground">Seguridad</h2>
+          </div>
+          <p className="font-body-md text-[14px] text-muted leading-relaxed">
+            Próximamente disponible.
+          </p>
+        </div>
       </div>
     </>
   );

@@ -18,6 +18,7 @@ const usuariosRoutes = require('./routes/usuarios.routes');
 const noticiasRoutes = require('./routes/noticias.routes');
 const productoresRoutes = require('./routes/productores.routes');
 const notasConceptualesRoutes = require('./routes/notasConceptuales.routes');
+const logsRoutes = require('./routes/logs.routes');
 const { cleanupOldSessions } = require('./services/sessions.service');
 
 const app = express();
@@ -54,6 +55,7 @@ app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/noticias', noticiasRoutes);
 app.use('/api/productores', productoresRoutes);
 app.use('/api/notas-conceptuales', notasConceptualesRoutes);
+app.use('/api/logs', logsRoutes);
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads'), {
   fallthrough: false,
   maxAge: '1d',
