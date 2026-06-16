@@ -134,17 +134,50 @@
 }
 
 .theme-admin {
-  --background: #ffffff;
-  --foreground: #111111; /* black */
+  --background: #fffdf8;
+  --foreground: #2b1710;
   --primary: var(--color-chocolate);
-  --primary-foreground: #ffffff;
-  --surface: #ffffff;
-  --card: #ffffff;
-  --accent: var(--color-chocolate);
-  --accent-hover: #1A0D09; /* darker chocolate */
-  --muted: #000000; /* pure black for subtitles */
-  --brand-green: var(--color-chocolate); /* chocolate instead of green */
-  --border: #e5e5e5; /* subtle gray border */
+  --primary-foreground: #fffaf1;
+  --surface: #fffaf1;
+  --card: #fffdf8;
+  --accent: #c28a3a;
+  --accent-hover: #d7a24a;
+  --muted: #765e50;
+  --secondary: #5a3424;
+  --brand-green: #2f5d3a;
+  --border: #d8cabb;
+
+  --color-surface-bright: #fffdf8;
+  --color-surface-container-lowest: #fffdf8;
+  --color-surface-container-low: #fbf7f0;
+  --color-surface-container: #f6efe5;
+  --color-surface-container-high: #efe2d1;
+  --color-outline-variant: #d8cabb;
+  --color-outline: #a98f75;
+  --color-on-surface-variant: #765e50;
+  --color-primary-fixed: #f3e8d8;
+  --color-on-primary-fixed: #2b1710;
+}
+
+.theme-admin,
+.theme-admin header,
+.theme-admin button,
+.theme-admin a,
+.theme-admin input,
+.theme-admin select,
+.theme-admin textarea {
+  font-family: "Avenir Next", Avenir, var(--font-sans-source), Inter, system-ui, sans-serif;
+}
+
+.theme-admin .font-headline-lg,
+.theme-admin .font-headline-md,
+.theme-admin .font-display-number {
+  font-family: var(--font-display), Montserrat, var(--font-sans-source), Inter, system-ui, sans-serif;
+}
+
+.theme-admin .font-label-caps {
+  font-family: "Avenir Next", Avenir, var(--font-sans-source), Inter, system-ui, sans-serif;
+  letter-spacing: 0.08em;
 }
 
 .theme-admin button,

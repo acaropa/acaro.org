@@ -163,6 +163,7 @@ function escapeHtml(value: string) {
     .replaceAll("'", '&#039;');
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function slugify(value: string) {
   return (
     value
@@ -173,6 +174,41 @@ function slugify(value: string) {
       .replace(/^-+|-+$/g, '')
       .slice(0, 70) || 'nota-conceptual'
   );
+}
+
+function normalizeSearch(value: string) {
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
+function getNoteStatus(note: NotaConceptualRecord) {
+  const requiredFields = [
+    note.subtitulo,
+    note.fecha,
+    note.lugar,
+    note.horario,
+    note.introduccion,
+    note.objetivo,
+    note.metodologia,
+    note.resultados,
+    note.productos,
+  ];
+  const isComplete = requiredFields.every(value => value?.trim());
+  const isStarted = Boolean(note.subtitulo?.trim() && (note.introduccion?.trim() || note.objetivo?.trim()));
+  if (isComplete) return { label: 'Aprobada', className: 'bg-[#ead2bd] text-[#7a4d27]' };
+  if (isStarted) return { label: 'En revision', className: 'bg-[#d8eef1] text-[#336a73]' };
+  return { label: 'Borrador', className: 'bg-[#e8dedd] text-[#6f4d4a]' };
+}
+
+function getNoteSummary(note: NotaConceptualRecord) {
+  return note.objetivo || note.introduccion || note.lugar || 'Sin descripcion registrada.';
+}
+
+function formatNoteDate(value: string) {
+  if (!value) return 'Sin fecha';
+  return value;
 }
 
 function buildDocumentHtml(form: ConceptNoteForm, logoUrl = '', autoPrint = false) {
@@ -296,11 +332,32 @@ export default function AdminNotasConceptualesPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [query, setQuery] = useState('');
 
   const selectedRecord = notes.find(n => n.id === selectedId) || null;
   const logoUrl = `${window.location.origin}/assets/logos/logo1.png`;
   const previewForm = useMemo(() => (selectedRecord ? recordToForm(selectedRecord) : null), [selectedRecord]);
   const preview = useMemo(() => (previewForm ? buildDocumentHtml(previewForm, logoUrl) : ''), [previewForm, logoUrl]);
+  const filteredNotes = useMemo(() => {
+    const term = normalizeSearch(query.trim());
+    if (!term) return notes;
+    return notes.filter(note => {
+      const haystack = normalizeSearch([
+        note.titulo,
+        note.subtitulo,
+        note.fecha,
+        note.lugar,
+        note.horario,
+        note.introduccion,
+        note.objetivo,
+        note.temas,
+        note.metodologia,
+        note.resultados,
+        note.productos,
+      ].join(' '));
+      return haystack.includes(term);
+    });
+  }, [notes, query]);
 
   const loadNotes = useCallback(async () => {
     try {
@@ -315,7 +372,10 @@ export default function AdminNotasConceptualesPage() {
     }
   }, []);
 
-  useEffect(() => { loadNotes(); }, [loadNotes]);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void loadNotes();
+  }, [loadNotes]);
 
   function updateField<K extends keyof ConceptNoteForm>(key: K, value: ConceptNoteForm[K]) {
     setDraftForm(current => ({ ...current, [key]: value }));
@@ -448,7 +508,18 @@ export default function AdminNotasConceptualesPage() {
         <aside className="bg-card border border-border rounded-lg p-6 space-y-5">
           <div className="flex items-center justify-between gap-3">
             <span className="font-label-caps text-[10px] text-muted uppercase tracking-widest">Notas creadas</span>
-            <span className="text-xs text-muted">{notes.length}</span>
+            <span className="text-xs text-muted">{filteredNotes.length}/{notes.length}</span>
+          </div>
+          <div className="relative">
+            <span className="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-muted">
+              search
+            </span>
+            <input
+              value={query}
+              onChange={event => setQuery(event.target.value)}
+              placeholder="Buscar notas..."
+              className="w-full border border-border bg-surface-container-lowest py-3 pl-10 pr-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted focus:border-primary"
+            />
           </div>
           {loading ? (
             <div className="py-8 text-center text-sm text-muted">Cargando...</div>
@@ -458,22 +529,41 @@ export default function AdminNotasConceptualesPage() {
               <h2 className="font-headline-md text-lg text-foreground">Sin notas</h2>
               <p className="mt-2 text-sm text-muted leading-6">Crea la primera nota conceptual para verla aquí.</p>
             </div>
+          ) : filteredNotes.length === 0 ? (
+            <div className="border border-dashed border-border rounded-lg p-6 text-center">
+              <span className="material-symbols-outlined text-[36px] text-muted mb-3">search_off</span>
+              <h2 className="font-headline-md text-lg text-foreground">Sin resultados</h2>
+              <p className="mt-2 text-sm text-muted leading-6">No encontramos notas con ese termino.</p>
+            </div>
           ) : (
-            <div className="space-y-3">
-              {notes.map(note => {
+            <div className="-mx-6 border-y border-border">
+              {filteredNotes.map(note => {
                 const isSelected = note.id === selectedId;
+                const status = getNoteStatus(note);
                 return (
                   <button
                     key={note.id}
                     type="button"
                     onClick={() => setSelectedId(note.id)}
-                    className={`w-full text-left border rounded-lg p-4 transition-colors ${
-                      isSelected ? 'border-primary bg-primary/5' : 'border-border hover:bg-surface'
+                    className={`w-full border-b border-border px-6 py-4 text-left transition-colors last:border-b-0 ${
+                      isSelected ? 'bg-primary/5' : 'hover:bg-surface-container-low'
                     }`}
                   >
-                    <span className="block font-label-caps text-[10px] uppercase tracking-widest text-muted">{note.fecha}</span>
-                    <span className="mt-2 block font-semibold text-foreground leading-5 line-clamp-2">{note.subtitulo}</span>
-                    <span className="mt-2 block text-xs text-muted line-clamp-1">{note.lugar}</span>
+                    <div className="flex items-start justify-between gap-3">
+                      <h3 className="text-[15px] font-bold leading-5 text-foreground line-clamp-2">
+                        {note.subtitulo || note.titulo}
+                      </h3>
+                      <span className={`shrink-0 rounded-full px-2 py-1 text-[8px] font-bold uppercase tracking-widest ${status.className}`}>
+                        {status.label}
+                      </span>
+                    </div>
+                    <p className="mt-2 line-clamp-2 text-xs leading-5 text-muted">
+                      {getNoteSummary(note)}
+                    </p>
+                    <div className="mt-3 flex items-center gap-1 text-[11px] font-medium text-foreground">
+                      <span className="material-symbols-outlined text-[14px]">calendar_month</span>
+                      {formatNoteDate(note.fecha)}
+                    </div>
                   </button>
                 );
               })}
