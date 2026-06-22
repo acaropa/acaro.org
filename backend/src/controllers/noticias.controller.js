@@ -60,7 +60,17 @@ async function create(req, res, next) {
     const imagen_portada = uploaded || req.body.imagen_portada || null;
 
     const secondaryUploaded = await uploadSecondaryImages(req.body);
-    const imagenes = secondaryUploaded || req.body.imagenes || null;
+    let imagenes = null;
+    let reqImagenes = req.body.imagenes;
+    if (typeof reqImagenes === 'string') {
+      try { reqImagenes = JSON.parse(reqImagenes); } catch (e) { reqImagenes = null; }
+    }
+    const existingUrls = Array.isArray(reqImagenes) ? reqImagenes : [];
+    if (secondaryUploaded) {
+      imagenes = [...existingUrls, ...secondaryUploaded];
+    } else {
+      imagenes = existingUrls.length > 0 ? existingUrls : null;
+    }
 
     res.status(201).json(await noticias.create({ ...req.body, imagen_portada, imagenes }, req.user));
   } catch (err) { next(err); }
@@ -89,16 +99,18 @@ async function update(req, res, next) {
     if (imagen_portada) body.imagen_portada = imagen_portada;
 
     const secondaryUploaded = await uploadSecondaryImages(body);
+    let existingUrls = [];
+    if (body.imagenes) {
+      existingUrls = typeof body.imagenes === 'string' ? JSON.parse(body.imagenes) : body.imagenes;
+    }
+    if (!Array.isArray(existingUrls)) {
+      existingUrls = [];
+    }
+
     if (secondaryUploaded) {
-      let existingUrls = [];
-      if (body.imagenes) {
-        existingUrls = typeof body.imagenes === 'string' ? JSON.parse(body.imagenes) : body.imagenes;
-      }
-      body.imagenes = [...(Array.isArray(existingUrls) ? existingUrls : []), ...secondaryUploaded];
+      body.imagenes = [...existingUrls, ...secondaryUploaded];
     } else if ('imagenes' in body) {
-      if (typeof body.imagenes === 'string') {
-        body.imagenes = JSON.parse(body.imagenes);
-      }
+      body.imagenes = existingUrls;
     }
 
     const item = await noticias.update(req.params.id, body);

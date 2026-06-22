@@ -30,14 +30,28 @@ const SESSION_CLEANUP_INTERVAL_MS = 24 * 60 * 60 * 1000;
 app.set('trust proxy', 1);
 
 app.use(helmet({ crossOriginResourcePolicy: false }));
+const allowedOrigins = [
+  'http://localhost:3001',
+  'http://localhost:3000',
+  process.env.FRONTEND_URL,
+  'https://acaro.org',
+  'https://www.acaro.org',
+].filter(Boolean);
+
+const isDev = process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
+
 app.use(cors({
-  origin: [
-    'http://localhost:3001',
-    'http://localhost:3000',
-    process.env.FRONTEND_URL,
-    'https://acaro.org',
-    'https://www.acaro.org',
-  ].filter(Boolean),
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+
+    if (isDev) {
+      const isLocalIp = /^https?:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+)(:\d+)?$/.test(origin);
+      if (isLocalIp) return callback(null, true);
+    }
+
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
 }));
 app.use(morgan('dev'));

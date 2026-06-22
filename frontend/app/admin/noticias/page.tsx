@@ -46,6 +46,8 @@ export default function AdminNoticias() {
   const [imageMode, setImageMode] = useState<'url' | 'file'>('url');
   const [cover, setCover] = useState<UploadedFile | null>(null);
   const [secondaryFiles, setSecondaryFiles] = useState<UploadedFile[]>([]);
+  const [secondaryImageMode, setSecondaryImageMode] = useState<'file' | 'url'>('file');
+  const [newSecondaryUrl, setNewSecondaryUrl] = useState('');
   const [editing, setEditing] = useState<NoticiaRecord | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -72,6 +74,8 @@ export default function AdminNoticias() {
   function resetForm() {
     setForm(emptyForm);
     setImageMode('url');
+    setSecondaryImageMode('file');
+    setNewSecondaryUrl('');
     setCover(null);
     setSecondaryFiles([]);
     setEditing(null);
@@ -98,6 +102,8 @@ export default function AdminNoticias() {
       imagenes: secondaryImagesList,
     });
     setImageMode('url');
+    setSecondaryImageMode('file');
+    setNewSecondaryUrl('');
     setCover(null);
     setSecondaryFiles([]);
     setShowForm(true);
@@ -369,19 +375,68 @@ export default function AdminNoticias() {
               )}
 
               {/* Selector para agregar */}
-              <div className="max-w-xs">
-                <ImageUploadField
-                  value={null}
-                  onChange={(file) => {
-                    if (file) {
-                      setSecondaryFiles(current => [...current, file]);
-                    }
-                  }}
-                  showPreview={false}
-                  helperText="Agrega imágenes que se insertarán de forma fluida dentro del cuerpo de la noticia."
-                  label=""
-                />
+              <div className="flex items-center gap-2 mb-3">
+                <button
+                  type="button"
+                  onClick={() => setSecondaryImageMode('file')}
+                  className={`px-4 py-2 font-label-caps text-[11px] uppercase tracking-widest border transition-colors ${secondaryImageMode === 'file' ? 'border-primary text-primary bg-primary/5' : 'border-border text-muted hover:bg-surface'}`}
+                >
+                  Subir archivo
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSecondaryImageMode('url')}
+                  className={`px-4 py-2 font-label-caps text-[11px] uppercase tracking-widest border transition-colors ${secondaryImageMode === 'url' ? 'border-primary text-primary bg-primary/5' : 'border-border text-muted hover:bg-surface'}`}
+                >
+                  URL externa
+                </button>
               </div>
+
+              {secondaryImageMode === 'file' ? (
+                <div className="max-w-xs">
+                  <ImageUploadField
+                    value={null}
+                    onChange={(file) => {
+                      if (file) {
+                        setSecondaryFiles(current => [...current, file]);
+                      }
+                    }}
+                    showPreview={false}
+                    helperText="Agrega imágenes que se insertarán de forma fluida dentro del cuerpo de la noticia."
+                    label=""
+                  />
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="url"
+                      placeholder="https://..."
+                      value={newSecondaryUrl}
+                      onChange={event => setNewSecondaryUrl(event.target.value)}
+                      className="flex-1 bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const url = newSecondaryUrl.trim();
+                        if (!url) return;
+                        if (!form.imagenes.includes(url)) {
+                          setForm(current => ({
+                            ...current,
+                            imagenes: [...current.imagenes, url]
+                          }));
+                        }
+                        setNewSecondaryUrl('');
+                      }}
+                      className="px-4 py-3 bg-primary text-primary-foreground font-label-caps text-[11px] uppercase tracking-widest hover:bg-accent transition-colors shrink-0"
+                    >
+                      Agregar
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-muted">Ingresa la URL de la imagen externa y haz clic en Agregar.</p>
+                </div>
+              )}
             </div>
 
             <div className="md:col-span-2 flex justify-end mt-4">
