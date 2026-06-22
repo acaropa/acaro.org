@@ -17,6 +17,23 @@ async function uploadCoverImage(data) {
   return uploaded.url;
 }
 
+async function uploadSecondaryImages(data) {
+  if (!data.imagenes_base64 || !Array.isArray(data.imagenes_base64)) return undefined;
+  const urls = [];
+  for (const file of data.imagenes_base64) {
+    if (!file.base64 || !file.fileName) continue;
+    const uploaded = await saveBase64Upload({
+      base64: file.base64,
+      fileName: file.fileName,
+      subdir: 'noticias',
+      maxBytes: MAX_IMAGE_BYTES,
+      allowedExtensions: IMAGE_EXTENSIONS,
+    });
+    urls.push(uploaded.url);
+  }
+  return urls;
+}
+
 async function getAll(req, res, next) {
   try {
     const includeInternal = req.user?.role === 'admin' || req.user?.role === 'supervisor';
@@ -41,7 +58,11 @@ async function create(req, res, next) {
     }
     const uploaded = await uploadCoverImage(req.body);
     const imagen_portada = uploaded || req.body.imagen_portada || null;
-    res.status(201).json(await noticias.create({ ...req.body, imagen_portada }, req.user));
+
+    const secondaryUploaded = await uploadSecondaryImages(req.body);
+    const imagenes = secondaryUploaded || req.body.imagenes || null;
+
+    res.status(201).json(await noticias.create({ ...req.body, imagen_portada, imagenes }, req.user));
   } catch (err) { next(err); }
 }
 
@@ -66,6 +87,19 @@ async function update(req, res, next) {
 
     const imagen_portada = await uploadCoverImage(body);
     if (imagen_portada) body.imagen_portada = imagen_portada;
+
+    const secondaryUploaded = await uploadSecondaryImages(body);
+    if (secondaryUploaded) {
+      let existingUrls = [];
+      if (body.imagenes) {
+        existingUrls = typeof body.imagenes === 'string' ? JSON.parse(body.imagenes) : body.imagenes;
+      }
+      body.imagenes = [...(Array.isArray(existingUrls) ? existingUrls : []), ...secondaryUploaded];
+    } else if ('imagenes' in body) {
+      if (typeof body.imagenes === 'string') {
+        body.imagenes = JSON.parse(body.imagenes);
+      }
+    }
 
     const item = await noticias.update(req.params.id, body);
     if (!item) return res.status(404).json({ error: 'Noticia no encontrada' });

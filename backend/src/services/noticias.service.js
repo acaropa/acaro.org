@@ -28,7 +28,7 @@ async function queryAll(includeInternal = false, user = null) {
   }
 
   const [rows] = await db.query(
-    `SELECT n.id, n.titulo, n.slug, n.resumen, n.contenido, n.categoria, n.imagen_portada,
+    `SELECT n.id, n.titulo, n.slug, n.resumen, n.contenido, n.categoria, n.imagen_portada, n.imagenes,
             n.estado, n.visibilidad,
             n.creado_por, n.publicado_por, n.fecha_creacion, n.fecha_publicacion,
             creator.email AS creado_por_email, creator.full_name AS creado_por_nombre,
@@ -66,7 +66,7 @@ async function getBySlug(slug, includeInternal = false) {
 
 async function queryBySlug(slug, includeInternal = false) {
   const [rows] = await db.query(
-    `SELECT n.id, n.titulo, n.slug, n.resumen, n.contenido, n.categoria, n.imagen_portada,
+    `SELECT n.id, n.titulo, n.slug, n.resumen, n.contenido, n.categoria, n.imagen_portada, n.imagenes,
             n.estado, n.visibilidad,
             n.creado_por, n.publicado_por, n.fecha_creacion, n.fecha_publicacion,
             creator.email AS creado_por_email, creator.full_name AS creado_por_nombre,
@@ -85,8 +85,8 @@ async function create(data, actor) {
   const slug = await generateUniqueSlug('noticias', data.titulo);
   const estado = actor.role === 'tecnico' ? 'pendiente' : 'borrador';
   const [result] = await db.query(
-    `INSERT INTO noticias (titulo, slug, resumen, contenido, categoria, imagen_portada, estado, visibilidad, creado_por)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO noticias (titulo, slug, resumen, contenido, categoria, imagen_portada, imagenes, estado, visibilidad, creado_por)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       data.titulo,
       slug,
@@ -94,6 +94,7 @@ async function create(data, actor) {
       data.contenido,
       data.categoria || 'General',
       data.imagen_portada || null,
+      data.imagenes ? JSON.stringify(data.imagenes) : null,
       estado,
       data.visibilidad || 'publica',
       actor.id,
@@ -104,7 +105,7 @@ async function create(data, actor) {
 }
 
 async function update(id, data) {
-  const allowed = ['titulo', 'resumen', 'contenido', 'categoria', 'visibilidad', 'imagen_portada', 'estado'];
+  const allowed = ['titulo', 'resumen', 'contenido', 'categoria', 'visibilidad', 'imagen_portada', 'imagenes', 'estado'];
   const fields = Object.keys(data).filter(field => allowed.includes(field));
   if (!fields.length) {
     const err = new Error('Sin campos válidos para actualizar');
@@ -119,6 +120,9 @@ async function update(id, data) {
   }
 
   const values = { ...data };
+  if (fields.includes('imagenes') && values.imagenes) {
+    values.imagenes = JSON.stringify(values.imagenes);
+  }
   if (fields.includes('titulo')) {
     values.slug = await generateUniqueSlug('noticias', data.titulo, id);
     fields.push('slug');

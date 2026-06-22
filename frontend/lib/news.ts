@@ -6,6 +6,7 @@ export interface NoticiaRecord {
   contenido: string;
   categoria: string;
   imagen_portada: string | null;
+  imagenes?: string[] | string | null;
   estado: "borrador" | "pendiente" | "publicada" | "archivada";
   visibilidad: "publica" | "interna";
   creado_por?: number;

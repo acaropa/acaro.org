@@ -15,6 +15,7 @@ const emptyForm = {
   categoria: newsCategories[newsCategories.length - 1],
   visibilidad: 'publica' as 'publica' | 'interna',
   imagen_portada: '',
+  imagenes: [] as string[],
 };
 
 const stateLabels: Record<NoticiaRecord['estado'], string> = {
@@ -44,6 +45,7 @@ export default function AdminNoticias() {
   const [form, setForm] = useState(emptyForm);
   const [imageMode, setImageMode] = useState<'url' | 'file'>('url');
   const [cover, setCover] = useState<UploadedFile | null>(null);
+  const [secondaryFiles, setSecondaryFiles] = useState<UploadedFile[]>([]);
   const [editing, setEditing] = useState<NoticiaRecord | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -71,11 +73,20 @@ export default function AdminNoticias() {
     setForm(emptyForm);
     setImageMode('url');
     setCover(null);
+    setSecondaryFiles([]);
     setEditing(null);
     setShowForm(false);
   }
 
   function startEdit(item: NoticiaRecord) {
+    const secondaryImagesList: string[] = (() => {
+      if (!item.imagenes) return [];
+      if (typeof item.imagenes === 'string') {
+        try { return JSON.parse(item.imagenes); } catch { return []; }
+      }
+      return Array.isArray(item.imagenes) ? item.imagenes : [];
+    })();
+
     setEditing(item);
     setForm({
       titulo: item.titulo,
@@ -84,9 +95,11 @@ export default function AdminNoticias() {
       categoria: item.categoria,
       visibilidad: item.visibilidad,
       imagen_portada: item.imagen_portada || '',
+      imagenes: secondaryImagesList,
     });
     setImageMode('url');
     setCover(null);
+    setSecondaryFiles([]);
     setShowForm(true);
   }
 
@@ -103,6 +116,14 @@ export default function AdminNoticias() {
       } else {
         payload.imagen_portada = form.imagen_portada.trim() || null;
       }
+
+      if (secondaryFiles.length > 0) {
+        payload.imagenes_base64 = secondaryFiles.map(f => ({
+          base64: f.base64,
+          fileName: f.fileName,
+        }));
+      }
+
       if (editing) {
         await api.put(`/noticias/${editing.id}`, payload);
       } else {
@@ -295,6 +316,72 @@ export default function AdminNoticias() {
                   helperText="Formatos JPG, PNG o WEBP, máximo 4 MB."
                 />
               )}
+            </div>
+
+            <div className="md:col-span-2 border-t border-border pt-4 mt-2">
+              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Fotos secundarias (Opcional)</label>
+              
+              {/* Fotos existentes */}
+              {form.imagenes.length > 0 && (
+                <div className="mb-4">
+                  <p className="text-xs text-muted mb-2 font-semibold">Fotos existentes:</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    {form.imagenes.map((url, i) => (
+                      <div key={i} className="relative h-24 bg-surface border border-border rounded overflow-hidden">
+                        <img src={apiAssetUrl(url)} alt={`Foto ${i + 1}`} className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => setForm(current => ({
+                            ...current,
+                            imagenes: current.imagenes.filter((_, idx) => idx !== i)
+                          }))}
+                          className="absolute top-1 right-1 bg-red-600 hover:bg-red-800 text-white rounded-full p-1 text-[10px] transition-colors shadow flex items-center justify-center w-5 h-5"
+                          title="Eliminar foto"
+                        >
+                          <span className="material-symbols-outlined text-[14px]">close</span>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Nuevas fotos por subir */}
+              {secondaryFiles.length > 0 && (
+                <div className="mb-4">
+                  <p className="text-xs text-muted mb-2 font-semibold">Nuevas fotos por subir:</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    {secondaryFiles.map((file, i) => (
+                      <div key={i} className="relative h-24 bg-surface border border-border rounded overflow-hidden">
+                        <img src={file.base64} alt={`Nueva Foto ${i + 1}`} className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => setSecondaryFiles(current => current.filter((_, idx) => idx !== i))}
+                          className="absolute top-1 right-1 bg-red-600 hover:bg-red-800 text-white rounded-full p-1 text-[10px] transition-colors shadow flex items-center justify-center w-5 h-5"
+                          title="Eliminar foto"
+                        >
+                          <span className="material-symbols-outlined text-[14px]">close</span>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Selector para agregar */}
+              <div className="max-w-xs">
+                <ImageUploadField
+                  value={null}
+                  onChange={(file) => {
+                    if (file) {
+                      setSecondaryFiles(current => [...current, file]);
+                    }
+                  }}
+                  showPreview={false}
+                  helperText="Agrega imágenes que se insertarán de forma fluida dentro del cuerpo de la noticia."
+                  label=""
+                />
+              </div>
             </div>
 
             <div className="md:col-span-2 flex justify-end mt-4">

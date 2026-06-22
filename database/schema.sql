@@ -117,6 +117,7 @@ CREATE TABLE IF NOT EXISTS noticias (
   contenido       LONGTEXT NOT NULL,
   categoria       VARCHAR(100) NOT NULL DEFAULT 'General',
   imagen_portada  VARCHAR(500) DEFAULT NULL,
+  imagenes        JSON DEFAULT NULL,
   estado          ENUM('borrador','pendiente','publicada','archivada') NOT NULL DEFAULT 'borrador',
   visibilidad     ENUM('publica','interna') NOT NULL DEFAULT 'publica',
   creado_por      INT UNSIGNED NOT NULL,

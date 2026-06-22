@@ -31,6 +31,18 @@ function NoticiaDetalle() {
       .finally(() => setLoading(false));
   }, [slug]);
 
+  const secondaryImages: string[] = (() => {
+    if (!noticia || !noticia.imagenes) return [];
+    if (typeof noticia.imagenes === 'string') {
+      try { return JSON.parse(noticia.imagenes); } catch { return []; }
+    }
+    return Array.isArray(noticia.imagenes) ? noticia.imagenes : [];
+  })();
+
+  const paragraphs = noticia ? noticia.contenido.split(/\n+/).filter(Boolean) : [];
+  const inlineImagesCount = Math.min(secondaryImages.length, Math.floor(paragraphs.length / 2));
+  const remainingImages = secondaryImages.slice(inlineImagesCount);
+
   return (
     <PublicLayout className="landing-typography">
       <main className="flex-grow max-w-[960px] mx-auto w-full px-[20px] md:px-[64px] py-[80px]">
@@ -75,13 +87,55 @@ function NoticiaDetalle() {
                 </div>
               )}
 
-              <div className="flex flex-col gap-[24px]">
-                {noticia.contenido.split(/\n+/).filter(Boolean).map((paragraph, index) => (
-                  <p key={index} className="text-[18px] leading-[1.8] text-muted">
-                    {paragraph}
-                  </p>
-                ))}
+              <div className="block flow-root">
+                {paragraphs.map((paragraph, index) => {
+                  // Muestra imagen inline antes del párrafo:
+                  // Primera imagen antes del párrafo 1 (index 1),
+                  // Segunda antes del párrafo 3 (index 3), etc.
+                  const imageIndex = index > 0 && index % 2 === 1 ? Math.floor(index / 2) : -1;
+                  const hasImage = imageIndex >= 0 && imageIndex < inlineImagesCount;
+                  const imageUrl = hasImage ? secondaryImages[imageIndex] : null;
+                  const floatClass = imageIndex % 2 === 0 ? "float-right md:ml-8" : "float-left md:mr-8";
+
+                  return (
+                    <div key={index} className="contents">
+                      {hasImage && imageUrl && (
+                        <div className={`w-full md:w-[45%] lg:w-[40%] h-[240px] md:h-[300px] mb-6 rounded-lg overflow-hidden border border-[#ded6cc] bg-[#fbf9f5] dark:border-border dark:bg-surface ${floatClass}`}>
+                          <img
+                            src={apiAssetUrl(imageUrl)}
+                            alt={`Imagen del comunicado ${imageIndex + 1}`}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                        </div>
+                      )}
+                      <p className="text-[18px] leading-[1.8] text-muted mb-[24px]">
+                        {paragraph}
+                      </p>
+                    </div>
+                  );
+                })}
               </div>
+
+              {remainingImages.length > 0 && (
+                <div className="mt-16 pt-8 border-t border-border">
+                  <h3 className="text-xs font-bold uppercase tracking-[0.14em] text-accent mb-6">Galería del Comunicado</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                    {remainingImages.map((imgUrl, i) => (
+                      <div key={i} className="h-[200px] bg-surface rounded-lg overflow-hidden border border-border group relative">
+                        <a href={apiAssetUrl(imgUrl)} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
+                          <img
+                            src={apiAssetUrl(imgUrl)}
+                            alt={`Imagen de galería ${inlineImagesCount + i + 1}`}
+                            className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300"
+                            loading="lazy"
+                          />
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </article>
           </ScrollReveal>
         )}
