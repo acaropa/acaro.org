@@ -45,6 +45,19 @@ export const PERMISSIONS = {
   NOTAS_CONCEPTUALES_CREATE: 'notas_conceptuales.create',
   NOTAS_CONCEPTUALES_UPDATE: 'notas_conceptuales.update',
   NOTAS_CONCEPTUALES_DELETE: 'notas_conceptuales.delete',
+  ENCUESTAS_READ: 'encuestas.read',
+  ENCUESTAS_CREATE: 'encuestas.create',
+  ENCUESTAS_UPDATE: 'encuestas.update',
+  ENCUESTAS_PUBLISH: 'encuestas.publish',
+  ENCUESTAS_REVIEW: 'encuestas.review',
+  ENCUESTAS_CLOSE: 'encuestas.close',
+  ENCUESTAS_ARCHIVE: 'encuestas.archive',
+  ENCUESTAS_DELETE: 'encuestas.delete',
+  ENCUESTAS_DUPLICATE: 'encuestas.duplicate',
+  ENCUESTAS_RESULTS_READ: 'encuestas.results.read',
+  ENCUESTAS_RESULTS_EXPORT: 'encuestas.results.export',
+  ENCUESTAS_RESULTS_DELETE: 'encuestas.results.delete',
+  ENCUESTAS_RESPOND_INTERNAL: 'encuestas.respond.internal',
 } as const;
 
 export type Permission = typeof PERMISSIONS[keyof typeof PERMISSIONS];

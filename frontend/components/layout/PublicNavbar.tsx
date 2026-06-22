@@ -32,6 +32,7 @@ const navItems: NavItem[] = [
     ],
   },
   { href: "/biblioteca", label: "Biblioteca" },
+  { href: "/encuestas", label: "Encuestas" },
 ]
 
 export function PublicNavbar() {

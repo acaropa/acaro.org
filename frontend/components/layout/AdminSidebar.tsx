@@ -59,6 +59,12 @@ const navigation = [
     permissions: [PERMISSIONS.USUARIOS_READ],
   },
   {
+    name: "Encuestas",
+    href: "/admin/encuestas",
+    icon: "assignment",
+    permissions: [PERMISSIONS.ENCUESTAS_READ, PERMISSIONS.ENCUESTAS_CREATE],
+  },
+  {
     name: "Configuracion",
     href: "/admin/configuracion",
     icon: "settings",
