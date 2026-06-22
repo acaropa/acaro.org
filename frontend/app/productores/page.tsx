@@ -85,7 +85,7 @@ export default function Productores() {
       <main className="flex-grow pt-32 pb-[120px] px-[20px] md:px-[64px] max-w-[1280px] mx-auto w-full">
         <header className="mb-24 grid grid-cols-1 md:grid-cols-12 gap-[24px] items-end">
           <ScrollReveal delay={0} distance="sm" className="md:col-span-8">
-            <h1 className="landing-hero-title font-serif text-[40px] leading-[1.1] md:text-[64px] md:leading-[1.1] tracking-[-0.04em] text-primary mb-6">
+            <h1 className="font-serif font-semibold text-[32px] leading-[1.2] md:text-[52px] md:leading-[1.2] tracking-[-0.015em] text-primary mb-6">
               Nuestros<br />Productores.
             </h1>
           </ScrollReveal>

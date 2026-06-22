@@ -106,10 +106,23 @@ function ResultCard({ document, query }: { document: LibraryDocument; query: str
         <HighlightText text={document.description} query={query} />
       </p>
 
+      {document.tags?.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {document.tags.slice(0, 3).map(tag => (
+            <span key={tag} className="inline-flex items-center rounded-full border border-border bg-card px-2 py-0.5 text-[10px] font-medium text-muted">
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+
       <div className="mt-auto flex items-end justify-between pt-6">
         <div className="flex flex-col gap-0.5 text-[11px] font-medium text-muted">
           <span>{document.date}</span>
           <span className="uppercase">{document.type}</span>
+          {document.serie && (
+            <span className="mt-1 text-[10px] text-accent">📖 {document.serie}{document.ordenLectura ? ` · Paso ${document.ordenLectura}` : ''}</span>
+          )}
         </div>
         <div className="flex items-center gap-2 text-accent">
           {document.resourceType === "link" ? <ExternalLink className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -221,6 +234,8 @@ function SearchCatalog() {
   const [page, setPage] = useState(initialPage);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navigationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -241,6 +256,32 @@ function SearchCatalog() {
     () => [...new Set(documents.map(document => document.year))].sort((a, b) => b.localeCompare(a)),
     [documents],
   );
+
+  const suggestions = useMemo(() => {
+    if (query.trim().length < 2) return [];
+    const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    return documents
+      .filter(doc => words.every(word => doc.title.toLowerCase().includes(word)))
+      .slice(0, 5);
+  }, [query, documents]);
+
+  function selectSuggestion(title: string) {
+    setQuery(title);
+    setShowSuggestions(false);
+    
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    setIsSearching(true);
+    setShowResults(false);
+    
+    // Pequeño delay visual para simular la búsqueda
+    setTimeout(() => {
+      setAppliedQuery(title);
+      setPage(1);
+      setShowResults(true);
+      setIsSearching(false);
+      syncUrl({ query: title, page: 1 });
+    }, 150);
+  }
 
   const filtered = useMemo(() => {
     const matches = documents.filter(document =>
@@ -390,38 +431,73 @@ function SearchCatalog() {
               <p className="mx-auto mt-3 max-w-2xl text-sm text-white/85">
                 Repositorio oficial de investigación, metodologías y estándares para el cultivo y procesamiento del café robusta.
               </p>
-              <form
-                onSubmit={submitSearch}
-                className="group mx-auto mt-8 flex min-h-16 max-w-4xl items-center rounded-none border border-[#ead9c6] bg-[#fffaf1]/95 p-1.5 backdrop-blur-md transition-colors duration-300 focus-within:border-accent focus-within:bg-white"
+              <div 
+                className="relative mx-auto mt-8 w-full max-w-4xl"
+                onBlur={(e) => {
+                  if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                    setTimeout(() => setShowSuggestions(false), 200);
+                  }
+                }}
               >
-                <span className="ml-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-none bg-accent/15 text-accent transition-colors group-focus-within:bg-accent/25">
-                  <Search className="h-5 w-5" />
-                </span>
-                <input
-                  value={query}
-                  onChange={event => setQuery(event.target.value)}
-                  className="min-w-0 flex-1 bg-transparent px-4 text-[15px] font-medium text-[#25160e] caret-[#a66f20] outline-none placeholder:font-normal placeholder:text-[#8d7c70]"
-                  placeholder="Buscar documentos, manuales, investigaciones..."
-                />
-                {query && (
-                  <button
-                    type="button"
-                    onClick={clearQuery}
-                    aria-label="Limpiar búsqueda"
-                    className="my-auto mr-1 flex h-9 w-9 items-center justify-center rounded-none text-[#81756f] transition-colors hover:bg-accent/15 hover:text-[#25160e]"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
-                <button
-                  type="submit"
-                  disabled={isSearching}
-                  className="flex min-h-12 min-w-28 items-center justify-center gap-2 rounded-none bg-primary px-6 text-[12px] font-semibold uppercase tracking-[0.1em] text-primary-foreground transition-colors duration-300 hover:bg-accent active:scale-[0.98] disabled:cursor-wait disabled:opacity-80"
+                <form
+                  onSubmit={submitSearch}
+                  className="group flex min-h-16 items-center rounded-none border border-[#ead9c6] bg-[#fffaf1]/95 p-1.5 backdrop-blur-md transition-colors duration-300 focus-within:border-accent focus-within:bg-white"
                 >
-                  {isSearching && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                  {isSearching ? "Buscando" : "Buscar"}
-                </button>
-              </form>
+                  <span className="ml-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-none bg-accent/15 text-accent transition-colors group-focus-within:bg-accent/25">
+                    <Search className="h-5 w-5" />
+                  </span>
+                  <input
+                    ref={searchInputRef}
+                    value={query}
+                    onChange={event => {
+                      setQuery(event.target.value);
+                      setShowSuggestions(true);
+                    }}
+                    onFocus={() => setShowSuggestions(true)}
+                    className="min-w-0 flex-1 bg-transparent px-4 text-[15px] font-medium text-[#25160e] caret-[#a66f20] outline-none placeholder:font-normal placeholder:text-[#8d7c70]"
+                    placeholder="Buscar documentos, manuales, investigaciones..."
+                  />
+                  {query && (
+                    <button
+                      type="button"
+                      onClick={clearQuery}
+                      aria-label="Limpiar búsqueda"
+                      className="my-auto mr-1 flex h-9 w-9 items-center justify-center rounded-none text-[#81756f] transition-colors hover:bg-accent/15 hover:text-[#25160e]"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                  <button
+                    type="submit"
+                    disabled={isSearching}
+                    className="flex min-h-12 min-w-28 items-center justify-center gap-2 rounded-none bg-primary px-6 text-[12px] font-semibold uppercase tracking-[0.1em] text-primary-foreground transition-colors duration-300 hover:bg-accent active:scale-[0.98] disabled:cursor-wait disabled:opacity-80"
+                  >
+                    {isSearching && <LoaderCircle className="h-4 w-4 animate-spin" />}
+                    {isSearching ? "Buscando" : "Buscar"}
+                  </button>
+                </form>
+
+                {showSuggestions && suggestions.length > 0 && (
+                  <div className="absolute top-full z-50 mt-1 w-full overflow-hidden rounded-none border border-[#ead9c6] bg-white shadow-xl">
+                    <ul className="py-1">
+                      {suggestions.map(doc => (
+                        <li key={doc.id}>
+                          <button
+                            type="button"
+                            onClick={() => selectSuggestion(doc.title)}
+                            className="flex w-full items-center gap-3 px-5 py-3 text-left transition-colors hover:bg-accent/10 focus:bg-accent/10"
+                          >
+                            <Search className="h-4 w-4 text-muted/50 shrink-0" />
+                            <span className="text-sm font-medium text-primary line-clamp-1">
+                              <HighlightText text={doc.title} query={query} />
+                            </span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
               <div className="mt-6 flex flex-wrap justify-center gap-2.5">
                 {["Todos", ...libraryCategories].map(item => (
                   <button

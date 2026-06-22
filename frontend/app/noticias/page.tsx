@@ -48,7 +48,7 @@ export default function Noticias() {
         {/* Header Section */}
         <header className="mb-[40px]">
           <ScrollReveal delay={0} distance="sm">
-            <h1 className="landing-hero-title text-[48px] md:text-[72px] leading-[1.1] tracking-[-0.04em] text-primary max-w-4xl mb-[32px]">
+            <h1 className="font-serif font-semibold text-[36px] md:text-[56px] leading-[1.2] tracking-[-0.015em] text-primary max-w-4xl mb-[32px]">
               Noticias y novedades de la Asociación
             </h1>
             <p className="text-[20px] leading-[1.6] text-muted max-w-3xl">
@@ -94,7 +94,7 @@ export default function Noticias() {
               <section className="mb-[120px]">
                 <ScrollReveal delay={200} distance="md">
                   <Link href={`/noticias/detalle/?slug=${featured.slug}`} className="group grid grid-cols-1 lg:grid-cols-12 gap-[32px]">
-                    <div className="lg:col-span-8 h-[600px] bg-surface relative overflow-hidden">
+                    <div className="lg:col-span-7 h-[500px] bg-surface relative overflow-hidden">
                       {featured.imagen_portada && (
                         <img
                           alt={featured.titulo}
@@ -105,17 +105,17 @@ export default function Noticias() {
                       )}
                     </div>
 
-                    <div className="lg:col-span-4 flex flex-col justify-center bg-background p-[32px] md:p-[48px] relative border border-primary/20">
+                    <div className="lg:col-span-5 flex flex-col justify-center bg-background p-[24px] md:p-[40px] relative border border-primary/20">
                       <div className="flex items-center gap-[16px] mb-[16px]">
                         <span className="text-xs font-bold tracking-widest uppercase text-accent">{featured.categoria}</span>
                         <span className="w-1 h-1 rounded-full bg-primary/30"></span>
                         <span className="text-xs font-bold tracking-widest uppercase text-muted">{formatNoticiaDate(featured)}</span>
                       </div>
-                      <h2 className="font-bold text-[32px] md:text-[48px] leading-[1.2] text-primary mb-[24px]">
+                      <h2 className="font-serif font-semibold text-[26px] md:text-[34px] leading-[1.25] tracking-[-0.015em] text-primary mb-[20px]">
                         {featured.titulo}
                       </h2>
                       {featured.resumen && (
-                        <p className="text-[16px] leading-[1.6] text-muted mb-[32px]">
+                        <p className="text-[15px] leading-[1.6] text-muted mb-[24px]">
                           {featured.resumen}
                         </p>
                       )}
@@ -151,7 +151,7 @@ export default function Noticias() {
                         <span className="text-xs font-semibold tracking-wider uppercase text-accent block mb-[12px]">
                           {item.categoria} · {formatNoticiaDate(item)}
                         </span>
-                        <h3 className="font-bold text-[22px] leading-[1.3] text-primary mb-[12px]">{item.titulo}</h3>
+                        <h3 className="font-serif font-semibold text-[20px] md:text-[22px] leading-[1.3] tracking-[-0.01em] text-primary mb-[12px]">{item.titulo}</h3>
                         {item.resumen && (
                           <p className="text-[15px] leading-[1.6] text-muted flex-grow line-clamp-3">{item.resumen}</p>
                         )}

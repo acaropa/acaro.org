@@ -22,6 +22,7 @@ const navItems: NavItem[] = [
     submenu: [
       { href: "/nosotros", label: "Acerca de la Asociación", info: "Conoce nuestra historia, misión y propósito." },
       { href: "/noticias", label: "Noticias y Novedades", info: "Explora los últimos avances y eventos de la comunidad." },
+      { href: "/login", label: "Acceso Interno", info: "Portal de administración para miembros autorizados." },
     ],
   },
   {
@@ -118,11 +119,7 @@ export function PublicNavbar() {
             )}
           </nav>
 
-          <div className="hidden items-center gap-3 md:flex">
-            <Link href="/login" className="inline-flex min-h-10 items-center justify-center rounded-md bg-[#d7a24a] px-5 text-sm font-semibold text-[#120c08] transition-all hover:-translate-y-0.5 hover:bg-[#e8b661] active:translate-y-0">
-              Acceso interno
-            </Link>
-          </div>
+          <div className="hidden items-center gap-3 md:flex" />
 
           <div className="flex items-center gap-2 md:hidden">
             <button
@@ -167,9 +164,6 @@ export function PublicNavbar() {
                 </Link>
               )
             )}
-            <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-md bg-[#d7a24a] px-5 text-sm font-semibold text-[#120c08]">
-              Acceso interno
-            </Link>
           </div>
         </div>
       </div>

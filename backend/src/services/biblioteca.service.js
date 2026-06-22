@@ -22,6 +22,7 @@ const VISIBILITIES = ['publica', 'interna'];
 
 const BASE_SELECT = `
   SELECT b.id, b.titulo, b.slug, b.descripcion, b.archivo_url, b.categoria, b.imagen_portada,
+         b.etiquetas, b.serie, b.orden_lectura,
          b.estado, b.visibilidad, b.creado_por, b.revisado_por,
          b.fecha_creacion, b.fecha_revision, b.observacion_revision,
          creator.email AS creado_por_email, creator.full_name AS creado_por_nombre,
@@ -147,9 +148,11 @@ async function create(data, actor) {
   const slug = await generateUniqueSlug('biblioteca', data.titulo);
   const [result] = await db.query(
     `INSERT INTO biblioteca
-      (titulo, slug, descripcion, archivo_url, categoria, imagen_portada, estado, visibilidad,
+      (titulo, slug, descripcion, archivo_url, categoria, imagen_portada,
+       etiquetas, serie, orden_lectura,
+       estado, visibilidad,
        creado_por, revisado_por, fecha_revision, observacion_revision)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       data.titulo,
       slug,
@@ -157,6 +160,9 @@ async function create(data, actor) {
       data.archivo_url,
       data.categoria,
       data.imagen_portada || null,
+      data.etiquetas ? JSON.stringify(data.etiquetas) : null,
+      data.serie || null,
+      data.orden_lectura != null ? Number(data.orden_lectura) : null,
       initialState,
       data.visibilidad,
       actor.id,
@@ -170,7 +176,7 @@ async function create(data, actor) {
 }
 
 async function update(id, data) {
-  const allowed = ['titulo', 'descripcion', 'archivo_url', 'categoria', 'imagen_portada', 'visibilidad'];
+  const allowed = ['titulo', 'descripcion', 'archivo_url', 'categoria', 'imagen_portada', 'visibilidad', 'etiquetas', 'serie', 'orden_lectura'];
   const fields = Object.keys(data).filter(field => allowed.includes(field));
   if (fields.length === 0) {
     const err = new Error('Sin campos válidos para actualizar');
@@ -182,6 +188,12 @@ async function update(id, data) {
   if (fields.includes('titulo')) {
     values.slug = await generateUniqueSlug('biblioteca', data.titulo, id);
     fields.push('slug');
+  }
+  if (fields.includes('etiquetas') && values.etiquetas) {
+    values.etiquetas = JSON.stringify(values.etiquetas);
+  }
+  if (fields.includes('orden_lectura') && values.orden_lectura != null) {
+    values.orden_lectura = Number(values.orden_lectura);
   }
 
   await db.query(
@@ -222,6 +234,15 @@ async function remove(id) {
   return result.affectedRows > 0;
 }
 
+async function getBySerie(serie) {
+  if (!serie) return [];
+  const [rows] = await db.query(
+    `${BASE_SELECT} WHERE b.serie = ? AND b.estado = 'aprobado' AND b.visibilidad = 'publica' ORDER BY b.orden_lectura ASC, b.fecha_creacion ASC`,
+    [serie]
+  );
+  return rows;
+}
+
 module.exports = {
   STATES,
   VISIBILITIES,
@@ -234,4 +255,5 @@ module.exports = {
   review,
   remove,
   canSupervisorAccess,
+  getBySerie,
 };

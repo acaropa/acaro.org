@@ -74,7 +74,7 @@ function ProyectoDetalle() {
                 )}
               </div>
 
-              <h1 className={`landing-hero-title font-serif text-[40px] leading-[1.1] md:text-[64px] tracking-[-0.04em] text-primary ${(proyecto.responsable_nombre || proyecto.responsable_email) ? 'mb-[16px]' : 'mb-[40px]'}`}>
+              <h1 className={`font-serif font-semibold text-[32px] md:text-[52px] leading-[1.2] tracking-[-0.015em] text-primary ${(proyecto.responsable_nombre || proyecto.responsable_email) ? 'mb-[16px]' : 'mb-[40px]'}`}>
                 {proyecto.nombre}
               </h1>
 

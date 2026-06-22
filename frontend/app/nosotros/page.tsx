@@ -17,7 +17,7 @@ export default function Nosotros() {
             <div className="absolute inset-0 bg-gradient-to-t from-[#120C08] via-[#120C08]/40 to-transparent"></div>
           </div>
           <ScrollReveal delay={100} distance="md" className="relative z-10 max-w-[1280px] mx-auto w-full">
-            <h1 className="landing-hero-title text-[56px] leading-[1.1] md:text-[72px] tracking-[-0.04em] text-[#fdf9f4] max-w-3xl">
+            <h1 className="font-serif font-semibold text-[44px] leading-[1.2] md:text-[60px] tracking-[-0.015em] text-[#fdf9f4] max-w-3xl">
               Somos Asociación Café Robusta OBC
             </h1>
             <p className="text-[18px] leading-[1.6] text-[#fdf9f4]/80 mt-8 max-w-xl">

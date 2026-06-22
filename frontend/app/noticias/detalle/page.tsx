@@ -56,7 +56,7 @@ function NoticiaDetalle() {
                 <span className="text-xs font-bold tracking-widest uppercase text-muted">{formatNoticiaDate(noticia)}</span>
               </div>
 
-              <h1 className="landing-hero-title text-[40px] md:text-[64px] leading-[1.1] tracking-[-0.04em] text-primary mb-[16px]">
+              <h1 className="font-serif font-semibold text-[32px] md:text-[52px] leading-[1.2] tracking-[-0.015em] text-primary mb-[16px]">
                 {noticia.titulo}
               </h1>
 

@@ -69,7 +69,13 @@ export function PublicFooter() {
         </div>
 
         <ScrollReveal className="mt-16 flex flex-col gap-3 border-t border-[#3a2a20] pt-7 text-xs text-[#82766d] sm:flex-row sm:items-center sm:justify-between" delay={260} distance="sm">
-          <p>© {new Date().getFullYear()} Asociación Café Robusta OBC. Todos los derechos reservados.</p>
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
+            <p>© {new Date().getFullYear()} Asociación Café Robusta OBC. Todos los derechos reservados.</p>
+            <span className="hidden sm:inline text-[#3a2a20]">·</span>
+            <Link href="/login" className="hover:underline hover:text-[#b8a99a] transition-colors">
+              Acceso Interno
+            </Link>
+          </div>
           <p>Organización · Conocimiento · Producción</p>
         </ScrollReveal>
       </div>

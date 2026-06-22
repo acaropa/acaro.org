@@ -12,6 +12,9 @@ export interface LibraryRecord {
   autor?: string;
   fecha?: string;
   link?: string;
+  etiquetas?: string[] | string | null;
+  serie?: string | null;
+  orden_lectura?: number | null;
 }
 
 export type ResourceType = "pdf" | "video" | "link" | "doc";
@@ -37,6 +40,9 @@ export interface LibraryDocument {
   contributor: string;
   meta: string;
   link: string;
+  tags: string[];
+  serie: string | null;
+  ordenLectura: number | null;
 }
 
 export const libraryCategories: LibraryCategory[] = [
@@ -110,6 +116,15 @@ export function toLibraryDocument(record: LibraryRecord): LibraryDocument {
     contributor: record.creado_por_nombre || record.creado_por_email || record.autor || "ACARO",
     meta: resourceType === "link" ? "Enlace externo" : "Abrir documento",
     link,
+    tags: (() => {
+      if (!record.etiquetas) return [];
+      if (typeof record.etiquetas === 'string') {
+        try { return JSON.parse(record.etiquetas); } catch { return []; }
+      }
+      return Array.isArray(record.etiquetas) ? record.etiquetas : [];
+    })(),
+    serie: record.serie || null,
+    ordenLectura: record.orden_lectura ?? null,
   };
 }
 
@@ -136,5 +151,7 @@ export function matchesLibraryQuery(document: LibraryDocument, query: string) {
     document.type,
     document.category,
     document.contributor,
+    ...(document.tags || []),
+    document.serie || '',
   ].some(value => value.toLocaleLowerCase("es").includes(normalizedQuery));
 }

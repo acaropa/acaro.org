@@ -54,6 +54,18 @@ function validateDocument(data = {}, partial = false, trustedFileUrl = false) {
   if ('visibilidad' in data && !biblioteca.VISIBILITIES.includes(data.visibilidad)) {
     return 'visibilidad inválida';
   }
+  if ('etiquetas' in data && data.etiquetas !== null) {
+    if (!Array.isArray(data.etiquetas) || data.etiquetas.some(t => typeof t !== 'string')) {
+      return 'etiquetas debe ser un arreglo de textos';
+    }
+  }
+  if ('serie' in data && data.serie !== null && typeof data.serie !== 'string') {
+    return 'serie debe ser texto';
+  }
+  if ('orden_lectura' in data && data.orden_lectura !== null) {
+    const n = Number(data.orden_lectura);
+    if (!Number.isInteger(n) || n < 1) return 'orden_lectura debe ser un entero positivo';
+  }
   if ('descripcion' in data && data.descripcion !== null && typeof data.descripcion !== 'string') {
     return 'descripcion debe ser texto';
   }
@@ -126,6 +138,9 @@ async function create(req, res, next) {
       archivo_url: body.archivo_url.trim(),
       categoria: body.categoria.trim(),
       imagen_portada: body.imagen_portada?.trim() || null,
+      etiquetas: Array.isArray(body.etiquetas) ? body.etiquetas.map(t => t.trim()).filter(Boolean) : null,
+      serie: body.serie?.trim() || null,
+      orden_lectura: body.orden_lectura != null ? Number(body.orden_lectura) : null,
     }, req.user));
   } catch (err) { next(err); }
 }
@@ -188,6 +203,7 @@ async function review(req, res, next) {
       reject: ['rechazado', PERMISSIONS.BIBLIOTECA_REJECT],
       request_changes: ['requiere_correccion', PERMISSIONS.BIBLIOTECA_REQUEST_CHANGES],
       archive: ['archivado', PERMISSIONS.BIBLIOTECA_ARCHIVE],
+      unarchive: ['aprobado', PERMISSIONS.BIBLIOTECA_APPROVE],
     };
     const selected = actions[req.body?.action];
     if (!selected) return res.status(400).json({ error: 'Acción de revisión inválida' });
@@ -203,9 +219,10 @@ async function review(req, res, next) {
     ) {
       return res.status(403).json({ error: 'El documento no pertenece a un técnico asignado' });
     }
-    const allowedStates = req.body.action === 'archive'
-      ? ['aprobado', 'rechazado']
-      : ['pendiente_revision', 'requiere_correccion'];
+    let allowedStates = [];
+    if (req.body.action === 'archive') allowedStates = ['aprobado', 'rechazado'];
+    else if (req.body.action === 'unarchive') allowedStates = ['archivado'];
+    else allowedStates = ['pendiente_revision', 'requiere_correccion'];
     if (!allowedStates.includes(document.estado)) {
       return res.status(409).json({ error: 'El documento no admite esta transición' });
     }
@@ -232,4 +249,12 @@ async function remove(req, res, next) {
   } catch (err) { next(err); }
 }
 
-module.exports = { getAll, getById, getBySlug, create, update, resubmit, review, remove };
+async function getBySerie(req, res, next) {
+  try {
+    const serie = req.params.serie;
+    if (!serie) return res.status(400).json({ error: 'Serie es requerida' });
+    res.json(await biblioteca.getBySerie(decodeURIComponent(serie)));
+  } catch (err) { next(err); }
+}
+
+module.exports = { getAll, getById, getBySlug, getBySerie, create, update, resubmit, review, remove };

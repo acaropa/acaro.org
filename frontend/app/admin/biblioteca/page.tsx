@@ -35,6 +35,9 @@ interface LibraryRecord {
   fecha_creacion: string;
   fecha_revision: string | null;
   observacion_revision: string | null;
+  etiquetas: string[] | null;
+  serie: string | null;
+  orden_lectura: number | null;
 }
 
 const emptyForm = {
@@ -44,6 +47,9 @@ const emptyForm = {
   categoria: '',
   imagen_portada: '',
   visibilidad: 'interna' as 'publica' | 'interna',
+  etiquetas: '',
+  serie: '',
+  orden_lectura: '',
 };
 
 const stateLabels: Record<DocumentState, string> = {
@@ -123,6 +129,9 @@ export default function AdminBiblioteca() {
       categoria: document.categoria,
       imagen_portada: document.imagen_portada || '',
       visibilidad: document.visibilidad,
+      etiquetas: (document.etiquetas || []).join(', '),
+      serie: document.serie || '',
+      orden_lectura: document.orden_lectura != null ? String(document.orden_lectura) : '',
     });
     setUploadMode('url');
     setFile(null);
@@ -137,6 +146,11 @@ export default function AdminBiblioteca() {
     setError('');
     try {
       const payload: Record<string, unknown> = { ...form };
+      payload.etiquetas = form.etiquetas
+        ? form.etiquetas.split(',').map((t: string) => t.trim()).filter(Boolean)
+        : null;
+      payload.serie = form.serie.trim() || null;
+      payload.orden_lectura = form.orden_lectura ? Number(form.orden_lectura) : null;
       if (uploadMode === 'file' && file) {
         delete payload.archivo_url;
         payload.archivo_base64 = file.base64;
@@ -336,6 +350,21 @@ export default function AdminBiblioteca() {
               )}
             </div>
             <div className="md:col-span-2">
+              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Etiquetas</label>
+              <input value={form.etiquetas} onChange={event => setForm(current => ({ ...current, etiquetas: event.target.value }))} placeholder="Ej: Permisología, Legal, Productores (separadas por coma)" className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
+              <p className="mt-1 text-[11px] text-muted">Separa las etiquetas con comas. Estas ayudan a los usuarios a encontrar documentos relacionados.</p>
+            </div>
+            <div>
+              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Serie / Curso (opcional)</label>
+              <input value={form.serie} onChange={event => setForm(current => ({ ...current, serie: event.target.value }))} placeholder="Ej: Permisología del Café" className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
+              <p className="mt-1 text-[11px] text-muted">Agrupa documentos en un curso o serie paso a paso.</p>
+            </div>
+            <div>
+              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">N° de paso en la serie (opcional)</label>
+              <input type="number" min="1" value={form.orden_lectura} onChange={event => setForm(current => ({ ...current, orden_lectura: event.target.value }))} placeholder="Ej: 1" className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
+              <p className="mt-1 text-[11px] text-muted">El orden en que se debe leer este documento dentro de la serie.</p>
+            </div>
+            <div className="md:col-span-2">
               <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Descripción</label>
               <textarea value={form.descripcion} onChange={event => setForm(current => ({ ...current, descripcion: event.target.value }))} rows={3} className="w-full bg-background border border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors resize-none" />
             </div>
@@ -371,6 +400,16 @@ export default function AdminBiblioteca() {
                       {document.categoria}
                     </span>
                     <span className="text-xs text-muted font-mono">{document.visibilidad}</span>
+                    {document.serie && (
+                      <span className="text-[10px] tracking-wide text-primary/80 bg-primary/5 border border-primary/15 px-2 py-1 rounded">
+                        📖 {document.serie}{document.orden_lectura ? ` · Paso ${document.orden_lectura}` : ''}
+                      </span>
+                    )}
+                    {document.etiquetas?.map(tag => (
+                      <span key={tag} className="text-[10px] tracking-wide text-muted bg-surface px-2 py-0.5 rounded border border-border">
+                        {tag}
+                      </span>
+                    ))}
                   </div>
                   <a href={document.archivo_url} target="_blank" rel="noreferrer" className="block font-headline-md text-lg font-bold text-foreground hover:text-primary transition-colors mb-1">
                     {document.titulo}
@@ -412,6 +451,11 @@ export default function AdminBiblioteca() {
                     {canReview && document.estado === 'aprobado' && (
                       <button onClick={() => void review(document, 'archive')} className="flex items-center gap-1 text-sm font-medium text-muted hover:text-foreground">
                         <span className="material-symbols-outlined text-[16px]">inventory_2</span> Archivar
+                      </button>
+                    )}
+                    {canReview && document.estado === 'archivado' && (
+                      <button onClick={() => void review(document, 'unarchive')} className="flex items-center gap-1 text-sm font-medium text-brand-green hover:underline">
+                        <span className="material-symbols-outlined text-[16px]">unarchive</span> Desarchivar
                       </button>
                     )}
                     {canDelete && (
