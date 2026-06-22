@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useState } from "react"
 
 import { cn } from "@/lib/utils"
 import { Logo } from "@/components/Logo"
@@ -17,59 +18,77 @@ const navigation = [
     permissions: [PERMISSIONS.PROYECTOS_READ_ASSIGNED, PERMISSIONS.PROYECTOS_READ_PRIVATE],
   },
   {
-    name: "Biblioteca",
-    href: "/admin/biblioteca",
-    icon: "import_contacts",
-    permissions: [PERMISSIONS.BIBLIOTECA_READ_INTERNAL, PERMISSIONS.BIBLIOTECA_UPLOAD_OWN],
+    name: "Información institucional",
+    icon: "domain",
+    subItems: [
+      {
+        name: "Noticias",
+        href: "/admin/noticias",
+        icon: "newspaper",
+        permissions: [PERMISSIONS.NOTICIAS_CREATE, PERMISSIONS.NOTICIAS_UPDATE],
+      },
+      {
+        name: "Biblioteca",
+        href: "/admin/biblioteca",
+        icon: "import_contacts",
+        permissions: [PERMISSIONS.BIBLIOTECA_READ_INTERNAL, PERMISSIONS.BIBLIOTECA_UPLOAD_OWN],
+      },
+      {
+        name: "Documentos institucionales",
+        href: "/admin/notas-conceptuales",
+        icon: "contract_edit",
+        permissions: [],
+      },
+      {
+        name: "Encuestas",
+        href: "/admin/encuestas",
+        icon: "assignment",
+        permissions: [PERMISSIONS.ENCUESTAS_READ, PERMISSIONS.ENCUESTAS_CREATE],
+      },
+    ]
   },
   {
-    name: "Notas conceptuales",
-    href: "/admin/notas-conceptuales",
-    icon: "contract_edit",
-    permissions: [],
+    name: "Comunidad",
+    icon: "public",
+    subItems: [
+      {
+        name: "Productores",
+        href: "/admin/productores",
+        icon: "agriculture",
+        permissions: [PERMISSIONS.PRODUCTORES_CREATE, PERMISSIONS.PRODUCTORES_UPDATE],
+      },
+      {
+        name: "Técnicos",
+        href: "/admin/tecnicos",
+        icon: "engineering",
+        permissions: [PERMISSIONS.TECNICOS_READ],
+      },
+      {
+        name: "Socios",
+        href: "/admin/socios",
+        icon: "groups",
+        permissions: [PERMISSIONS.SOCIOS_READ],
+      },
+    ]
   },
   {
-    name: "Noticias",
-    href: "/admin/noticias",
-    icon: "newspaper",
-    permissions: [PERMISSIONS.NOTICIAS_CREATE, PERMISSIONS.NOTICIAS_UPDATE],
-  },
-  {
-    name: "Productores",
-    href: "/admin/productores",
-    icon: "agriculture",
-    permissions: [PERMISSIONS.PRODUCTORES_CREATE, PERMISSIONS.PRODUCTORES_UPDATE],
-  },
-  {
-    name: "Tecnicos",
-    href: "/admin/tecnicos",
-    icon: "engineering",
-    permissions: [PERMISSIONS.TECNICOS_READ],
-  },
-  {
-    name: "Socios",
-    href: "/admin/socios",
-    icon: "groups",
-    permissions: [PERMISSIONS.SOCIOS_READ],
-  },
-  {
-    name: "Usuarios",
-    href: "/admin/usuarios",
-    icon: "manage_accounts",
-    permissions: [PERMISSIONS.USUARIOS_READ],
-  },
-  {
-    name: "Encuestas",
-    href: "/admin/encuestas",
-    icon: "assignment",
-    permissions: [PERMISSIONS.ENCUESTAS_READ, PERMISSIONS.ENCUESTAS_CREATE],
-  },
-  {
-    name: "Configuracion",
-    href: "/admin/configuracion",
-    icon: "settings",
-    permissions: [PERMISSIONS.CONFIGURACION_MANAGE],
-  },
+    name: "Administración",
+    icon: "admin_panel_settings",
+    subItems: [
+      {
+        name: "Usuarios",
+        href: "/admin/usuarios",
+        icon: "manage_accounts",
+        permissions: [PERMISSIONS.USUARIOS_READ],
+      },
+      {
+        name: "Configuración",
+        href: "/admin/configuracion",
+        icon: "settings",
+        permissions: [PERMISSIONS.CONFIGURACION_MANAGE],
+      },
+    ]
+  }
 ]
 
 interface AdminSidebarProps {
@@ -80,9 +99,16 @@ interface AdminSidebarProps {
 export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
   const pathname = usePathname()
   const { user, logout } = useAuth()
-  const visibleNavigation = navigation.filter(item =>
-    item.permissions.length === 0 || hasAnyPermission(user?.permissions, item.permissions)
-  )
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({})
+
+  const toggleGroup = (name: string) => {
+    setOpenGroups(prev => ({ ...prev, [name]: !prev[name] }))
+  }
+
+  const hasPermission = (permissions?: string[]) => {
+    if (!permissions || permissions.length === 0) return true
+    return hasAnyPermission(user?.permissions, permissions)
+  }
 
   return (
     <>
@@ -118,12 +144,70 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
         </div>
 
         <div className="mt-2 flex w-full flex-1 flex-col gap-1.5 overflow-y-auto px-3">
-          {visibleNavigation.map(item => {
+          {navigation.map(item => {
+            if (item.subItems) {
+              const visibleSubItems = item.subItems.filter(subItem => hasPermission(subItem.permissions))
+              if (visibleSubItems.length === 0) return null
+
+              const isGroupActive = visibleSubItems.some(subItem => pathname === subItem.href || (subItem.href !== "/admin" && pathname.startsWith(`${subItem.href}/`)))
+              const isGroupOpen = openGroups[item.name] ?? isGroupActive
+
+              return (
+                <div key={item.name} className="flex flex-col gap-1">
+                  <button
+                    onClick={() => toggleGroup(item.name)}
+                    className={cn(
+                      "flex w-full items-center justify-between rounded-lg px-3 py-3 transition-all duration-200",
+                      "text-[#5a3424] hover:bg-[#fbf7f0] hover:text-[#2b1710]"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="material-symbols-outlined text-[21px]">{item.icon}</span>
+                      <span className="text-[14px] font-semibold tracking-normal">{item.name}</span>
+                    </div>
+                    <span className={cn("material-symbols-outlined text-[18px] transition-transform duration-200", isGroupOpen && "rotate-180")}>
+                      expand_more
+                    </span>
+                  </button>
+                  {isGroupOpen && (
+                    <div className="flex flex-col gap-1 mb-1">
+                      {visibleSubItems.map(subItem => {
+                        const isActive = pathname === subItem.href || (subItem.href !== "/admin" && pathname.startsWith(`${subItem.href}/`))
+                        return (
+                          <Link
+                            key={subItem.name}
+                            href={subItem.href}
+                            className={cn(
+                              "flex w-full items-center gap-3 rounded-lg py-2 pr-3 pl-11 transition-all duration-200",
+                              isActive
+                                ? "bg-[#2b1710] text-[#fffaf1] shadow-[0_10px_24px_rgba(43,23,16,0.12)]"
+                                : "text-[#5a3424] hover:bg-[#fbf7f0] hover:text-[#2b1710]"
+                            )}
+                          >
+                            <span
+                              className="material-symbols-outlined text-[18px]"
+                              data-weight={isActive ? "fill" : undefined}
+                              style={isActive ? { fontVariationSettings: "'FILL' 1" } : {}}
+                            >
+                              {subItem.icon}
+                            </span>
+                            <span className="text-[13px] font-semibold tracking-normal">{subItem.name}</span>
+                          </Link>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )
+            }
+
+            if (!hasPermission(item.permissions)) return null
+
             const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(`${item.href}/`))
             return (
               <Link
                 key={item.name}
-                href={item.href}
+                href={item.href!}
                 className={cn(
                   "flex w-full items-center gap-3 rounded-lg px-3 py-3 transition-all duration-200",
                   isActive
