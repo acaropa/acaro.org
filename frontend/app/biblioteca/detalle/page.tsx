@@ -6,7 +6,6 @@ import { useSearchParams } from "next/navigation";
 import { ArrowLeft, CalendarDays, ChevronRight, Download, ExternalLink, FileText, Tag } from "lucide-react";
 
 import { PublicLayout } from "@/components/layout/PublicLayout";
-import { ScrollReveal } from "@/components/landing/LandingMotion";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { api, apiAssetUrl } from "@/lib/api";
 import { LibraryDocument, LibraryRecord, toLibraryDocument } from "@/lib/library";
@@ -67,7 +66,7 @@ function DocumentDetail() {
               description="Es posible que este recurso ya no esté disponible o haya sido retirado."
             />
           ) : (
-            <ScrollReveal delay={0} distance="md">
+            <div>
               <article>
                 <span className="inline-flex rounded bg-[#f7decc] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#705a4f] dark:bg-accent/15 dark:text-accent">
                   {document.category}
@@ -164,11 +163,15 @@ function DocumentDetail() {
 
                 {isPdf && fileHref && (
                   <div className="mt-10 overflow-hidden rounded-lg border border-[#ded6cc] dark:border-border">
-                    <iframe src={fileHref} title={document.title} className="h-[640px] w-full" />
+                    <iframe
+                      src={`${fileHref}#view=FitH`}
+                      title={document.title}
+                      className="h-[75vh] min-h-[640px] w-full bg-white"
+                    />
                   </div>
                 )}
               </article>
-            </ScrollReveal>
+            </div>
           )}
         </div>
       </main>
