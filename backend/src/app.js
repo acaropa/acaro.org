@@ -33,7 +33,8 @@ app.set('trust proxy', 1);
 app.use(helmet({ 
   crossOriginResourcePolicy: false, 
   crossOriginEmbedderPolicy: false,
-  contentSecurityPolicy: false 
+  contentSecurityPolicy: false,
+  frameguard: false
 }));
 const allowedOrigins = [
   'http://localhost:3001',
