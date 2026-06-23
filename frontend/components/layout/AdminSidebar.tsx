@@ -242,12 +242,6 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
             <LogOut className="h-[21px] w-[21px]" aria-hidden="true" />
             <span className="text-[14px] font-semibold">Cerrar sesion</span>
           </button>
-          <button
-            onClick={() => void logout(true)}
-            className="mt-1 w-full px-3 py-2 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-[#765e50] hover:text-red-600"
-          >
-            Cerrar todas las sesiones
-          </button>
         </div>
       </nav>
     </>

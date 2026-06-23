@@ -2,7 +2,6 @@
 
 import { AppIcon } from "@/components/ui/AppIcon"
 
-import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
 type SettingsTab = 'institucion' | 'documentos' | 'contenido' | 'seguridad';
@@ -167,13 +166,6 @@ export default function AdminConfiguracion() {
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link
-              href="/admin/configuracion/logs"
-              className="flex items-center gap-2 border border-border px-5 py-3 font-label-caps text-label-caps uppercase tracking-widest text-foreground transition-colors hover:bg-surface"
-            >
-              <AppIcon name="terminal" className="text-[18px]" />
-              Logs
-            </Link>
             <button
               type="button"
               onClick={restoreDefaults}

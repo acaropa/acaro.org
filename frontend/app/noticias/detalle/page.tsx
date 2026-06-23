@@ -109,7 +109,7 @@ function NoticiaDetalle() {
                           />
                         </div>
                       )}
-                      <p className="text-[18px] leading-[1.8] text-muted mb-[24px]">
+                      <p className="text-justify text-[18px] leading-[1.8] text-muted mb-[24px] [hyphens:auto]">
                         {paragraph}
                       </p>
                     </div>

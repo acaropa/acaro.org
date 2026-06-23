@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { ArrowLeft, CalendarDays, ChevronRight, Download, ExternalLink, FileText, Tag } from "lucide-react";
+import { ArrowLeft, CalendarDays, ChevronRight, ExternalLink, FileText, Tag } from "lucide-react";
 
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -82,7 +82,7 @@ function DocumentDetail() {
                   <span className="uppercase">{document.type}</span>
                 </div>
 
-                <p className="mt-6 max-w-2xl text-[15px] leading-7 text-[#5f514a] dark:text-muted">
+                <p className="mt-6 max-w-2xl text-justify text-[15px] leading-7 text-[#5f514a] [hyphens:auto] dark:text-muted">
                   {document.description}
                 </p>
 
@@ -141,25 +141,18 @@ function DocumentDetail() {
                   </div>
                 )}
 
+                {document.resourceType === "link" && (
                 <div className="mt-8">
                   <a
                     href={fileHref}
                     target="_blank"
                     rel="noopener noreferrer"
-                    download={document.resourceType !== "link"}
                     className="inline-flex items-center gap-2 rounded-md bg-[#243120] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#34452f]"
                   >
-                    {document.resourceType === "link" ? (
-                      <>
-                        <ExternalLink className="h-4 w-4" /> Abrir enlace
-                      </>
-                    ) : (
-                      <>
-                        <Download className="h-4 w-4" /> Descargar documento
-                      </>
-                    )}
+                    <ExternalLink className="h-4 w-4" /> Abrir enlace
                   </a>
                 </div>
+                )}
 
                 {isPdf && fileHref && (
                   <div className="mt-10 overflow-hidden rounded-lg border border-[#ded6cc] dark:border-border">

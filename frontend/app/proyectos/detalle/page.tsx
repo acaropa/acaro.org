@@ -96,7 +96,7 @@ function ProyectoDetalle() {
               )}
 
               {proyecto.descripcion && (
-                <p className="text-[18px] leading-[1.8] text-muted max-w-3xl mb-[64px]">{proyecto.descripcion}</p>
+                <p className="max-w-3xl mb-[64px] text-justify text-[18px] leading-[1.8] text-muted [hyphens:auto]">{proyecto.descripcion}</p>
               )}
 
               {/* Fases */}
@@ -113,7 +113,7 @@ function ProyectoDetalle() {
                           </span>
                         </div>
                         {fase.descripcion && (
-                          <p className="text-[15px] leading-[1.6] text-muted mb-[16px]">{fase.descripcion}</p>
+                          <p className="mb-[16px] text-justify text-[15px] leading-[1.6] text-muted [hyphens:auto]">{fase.descripcion}</p>
                         )}
                         <div className="h-[6px] w-full bg-surface mb-[8px]">
                           <div

@@ -90,13 +90,13 @@ function ProductorDetalle() {
                 {producer.descripcion ? (
                   <div className="flex flex-col gap-[24px]">
                     {producer.descripcion.split(/\n+/).filter(Boolean).map((paragraph, index) => (
-                      <p key={index} className="text-[18px] leading-[1.8] text-muted">
+                      <p key={index} className="text-justify text-[18px] leading-[1.8] text-muted [hyphens:auto]">
                         {paragraph}
                       </p>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-[18px] leading-[1.8] text-muted">
+                  <p className="text-justify text-[18px] leading-[1.8] text-muted [hyphens:auto]">
                     Este productor forma parte de la Asociación Café Robusta OBC.
                   </p>
                 )}
