@@ -30,7 +30,11 @@ const SESSION_CLEANUP_INTERVAL_MS = 24 * 60 * 60 * 1000;
 // Trust one proxy hop so rate limiting uses the visitor IP instead of the proxy IP.
 app.set('trust proxy', 1);
 
-app.use(helmet({ crossOriginResourcePolicy: false, frameguard: false }));
+app.use(helmet({ 
+  crossOriginResourcePolicy: false, 
+  crossOriginEmbedderPolicy: false,
+  contentSecurityPolicy: false 
+}));
 const allowedOrigins = [
   'http://localhost:3001',
   'http://localhost:3000',
