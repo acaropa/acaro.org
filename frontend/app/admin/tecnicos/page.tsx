@@ -1,5 +1,7 @@
 'use client';
 
+import { AppIcon } from "@/components/ui/AppIcon"
+
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
@@ -150,7 +152,7 @@ export default function TecnicosPage() {
         <div className="py-12 text-center text-muted font-body-md animate-pulse">Cargando técnicos...</div>
       ) : tecnicos.length === 0 ? (
         <div className="bg-surface/30 border border-border border-dashed p-16 flex flex-col items-center justify-center text-center">
-          <span className="material-symbols-outlined text-[48px] text-muted mb-4 opacity-50">engineering</span>
+          <AppIcon name="engineering" className="text-[48px] text-muted mb-4 opacity-50" />
           <h3 className="font-headline-md text-xl font-bold text-foreground mb-2">Sin técnicos registrados</h3>
           <p className="font-body-md text-muted max-w-md">No hay personal técnico registrado en el sistema.</p>
         </div>
@@ -174,12 +176,12 @@ export default function TecnicosPage() {
               
               <div className="flex flex-col gap-2 mb-6 flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[16px] text-muted">mail</span>
+                  <AppIcon name="mail" className="text-[16px] text-muted" />
                   <span className="text-sm text-foreground font-body-md">{t.email}</span>
                 </div>
                 {t.telefono && (
                   <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[16px] text-muted">call</span>
+                    <AppIcon name="call" className="text-[16px] text-muted" />
                     <span className="text-sm text-foreground font-body-md">{t.telefono}</span>
                   </div>
                 )}
@@ -206,14 +208,12 @@ export default function TecnicosPage() {
               {canWrite && (
                 <div className="flex justify-end gap-4 pt-4 border-t border-border/50">
                   <button onClick={() => toggleDisponible(t)} className="flex items-center gap-1 text-sm font-medium text-foreground hover:text-primary transition-colors">
-                    <span className="material-symbols-outlined text-[16px]">
-                      {t.disponible ? 'do_not_disturb_on' : 'check_circle'}
-                    </span>
+                    <AppIcon name={t.disponible ? 'do_not_disturb_on' : 'check_circle'} className="text-[16px]" />
                     {t.disponible ? 'Marcar ocupado' : 'Marcar disponible'}
                   </button>
                   {canDelete && (
                     <button onClick={() => handleDelete(t.id)} className="flex items-center gap-1 text-sm font-medium text-red-600 hover:text-red-800 transition-colors">
-                      <span className="material-symbols-outlined text-[16px]">delete</span>
+                      <AppIcon name="delete" className="text-[16px]" />
                     </button>
                   )}
                 </div>

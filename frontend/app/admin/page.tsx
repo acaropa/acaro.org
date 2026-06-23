@@ -1,5 +1,7 @@
 'use client';
 
+import { AppIcon } from "@/components/ui/AppIcon"
+
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api } from '@/lib/api';
@@ -178,7 +180,7 @@ export default function AdminDashboardPage() {
             disabled={refreshing}
             className="inline-flex items-center justify-center gap-2 border border-border px-5 py-3 font-label-caps text-label-caps uppercase tracking-widest text-foreground transition-colors hover:bg-surface disabled:opacity-60"
           >
-            <span className="material-symbols-outlined text-[18px]">{refreshing ? 'progress_activity' : 'refresh'}</span>
+            <AppIcon name={refreshing ? 'progress_activity' : 'refresh'} className="text-[18px]" />
             Actualizar
           </button>
         </div>
@@ -194,7 +196,7 @@ export default function AdminDashboardPage() {
               </div>
             </div>
             <div className="flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 font-data-mono text-data-mono text-primary">
-              <span className="material-symbols-outlined text-[16px]">account_tree</span>
+              <AppIcon name="account_tree" className="text-[16px]" />
               {formatNumber(data.projects.length)} total
             </div>
           </div>
@@ -256,7 +258,7 @@ export default function AdminDashboardPage() {
             <p className="mt-2 text-sm text-muted">Ordenados por avance registrado.</p>
           </div>
           <Link href="/admin/proyectos" className="font-label-caps text-label-caps text-muted hover:text-primary flex items-center gap-1 transition-colors">
-            Ver todos <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+            Ver todos <AppIcon name="arrow_forward" className="text-[16px]" />
           </Link>
         </div>
 
@@ -268,7 +270,7 @@ export default function AdminDashboardPage() {
           </div>
         ) : currentProjects.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border bg-card p-10 text-center">
-            <span className="material-symbols-outlined mb-3 text-[42px] text-muted">account_tree_off</span>
+            <AppIcon name="account_tree_off" className="mb-3 text-[42px] text-muted" />
             <h3 className="font-headline-md text-xl text-foreground">Sin proyectos disponibles</h3>
             <p className="mt-2 text-sm text-muted">Cuando existan proyectos, apareceran aqui automaticamente.</p>
           </div>

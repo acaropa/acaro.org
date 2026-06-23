@@ -1,5 +1,7 @@
 'use client';
 
+import { AppIcon } from "@/components/ui/AppIcon"
+
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
@@ -40,6 +42,7 @@ export default function AdminProyectos() {
   const [status, setStatus] = useState('todos');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -130,6 +133,21 @@ export default function AdminProyectos() {
     }
   }
 
+  async function remove(project: Project) {
+    if (!window.confirm(`¿Eliminar el proyecto "${project.nombre}"? Esta acción no se puede deshacer.`)) return;
+
+    try {
+      setError('');
+      setDeletingId(project.id);
+      await api.delete(`/proyectos/${project.id}`);
+      setProjects(current => current.filter(item => item.id !== project.id));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo eliminar el proyecto');
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
   return (
     <>
       <section className="mb-8 border-b border-border pb-7">
@@ -149,7 +167,7 @@ export default function AdminProyectos() {
 
       <div className="mb-7 grid gap-3 rounded-2xl border border-border bg-card p-4 md:grid-cols-[1fr_220px]">
         <label className="flex items-center gap-3 rounded-xl bg-background px-4">
-          <span className="material-symbols-outlined text-[20px] text-muted">search</span>
+          <AppIcon name="search" className="text-[20px] text-muted" />
           <input value={query} onChange={event => setQuery(event.target.value)} placeholder="Buscar por nombre, descripción o categoría" className="w-full bg-transparent py-3 text-sm outline-none" />
         </label>
         <select value={status} onChange={event => setStatus(event.target.value)} className="border border-border bg-background px-4 py-3 text-sm outline-none">
@@ -166,7 +184,7 @@ export default function AdminProyectos() {
         <div className="py-20 text-center text-muted">Cargando portafolio...</div>
       ) : visible.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border p-16 text-center">
-          <span className="material-symbols-outlined text-[48px] text-muted">folder_open</span>
+          <AppIcon name="folder_open" className="text-[48px] text-muted" />
           <h2 className="mt-3 font-headline-md text-xl">No hay proyectos para mostrar</h2>
         </div>
       ) : (
@@ -195,11 +213,22 @@ export default function AdminProyectos() {
                 <div className="flex items-center gap-4">
                   {canEditProject(project) && (
                     <button onClick={() => startEdit(project)} className="inline-flex items-center gap-1 font-label-caps text-[11px] uppercase tracking-[0.16em] text-foreground transition-colors hover:text-primary">
-                      <span className="material-symbols-outlined text-[16px]">edit</span> Editar
+                      <AppIcon name="edit" className="text-[16px]" /> Editar
+                    </button>
+                  )}
+                  {can(PERMISSIONS.PROYECTOS_DELETE) && (
+                    <button
+                      type="button"
+                      onClick={() => void remove(project)}
+                      disabled={deletingId === project.id}
+                      className="inline-flex items-center gap-1 font-label-caps text-[11px] uppercase tracking-[0.16em] text-red-700 transition-colors hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <AppIcon name="delete" className="text-[16px]" />
+                      {deletingId === project.id ? 'Eliminando...' : 'Eliminar'}
                     </button>
                   )}
                   <Link href={`/admin/proyectos/gestion?id=${project.id}`} className="inline-flex items-center gap-2 font-label-caps text-[11px] uppercase tracking-[0.16em] text-primary transition-all group-hover:gap-3">
-                    Abrir expediente <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                    Abrir expediente <AppIcon name="arrow_forward" className="text-[18px]" />
                   </Link>
                 </div>
               </div>

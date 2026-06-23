@@ -1,5 +1,7 @@
 'use client'
 
+
+import { AppIcon } from "@/components/ui/AppIcon"
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { encuestasApi, type EncuestaFull, type TipoPregunta } from '@/lib/encuestas'
@@ -163,7 +165,7 @@ export function SurveyEditorWizard({ encuestaId }: Props) {
         </div>
         <button
           onClick={() => router.push('/admin/encuestas')}
-          className="rounded-lg border border-[#d8cabb] px-3 py-2 text-sm font-semibold text-[#5a3424] hover:bg-[#fbf7f0]"
+          className="rounded-lg border border-[#d8cabb] px-3 py-2 text-sm font-semibold text-[#5a3424] hover:bg-[#f3f4f6]"
         >
           Cancelar
         </button>
@@ -179,7 +181,7 @@ export function SurveyEditorWizard({ encuestaId }: Props) {
                 ? 'border-[#2b1710] bg-[#2b1710] text-white'
                 : i < step
                   ? 'border-green-300 bg-green-50 text-green-700'
-                  : 'border-[#d8cabb] bg-[#fbf7f0] text-[#765e50]'
+                  : 'border-[#e5e7eb] bg-white text-[#765e50]'
             }`}
           >
             {s}
@@ -290,13 +292,13 @@ export function SurveyEditorWizard({ encuestaId }: Props) {
             onClick={addQuestion}
             className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[#d8cabb] py-4 text-sm font-semibold text-[#5a3424] hover:border-[#a66f2e] hover:text-[#a66f2e]"
           >
-            <span className="material-symbols-outlined text-[18px]">add</span>
+            <AppIcon name="add" className="text-[18px]" />
             Agregar pregunta
           </button>
           <div className="flex justify-between">
             <button
               onClick={() => setStep(0)}
-              className="rounded-lg border border-[#d8cabb] px-6 py-2.5 text-sm font-semibold text-[#5a3424] hover:bg-[#fbf7f0]"
+              className="rounded-lg border border-[#d8cabb] px-6 py-2.5 text-sm font-semibold text-[#5a3424] hover:bg-[#f3f4f6]"
             >
               Anterior
             </button>
@@ -339,7 +341,7 @@ export function SurveyEditorWizard({ encuestaId }: Props) {
           <div className="flex justify-between pt-4">
             <button
               onClick={() => setStep(1)}
-              className="rounded-lg border border-[#d8cabb] px-6 py-2.5 text-sm font-semibold text-[#5a3424] hover:bg-[#fbf7f0]"
+              className="rounded-lg border border-[#d8cabb] px-6 py-2.5 text-sm font-semibold text-[#5a3424] hover:bg-[#f3f4f6]"
             >
               Anterior
             </button>

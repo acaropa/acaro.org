@@ -1,5 +1,7 @@
 'use client';
 
+import { AppIcon } from "@/components/ui/AppIcon"
+
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api, apiAssetUrl } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
@@ -344,7 +346,7 @@ export default function AdminNoticias() {
                           className="absolute top-1 right-1 bg-red-600 hover:bg-red-800 text-white rounded-full p-1 text-[10px] transition-colors shadow flex items-center justify-center w-5 h-5"
                           title="Eliminar foto"
                         >
-                          <span className="material-symbols-outlined text-[14px]">close</span>
+                          <AppIcon name="close" className="text-[14px]" />
                         </button>
                       </div>
                     ))}
@@ -366,7 +368,7 @@ export default function AdminNoticias() {
                           className="absolute top-1 right-1 bg-red-600 hover:bg-red-800 text-white rounded-full p-1 text-[10px] transition-colors shadow flex items-center justify-center w-5 h-5"
                           title="Eliminar foto"
                         >
-                          <span className="material-symbols-outlined text-[14px]">close</span>
+                          <AppIcon name="close" className="text-[14px]" />
                         </button>
                       </div>
                     ))}
@@ -454,7 +456,7 @@ export default function AdminNoticias() {
         <div className="py-12 text-center text-muted font-body-md animate-pulse">Cargando noticias...</div>
       ) : filtered.length === 0 ? (
         <div className="bg-surface/30 border border-border border-dashed p-16 flex flex-col items-center justify-center text-center">
-          <span className="material-symbols-outlined text-[48px] text-muted mb-4 opacity-50">newspaper</span>
+          <AppIcon name="newspaper" className="text-[48px] text-muted mb-4 opacity-50" />
           <h3 className="font-headline-md text-xl font-bold text-foreground mb-2">Sin noticias</h3>
           <p className="font-body-md text-muted max-w-md">No se encontraron noticias en este estado.</p>
         </div>
@@ -492,22 +494,22 @@ export default function AdminNoticias() {
                 <div className="flex flex-wrap gap-4 justify-end mt-auto pt-4 border-t border-border/50">
                   {canEdit && (
                     <button onClick={() => startEdit(item)} className="flex items-center gap-1 text-sm font-medium text-foreground hover:text-primary transition-colors">
-                      <span className="material-symbols-outlined text-[16px]">edit</span> Editar
+                      <AppIcon name="edit" className="text-[16px]" /> Editar
                     </button>
                   )}
                   {canPublish && ['borrador', 'pendiente', 'archivada'].includes(item.estado) && (
                     <button onClick={() => void publish(item)} className="flex items-center gap-1 text-sm font-medium text-brand-green hover:underline">
-                      <span className="material-symbols-outlined text-[16px]">campaign</span> {item.estado === 'archivada' ? 'Republicar' : 'Publicar'}
+                      <AppIcon name="campaign" className="text-[16px]" /> {item.estado === 'archivada' ? 'Republicar' : 'Publicar'}
                     </button>
                   )}
                   {canUpdateAll && item.estado !== 'archivada' && (
                     <button onClick={() => void archive(item)} className="flex items-center gap-1 text-sm font-medium text-muted hover:text-foreground">
-                      <span className="material-symbols-outlined text-[16px]">inventory_2</span> Archivar
+                      <AppIcon name="inventory_2" className="text-[16px]" /> Archivar
                     </button>
                   )}
                   {canDelete && (
                     <button onClick={() => void remove(item)} className="flex items-center gap-1 text-sm font-medium text-red-600 hover:text-red-800">
-                      <span className="material-symbols-outlined text-[16px]">delete</span> Eliminar
+                      <AppIcon name="delete" className="text-[16px]" /> Eliminar
                     </button>
                   )}
                 </div>

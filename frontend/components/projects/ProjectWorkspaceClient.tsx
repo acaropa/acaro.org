@@ -1,5 +1,7 @@
 'use client';
 
+import { AppIcon } from "@/components/ui/AppIcon"
+
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -290,7 +292,7 @@ export default function ProjectWorkspacePage() {
   return (
     <>
       <Link href="/admin/proyectos" className="mb-5 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted hover:text-primary">
-        <span className="material-symbols-outlined text-[18px]">arrow_back</span> Portafolio
+        <AppIcon name="arrow_back" className="text-[18px]" /> Portafolio
       </Link>
 
       <header className="overflow-hidden rounded-3xl bg-[#2b1710] p-7 text-white md:p-10">
@@ -377,7 +379,7 @@ export default function ProjectWorkspacePage() {
                 <div className="flex gap-1 overflow-x-auto py-3">
                   {phaseTabs.map(([key, label, icon]) => (
                     <button key={key} onClick={() => setPhaseTab(key)} className={`flex items-center gap-2 whitespace-nowrap rounded-xl px-3 py-2 text-[10px] font-bold uppercase tracking-wider ${phaseTab === key ? 'bg-primary text-primary-foreground' : 'text-muted hover:bg-background'}`}>
-                      <span className="material-symbols-outlined text-[17px]">{icon}</span>{label}
+                      <AppIcon name={icon} className="text-[17px]" />{label}
                     </button>
                   ))}
                 </div>
@@ -401,7 +403,7 @@ export default function ProjectWorkspacePage() {
             </section>
           ) : (
             <div className="rounded-2xl border border-dashed border-border bg-card p-16 text-center">
-              <span className="material-symbols-outlined text-[48px] text-muted">account_tree</span>
+              <AppIcon name="account_tree" className="text-[48px] text-muted" />
               <h2 className="mt-3 font-headline-md text-2xl">El proyecto aún no tiene fases</h2>
               <p className="mt-2 text-sm text-muted">Las tareas, archivos y demás registros se gestionan dentro de una fase.</p>
             </div>
@@ -555,7 +557,7 @@ function PhaseContent({ tab, phase, rows, finance, canManage, canOperate, canRev
   </div>;
 }
 
-function TopNav({ active, onClick, icon, children }: { active: boolean; onClick: () => void; icon: string; children: React.ReactNode }) { return <button onClick={onClick} className={`flex items-center gap-2 px-5 py-2.5 text-[11px] font-bold uppercase tracking-wider ${active ? 'bg-primary text-primary-foreground' : 'text-muted'}`}><span className="material-symbols-outlined text-[18px]">{icon}</span>{children}</button>; }
+function TopNav({ active, onClick, icon, children }: { active: boolean; onClick: () => void; icon: string; children: React.ReactNode }) { return <button onClick={onClick} className={`flex items-center gap-2 px-5 py-2.5 text-[11px] font-bold uppercase tracking-wider ${active ? 'bg-primary text-primary-foreground' : 'text-muted'}`}><AppIcon name={icon} className="text-[18px]" />{children}</button>; }
 function PhaseSelector({ phase, index, active, responsible, onClick }: { phase: Row; index: number; active: boolean; responsible: string; onClick: () => void }) { const progress = Number(phase.porcentaje_avance || 0); return <button onClick={onClick} className={`w-full rounded-xl border p-4 text-left transition-all ${active ? 'border-accent bg-[#2b1710] text-white shadow-lg' : 'border-border bg-background hover:border-accent/50'}`}><div className="flex items-center justify-between gap-3"><span className={`text-[9px] font-bold uppercase tracking-[0.18em] ${active ? 'text-[#d7a24a]' : 'text-accent'}`}>Fase {index + 1} · {phase.peso_porcentaje || 0}% peso</span><strong className="text-sm">{progress}%</strong></div><h3 className="mt-2 font-bold">{String(phase.nombre)}</h3><p className={`mt-1 truncate text-xs ${active ? 'text-[#d8cabb]' : 'text-muted'}`}>{responsible}</p><div className={`mt-3 h-1 overflow-hidden rounded-full ${active ? 'bg-white/15' : 'bg-border'}`}><div className="h-full bg-accent" style={{ width: `${progress}%` }} /></div></button>; }
 function PhaseHeader({ phase, responsible, canManage, onEdit }: { phase: Row; responsible: string; canManage: boolean; onEdit: () => void }) { return <header className="bg-[#f7f3ee] p-5 md:p-7"><div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between"><div><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">Fase activa</p><h2 className="mt-2 font-headline-md text-3xl tracking-tight">{String(phase.nombre)}</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-muted">{String(phase.descripcion || 'Sin descripción registrada.')}</p></div>{canManage && <button onClick={onEdit} className="border border-border bg-white px-4 py-2 text-[10px] font-bold uppercase tracking-widest">Configurar fase</button>}</div><div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><PhaseDatum label="Estado" value={String(phase.estado).replace('_', ' ')} /><PhaseDatum label="Responsable" value={responsible} /><PhaseDatum label="Periodo" value={`${date(phase.fecha_inicio)} — ${date(phase.fecha_fin)}`} /><PhaseDatum label="Peso / avance" value={`${phase.peso_porcentaje || 0}% / ${phase.porcentaje_avance || 0}%`} /></div></header>; }
 function PhaseDatum({ label, value }: { label: string; value: string }) { return <div className="rounded-xl bg-white p-3"><span className="text-[9px] font-bold uppercase tracking-widest text-muted">{label}</span><strong className="mt-1 block truncate text-xs capitalize">{value}</strong></div>; }

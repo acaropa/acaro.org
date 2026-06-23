@@ -1,5 +1,7 @@
 'use client'
 
+
+import { AppIcon } from "@/components/ui/AppIcon"
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { encuestasApi, type EncuestaFull, type EncuestaPregunta } from '@/lib/encuestas'
@@ -118,7 +120,7 @@ export function SurveyPublicContainer({ slug }: Props) {
   if (error) return (
     <div className="landing-typography min-h-screen bg-surface flex items-center justify-center px-6">
       <div className="max-w-md text-center">
-        <span className="material-symbols-outlined text-[48px] text-accent mb-4">error_outline</span>
+        <AppIcon name="error_outline" className="text-[48px] text-accent mb-4" />
         <h1 className="font-serif text-3xl font-bold text-primary mb-3">Encuesta no disponible</h1>
         <p className="text-muted text-[15px] leading-relaxed mb-6">{error}</p>
         <Link href="/encuestas" className="text-xs font-bold tracking-widest uppercase text-primary border-b border-accent pb-1 hover:border-b-2 transition-all">
@@ -132,7 +134,7 @@ export function SurveyPublicContainer({ slug }: Props) {
     <div className="landing-typography min-h-screen bg-surface flex items-center justify-center px-6">
       <div className="max-w-lg text-center">
         <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center border border-brand-green/30 bg-brand-green/5">
-          <span className="material-symbols-outlined text-[40px] text-brand-green">check_circle</span>
+          <AppIcon name="check_circle" className="text-[40px] text-brand-green" />
         </div>
         <p className="text-xs font-bold tracking-[0.3em] uppercase text-brand-green mb-3">Encuesta enviada</p>
         <h1 className="font-serif text-4xl font-bold text-primary mb-4">Gracias por completar la encuesta</h1>
@@ -140,7 +142,7 @@ export function SurveyPublicContainer({ slug }: Props) {
           Su información fue enviada correctamente. Puede cerrar esta página o regresar al listado.
         </p>
         <Link href="/encuestas" className="inline-flex items-center gap-2 px-8 py-3 border border-primary text-primary text-xs font-bold tracking-widest uppercase hover:bg-primary hover:text-primary-foreground transition-colors">
-          <span className="material-symbols-outlined text-[16px]">home</span>
+          <AppIcon name="home" className="text-[16px]" />
           Volver al inicio
         </Link>
       </div>
@@ -162,7 +164,7 @@ export function SurveyPublicContainer({ slug }: Props) {
       <div className="border-b border-primary/10 bg-surface/95 backdrop-blur-sm">
         <div className="mx-auto max-w-[960px] flex items-center justify-between px-5 py-4 sm:px-8">
           <Link href="/encuestas" className="text-xs font-bold tracking-widest uppercase text-muted hover:text-primary transition-colors flex items-center gap-2">
-            <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+            <AppIcon name="arrow_back" className="text-[16px]" />
             Volver
           </Link>
           <div className="flex items-center gap-3">
@@ -208,7 +210,7 @@ export function SurveyPublicContainer({ slug }: Props) {
 
           {saveError && (
             <div className="text-sm text-red-600 bg-red-50 border border-red-200 px-4 py-3 flex items-center gap-2 mb-6">
-              <span className="material-symbols-outlined text-[18px]">error</span>
+              <AppIcon name="error" className="text-[18px]" />
               {saveError}
             </div>
           )}

@@ -1,5 +1,7 @@
 'use client';
 
+import { AppIcon } from "@/components/ui/AppIcon"
+
 import { useState } from 'react';
 import Link from 'next/link';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
@@ -133,7 +135,7 @@ export default function LoginPage() {
 
             {error && (
               <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3 flex items-center gap-2 mt-4">
-                <span className="material-symbols-outlined text-[18px]">error</span>
+                <AppIcon name="error" className="text-[18px]" />
                 <span>{error}</span>
               </div>
             )}
@@ -141,7 +143,7 @@ export default function LoginPage() {
             <button 
               type="submit" 
               disabled={loading} 
-              className="w-full h-12 mt-6 bg-[#26170c] hover:bg-[#120c08] text-[#fdf9f4] font-semibold rounded-full text-base shadow-lg transition-all flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full h-12 mt-6 bg-[#26170c] hover:bg-[#120c08] text-[#fdf9f4] font-semibold rounded-md text-base shadow-lg transition-all flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />

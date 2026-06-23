@@ -1,5 +1,7 @@
 'use client';
 
+import { AppIcon } from "@/components/ui/AppIcon"
+
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
@@ -133,7 +135,7 @@ export default function SociosPage() {
         <div className="py-12 text-center text-muted font-body-md animate-pulse">Cargando directorio...</div>
       ) : socios.length === 0 ? (
         <div className="bg-surface/30 border border-border border-dashed p-16 flex flex-col items-center justify-center text-center">
-          <span className="material-symbols-outlined text-[48px] text-muted mb-4 opacity-50">groups</span>
+          <AppIcon name="groups" className="text-[48px] text-muted mb-4 opacity-50" />
           <h3 className="font-headline-md text-xl font-bold text-foreground mb-2">Sin socios registrados</h3>
           <p className="font-body-md text-muted max-w-md">El directorio de la asociación está vacío.</p>
         </div>
@@ -157,15 +159,15 @@ export default function SociosPage() {
               
               <div className="flex flex-col gap-2 mb-6 flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[16px] text-muted">call</span>
+                  <AppIcon name="call" className="text-[16px] text-muted" />
                   <span className="text-sm text-foreground font-body-md">{s.telefono ?? 'No registrado'}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[16px] text-muted">mail</span>
+                  <AppIcon name="mail" className="text-[16px] text-muted" />
                   <span className="text-sm text-foreground font-body-md">{s.email ?? 'No registrado'}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[16px] text-muted">calendar_today</span>
+                  <AppIcon name="calendar_today" className="text-[16px] text-muted" />
                   <span className="text-sm text-foreground font-body-md">Ingreso: {new Date(s.fecha_ingreso).toLocaleDateString('es-EC')}</span>
                 </div>
               </div>
@@ -174,13 +176,13 @@ export default function SociosPage() {
                 <div className="flex justify-end gap-4 pt-4 border-t border-border/50">
                   {canUpdate && (
                     <button onClick={() => toggleEstado(s)} className="flex items-center gap-1 text-sm font-medium text-foreground hover:text-primary transition-colors">
-                      <span className="material-symbols-outlined text-[16px]">power_settings_new</span>
+                      <AppIcon name="power_settings_new" className="text-[16px]" />
                       {s.estado === 'activo' ? 'Desactivar' : 'Activar'}
                     </button>
                   )}
                   {canDelete && (
                     <button onClick={() => handleDelete(s.id)} className="flex items-center gap-1 text-sm font-medium text-red-600 hover:text-red-800 transition-colors">
-                      <span className="material-symbols-outlined text-[16px]">delete</span> Eliminar
+                      <AppIcon name="delete" className="text-[16px]" /> Eliminar
                     </button>
                   )}
                 </div>

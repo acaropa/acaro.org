@@ -1,5 +1,7 @@
 'use client';
 
+import { AppIcon } from "@/components/ui/AppIcon"
+
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { PublicLayout } from '@/components/layout/PublicLayout';
@@ -53,9 +55,7 @@ function ProducerCard({ producer, index }: { producer: ProductorRecord; index: n
           <span>{experience || 'Productor asociado'}</span>
           <span className="inline-flex items-center gap-1">
             Ver perfil
-            <span className="material-symbols-outlined text-[14px] transition-transform duration-300 group-hover:translate-x-1">
-              arrow_forward
-            </span>
+            <AppIcon name="arrow_forward" className="text-[14px] transition-transform duration-300 group-hover:translate-x-1" />
           </span>
         </div>
       </Link>

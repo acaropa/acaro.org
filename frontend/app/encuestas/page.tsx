@@ -1,5 +1,7 @@
 'use client'
 
+
+import { AppIcon } from "@/components/ui/AppIcon"
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { PublicLayout } from '@/components/layout/PublicLayout'
@@ -72,9 +74,7 @@ export default function EncuestasPublicas() {
                         onError={(e) => { e.currentTarget.style.display = 'none' }}
                       />
                     ) : (
-                      <span className="material-symbols-outlined text-[64px] text-primary/20 group-hover:text-accent/40 transition-colors duration-500">
-                        assignment
-                      </span>
+                      <AppIcon name="assignment" className="text-[64px] text-primary/20 group-hover:text-accent/40 transition-colors duration-500" />
                     )}
                     <div className="absolute top-[16px] left-[16px] flex items-center gap-[8px]">
                       <span className="px-3 py-1 text-[10px] font-bold tracking-[0.2em] uppercase bg-accent text-white">

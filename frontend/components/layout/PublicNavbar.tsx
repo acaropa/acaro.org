@@ -75,7 +75,7 @@ export function PublicNavbar() {
                     <ChevronDown className="h-3.5 w-3.5 transition-transform duration-300 group-hover:rotate-180" />
                   </button>
                   <div className="invisible absolute left-1/2 top-full w-[340px] -translate-x-1/2 -translate-y-2 pt-3 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
-                    <div className="rounded-2xl border border-[#2a1a12] bg-[#120a06]/95 p-2 shadow-[0_20px_60px_rgba(0,0,0,0.6)] backdrop-blur-xl">
+                    <div className="rounded-2xl border border-[#2a1a12]/80 bg-[#120a06]/80 p-2 shadow-[0_20px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl">
                       {item.submenu.map((sub) => (
                         <Link
                           key={sub.href}

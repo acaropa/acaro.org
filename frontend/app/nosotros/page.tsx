@@ -1,3 +1,4 @@
+import { AppIcon } from "@/components/ui/AppIcon"
 import Link from 'next/link';
 import { PublicLayout } from '@/components/layout/PublicLayout';
 import { ScrollReveal } from '@/components/landing/LandingMotion';
@@ -93,7 +94,7 @@ export default function Nosotros() {
                       <h4 className="font-semibold text-[24px] leading-[1.3] text-[#fdf9f4] mb-3">Los Productores</h4>
                       <span className="inline-flex items-center gap-2 text-[12px] font-semibold tracking-[0.1em] uppercase text-[#fdf9f4]/80 group-hover:text-accent transition-colors duration-300">
                         Conocer sus historias
-                        <span className="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform duration-300">arrow_forward</span>
+                        <AppIcon name="arrow_forward" className="text-[16px] group-hover:translate-x-1 transition-transform duration-300" />
                       </span>
                     </div>
                   </Link>

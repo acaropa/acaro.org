@@ -1,5 +1,7 @@
 'use client';
 
+import { AppIcon } from "@/components/ui/AppIcon"
+
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
@@ -169,7 +171,7 @@ export default function AdminConfiguracion() {
               href="/admin/configuracion/logs"
               className="flex items-center gap-2 border border-border px-5 py-3 font-label-caps text-label-caps uppercase tracking-widest text-foreground transition-colors hover:bg-surface"
             >
-              <span className="material-symbols-outlined text-[18px]">terminal</span>
+              <AppIcon name="terminal" className="text-[18px]" />
               Logs
             </Link>
             <button
@@ -191,7 +193,7 @@ export default function AdminConfiguracion() {
       </section>
 
       {saved && (
-        <div className="rounded-lg border border-[#c9ad8b] bg-[#fbf7f0] px-4 py-3 text-sm font-medium text-[#5a3424]">
+        <div className="rounded-lg border border-[#e5e7eb] bg-white px-4 py-3 text-sm font-medium text-[#5a3424]">
           Ajustes guardados en este navegador. Cuando exista API de configuracion, estos mismos campos se pueden sincronizar con la base de datos.
         </div>
       )}
@@ -212,7 +214,7 @@ export default function AdminConfiguracion() {
                       isActive ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-surface'
                     }`}
                   >
-                    <span className="material-symbols-outlined mt-0.5 text-[20px]">{tab.icon}</span>
+                    <AppIcon name={tab.icon} className="mt-0.5 text-[20px]" />
                     <span>
                       <span className="block text-sm font-bold">{tab.label}</span>
                       <span className={`mt-1 block text-xs leading-5 ${isActive ? 'text-primary-foreground/75' : 'text-muted'}`}>
@@ -241,7 +243,7 @@ export default function AdminConfiguracion() {
         <main className="rounded-lg border border-border bg-card">
           <div className="border-b border-border px-6 py-5">
             <div className="flex items-center gap-3">
-              <span className="material-symbols-outlined text-[24px] text-accent">{active.icon}</span>
+              <AppIcon name={active.icon} className="text-[24px] text-accent" />
               <div>
                 <h2 className="font-headline-md text-2xl text-foreground">{active.label}</h2>
                 <p className="mt-1 text-sm text-muted">{active.description}</p>

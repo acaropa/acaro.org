@@ -1,5 +1,7 @@
 'use client'
 
+
+import { AppIcon } from "@/components/ui/AppIcon"
 import type { TipoPregunta } from '@/lib/encuestas'
 
 export interface OptionFormData {
@@ -79,16 +81,16 @@ export function QuestionBuilder({ index, data, onChange, onRemove, onMoveUp, onM
         <div className="flex items-center gap-1">
           {onMoveUp && (
             <button onClick={onMoveUp} className="rounded p-1 text-[#765e50] hover:bg-[#f0e8dd]" title="Mover arriba">
-              <span className="material-symbols-outlined text-[18px]">arrow_upward</span>
+              <AppIcon name="arrow_upward" className="text-[18px]" />
             </button>
           )}
           {onMoveDown && (
             <button onClick={onMoveDown} className="rounded p-1 text-[#765e50] hover:bg-[#f0e8dd]" title="Mover abajo">
-              <span className="material-symbols-outlined text-[18px]">arrow_downward</span>
+              <AppIcon name="arrow_downward" className="text-[18px]" />
             </button>
           )}
           <button onClick={onRemove} className="rounded p-1 text-red-500 hover:bg-red-50" title="Eliminar">
-            <span className="material-symbols-outlined text-[18px]">close</span>
+            <AppIcon name="close" className="text-[18px]" />
           </button>
         </div>
       </div>
@@ -154,7 +156,7 @@ export function QuestionBuilder({ index, data, onChange, onRemove, onMoveUp, onM
         </label>
 
         {hasOptions(data.tipo_pregunta) && (
-          <div className="space-y-2 rounded-lg border border-dashed border-[#d8cabb] bg-[#fefcf8] p-3">
+          <div className="space-y-2 rounded-lg border border-dashed border-[#d1d5db] bg-white p-3">
             <p className="text-xs font-semibold text-[#765e50]">Opciones de respuesta</p>
             {data.opciones.map((opc, i) => (
               <div key={i} className="flex items-center gap-2">
@@ -178,7 +180,7 @@ export function QuestionBuilder({ index, data, onChange, onRemove, onMoveUp, onM
                   onClick={() => removeOption(i)}
                   className="rounded p-0.5 text-red-400 hover:text-red-600"
                 >
-                  <span className="material-symbols-outlined text-[16px]">close</span>
+                  <AppIcon name="close" className="text-[16px]" />
                 </button>
               </div>
             ))}

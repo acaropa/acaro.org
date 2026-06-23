@@ -3,6 +3,24 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
+import {
+  BookOpen,
+  Building2,
+  ChevronDown,
+  ClipboardList,
+  FilePenLine,
+  GitBranch,
+  Globe2,
+  HardHat,
+  Home,
+  LogOut,
+  Newspaper,
+  Settings,
+  ShieldCheck,
+  Tractor,
+  UserCog,
+  Users,
+} from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Logo } from "@/components/Logo"
@@ -10,81 +28,81 @@ import { useAuth } from "@/context/AuthContext"
 import { PERMISSIONS, hasAnyPermission } from "@/lib/permissions"
 
 const navigation = [
-  { name: "Inicio", href: "/admin", icon: "home", permissions: [] },
+  { name: "Inicio", href: "/admin", icon: Home, permissions: [] },
   {
     name: "Proyectos",
     href: "/admin/proyectos",
-    icon: "account_tree",
+    icon: GitBranch,
     permissions: [PERMISSIONS.PROYECTOS_READ_ASSIGNED, PERMISSIONS.PROYECTOS_READ_PRIVATE],
   },
   {
-    name: "Información institucional",
-    icon: "domain",
+    name: "Información",
+    icon: Building2,
     subItems: [
       {
         name: "Noticias",
         href: "/admin/noticias",
-        icon: "newspaper",
+        icon: Newspaper,
         permissions: [PERMISSIONS.NOTICIAS_CREATE, PERMISSIONS.NOTICIAS_UPDATE],
       },
       {
         name: "Biblioteca",
         href: "/admin/biblioteca",
-        icon: "import_contacts",
+        icon: BookOpen,
         permissions: [PERMISSIONS.BIBLIOTECA_READ_INTERNAL, PERMISSIONS.BIBLIOTECA_UPLOAD_OWN],
       },
       {
         name: "Documentos institucionales",
         href: "/admin/notas-conceptuales",
-        icon: "contract_edit",
+        icon: FilePenLine,
         permissions: [],
       },
       {
         name: "Encuestas",
         href: "/admin/encuestas",
-        icon: "assignment",
+        icon: ClipboardList,
         permissions: [PERMISSIONS.ENCUESTAS_READ, PERMISSIONS.ENCUESTAS_CREATE],
       },
     ]
   },
   {
     name: "Comunidad",
-    icon: "public",
+    icon: Globe2,
     subItems: [
       {
         name: "Productores",
         href: "/admin/productores",
-        icon: "agriculture",
+        icon: Tractor,
         permissions: [PERMISSIONS.PRODUCTORES_CREATE, PERMISSIONS.PRODUCTORES_UPDATE],
       },
       {
         name: "Técnicos",
         href: "/admin/tecnicos",
-        icon: "engineering",
+        icon: HardHat,
         permissions: [PERMISSIONS.TECNICOS_READ],
       },
       {
         name: "Socios",
         href: "/admin/socios",
-        icon: "groups",
+        icon: Users,
         permissions: [PERMISSIONS.SOCIOS_READ],
       },
     ]
   },
   {
     name: "Administración",
-    icon: "admin_panel_settings",
+    icon: ShieldCheck,
     subItems: [
       {
         name: "Usuarios",
         href: "/admin/usuarios",
-        icon: "manage_accounts",
+        icon: UserCog,
         permissions: [PERMISSIONS.USUARIOS_READ],
       },
       {
         name: "Configuración",
         href: "/admin/configuracion",
-        icon: "settings",
+        icon: Settings,
         permissions: [PERMISSIONS.CONFIGURACION_MANAGE],
       },
     ]
@@ -123,7 +141,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
       <nav
         aria-hidden={!isOpen}
         className={cn(
-          "fixed left-0 top-0 z-40 flex h-full w-64 flex-col border-r border-[#d8cabb] bg-[#fffdf8] py-7 shadow-[8px_0_30px_rgba(43,23,16,0.06)] transition-transform duration-300 ease-out",
+          "fixed left-0 top-0 z-40 flex h-full w-64 flex-col border-r border-[#e5e7eb] bg-white py-7 shadow-[8px_0_30px_rgba(15,23,42,0.05)] transition-transform duration-300 ease-out",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -145,6 +163,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
 
         <div className="mt-2 flex w-full flex-1 flex-col gap-1.5 overflow-y-auto px-3">
           {navigation.map(item => {
+            const ItemIcon = item.icon
             if (item.subItems) {
               const visibleSubItems = item.subItems.filter(subItem => hasPermission(subItem.permissions))
               if (visibleSubItems.length === 0) return null
@@ -158,21 +177,20 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                     onClick={() => toggleGroup(item.name)}
                     className={cn(
                       "flex w-full items-center justify-between rounded-lg px-3 py-3 transition-all duration-200",
-                      "text-[#5a3424] hover:bg-[#fbf7f0] hover:text-[#2b1710]"
+                      "text-[#5a3424] hover:bg-[#f3f4f6] hover:text-[#2b1710]"
                     )}
                   >
                     <div className="flex items-center gap-3">
-                      <span className="material-symbols-outlined text-[21px]">{item.icon}</span>
+                      <ItemIcon className="h-[21px] w-[21px]" aria-hidden="true" />
                       <span className="text-[14px] font-semibold tracking-normal">{item.name}</span>
                     </div>
-                    <span className={cn("material-symbols-outlined text-[18px] transition-transform duration-200", isGroupOpen && "rotate-180")}>
-                      expand_more
-                    </span>
+                    <ChevronDown className={cn("h-[18px] w-[18px] transition-transform duration-200", isGroupOpen && "rotate-180")} aria-hidden="true" />
                   </button>
                   {isGroupOpen && (
                     <div className="flex flex-col gap-1 mb-1">
                       {visibleSubItems.map(subItem => {
                         const isActive = pathname === subItem.href || (subItem.href !== "/admin" && pathname.startsWith(`${subItem.href}/`))
+                        const SubItemIcon = subItem.icon
                         return (
                           <Link
                             key={subItem.name}
@@ -180,17 +198,11 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                             className={cn(
                               "flex w-full items-center gap-3 rounded-lg py-2 pr-3 pl-11 transition-all duration-200",
                               isActive
-                                ? "bg-[#2b1710] text-[#fffaf1] shadow-[0_10px_24px_rgba(43,23,16,0.12)]"
-                                : "text-[#5a3424] hover:bg-[#fbf7f0] hover:text-[#2b1710]"
+                                ? "bg-[#5a3424]/12 text-[#3d2118] ring-1 ring-inset ring-[#5a3424]/10"
+                                : "text-[#5a3424] hover:bg-[#f3f4f6] hover:text-[#2b1710]"
                             )}
                           >
-                            <span
-                              className="material-symbols-outlined text-[18px]"
-                              data-weight={isActive ? "fill" : undefined}
-                              style={isActive ? { fontVariationSettings: "'FILL' 1" } : {}}
-                            >
-                              {subItem.icon}
-                            </span>
+                            <SubItemIcon className="h-[18px] w-[18px]" aria-hidden="true" />
                             <span className="text-[13px] font-semibold tracking-normal">{subItem.name}</span>
                           </Link>
                         )
@@ -211,17 +223,11 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                 className={cn(
                   "flex w-full items-center gap-3 rounded-lg px-3 py-3 transition-all duration-200",
                   isActive
-                    ? "bg-[#2b1710] text-[#fffaf1] shadow-[0_10px_24px_rgba(43,23,16,0.12)]"
-                    : "text-[#5a3424] hover:bg-[#fbf7f0] hover:text-[#2b1710]"
+                    ? "bg-[#5a3424]/12 text-[#3d2118] ring-1 ring-inset ring-[#5a3424]/10"
+                    : "text-[#5a3424] hover:bg-[#f3f4f6] hover:text-[#2b1710]"
                 )}
               >
-                <span
-                  className="material-symbols-outlined text-[21px]"
-                  data-weight={isActive ? "fill" : undefined}
-                  style={isActive ? { fontVariationSettings: "'FILL' 1" } : {}}
-                >
-                  {item.icon}
-                </span>
+                <ItemIcon className="h-[21px] w-[21px]" aria-hidden="true" />
                 <span className="text-[14px] font-semibold tracking-normal">{item.name}</span>
               </Link>
             )
@@ -233,7 +239,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
             onClick={() => void logout()}
             className="group flex w-full items-center gap-3 rounded-lg px-3 py-3 text-[#5a3424] transition-colors hover:bg-red-500/10 hover:text-red-700"
           >
-            <span className="material-symbols-outlined text-[21px]">logout</span>
+            <LogOut className="h-[21px] w-[21px]" aria-hidden="true" />
             <span className="text-[14px] font-semibold">Cerrar sesion</span>
           </button>
           <button

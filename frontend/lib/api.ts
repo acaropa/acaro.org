@@ -139,5 +139,13 @@ export const api = {
 export function apiAssetUrl(path: string | null | undefined) {
   if (!path) return '';
   if (/^https?:\/\//.test(path)) return path;
-  return `${BASE.replace(/\/api\/?$/, '')}${path.startsWith('/') ? path : `/${path}`}`;
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+
+  // Uploaded files must travel through /api in production because that is the
+  // path forwarded to the Node backend by the reverse proxy.
+  if (normalizedPath.startsWith('/uploads/')) {
+    return `${BASE.replace(/\/$/, '')}${normalizedPath}`;
+  }
+
+  return `${BASE.replace(/\/api\/?$/, '')}${normalizedPath}`;
 }

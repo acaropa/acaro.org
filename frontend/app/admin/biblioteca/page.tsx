@@ -1,9 +1,11 @@
 'use client';
 
+import { AppIcon } from "@/components/ui/AppIcon"
+
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Modal } from '@/components/ui/Modal';
-import { api } from '@/lib/api';
+import { api, apiAssetUrl } from '@/lib/api';
 import { PERMISSIONS } from '@/lib/permissions';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ImageUploadField, UploadedFile } from '@/components/admin/ImageUploadField';
@@ -384,7 +386,7 @@ export default function AdminBiblioteca() {
         <div className="py-12 text-center text-muted font-body-md animate-pulse">Cargando biblioteca...</div>
       ) : documents.length === 0 ? (
         <div className="bg-surface/30 border border-border border-dashed p-16 flex flex-col items-center justify-center text-center">
-          <span className="material-symbols-outlined text-[48px] text-muted mb-4 opacity-50">description</span>
+          <AppIcon name="description" className="text-[48px] text-muted mb-4 opacity-50" />
           <h3 className="font-headline-md text-xl font-bold text-foreground mb-2">Sin documentos</h3>
           <p className="font-body-md text-muted max-w-md">No se encontraron archivos en este estado actualmente.</p>
         </div>
@@ -394,6 +396,15 @@ export default function AdminBiblioteca() {
             const isOwner = document.creado_por === user?.id;
             return (
               <div key={document.id} className="bg-card p-6 border border-border hover:border-primary/30 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-6 group">
+                {document.imagen_portada && (
+                  <div className="h-24 w-full shrink-0 overflow-hidden rounded-lg border border-border bg-surface md:w-36">
+                    <img
+                      src={apiAssetUrl(document.imagen_portada)}
+                      alt={`Portada de ${document.titulo}`}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                )}
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <span className="font-label-caps text-[10px] tracking-widest uppercase text-accent bg-accent/10 px-2 py-1 rounded">
@@ -411,7 +422,7 @@ export default function AdminBiblioteca() {
                       </span>
                     ))}
                   </div>
-                  <a href={document.archivo_url} target="_blank" rel="noreferrer" className="block font-headline-md text-lg font-bold text-foreground hover:text-primary transition-colors mb-1">
+                  <a href={apiAssetUrl(document.archivo_url)} target="_blank" rel="noreferrer" className="block font-headline-md text-lg font-bold text-foreground hover:text-primary transition-colors mb-1">
                     {document.titulo}
                   </a>
                   <p className="text-sm text-muted font-body-md">Subido por: <span className="text-foreground">{document.creado_por_nombre || document.creado_por_email}</span></p>
@@ -432,35 +443,35 @@ export default function AdminBiblioteca() {
                   <div className="flex flex-wrap gap-4 md:gap-3">
                     {(canReview || (isOwner && editableStates.includes(document.estado))) && (
                       <button onClick={() => startEdit(document)} className="flex items-center gap-1 text-sm font-medium text-foreground hover:text-primary transition-colors">
-                        <span className="material-symbols-outlined text-[16px]">edit</span> Editar
+                        <AppIcon name="edit" className="text-[16px]" /> Editar
                       </button>
                     )}
                     {canReview && document.estado === 'pendiente_revision' && (
                       <>
                         <button onClick={() => void review(document, 'approve')} className="flex items-center gap-1 text-sm font-medium text-brand-green hover:underline">
-                          <span className="material-symbols-outlined text-[16px]">check_circle</span> Aprobar
+                          <AppIcon name="check_circle" className="text-[16px]" /> Aprobar
                         </button>
                         <button onClick={() => void review(document, 'request_changes')} className="flex items-center gap-1 text-sm font-medium text-accent hover:underline">
-                          <span className="material-symbols-outlined text-[16px]">assignment_return</span> Pedir corrección
+                          <AppIcon name="assignment_return" className="text-[16px]" /> Pedir corrección
                         </button>
                         <button onClick={() => void review(document, 'reject')} className="flex items-center gap-1 text-sm font-medium text-red-600 hover:underline">
-                          <span className="material-symbols-outlined text-[16px]">cancel</span> Rechazar
+                          <AppIcon name="cancel" className="text-[16px]" /> Rechazar
                         </button>
                       </>
                     )}
                     {canReview && document.estado === 'aprobado' && (
                       <button onClick={() => void review(document, 'archive')} className="flex items-center gap-1 text-sm font-medium text-muted hover:text-foreground">
-                        <span className="material-symbols-outlined text-[16px]">inventory_2</span> Archivar
+                        <AppIcon name="inventory_2" className="text-[16px]" /> Archivar
                       </button>
                     )}
                     {canReview && document.estado === 'archivado' && (
                       <button onClick={() => void review(document, 'unarchive')} className="flex items-center gap-1 text-sm font-medium text-brand-green hover:underline">
-                        <span className="material-symbols-outlined text-[16px]">unarchive</span> Desarchivar
+                        <AppIcon name="unarchive" className="text-[16px]" /> Desarchivar
                       </button>
                     )}
                     {canDelete && (
                       <button onClick={() => void remove(document)} className="flex items-center gap-1 text-sm font-medium text-red-600 hover:text-red-800">
-                        <span className="material-symbols-outlined text-[16px]">delete</span> Eliminar
+                        <AppIcon name="delete" className="text-[16px]" /> Eliminar
                       </button>
                     )}
                   </div>

@@ -1,5 +1,7 @@
 'use client';
 
+import { AppIcon } from "@/components/ui/AppIcon"
+
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { api } from '@/lib/api';
@@ -511,9 +513,7 @@ export default function AdminNotasConceptualesPage() {
             <span className="text-xs text-muted">{filteredNotes.length}/{notes.length}</span>
           </div>
           <div className="relative">
-            <span className="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-muted">
-              search
-            </span>
+            <AppIcon name="search" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-muted" />
             <input
               value={query}
               onChange={event => setQuery(event.target.value)}
@@ -525,13 +525,13 @@ export default function AdminNotasConceptualesPage() {
             <div className="py-8 text-center text-sm text-muted">Cargando...</div>
           ) : notes.length === 0 ? (
             <div className="border border-dashed border-border rounded-lg p-6 text-center">
-              <span className="material-symbols-outlined text-[36px] text-muted mb-3">contract_edit</span>
+              <AppIcon name="contract_edit" className="text-[36px] text-muted mb-3" />
               <h2 className="font-headline-md text-lg text-foreground">Sin notas</h2>
               <p className="mt-2 text-sm text-muted leading-6">Crea la primera nota conceptual para verla aquí.</p>
             </div>
           ) : filteredNotes.length === 0 ? (
             <div className="border border-dashed border-border rounded-lg p-6 text-center">
-              <span className="material-symbols-outlined text-[36px] text-muted mb-3">search_off</span>
+              <AppIcon name="search_off" className="text-[36px] text-muted mb-3" />
               <h2 className="font-headline-md text-lg text-foreground">Sin resultados</h2>
               <p className="mt-2 text-sm text-muted leading-6">No encontramos notas con ese termino.</p>
             </div>
@@ -561,7 +561,7 @@ export default function AdminNotasConceptualesPage() {
                       {getNoteSummary(note)}
                     </p>
                     <div className="mt-3 flex items-center gap-1 text-[11px] font-medium text-foreground">
-                      <span className="material-symbols-outlined text-[14px]">calendar_month</span>
+                      <AppIcon name="calendar_month" className="text-[14px]" />
                       {formatNoteDate(note.fecha)}
                     </div>
                   </button>
@@ -598,7 +598,7 @@ export default function AdminNotasConceptualesPage() {
             <iframe title="Vista previa de nota conceptual" srcDoc={preview} className="h-[760px] w-full bg-white" />
           ) : (
             <div className="h-[560px] flex flex-col items-center justify-center text-center px-8">
-              <span className="material-symbols-outlined text-[52px] text-muted mb-4">draft</span>
+              <AppIcon name="draft" className="text-[52px] text-muted mb-4" />
               <h2 className="font-headline-md text-xl text-foreground">Selecciona o crea una nota</h2>
               <p className="mt-2 max-w-md text-sm text-muted leading-6">
                 La vista previa aparecerá cuando selecciones una nota conceptual.
@@ -685,7 +685,7 @@ export default function AdminNotasConceptualesPage() {
                     onClick={() => removeAgendaRow(index)}
                     className="h-11 w-11 flex items-center justify-center border border-border text-muted hover:text-red-600 hover:border-red-200 transition-colors"
                   >
-                    <span className="material-symbols-outlined text-[20px]">delete</span>
+                    <AppIcon name="delete" className="text-[20px]" />
                   </button>
                 </div>
               ))}

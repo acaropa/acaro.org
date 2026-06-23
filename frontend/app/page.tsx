@@ -32,11 +32,11 @@ export default function Home() {
             <p className="hero-reveal mt-7 max-w-2xl text-lg leading-8 text-[#f3e8d8]/85 sm:text-xl" style={{ animationDelay: "320ms" }}>
               Impulsamos el desarrollo del café robusta con organización, conocimiento técnico y visión productiva.
             </p>
-            <div className="hero-reveal mt-10 flex flex-col gap-4 sm:flex-row" style={{ animationDelay: "460ms" }}>
-              <Link href="/nosotros" className="group inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full border border-[#d7a24a]/60 bg-[#d7a24a]/10 px-8 text-sm font-medium tracking-wide text-[#f0c87e] backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-[#d7a24a] hover:bg-[#d7a24a]/20 hover:shadow-[0_8px_32px_rgba(215,162,74,0.25)] active:translate-y-0">
+            <div className="hero-reveal mt-9 flex flex-col gap-3 sm:flex-row" style={{ animationDelay: "460ms" }}>
+              <Link href="/nosotros" className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-[#fffaf1] bg-[#fffaf1] px-6 text-sm font-semibold text-[#24130d] transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_14px_34px_rgba(255,250,241,0.16)] active:translate-y-0">
                 Conocer la asociación <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
-              <Link href="/biblioteca" className="inline-flex min-h-[52px] items-center justify-center rounded-full border border-[#fffaf1]/15 bg-white/5 px-8 text-sm font-medium tracking-wide text-[#fffaf1] backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-[#fffaf1]/30 hover:bg-white/10 hover:shadow-[0_8px_32px_rgba(255,255,255,0.08)] active:translate-y-0">
+              <Link href="/biblioteca" className="inline-flex min-h-12 items-center justify-center rounded-md border border-[#fffaf1]/35 bg-[#fffaf1]/5 px-6 text-sm font-semibold text-[#fffaf1] backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-[#fffaf1]/12 active:translate-y-0">
                 Explorar biblioteca
               </Link>
             </div>

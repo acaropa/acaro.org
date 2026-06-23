@@ -1,5 +1,7 @@
 'use client';
 
+import { AppIcon } from "@/components/ui/AppIcon"
+
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
@@ -155,11 +157,9 @@ export default function AdminUsuarios() {
           <article key={record.id} className="bg-card p-6 border border-border hover:border-primary/30 transition-colors flex flex-col group relative overflow-hidden">
             <div className="flex justify-between items-start mb-6">
               <div className="flex items-center justify-center w-12 h-12 rounded bg-surface text-muted">
-                <span className="material-symbols-outlined text-[24px]">
-                  {record.role === 'admin' ? 'admin_panel_settings' : 
-                   record.role === 'supervisor' ? 'manage_accounts' : 
-                   record.role === 'tecnico' ? 'engineering' : 'person'}
-                </span>
+                <AppIcon name={record.role === 'admin' ? 'admin_panel_settings' :
+                   record.role === 'supervisor' ? 'manage_accounts' :
+                   record.role === 'tecnico' ? 'engineering' : 'person'} className="text-[24px]" />
               </div>
               <span className={`font-label-caps text-[10px] tracking-widest uppercase px-2 py-1 rounded shrink-0 ${Boolean(record.activo) ? 'bg-brand-green/10 text-brand-green' : 'bg-red-500/10 text-red-600'}`}>
                 {Boolean(record.activo) ? 'Activo' : 'Desactivado'}
@@ -219,7 +219,7 @@ export default function AdminUsuarios() {
               <div className="flex justify-end pt-4 border-t border-border/50">
                 {Boolean(record.activo) ? (
                   <button onClick={() => void disable(record.id)} className="flex items-center gap-1 text-sm font-medium text-red-600 hover:text-red-800 transition-colors">
-                    <span className="material-symbols-outlined text-[16px]">block</span> Desactivar cuenta
+                    <AppIcon name="block" className="text-[16px]" /> Desactivar cuenta
                   </button>
                 ) : (
                   <span className="text-xs text-muted italic">Cuenta inactiva</span>

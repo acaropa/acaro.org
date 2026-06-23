@@ -1,5 +1,7 @@
 'use client'
 
+
+import { AppIcon } from "@/components/ui/AppIcon"
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
@@ -110,12 +112,12 @@ export function AnalyticsDashboard({ encuestaId }: Props) {
         </div>
         <div className="flex flex-wrap gap-2">
           {encuesta.estado === 'publicada' && (
-            <button onClick={copyLink} className="inline-flex items-center gap-2 rounded-lg border border-[#d8cabb] px-3 py-2 text-sm font-semibold text-[#5a3424] hover:bg-[#fbf7f0]">
-              <span className="material-symbols-outlined text-[16px]">{copied ? 'check' : 'link'}</span>
+            <button onClick={copyLink} className="inline-flex items-center gap-2 rounded-lg border border-[#d8cabb] px-3 py-2 text-sm font-semibold text-[#5a3424] hover:bg-[#f3f4f6]">
+              <AppIcon name={copied ? 'check' : 'link'} className="text-[16px]" />
               {copied ? 'Copiado' : 'Copiar enlace'}
             </button>
           )}
-          <Link href={`/admin/encuestas/editar?id=${encuestaId}`} className="rounded-lg border border-[#d8cabb] px-3 py-2 text-sm font-semibold text-[#5a3424] hover:bg-[#fbf7f0]">Editar</Link>
+          <Link href={`/admin/encuestas/editar?id=${encuestaId}`} className="rounded-lg border border-[#d8cabb] px-3 py-2 text-sm font-semibold text-[#5a3424] hover:bg-[#f3f4f6]">Editar</Link>
           {canExport && (
             <button onClick={handleExport} disabled={exporting || !responses.length} className="rounded-lg bg-[#2b1710] px-4 py-2 text-sm font-semibold text-white hover:bg-[#3d2318] disabled:opacity-50">
               {exporting ? 'Exportando...' : 'Exportar Excel'}
@@ -128,7 +130,7 @@ export function AnalyticsDashboard({ encuestaId }: Props) {
       <div className="flex flex-wrap gap-3">
         <input type="date" value={fechaInicio} onChange={e => setFechaInicio(e.target.value)} className="rounded-lg border border-[#d8cabb] px-3 py-2 text-sm text-[#2b1710]" />
         <input type="date" value={fechaFin} onChange={e => setFechaFin(e.target.value)} className="rounded-lg border border-[#d8cabb] px-3 py-2 text-sm text-[#2b1710]" />
-        <button onClick={() => { setFechaInicio(''); setFechaFin('') }} className="rounded-lg border border-[#d8cabb] px-3 py-2 text-sm text-[#5a3424] hover:bg-[#fbf7f0]">Limpiar</button>
+        <button onClick={() => { setFechaInicio(''); setFechaFin('') }} className="rounded-lg border border-[#d8cabb] px-3 py-2 text-sm text-[#5a3424] hover:bg-[#f3f4f6]">Limpiar</button>
       </div>
 
       {/* Metrics */}
@@ -186,9 +188,9 @@ export function AnalyticsDashboard({ encuestaId }: Props) {
 
         <div className="grid xl:grid-cols-[280px,1fr]">
           {/* ── Sidebar: question filter ── */}
-          <aside className="border-b border-[#ede6db] bg-[#fbf7f0] p-5 xl:border-b-0 xl:border-r">
+          <aside className="border-b border-[#e5e7eb] bg-white p-5 xl:border-b-0 xl:border-r">
             <div className="flex items-center gap-2 text-sm font-bold text-[#2b1710]">
-              <span className="material-symbols-outlined text-[16px] text-[#c28a3a]">filter_list</span>
+              <AppIcon name="filter_list" className="text-[16px] text-[#c28a3a]" />
               Filtrar Preguntas
             </div>
             <p className="mt-2 text-xs text-[#765e50]">Selecciona las preguntas que deseas incluir en el análisis.</p>
@@ -284,7 +286,7 @@ function QuestionInsightsCard({
   return (
     <div className="rounded-xl border border-[#d8cabb] bg-white overflow-hidden">
       {/* Header */}
-      <div className="border-b border-[#ede6db] px-5 py-4 bg-[#fbf7f0]">
+      <div className="border-b border-[#e5e7eb] bg-white px-5 py-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
@@ -374,7 +376,7 @@ function QuestionInsightsCard({
             <div className="max-h-[340px] overflow-y-auto">
               {data.respondentItems.length ? (
                 <table className="w-full text-sm">
-                  <thead className="sticky top-0 bg-[#fbf7f0]">
+                  <thead className="sticky top-0 bg-white">
                     <tr className="text-left text-[10px] font-bold uppercase tracking-wider text-[#a08c7a]">
                       <th className="px-3 py-2">Respondente</th>
                       <th className="px-3 py-2">Respuesta</th>
@@ -383,7 +385,7 @@ function QuestionInsightsCard({
                   </thead>
                   <tbody className="divide-y divide-[#ede6db]">
                     {data.respondentItems.map(item => (
-                      <tr key={item.responseId} className="hover:bg-[#fbf7f0]">
+                      <tr key={item.responseId} className="hover:bg-[#f3f4f6]">
                         <td className="px-3 py-2.5 font-medium text-[#2b1710] max-w-[140px] truncate">{item.respondentName}</td>
                         <td className="px-3 py-2.5 text-[#5a3424] max-w-[200px] truncate">{item.answerPreview}</td>
                         <td className="px-3 py-2.5 text-xs text-[#a08c7a] whitespace-nowrap">{item.fecha}</td>
@@ -407,7 +409,7 @@ function QuestionInsightsCard({
 
 function MiniStat({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-lg border border-[#ede6db] bg-[#fbf7f0] px-4 py-3">
+    <div className="rounded-lg border border-[#e5e7eb] bg-white px-4 py-3">
       <p className="text-lg font-bold text-[#2b1710]">{value}</p>
       <p className="text-xs text-[#765e50]">{label}</p>
     </div>
@@ -459,7 +461,7 @@ function ResponseList({
 
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-[#fbf7f0] text-left text-[10px] font-bold uppercase tracking-wider text-[#a08c7a]">
+          <thead className="bg-white text-left text-[10px] font-bold uppercase tracking-wider text-[#a08c7a]">
             <tr>
               <th className="px-5 py-3">Respondente</th>
               <th className="px-5 py-3 hidden md:table-cell">Respuesta destacada</th>
@@ -473,7 +475,7 @@ function ResponseList({
                 ? r.respuestas_detalle?.find(d => d.pregunta_id === firstTextQ.id)?.respuesta_texto ?? ''
                 : ''
               return (
-                <tr key={r.id} className="hover:bg-[#fbf7f0] transition-colors">
+                <tr key={r.id} className="hover:bg-[#f3f4f6] transition-colors">
                   <td className="px-5 py-3">
                     <p className="font-medium text-[#2b1710]">
                       {r.respondente_nombre || r.respondente_email || `Anónimo #${r.id}`}
@@ -492,7 +494,7 @@ function ResponseList({
                     <td className="px-5 py-3">
                       <button onClick={() => onDelete(r.id)}
                         className="rounded p-1 text-red-400 hover:bg-red-50 hover:text-red-600">
-                        <span className="material-symbols-outlined text-[18px]">delete</span>
+                        <AppIcon name="delete" className="text-[18px]" />
                       </button>
                     </td>
                   )}

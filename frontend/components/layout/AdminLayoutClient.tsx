@@ -87,7 +87,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen theme-admin landing-typography bg-[#fffdf8] admin-background-noise flex flex-col md:flex-row">
+    <div className="min-h-screen theme-admin landing-typography bg-white flex flex-col md:flex-row">
       <AdminSidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}

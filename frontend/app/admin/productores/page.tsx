@@ -1,5 +1,7 @@
 'use client';
 
+import { AppIcon } from "@/components/ui/AppIcon"
+
 import { useCallback, useEffect, useState } from 'react';
 import { api, apiAssetUrl } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
@@ -282,7 +284,7 @@ export default function AdminProductores() {
         <div className="py-12 text-center text-muted font-body-md animate-pulse">Cargando productores...</div>
       ) : producers.length === 0 ? (
         <div className="bg-surface/30 border border-border border-dashed p-16 flex flex-col items-center justify-center text-center">
-          <span className="material-symbols-outlined text-[48px] text-muted mb-4 opacity-50">groups</span>
+          <AppIcon name="groups" className="text-[48px] text-muted mb-4 opacity-50" />
           <h3 className="font-headline-md text-xl font-bold text-foreground mb-2">Sin productores</h3>
           <p className="font-body-md text-muted max-w-md">Aún no se han registrado perfiles de productores.</p>
         </div>
@@ -325,22 +327,22 @@ export default function AdminProductores() {
               <div className="flex flex-wrap gap-4 justify-end mt-auto pt-4 border-t border-border/50">
                 {canUpdate && (
                   <button onClick={() => startEdit(item)} className="flex items-center gap-1 text-sm font-medium text-foreground hover:text-primary transition-colors">
-                    <span className="material-symbols-outlined text-[16px]">edit</span> Editar
+                    <AppIcon name="edit" className="text-[16px]" /> Editar
                   </button>
                 )}
                 {canUpdate && (
                   <button onClick={() => void toggleField(item, 'destacado')} className="flex items-center gap-1 text-sm font-medium text-accent hover:underline">
-                    <span className="material-symbols-outlined text-[16px]">star</span> {item.destacado ? 'Quitar destacado' : 'Destacar'}
+                    <AppIcon name="star" className="text-[16px]" /> {item.destacado ? 'Quitar destacado' : 'Destacar'}
                   </button>
                 )}
                 {canUpdate && (
                   <button onClick={() => void toggleField(item, 'activo')} className="flex items-center gap-1 text-sm font-medium text-muted hover:text-foreground">
-                    <span className="material-symbols-outlined text-[16px]">{item.activo ? 'visibility_off' : 'visibility'}</span> {item.activo ? 'Ocultar' : 'Publicar'}
+                    <AppIcon name={item.activo ? 'visibility_off' : 'visibility'} className="text-[16px]" /> {item.activo ? 'Ocultar' : 'Publicar'}
                   </button>
                 )}
                 {canDelete && (
                   <button onClick={() => void remove(item)} className="flex items-center gap-1 text-sm font-medium text-red-600 hover:text-red-800">
-                    <span className="material-symbols-outlined text-[16px]">delete</span> Eliminar
+                    <AppIcon name="delete" className="text-[16px]" /> Eliminar
                   </button>
                 )}
               </div>

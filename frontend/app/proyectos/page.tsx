@@ -1,5 +1,7 @@
 'use client';
 
+import { AppIcon } from "@/components/ui/AppIcon"
+
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { PublicLayout } from '@/components/layout/PublicLayout';
@@ -176,9 +178,7 @@ function SolidProject({ project, index }: { project: Project, index: number }) {
       <Link href={`/proyectos/detalle/?slug=${project.slug || ''}`} className="flex flex-col w-full h-full">
       <div className="h-full min-h-[400px] bg-primary p-8 flex flex-col justify-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
-          <span className="material-symbols-outlined text-[200px] absolute -bottom-10 -right-10" data-weight="fill">
-            {project.icon || 'eco'}
-          </span>
+          <AppIcon name={project.icon || 'eco'} className="text-[200px] absolute -bottom-10 -right-10" />
         </div>
         <span className="font-serif text-[14px] font-medium leading-none text-primary-foreground/60 mb-4 relative z-10">
           {String(index + 1).padStart(2, '0')}

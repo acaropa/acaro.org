@@ -70,7 +70,7 @@ export function QuestionRenderer({ question, value, onChange, required }: Props)
               className={`flex-1 rounded-lg border px-4 py-2.5 text-sm font-semibold transition-colors ${
                 value === opt.val
                   ? 'border-[#2b1710] bg-[#2b1710] text-white'
-                  : 'border-[#d8cabb] text-[#5a3424] hover:bg-[#fbf7f0]'
+                  : 'border-[#d8cabb] text-[#5a3424] hover:bg-[#f3f4f6]'
               }`}
             >
               {opt.label}
@@ -97,7 +97,7 @@ export function QuestionRenderer({ question, value, onChange, required }: Props)
                   className={`w-full rounded-lg border px-4 py-2.5 text-left text-sm transition-colors ${
                     selected
                       ? 'border-[#2b1710] bg-[#2b1710] text-white'
-                      : 'border-[#d8cabb] text-[#5a3424] hover:bg-[#fbf7f0]'
+                      : 'border-[#d8cabb] text-[#5a3424] hover:bg-[#f3f4f6]'
                   }`}
                 >
                   {opc.etiqueta_opcion}
@@ -152,7 +152,7 @@ export function QuestionRenderer({ question, value, onChange, required }: Props)
                   className={`w-full rounded-lg border px-4 py-2.5 text-left text-sm transition-colors ${
                     isChecked
                       ? 'border-[#2b1710] bg-[#2b1710]/10 text-[#2b1710]'
-                      : 'border-[#d8cabb] text-[#5a3424] hover:bg-[#fbf7f0]'
+                      : 'border-[#d8cabb] text-[#5a3424] hover:bg-[#f3f4f6]'
                   }`}
                 >
                   <span className="mr-2">{isChecked ? '☑' : '☐'}</span>

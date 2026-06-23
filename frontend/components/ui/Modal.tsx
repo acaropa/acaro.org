@@ -1,5 +1,7 @@
 'use client';
 
+import { AppIcon } from "@/components/ui/AppIcon"
+
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -50,7 +52,7 @@ export function Modal({ isOpen, onClose, title, children, maxWidth = 'max-w-2xl'
             onClick={onClose}
             className="flex items-center justify-center w-8 h-8 rounded-full bg-background/50 hover:bg-accent/10 hover:text-accent text-muted transition-colors"
           >
-            <span className="material-symbols-outlined text-[20px]">close</span>
+            <AppIcon name="close" className="text-[20px]" />
           </button>
         </div>
         

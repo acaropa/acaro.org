@@ -1,5 +1,7 @@
 'use client'
 
+
+import { AppIcon } from "@/components/ui/AppIcon"
 import { useEffect, useMemo, useState } from 'react'
 import type { EncuestaPregunta } from '@/lib/encuestas'
 import type { AnswerValue, SingleChoiceAnswer, MultipleChoiceAnswer } from '@/lib/surveyRules'
@@ -68,7 +70,7 @@ export function SurveyQuestionRenderer({
     [question.opciones]
   )
 
-  const arrow = <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+  const arrow = <AppIcon name="arrow_forward" className="text-[16px]" />
 
   // ─── BOOLEANO ─────────────────────────────────────────
   if (question.tipo_pregunta === 'booleano') {
@@ -82,7 +84,7 @@ export function SurveyQuestionRenderer({
               <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center border ${
                 selectedBoolean === opt.value ? 'border-accent bg-accent text-white' : 'border-[#81756f]'
               }`}>
-                {selectedBoolean === opt.value && <span className="material-symbols-outlined text-[14px]">check</span>}
+                {selectedBoolean === opt.value && <AppIcon name="check" className="text-[14px]" />}
               </span>
               <span className="text-base font-semibold">{opt.label}</span>
             </button>
@@ -214,7 +216,7 @@ export function SurveyQuestionRenderer({
                 <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center border ${
                   sel ? 'border-accent bg-accent text-white' : 'border-[#81756f] bg-white'
                 }`}>
-                  {sel && <span className="material-symbols-outlined text-[14px]">check</span>}
+                  {sel && <AppIcon name="check" className="text-[14px]" />}
                 </span>
                 <div>
                   <p className="text-[15px] font-semibold">{opt.etiqueta_opcion}</p>

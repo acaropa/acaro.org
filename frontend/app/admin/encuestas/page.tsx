@@ -1,5 +1,7 @@
 'use client'
 
+
+import { AppIcon } from "@/components/ui/AppIcon"
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/context/AuthContext'
@@ -44,6 +46,8 @@ export default function AdminEncuestas() {
   const [deleteTarget, setDeleteTarget] = useState<Encuesta | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [copiedId, setCopiedId] = useState<number | null>(null)
+  const [changingId, setChangingId] = useState<number | null>(null)
+  const [statusError, setStatusError] = useState('')
 
   const copyLink = (enc: Encuesta) => {
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://acaro.org'
@@ -95,10 +99,16 @@ export default function AdminEncuestas() {
   }
 
   const handleChangeEstado = async (enc: Encuesta, estado: string) => {
+    setChangingId(enc.id)
+    setStatusError('')
     try {
       const updated = await encuestasApi.changeEstado(enc.id, estado)
       setEncuestas(prev => prev.map(e => (e.id === updated.id ? { ...e, ...updated } : e)))
-    } catch { /* empty */ }
+    } catch {
+      setStatusError('No se pudo cambiar el estado de la encuesta. Inténtalo nuevamente.')
+    } finally {
+      setChangingId(null)
+    }
   }
 
   return (
@@ -113,14 +123,14 @@ export default function AdminEncuestas() {
             href="/admin/encuestas/nueva"
             className="inline-flex items-center gap-2 rounded-lg bg-[#2b1710] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#3d2318]"
           >
-            <span className="material-symbols-outlined text-[18px]">add</span>
+            <AppIcon name="add" className="text-[18px]" />
             Nueva encuesta
           </Link>
         )}
       </div>
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        <div className="flex gap-1 rounded-lg border border-[#d8cabb] bg-[#fbf7f0] p-1">
+        <div className="flex gap-1 rounded-lg border border-[#e5e7eb] bg-white p-1">
           {tabs.map(tab => (
             <button
               key={tab.estado}
@@ -128,7 +138,7 @@ export default function AdminEncuestas() {
               className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
                 activeTab === tab.estado
                   ? 'bg-[#2b1710] text-white'
-                  : 'text-[#5a3424] hover:bg-[#f0e8dd]'
+                  : 'text-[#5a3424] hover:bg-[#f3f4f6]'
               }`}
             >
               {tab.label}
@@ -144,6 +154,12 @@ export default function AdminEncuestas() {
         />
       </div>
 
+      {statusError && (
+        <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {statusError}
+        </p>
+      )}
+
       {loading ? (
         <p className="py-12 text-center text-sm text-[#765e50]">Cargando encuestas...</p>
       ) : !filtered.length ? (
@@ -151,7 +167,7 @@ export default function AdminEncuestas() {
       ) : (
         <div className="overflow-hidden rounded-xl border border-[#d8cabb]">
           <table className="w-full text-sm">
-            <thead className="bg-[#fbf7f0] text-left text-[11px] font-semibold uppercase tracking-wider text-[#765e50]">
+            <thead className="bg-[#f9fafb] text-left text-[11px] font-semibold uppercase tracking-wider text-[#765e50]">
               <tr>
                 <th className="px-4 py-3">Título</th>
                 <th className="hidden px-4 py-3 md:table-cell">Estado</th>
@@ -163,7 +179,7 @@ export default function AdminEncuestas() {
             </thead>
             <tbody className="divide-y divide-[#ede6db]">
               {filtered.map(enc => (
-                <tr key={enc.id} className="bg-white transition-colors hover:bg-[#fefcf8]">
+                <tr key={enc.id} className="bg-white transition-colors hover:bg-[#f9fafb]">
                   <td className="px-4 py-3 font-medium text-[#2b1710]">
                     <Link href={`/admin/encuestas/editar?id=${enc.id}`} className="hover:underline">
                       {enc.titulo}
@@ -185,14 +201,14 @@ export default function AdminEncuestas() {
                         className="rounded-md p-1.5 text-[#5a3424] hover:bg-[#f0e8dd]"
                         title="Editar"
                       >
-                        <span className="material-symbols-outlined text-[18px]">edit</span>
+                        <AppIcon name="edit" className="text-[18px]" />
                       </Link>
                       <Link
                         href={`/admin/encuestas/resultados?id=${enc.id}`}
                         className="rounded-md p-1.5 text-[#5a3424] hover:bg-[#f0e8dd]"
                         title="Resultados"
                       >
-                        <span className="material-symbols-outlined text-[18px]">bar_chart</span>
+                        <AppIcon name="bar_chart" className="text-[18px]" />
                       </Link>
                       {enc.estado === 'publicada' && (
                         <button
@@ -200,27 +216,38 @@ export default function AdminEncuestas() {
                           className="rounded-md p-1.5 text-[#5a3424] hover:bg-[#f0e8dd]"
                           title={copiedId === enc.id ? '¡Copiado!' : 'Copiar enlace'}
                         >
-                          <span className="material-symbols-outlined text-[18px]">
-                            {copiedId === enc.id ? 'check' : 'link'}
-                          </span>
+                          <AppIcon name={copiedId === enc.id ? 'check' : 'link'} className="text-[18px]" />
                         </button>
                       )}
                       {canPublish && enc.estado === 'borrador' && (
                         <button
                           onClick={() => handleChangeEstado(enc, 'publicada')}
-                          className="rounded-md p-1.5 text-green-700 hover:bg-green-50"
+                          disabled={changingId === enc.id}
+                          className="rounded-md p-1.5 text-green-700 hover:bg-green-50 disabled:cursor-wait disabled:opacity-50"
                           title="Publicar"
                         >
-                          <span className="material-symbols-outlined text-[18px]">publish</span>
+                          <AppIcon name="publish" className="text-[18px]" />
                         </button>
                       )}
                       {canPublish && enc.estado === 'publicada' && (
                         <button
                           onClick={() => handleChangeEstado(enc, 'cerrada')}
-                          className="rounded-md p-1.5 text-orange-700 hover:bg-orange-50"
+                          disabled={changingId === enc.id}
+                          className="rounded-md p-1.5 text-orange-700 hover:bg-orange-50 disabled:cursor-wait disabled:opacity-50"
                           title="Cerrar"
                         >
-                          <span className="material-symbols-outlined text-[18px]">lock</span>
+                          <AppIcon name="lock" className="text-[18px]" />
+                        </button>
+                      )}
+                      {canPublish && enc.estado === 'cerrada' && (
+                        <button
+                          onClick={() => handleChangeEstado(enc, 'publicada')}
+                          disabled={changingId === enc.id}
+                          className="rounded-md p-1.5 text-green-700 hover:bg-green-50 disabled:cursor-wait disabled:opacity-50"
+                          title="Volver a publicar"
+                          aria-label={`Volver a publicar ${enc.titulo}`}
+                        >
+                          <AppIcon name="publish" className="text-[18px]" />
                         </button>
                       )}
                       {canDuplicate && (
@@ -229,7 +256,7 @@ export default function AdminEncuestas() {
                           className="rounded-md p-1.5 text-[#5a3424] hover:bg-[#f0e8dd]"
                           title="Duplicar"
                         >
-                          <span className="material-symbols-outlined text-[18px]">content_copy</span>
+                          <AppIcon name="content_copy" className="text-[18px]" />
                         </button>
                       )}
                       {canDelete && (
@@ -238,7 +265,7 @@ export default function AdminEncuestas() {
                           className="rounded-md p-1.5 text-red-600 hover:bg-red-50"
                           title="Eliminar"
                         >
-                          <span className="material-symbols-outlined text-[18px]">delete</span>
+                          <AppIcon name="delete" className="text-[18px]" />
                         </button>
                       )}
                     </div>
@@ -258,7 +285,7 @@ export default function AdminEncuestas() {
         <div className="flex justify-end gap-2">
           <button
             onClick={() => setDeleteTarget(null)}
-            className="rounded-lg border border-[#d8cabb] px-4 py-2 text-sm font-semibold text-[#5a3424] hover:bg-[#fbf7f0]"
+            className="rounded-lg border border-[#d8cabb] px-4 py-2 text-sm font-semibold text-[#5a3424] hover:bg-[#f3f4f6]"
           >
             Cancelar
           </button>

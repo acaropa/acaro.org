@@ -72,10 +72,13 @@ app.use('/api/productores', productoresRoutes);
 app.use('/api/notas-conceptuales', notasConceptualesRoutes);
 app.use('/api/logs', logsRoutes);
 app.use('/api/encuestas', encuestasRoutes);
-app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads'), {
+const uploadsDirectory = path.join(__dirname, '..', 'uploads');
+const uploadStaticOptions = {
   fallthrough: false,
   maxAge: '1d',
-}));
+};
+app.use('/uploads', express.static(uploadsDirectory, uploadStaticOptions));
+app.use('/api/uploads', express.static(uploadsDirectory, uploadStaticOptions));
 
 app.use(errorHandler);
 
