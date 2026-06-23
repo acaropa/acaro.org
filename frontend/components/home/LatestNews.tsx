@@ -22,26 +22,21 @@ export function LatestNews() {
 
   return (
     <div className="mt-10 grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-      <ScrollReveal className="premium-project group relative flex min-h-[500px] flex-col overflow-hidden rounded-[10px] bg-[#2b1710] p-8 text-[#fffaf1] sm:p-10" direction="left">
-        <div className="absolute inset-0 opacity-30">
+      <ScrollReveal className="premium-project group relative flex min-h-[500px] flex-col justify-end overflow-hidden rounded-[10px] bg-[#2b1710]" direction="left">
+        <Link href={`/noticias/detalle/?slug=${featured.slug}`} className="absolute inset-0 z-10" />
+        <div className="absolute inset-0">
           <img
             src={apiAssetUrl(featured.imagen_portada) || '/assets/library-hero-v2.png'}
             alt=""
             className="scene-scale h-full w-full object-cover"
           />
         </div>
-        <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(31,17,11,0.98),rgba(31,17,11,0.25))]" />
-        <div className="relative flex flex-1 flex-col">
-          <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.18em] text-[#e7c792]">
-            <span>{featured.categoria}</span><span>{formatNoticiaDate(featured)}</span>
-          </div>
-          <div className="mt-auto pt-10">
-            <h3 className="scene-drift-side max-w-2xl font-serif text-3xl font-semibold leading-[1.2] tracking-[-0.015em] sm:text-4xl">{featured.titulo}</h3>
-            {featured.resumen && <p className="mt-6 max-w-xl text-base leading-7 text-[#f3e8d8]/78">{featured.resumen}</p>}
-            <Link href={`/noticias/detalle/?slug=${featured.slug}`} className="group/link mt-8 inline-flex items-center gap-2 border-b border-[#e7c792]/55 pb-1 text-sm font-semibold text-[#e7c792]">
-              Leer comunicado <ArrowRight className="h-4 w-4 transition-transform group-hover/link:translate-x-1" />
-            </Link>
-          </div>
+        {/* Gradient overlay to ensure text contrast at the bottom */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#1a0c07] via-[#1a0c07]/40 to-transparent opacity-90" />
+        <div className="relative p-8 sm:p-10 z-20">
+          <h3 className="scene-drift-side font-serif text-3xl font-semibold leading-[1.2] tracking-[-0.015em] sm:text-4xl text-[#fffaf1] text-balance">
+            {featured.titulo}
+          </h3>
         </div>
       </ScrollReveal>
 
