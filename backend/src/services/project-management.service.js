@@ -2,9 +2,10 @@ const fs = require('fs/promises');
 const path = require('path');
 const crypto = require('crypto');
 const db = require('../config/db');
+const { uploadRoot } = require('../config/uploads');
 const cache = require('../utils/memoryCache');
 
-const UPLOAD_ROOT = path.join(__dirname, '..', '..', 'uploads', 'proyectos');
+const UPLOAD_ROOT = path.join(uploadRoot, 'proyectos');
 
 const ENTITY_CONFIG = {
   tareas: {

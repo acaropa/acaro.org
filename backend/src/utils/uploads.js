@@ -1,8 +1,9 @@
 const fs = require('fs/promises');
 const path = require('path');
 const crypto = require('crypto');
+const { uploadRoot } = require('../config/uploads');
 
-const UPLOAD_ROOT = path.join(__dirname, '..', '..', 'uploads');
+const UPLOAD_ROOT = uploadRoot;
 
 const IMAGE_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.webp']);
 const DOCUMENT_EXTENSIONS = new Set([

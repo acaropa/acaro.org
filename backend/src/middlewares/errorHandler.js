@@ -1,4 +1,8 @@
 function errorHandler(err, req, res, next) {
+  if (err.code === 'ENOENT' && req.path.includes('/uploads/')) {
+    return res.status(404).json({ error: 'Archivo no encontrado' });
+  }
+
   const status = err.status || 500;
   const isDatabaseError =
     typeof err.code === 'string' &&

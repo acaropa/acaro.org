@@ -1,6 +1,5 @@
 require('dotenv').config();
 const express = require('express');
-const path = require('path');
 const helmet = require('helmet');
 const cors = require('cors');
 const morgan = require('morgan');
@@ -21,6 +20,7 @@ const notasConceptualesRoutes = require('./routes/notasConceptuales.routes');
 const logsRoutes = require('./routes/logs.routes');
 const encuestasRoutes = require('./routes/encuestas.routes');
 const { cleanupOldSessions } = require('./services/sessions.service');
+const { uploadRoot } = require('./config/uploads');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -72,13 +72,12 @@ app.use('/api/productores', productoresRoutes);
 app.use('/api/notas-conceptuales', notasConceptualesRoutes);
 app.use('/api/logs', logsRoutes);
 app.use('/api/encuestas', encuestasRoutes);
-const uploadsDirectory = path.join(__dirname, '..', 'uploads');
 const uploadStaticOptions = {
   fallthrough: false,
   maxAge: '1d',
 };
-app.use('/uploads', express.static(uploadsDirectory, uploadStaticOptions));
-app.use('/api/uploads', express.static(uploadsDirectory, uploadStaticOptions));
+app.use('/uploads', express.static(uploadRoot, uploadStaticOptions));
+app.use('/api/uploads', express.static(uploadRoot, uploadStaticOptions));
 
 app.use(errorHandler);
 
@@ -92,6 +91,7 @@ function runSessionCleanup() {
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Uploads directory: ${uploadRoot}`);
   runSessionCleanup();
 });
 
