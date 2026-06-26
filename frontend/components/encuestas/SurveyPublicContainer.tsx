@@ -10,25 +10,20 @@ import { AnimatedCircularProgress } from '@/components/ui/AnimatedCircularProgre
 
 const STYLES = `
   @keyframes slideInRight {
-    from { opacity: 0; transform: translateX(48px); }
+    from { opacity: 0; transform: translateX(32px); }
     to   { opacity: 1; transform: translateX(0); }
   }
   @keyframes slideInLeft {
-    from { opacity: 0; transform: translateX(-48px); }
+    from { opacity: 0; transform: translateX(-32px); }
     to   { opacity: 1; transform: translateX(0); }
   }
   @keyframes scaleIn {
-    from { opacity: 0; transform: scale(0.5); }
+    from { opacity: 0; transform: scale(0.55); }
     to   { opacity: 1; transform: scale(1); }
   }
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  .q-enter-forward { animation: slideInRight 0.35s cubic-bezier(0.22, 1, 0.36, 1) both; }
-  .q-enter-back    { animation: slideInLeft  0.35s cubic-bezier(0.22, 1, 0.36, 1) both; }
-  .check-enter     { animation: scaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
-  .fade-up         { animation: fadeUp 0.4s ease-out both; }
+  .q-enter-forward { animation: slideInRight 0.28s ease-out both; }
+  .q-enter-back    { animation: slideInLeft  0.28s ease-out both; }
+  .check-enter     { animation: scaleIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
 `
 
 function isEmptyAnswer(value?: AnswerValue) {
@@ -144,11 +139,7 @@ export function SurveyPublicContainer({ slug }: Props) {
 
   if (loading) return (
     <div className="landing-typography min-h-screen bg-surface flex items-center justify-center">
-      <style>{STYLES}</style>
-      <div className="flex flex-col items-center gap-4 fade-up">
-        <AnimatedCircularProgress value={0} size={80} strokeWidth={6} />
-        <p className="text-xs font-bold tracking-widest uppercase text-muted">Cargando...</p>
-      </div>
+      <p className="text-muted text-sm">Cargando formulario...</p>
     </div>
   )
 
@@ -168,19 +159,17 @@ export function SurveyPublicContainer({ slug }: Props) {
   if (done) return (
     <div className="landing-typography min-h-screen bg-surface flex items-center justify-center px-6">
       <style>{STYLES}</style>
-      <div className="max-w-sm text-center">
-        <div className="check-enter mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-full border-2 border-brand-green/25 bg-brand-green/5">
-          <AppIcon name="check_circle" className="text-[52px] text-brand-green" />
+      <div className="max-w-lg text-center">
+        <div className="check-enter mx-auto mb-6 flex h-20 w-20 items-center justify-center border border-brand-green/30 bg-brand-green/5">
+          <AppIcon name="check_circle" className="text-[40px] text-brand-green" />
         </div>
-        <p className="text-[10px] font-bold tracking-[0.35em] uppercase text-brand-green mb-3">Encuesta completada</p>
-        <h1 className="font-serif text-3xl md:text-4xl font-bold text-primary mb-4 leading-tight">
-          ¡Gracias por su participación!
-        </h1>
-        <p className="text-[15px] leading-relaxed text-muted mb-8">
-          Su información fue registrada correctamente y contribuye al desarrollo de la comunidad cafetalera.
+        <p className="text-xs font-bold tracking-[0.3em] uppercase text-brand-green mb-3">Encuesta enviada</p>
+        <h1 className="font-serif text-4xl font-bold text-primary mb-4">Gracias por completar la encuesta</h1>
+        <p className="text-[16px] leading-[1.6] text-muted mb-8">
+          Su información fue enviada correctamente. Puede cerrar esta página o regresar al listado.
         </p>
-        <Link href="/encuestas" className="inline-flex items-center gap-2 px-7 py-3 bg-primary text-primary-foreground text-xs font-bold tracking-widest uppercase hover:opacity-90 transition-opacity">
-          <AppIcon name="home" className="text-[15px]" />
+        <Link href="/encuestas" className="inline-flex items-center gap-2 px-8 py-3 border border-primary text-primary text-xs font-bold tracking-widest uppercase hover:bg-primary hover:text-primary-foreground transition-colors">
+          <AppIcon name="home" className="text-[16px]" />
           Volver al inicio
         </Link>
       </div>
@@ -197,141 +186,96 @@ export function SurveyPublicContainer({ slug }: Props) {
   const isLast = pos === total
   const required = isQuestionRequired(q as any, answersByCode)
   const animClass = direction === 'forward' ? 'q-enter-forward' : 'q-enter-back'
-  const decorNum = String(pos).padStart(2, '0')
 
   return (
     <div className="landing-typography min-h-screen bg-surface">
       <style>{STYLES}</style>
 
-      {/* Sticky header — back button left, progress circle right */}
-      <header className="sticky top-0 z-10 border-b border-primary/8 bg-surface/90 backdrop-blur-md">
-        <div className="mx-auto max-w-[820px] flex items-center justify-between px-5 py-3 sm:px-8">
-          <Link
-            href="/encuestas"
-            className="flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-muted hover:text-primary transition-colors"
-          >
-            <AppIcon name="arrow_back" className="text-[15px]" />
+      {/* Header — círculo de progreso a la derecha */}
+      <div className="border-b border-primary/10 bg-surface/95 backdrop-blur-sm sticky top-0 z-10">
+        <div className="mx-auto max-w-[960px] flex items-center justify-between px-5 py-3 sm:px-8">
+          <Link href="/encuestas" className="text-xs font-bold tracking-widest uppercase text-muted hover:text-primary transition-colors flex items-center gap-2">
+            <AppIcon name="arrow_back" className="text-[16px]" />
             Volver
           </Link>
           <div className="flex items-center gap-3">
             {survey.logo_url && (
-              <img src={survey.logo_url} alt="" className="h-7 w-auto opacity-70" onError={e => { e.currentTarget.style.display = 'none' }} />
+              <img src={survey.logo_url} alt="" className="h-7 w-auto" onError={e => { e.currentTarget.style.display = 'none' }} />
             )}
             <AnimatedCircularProgress value={pct} size={52} strokeWidth={5} />
           </div>
         </div>
-      </header>
+      </div>
 
-      <main className="mx-auto max-w-[820px] px-5 sm:px-8 py-8 md:py-12">
+      <main className="mx-auto max-w-[960px] px-5 sm:px-8 py-12 md:py-16">
 
-        {/* Survey meta above the card */}
-        <div className="mb-5 fade-up">
+        {/* Survey meta */}
+        <div className="mb-10">
           {section && (
-            <span className="inline-block text-[9px] font-black tracking-[0.3em] uppercase text-accent bg-accent/8 px-2.5 py-1 rounded-full mb-2">
-              {section}
-            </span>
+            <p className="text-xs font-bold tracking-[0.2em] uppercase text-accent mb-2">{section}</p>
           )}
-          <p className="text-sm font-semibold text-primary/50 leading-snug line-clamp-1">
+          <h1 className="font-serif text-3xl md:text-4xl font-bold text-primary leading-tight mb-3">
             {survey.titulo}
+          </h1>
+          <p className="text-[15px] leading-[1.6] text-muted max-w-2xl">
+            {survey.descripcion?.trim() || 'Complete el formulario siguiendo el orden de las preguntas.'}
           </p>
         </div>
 
-        {/* Card stack */}
-        <div className="relative pb-8">
-          {/* Ghost card 2 — deepest */}
-          <div className="absolute inset-x-8 bottom-2 top-4 rounded-2xl border border-primary/5 bg-white/50" style={{ zIndex: 0 }} />
-          {/* Ghost card 1 */}
-          <div className="absolute inset-x-4 bottom-4 top-2 rounded-2xl border border-primary/8 bg-white/75" style={{ zIndex: 1 }} />
+        <div className="h-[1px] bg-primary/10 mb-10" />
 
-          {/* Main card */}
-          <div
-            key={`q-${index}`}
-            className={`relative rounded-2xl border border-primary/10 bg-white shadow-[0_4px_32px_rgba(43,23,16,0.07)] overflow-hidden ${animClass}`}
-            style={{ zIndex: 2 }}
-          >
-            {/* Accent top bar */}
-            <div className="h-[3px]" style={{ background: 'linear-gradient(90deg, transparent 0%, var(--color-accent, #a66f2e) 30%, var(--color-accent, #a66f2e) 70%, transparent 100%)' }} />
-
-            <div className="px-6 pt-6 pb-8 md:px-10 md:pt-8 md:pb-10">
-
-              {/* Card header: question number + required badge */}
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-[9px] font-black tracking-[0.3em] uppercase text-primary/20">
-                  N.º {decorNum}
-                </span>
-                {required
-                  ? (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-black tracking-[0.2em] uppercase bg-accent/10 text-accent border border-accent/20">
-                      <span className="block w-1 h-1 rounded-full bg-accent" />
-                      Obligatoria
-                    </span>
-                  ) : (
-                    <span className="px-2.5 py-1 rounded-full text-[9px] font-bold tracking-[0.2em] uppercase text-primary/20 border border-primary/10">
-                      Opcional
-                    </span>
-                  )
-                }
-              </div>
-
-              {/* Decorative large number — watermark effect */}
-              <div
-                className="font-serif font-black text-primary/[0.035] leading-none select-none pointer-events-none"
-                style={{ fontSize: 'clamp(4.5rem, 11vw, 7.5rem)', lineHeight: 1 }}
-                aria-hidden="true"
-              >
-                {decorNum}
-              </div>
-
-              {/* Question title — overlaps the watermark */}
-              <h2
-                className="font-serif font-bold text-primary leading-tight relative"
-                style={{ fontSize: 'clamp(1.5rem, 4vw, 2.1rem)', marginTop: '-0.5em' }}
-              >
-                {q.texto_pregunta.replace(/^\s*\d+[.)\-]?\s*/, '').trim()}
-              </h2>
-
-              {q.texto_ayuda && (
-                <p className="mt-2 text-sm leading-relaxed text-muted">{q.texto_ayuda}</p>
-              )}
-
-              {/* Divider */}
-              <div className="my-6 h-px bg-primary/6" />
-
-              {saveError && (
-                <div className="flex items-center gap-2.5 text-sm text-red-600 bg-red-50/80 border border-red-200 rounded-xl px-4 py-3 mb-5">
-                  <AppIcon name="error" className="text-[18px] shrink-0" />
-                  {saveError}
-                </div>
-              )}
-
-              <SurveyQuestionRenderer
-                question={q}
-                initialValue={answersByCode[q.codigo_pregunta ?? q.id]}
-                required={required}
-                continueLabel={isLast ? 'Enviar encuesta' : 'Continuar'}
-                onAnswer={handleAnswer}
-                isSubmitting={isSaving}
-              />
-            </div>
+        {/* Animated question */}
+        <div key={`q-${index}`} className={`max-w-2xl ${animClass}`}>
+          <div className="flex flex-wrap items-center gap-3 mb-4">
+            <span className="px-3 py-1 text-[10px] font-bold tracking-[0.2em] uppercase border border-primary/20 text-primary">
+              Pregunta {pos}
+            </span>
+            {required
+              ? <span className="px-3 py-1 text-[10px] font-bold tracking-[0.2em] uppercase bg-accent/10 text-accent border border-accent/20">Obligatoria</span>
+              : <span className="px-3 py-1 text-[10px] font-bold tracking-[0.2em] uppercase text-muted border border-primary/10">Opcional</span>
+            }
           </div>
-        </div>
 
-        {/* Bottom nav */}
-        <div className="flex items-center justify-between px-1 mt-2">
-          <button
-            type="button"
-            onClick={goBack}
-            disabled={index === 0 || isSaving}
-            className="flex items-center gap-1.5 text-xs font-bold tracking-widest uppercase text-primary/35 hover:text-primary transition-colors disabled:opacity-0 disabled:pointer-events-none py-2"
-          >
-            <AppIcon name="arrow_back" className="text-[14px]" />
-            Anterior
-          </button>
-          {isLast && !isSaving && (
-            <p className="text-xs text-muted/60 hidden sm:block">
-              Al continuar se enviará la encuesta.
-            </p>
+          <h2 className="font-serif text-2xl md:text-3xl font-bold text-primary leading-snug mb-2">
+            {q.texto_pregunta.replace(/^\s*\d+[.)\-]?\s*/, '').trim()}
+          </h2>
+          {q.texto_ayuda && (
+            <p className="text-sm text-muted mb-6">{q.texto_ayuda}</p>
           )}
+
+          {saveError && (
+            <div className="text-sm text-red-600 bg-red-50 border border-red-200 px-4 py-3 flex items-center gap-2 mb-6">
+              <AppIcon name="error" className="text-[18px]" />
+              {saveError}
+            </div>
+          )}
+
+          <div className="mt-6">
+            <SurveyQuestionRenderer
+              question={q}
+              initialValue={answersByCode[q.codigo_pregunta ?? q.id]}
+              required={required}
+              continueLabel={isLast ? 'Enviar encuesta' : 'Continuar'}
+              onAnswer={handleAnswer}
+              isSubmitting={isSaving}
+            />
+          </div>
+
+          <div className="flex items-center justify-between mt-10 pt-6 border-t border-primary/10">
+            <button
+              type="button"
+              onClick={goBack}
+              disabled={index === 0 || isSaving}
+              className="px-6 py-2.5 border border-primary text-primary text-xs font-bold tracking-widest uppercase hover:bg-primary hover:text-primary-foreground transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              Anterior
+            </button>
+            <p className="text-xs text-muted max-w-[280px] text-right leading-relaxed hidden sm:block">
+              {isLast
+                ? (isSaving ? 'Enviando respuestas...' : 'Al continuar se enviará la encuesta.')
+                : 'Continúe hasta el final para enviar.'}
+            </p>
+          </div>
         </div>
       </main>
     </div>
