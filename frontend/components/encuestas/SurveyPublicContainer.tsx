@@ -1,12 +1,30 @@
 'use client'
 
-
 import { AppIcon } from "@/components/ui/AppIcon"
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { encuestasApi, type EncuestaFull, type EncuestaPregunta } from '@/lib/encuestas'
 import { isQuestionVisible, isQuestionRequired, type AnswerValue } from '@/lib/surveyRules'
 import { SurveyQuestionRenderer } from './SurveyQuestionRenderer'
+import { AnimatedCircularProgress } from '@/components/ui/AnimatedCircularProgress'
+
+const SURVEY_STYLES = `
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateX(32px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-32px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.55); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  .q-enter-forward { animation: slideInRight 0.28s ease-out both; }
+  .q-enter-back    { animation: slideInLeft  0.28s ease-out both; }
+  .check-enter     { animation: scaleIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+`
 
 function isEmptyAnswer(value?: AnswerValue) {
   if (typeof value === 'undefined') return true
@@ -32,6 +50,7 @@ export function SurveyPublicContainer({ slug }: Props) {
   const [done, setDone] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
+  const [direction, setDirection] = useState<'forward' | 'back'>('forward')
 
   useEffect(() => {
     encuestasApi.getPublic(slug)
@@ -106,14 +125,24 @@ export function SurveyPublicContainer({ slug }: Props) {
     const nextVisible = questions.filter(qq => isQuestionVisible(qq as any, draft))
     const nextIdx = nextVisible.findIndex(qq => qq.id === q.id) + 1
     if (nextIdx >= nextVisible.length) { await submitAnswers(draft); return }
+    setDirection('forward')
     setIndex(nextIdx)
   }, [visibleQuestions, index, isSaving, answersByCode, questions, submitAnswers])
 
-  const goBack = () => { if (index > 0 && !isSaving) { setSaveError(''); setIndex(p => p - 1) } }
+  const goBack = () => {
+    if (index > 0 && !isSaving) {
+      setSaveError('')
+      setDirection('back')
+      setIndex(p => p - 1)
+    }
+  }
 
   if (loading) return (
     <div className="landing-typography min-h-screen bg-surface flex items-center justify-center">
-      <p className="text-muted text-sm">Cargando formulario...</p>
+      <div className="flex flex-col items-center gap-4">
+        <AnimatedCircularProgress value={0} size={80} strokeWidth={7} />
+        <p className="text-muted text-sm tracking-wide">Cargando formulario...</p>
+      </div>
     </div>
   )
 
@@ -132,12 +161,13 @@ export function SurveyPublicContainer({ slug }: Props) {
 
   if (done) return (
     <div className="landing-typography min-h-screen bg-surface flex items-center justify-center px-6">
+      <style>{SURVEY_STYLES}</style>
       <div className="max-w-lg text-center">
-        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center border border-brand-green/30 bg-brand-green/5">
-          <AppIcon name="check_circle" className="text-[40px] text-brand-green" />
+        <div className="check-enter mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full border border-brand-green/30 bg-brand-green/5">
+          <AppIcon name="check_circle" className="text-[48px] text-brand-green" />
         </div>
         <p className="text-xs font-bold tracking-[0.3em] uppercase text-brand-green mb-3">Encuesta enviada</p>
-        <h1 className="font-serif text-4xl font-bold text-primary mb-4">Gracias por completar la encuesta</h1>
+        <h1 className="font-serif text-4xl font-bold text-primary mb-4">¡Gracias por completar la encuesta!</h1>
         <p className="text-[16px] leading-[1.6] text-muted mb-8">
           Su información fue enviada correctamente. Puede cerrar esta página o regresar al listado.
         </p>
@@ -158,45 +188,58 @@ export function SurveyPublicContainer({ slug }: Props) {
   const pct = total > 0 ? (pos / total) * 100 : 0
   const isLast = pos === total
   const required = isQuestionRequired(q as any, answersByCode)
+  const animClass = direction === 'forward' ? 'q-enter-forward' : 'q-enter-back'
 
   return (
     <div className="landing-typography min-h-screen bg-surface">
-      <div className="border-b border-primary/10 bg-surface/95 backdrop-blur-sm">
+      <style>{SURVEY_STYLES}</style>
+
+      {/* Header */}
+      <div className="border-b border-primary/10 bg-surface/95 backdrop-blur-sm sticky top-0 z-10">
         <div className="mx-auto max-w-[960px] flex items-center justify-between px-5 py-4 sm:px-8">
           <Link href="/encuestas" className="text-xs font-bold tracking-widest uppercase text-muted hover:text-primary transition-colors flex items-center gap-2">
             <AppIcon name="arrow_back" className="text-[16px]" />
             Volver
           </Link>
           <div className="flex items-center gap-3">
-            {survey.logo_url && <img src={survey.logo_url} alt="" className="h-8 w-auto" onError={e => { e.currentTarget.style.display = 'none' }} />}
+            {survey.logo_url && (
+              <img src={survey.logo_url} alt="" className="h-8 w-auto" onError={e => { e.currentTarget.style.display = 'none' }} />
+            )}
             <span className="text-xs font-bold tracking-widest uppercase text-muted hidden sm:inline">Encuesta</span>
           </div>
         </div>
       </div>
 
-      <main className="mx-auto max-w-[960px] px-5 sm:px-8 py-12 md:py-16">
-        <div className="mb-10">
-          <div className="flex flex-wrap items-center gap-3 mb-5">
-            <span className="text-xs font-bold tracking-[0.2em] uppercase text-accent">Paso {pos} de {total}</span>
-            {section && (<><span className="w-1 h-1 rounded-full bg-primary/30" /><span className="text-xs font-bold tracking-[0.2em] uppercase text-muted">{section}</span></>)}
-          </div>
-          <h1 className="font-serif text-3xl md:text-4xl font-bold text-primary leading-tight mb-3">{survey.titulo}</h1>
-          <p className="text-[15px] leading-[1.6] text-muted max-w-2xl">
-            {survey.descripcion?.trim() || 'Complete el formulario siguiendo el orden de las preguntas.'}
-          </p>
-          <div className="mt-6 flex items-center gap-4">
-            <div className="flex-1 h-[3px] bg-primary/10 overflow-hidden">
-              <div className="h-full bg-accent transition-all duration-500" style={{ width: `${pct}%` }} />
-            </div>
-            <span className="text-xs font-bold tracking-wider text-accent">{Math.round(pct)}%</span>
+      <main className="mx-auto max-w-[960px] px-5 sm:px-8 py-10 md:py-14">
+
+        {/* Progress + Survey Meta */}
+        <div className="flex flex-col items-center gap-5 mb-10 md:flex-row md:items-center md:gap-10">
+          <AnimatedCircularProgress value={pct} size={110} strokeWidth={9} />
+          <div className="text-center md:text-left">
+            {section && (
+              <p className="text-[10px] font-bold tracking-[0.28em] uppercase text-accent mb-1.5">
+                {section}
+              </p>
+            )}
+            <h1 className="font-serif text-2xl md:text-3xl font-bold text-primary leading-tight">
+              {survey.titulo}
+            </h1>
+            {survey.descripcion?.trim() && (
+              <p className="text-sm leading-relaxed text-muted mt-2 max-w-xl">
+                {survey.descripcion.trim()}
+              </p>
+            )}
           </div>
         </div>
 
         <div className="h-[1px] bg-primary/10 mb-10" />
 
-        <div className="max-w-2xl">
+        {/* Animated Question Area */}
+        <div key={`q-${index}`} className={`max-w-2xl ${animClass}`}>
           <div className="flex flex-wrap items-center gap-3 mb-4">
-            <span className="px-3 py-1 text-[10px] font-bold tracking-[0.2em] uppercase border border-primary/20 text-primary">Pregunta {pos}</span>
+            <span className="px-3 py-1 text-[10px] font-bold tracking-[0.2em] uppercase border border-primary/20 text-primary">
+              Pregunta {pos}
+            </span>
             {required
               ? <span className="px-3 py-1 text-[10px] font-bold tracking-[0.2em] uppercase bg-accent/10 text-accent border border-accent/20">Obligatoria</span>
               : <span className="px-3 py-1 text-[10px] font-bold tracking-[0.2em] uppercase text-muted border border-primary/10">Opcional</span>
@@ -206,7 +249,9 @@ export function SurveyPublicContainer({ slug }: Props) {
           <h2 className="font-serif text-2xl md:text-3xl font-bold text-primary leading-snug mb-2">
             {q.texto_pregunta.replace(/^\s*\d+[.)\-]?\s*/, '').trim()}
           </h2>
-          {q.texto_ayuda && <p className="text-sm text-muted mb-6">{q.texto_ayuda}</p>}
+          {q.texto_ayuda && (
+            <p className="text-sm text-muted mb-6">{q.texto_ayuda}</p>
+          )}
 
           {saveError && (
             <div className="text-sm text-red-600 bg-red-50 border border-red-200 px-4 py-3 flex items-center gap-2 mb-6">
@@ -227,12 +272,18 @@ export function SurveyPublicContainer({ slug }: Props) {
           </div>
 
           <div className="flex items-center justify-between mt-10 pt-6 border-t border-primary/10">
-            <button type="button" onClick={goBack} disabled={index === 0 || isSaving}
-              className="px-6 py-2.5 border border-primary text-primary text-xs font-bold tracking-widest uppercase hover:bg-primary hover:text-primary-foreground transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+            <button
+              type="button"
+              onClick={goBack}
+              disabled={index === 0 || isSaving}
+              className="px-6 py-2.5 border border-primary text-primary text-xs font-bold tracking-widest uppercase hover:bg-primary hover:text-primary-foreground transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            >
               Anterior
             </button>
             <p className="text-xs text-muted max-w-[280px] text-right leading-relaxed hidden sm:block">
-              {isLast ? isSaving ? 'Enviando respuestas...' : 'Al continuar se enviará la encuesta.' : 'Continúe hasta el final para enviar.'}
+              {isLast
+                ? (isSaving ? 'Enviando respuestas...' : 'Al continuar se enviará la encuesta.')
+                : 'Continúe hasta el final para enviar.'}
             </p>
           </div>
         </div>
