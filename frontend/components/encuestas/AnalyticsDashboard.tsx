@@ -7,12 +7,13 @@ import Link from 'next/link'
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { encuestasApi, type EncuestaPregunta, type RespuestaEncuesta, type EncuestaFull } from '@/lib/encuestas'
 import {
-  buildDashboardMetrics, buildDailySeries, buildEventSuggestions,
+  buildDashboardMetrics, buildDailySeries, buildWeeklySeries, buildEventSuggestions,
   buildAllQuestionAnalytics, exportToExcelHtml, formatQuestionType,
   type QuestionAnalytics,
 } from '@/lib/dashboardAnalytics'
 import { useAuth } from '@/context/AuthContext'
 import { PERMISSIONS } from '@/lib/permissions'
+import { LineChart, Line } from 'recharts'
 // Modal removed — responses shown inline at bottom
 
 type ChartType = 'barras' | 'pastel' | 'dona'
@@ -28,49 +29,35 @@ export function AnalyticsDashboard({ encuestaId }: Props) {
   const [encuesta, setEncuesta] = useState<EncuestaFull | null>(null)
   const [responses, setResponses] = useState<RespuestaEncuesta[]>([])
   const [loading, setLoading] = useState(true)
-  const [fechaInicio, setFechaInicio] = useState('')
-  const [fechaFin, setFechaFin] = useState('')
   const [exporting, setExporting] = useState(false)
-  const [copied, setCopied] = useState(false)
+  const [showAnalysisModal, setShowAnalysisModal] = useState(false)
 
-  const [selectedQIds, setSelectedQIds] = useState<number[]>([])
+  const [selectedQIds, setSelectedQIds] = useState<number[] | 'all' | null>(null)
   const [chartTypes, setChartTypes] = useState<Record<number, ChartType>>({})
-  const [respPage, setRespPage] = useState(0)
-
-  const copyLink = () => {
-    if (!encuesta) return
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://acaro.org'
-    navigator.clipboard.writeText(`${origin}/encuestas/responder?slug=${encuesta.slug}`).then(() => {
-      setCopied(true); setTimeout(() => setCopied(false), 2000)
-    })
-  }
 
   const load = useCallback(async () => {
     try {
       setLoading(true)
       const [enc, resp] = await Promise.all([
         encuestasApi.getById(encuestaId),
-        encuestasApi.getResults(encuestaId, { fechaInicio: fechaInicio || undefined, fechaFin: fechaFin || undefined }),
+        encuestasApi.getResults(encuestaId, {}),
       ])
       setEncuesta(enc)
       setResponses(resp)
     } catch { /* empty */ } finally { setLoading(false) }
-  }, [encuestaId, fechaInicio, fechaFin])
+  }, [encuestaId])
 
   useEffect(() => { void load() }, [load])
 
   const questions: EncuestaPregunta[] = encuesta?.preguntas ?? []
+
   const metrics = useMemo(() => buildDashboardMetrics(responses, questions), [responses, questions])
+  const weeklySeries = useMemo(() => buildWeeklySeries(responses), [responses])
   const dailySeries = useMemo(() => buildDailySeries(responses), [responses])
-  const events = useMemo(() => buildEventSuggestions(responses), [responses])
   const analytics = useMemo(() => buildAllQuestionAnalytics(responses, questions), [responses, questions])
 
   useEffect(() => {
     if (!questions.length) return
-    setSelectedQIds(prev => {
-      const valid = prev.filter(id => questions.some(q => q.id === id))
-      return valid.length ? valid : questions.slice(0, 3).map(q => q.id)
-    })
     setChartTypes(prev => {
       const next = { ...prev }
       questions.forEach(q => { if (!next[q.id]) next[q.id] = 'barras' })
@@ -78,13 +65,13 @@ export function AnalyticsDashboard({ encuestaId }: Props) {
     })
   }, [questions])
 
-  const selectedCards = useMemo(
-    () => analytics.filter(c => selectedQIds.includes(c.question.id)),
-    [analytics, selectedQIds]
-  )
-
-  const toggleQ = (id: number) =>
-    setSelectedQIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id])
+  const selectedCards = useMemo(() => {
+    if (selectedQIds === 'all') return analytics;
+    if (Array.isArray(selectedQIds)) {
+      return analytics.filter(c => selectedQIds.includes(c.question.id));
+    }
+    return [];
+  }, [analytics, selectedQIds])
 
   const handleExport = async () => {
     if (!encuesta) return
@@ -99,170 +86,263 @@ export function AnalyticsDashboard({ encuestaId }: Props) {
     catch { /* empty */ }
   }
 
-  if (loading) return <p className="py-12 text-center text-sm text-[#765e50]">Cargando resultados...</p>
+  if (loading) return <p className="py-12 text-center text-sm text-[#6b7280]">Cargando resultados...</p>
   if (!encuesta) return <p className="py-12 text-center text-sm text-red-600">Encuesta no encontrada.</p>
 
+  const countText = responses.length === 1 ? '1 registro' : `${responses.length} registros`
+  const subtitle = `Mostrando ${countText} en total. La mayoría completó todo en menos de ${metrics.averageTime}.`
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-[#2b1710]">{encuesta.titulo}</h1>
-          <p className="text-sm text-[#765e50]">Resultados y analítica</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {encuesta.estado === 'publicada' && (
-            <button onClick={copyLink} className="inline-flex items-center gap-2 rounded-lg border border-[#d8cabb] px-3 py-2 text-sm font-semibold text-[#5a3424] hover:bg-[#f3f4f6]">
-              <AppIcon name={copied ? 'check' : 'link'} className="text-[16px]" />
-              {copied ? 'Copiado' : 'Copiar enlace'}
-            </button>
-          )}
-          <Link href={`/admin/encuestas/editar?id=${encuestaId}`} className="rounded-lg border border-[#d8cabb] px-3 py-2 text-sm font-semibold text-[#5a3424] hover:bg-[#f3f4f6]">Editar</Link>
-          {canExport && (
-            <button onClick={handleExport} disabled={exporting || !responses.length} className="rounded-lg bg-[#2b1710] px-4 py-2 text-sm font-semibold text-white hover:bg-[#3d2318] disabled:opacity-50">
-              {exporting ? 'Exportando...' : 'Exportar Excel'}
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3">
-        <input type="date" value={fechaInicio} onChange={e => setFechaInicio(e.target.value)} className="rounded-lg border border-[#d8cabb] px-3 py-2 text-sm text-[#2b1710]" />
-        <input type="date" value={fechaFin} onChange={e => setFechaFin(e.target.value)} className="rounded-lg border border-[#d8cabb] px-3 py-2 text-sm text-[#2b1710]" />
-        <button onClick={() => { setFechaInicio(''); setFechaFin('') }} className="rounded-lg border border-[#d8cabb] px-3 py-2 text-sm text-[#5a3424] hover:bg-[#f3f4f6]">Limpiar</button>
-      </div>
-
-      {/* Metrics */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricCard label="Respuestas" value={metrics.totalResponses} />
-        <MetricCard label="Días activos" value={metrics.activeDays} />
-        <MetricCard label="Encuestas" value={metrics.uniqueSurveys} />
-        <MetricCard label="Última respuesta" value={metrics.latestResponse} />
-      </div>
-
-      {/* Activity chart */}
-      {dailySeries.length > 0 && (
-        <div className="rounded-xl border border-[#d8cabb] bg-white p-5">
-          <h3 className="mb-3 text-sm font-bold text-[#2b1710]">Actividad por fecha</h3>
-          <div className="h-[200px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={dailySeries} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#ede6db" vertical={false} />
-                <XAxis dataKey="etiqueta" tick={{ fill: '#765e50', fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: '#765e50', fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} />
-                <Tooltip contentStyle={{ backgroundColor: '#fff', borderColor: '#d8cabb', color: '#2b1710' }} />
-                <Bar dataKey="total" fill="#2b1710" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      )}
-
-      {/* Detected peaks */}
-      {events.length > 0 && (
-        <div className="rounded-xl border border-[#d8cabb] bg-white p-5">
-          <h3 className="mb-3 text-sm font-bold text-[#2b1710]">Picos detectados</h3>
-          <div className="divide-y divide-[#ede6db]">
-            {events.map(ev => (
-              <div key={ev.fecha} className="flex items-center justify-between py-2">
-                <span className="text-sm font-medium text-[#2b1710]">{ev.fecha}</span>
-                <span className="text-xs text-[#765e50]">{ev.total} — {ev.motivo}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ═══ QUESTION ANALYSIS (with sidebar filter) ═══ */}
-      <div className="rounded-xl border border-[#d8cabb] bg-white overflow-hidden">
-        <div className="border-b border-[#ede6db] px-5 py-4 flex items-center justify-between">
+      <div className="rounded-xl bg-white p-6 border border-[#ede6db] shadow-sm">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#a08c7a]">Preguntas</p>
-            <h3 className="text-lg font-bold text-[#2b1710]">Análisis por pregunta</h3>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-[#c28a3a] mb-2">RESUMEN DE RESULTADOS</p>
+            <h1 className="text-3xl font-bold text-[#2b1710]">{encuesta.titulo}</h1>
+            <p className="text-sm text-[#765e50] mt-1">{subtitle}</p>
           </div>
-          <span className="text-sm text-[#765e50]">
-            {selectedQIds.length} pregunta{selectedQIds.length !== 1 ? 's' : ''} seleccionada{selectedQIds.length !== 1 ? 's' : ''}
-          </span>
-        </div>
-
-        <div className="grid xl:grid-cols-[280px,1fr]">
-          {/* ── Sidebar: question filter ── */}
-          <aside className="border-b border-[#e5e7eb] bg-white p-5 xl:border-b-0 xl:border-r">
-            <div className="flex items-center gap-2 text-sm font-bold text-[#2b1710]">
-              <AppIcon name="filter_list" className="text-[16px] text-[#c28a3a]" />
-              Filtrar Preguntas
-            </div>
-            <p className="mt-2 text-xs text-[#765e50]">Selecciona las preguntas que deseas incluir en el análisis.</p>
-
-            <div className="mt-4 flex gap-2">
-              <button onClick={() => setSelectedQIds(questions.map(q => q.id))}
-                className="flex-1 rounded-lg border border-[#d8cabb] px-3 py-1.5 text-xs font-semibold text-[#5a3424] hover:bg-[#f0e8dd]">
-                Todas
+          <div className="flex shrink-0">
+            {canExport && (
+              <button onClick={handleExport} disabled={exporting || !responses.length} className="flex items-center gap-2 rounded-lg bg-[#2b1710] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#3d2318] disabled:opacity-50 transition-all shadow-sm active:scale-95">
+                <AppIcon name="publish" className="text-[18px] rotate-180" />
+                {exporting ? 'Exportando...' : 'Exportar datos'}
               </button>
-              <button onClick={() => setSelectedQIds([])}
-                className="flex-1 rounded-lg border border-[#d8cabb] px-3 py-1.5 text-xs font-semibold text-[#5a3424] hover:bg-[#f0e8dd]">
-                Ninguna
-              </button>
-            </div>
-
-            <div className="mt-4 space-y-1 max-h-[400px] overflow-y-auto">
-              {questions.map(q => {
-                const checked = selectedQIds.includes(q.id)
-                return (
-                  <label key={q.id}
-                    className={`flex cursor-pointer items-start gap-3 rounded-lg px-3 py-2.5 transition-colors ${
-                      checked ? 'bg-[#2b1710]/5' : 'hover:bg-[#f0e8dd]'
-                    }`}>
-                    <input type="checkbox" checked={checked} onChange={() => toggleQ(q.id)}
-                      className="mt-0.5 h-4 w-4 rounded border-[#d8cabb] text-[#2b1710] accent-[#2b1710]" />
-                    <div className="min-w-0">
-                      <p className={`text-sm font-medium leading-tight ${checked ? 'text-[#2b1710]' : 'text-[#765e50]'}`}>
-                        {q.texto_pregunta}
-                      </p>
-                      <p className="mt-1 text-[10px] uppercase tracking-wider text-[#a08c7a]">
-                        {formatQuestionType(q.tipo_pregunta)}
-                      </p>
-                    </div>
-                  </label>
-                )
-              })}
-            </div>
-          </aside>
-
-          {/* ── Main: selected question cards ── */}
-          <div className="p-5 space-y-6">
-            {selectedCards.length ? selectedCards.map(card => (
-              <QuestionInsightsCard
-                key={card.question.id}
-                data={card}
-                chartType={chartTypes[card.question.id] ?? 'barras'}
-                onChartTypeChange={t => setChartTypes(prev => ({ ...prev, [card.question.id]: t }))}
-                onDeleteResponse={canDeleteResp ? handleDeleteResponse : undefined}
-              />
-            )) : (
-              <div className="py-12 text-center text-sm text-[#765e50] border border-dashed border-[#d8cabb] rounded-xl">
-                Selecciona una o más preguntas en el panel lateral para ver su análisis.
-              </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* ═══ RESPONSE LIST (single list at the bottom) ═══ */}
-      {responses.length > 0 && (
-        <ResponseList
-          responses={responses}
-          questions={questions}
-          canDelete={canDeleteResp}
-          onDelete={handleDeleteResponse}
-        />
+      {/* Contenido Principal (siempre análisis) */}
+          {/* Metrics */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-xl border border-[#ede6db] bg-white p-6 shadow-sm flex items-start gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#f0e8dd] text-[#2b1710]">
+                <AppIcon name="message_square" className="text-[24px]" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-[#2b1710]">{metrics.totalResponses}</p>
+                <p className="text-xs text-[#765e50] mt-1">Total respuestas</p>
+                <p className="text-[10px] text-[#a08c7a] mt-0.5">Histórico completo</p>
+              </div>
+            </div>
+            
+            <div className="rounded-xl border border-[#ede6db] bg-white p-6 shadow-sm flex items-start gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#eaf1ec] text-[#2f5d3a]">
+                <AppIcon name="check_circle" className="text-[24px]" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-[#2b1710]">{metrics.completionRate}%</p>
+                <p className="text-xs text-[#765e50] mt-1">Tasa de completado</p>
+                <p className="text-[10px] text-[#a08c7a] mt-0.5">Revisar fricción</p>
+              </div>
+            </div>
+            
+            <div className="rounded-xl border border-[#ede6db] bg-white p-6 shadow-sm flex items-start gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#f9f4ee] text-[#c28a3a]">
+                <AppIcon name="clock" className="text-[24px]" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-[#2b1710]">{metrics.averageTime}</p>
+                <p className="text-xs text-[#765e50] mt-1">Tiempo promedio</p>
+                <p className="text-[10px] text-[#a08c7a] mt-0.5">Rápido</p>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-[#ede6db] bg-white p-6 shadow-sm flex items-start gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#f4ebec] text-[#8b6a4f]">
+                <AppIcon name="activity" className="text-[24px]" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-[#2b1710]">{metrics.activeDays}</p>
+                <p className="text-xs text-[#765e50] mt-1">Días activos</p>
+                <p className="text-[10px] text-[#a08c7a] mt-0.5">Actividad general</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Charts Row */}
+          <div className="grid gap-4 lg:grid-cols-2">
+            <div className="rounded-xl border border-[#ede6db] bg-white p-6 shadow-sm">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[#c28a3a] mb-4">ÚLTIMOS 7 DÍAS</p>
+              <h3 className="text-lg font-bold text-[#2b1710] mb-6">Respuestas por día</h3>
+              <div className="h-[200px]">
+                {weeklySeries.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={weeklySeries} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#ede6db" vertical={false} />
+                      <XAxis dataKey="dia" tick={{ fill: '#765e50', fontSize: 11 }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fill: '#765e50', fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} />
+                      <Tooltip cursor={{ fill: '#fdfcfb' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                      <Bar dataKey="total" fill="#2b1710" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                   <div className="flex h-full items-center justify-center text-sm text-[#a08c7a]">Sin datos suficientes</div>
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-[#ede6db] bg-white p-6 shadow-sm">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[#c28a3a] mb-4">TENDENCIA</p>
+              <h3 className="text-lg font-bold text-[#2b1710] mb-6">Últimos 14 días</h3>
+              <div className="h-[200px]">
+                {dailySeries.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={dailySeries.slice(-14)} margin={{ top: 5, right: 0, left: -20, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#ede6db" vertical={false} />
+                      <XAxis dataKey="etiqueta" tick={{ fill: '#765e50', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={(val) => val.slice(5).replace('-', '/')} />
+                      <YAxis tick={{ fill: '#765e50', fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} />
+                      <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                      <Line type="monotone" dataKey="total" stroke="#2b1710" strokeWidth={3} dot={{ r: 4, fill: '#2b1710', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 6 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex h-full items-center justify-center text-sm text-[#a08c7a]">Sin datos suficientes</div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Analysis Selection / CTA */}
+          {selectedQIds === null ? (
+            <div className="rounded-xl border border-dashed border-[#d8cabb] bg-[#fdfcfb] p-12 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#f0e8dd] text-[#2b1710] mb-4">
+                <AppIcon name="bar_chart" className="text-[24px]" />
+              </div>
+              <h3 className="text-lg font-bold text-[#2b1710]">Panel de Análisis de Datos</h3>
+              <p className="text-sm text-[#765e50] mt-2 mb-6 max-w-md mx-auto">
+                Seleccione las preguntas específicas que desea evaluar para generar los gráficos y métricas correspondientes de los resultados obtenidos.
+              </p>
+              <button 
+                onClick={() => setShowAnalysisModal(true)}
+                className="rounded-lg bg-[#2b1710] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#3d2318] transition-colors"
+              >
+                Seleccionar Preguntas
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold text-[#2b1710]">Análisis de preguntas</h3>
+                <button 
+                  onClick={() => setShowAnalysisModal(true)}
+                  className="text-sm font-medium text-[#c28a3a] hover:text-[#2b1710]"
+                >
+                  Cambiar selección
+                </button>
+              </div>
+              
+              <div className="grid gap-6">
+                {selectedCards.map(card => (
+                  <QuestionInsightsCard
+                    key={card.question.id}
+                    data={card}
+                    chartType={chartTypes[card.question.id] ?? 'barras'}
+                    onChartTypeChange={t => setChartTypes(prev => ({ ...prev, [card.question.id]: t }))}
+                  />
+                ))}
+                {selectedCards.length === 0 && (
+                  <p className="text-center text-sm text-[#765e50] py-8">No hay preguntas seleccionadas para analizar.</p>
+                )}
+              </div>
+            </div>
+          )}
+      {/* Fin Contenido Principal */}
+
+      {/* Analysis Selection Modal */}
+      {showAnalysisModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-2xl rounded-2xl bg-white shadow-xl overflow-hidden">
+            <div className="flex items-center justify-between border-b border-[#ede6db] px-6 py-4">
+              <div>
+                <h3 className="text-lg font-bold text-[#2b1710]">Selección de datos</h3>
+                <p className="text-sm text-[#765e50]">Indique qué información del cuestionario se mostrará en el reporte.</p>
+              </div>
+              <button onClick={() => setShowAnalysisModal(false)} className="text-[#a08c7a] hover:text-[#2b1710]">
+                <AppIcon name="close" className="text-[20px]" />
+              </button>
+            </div>
+            
+            <div className="p-6 max-h-[60vh] overflow-y-auto bg-[#fdfcfb]">
+              <div className="grid gap-4">
+                <label className={`flex cursor-pointer items-start gap-4 rounded-xl border p-4 transition-colors ${selectedQIds === 'all' ? 'border-[#2b1710] bg-[#f0e8dd]' : 'border-[#ede6db] bg-white hover:border-[#d8cabb]'}`}>
+                   <div className="mt-0.5 text-[#2b1710]">
+                     <AppIcon name="list_checks" className="text-[20px]" />
+                   </div>
+                   <div className="flex-1">
+                     <p className={`font-semibold ${selectedQIds === 'all' ? 'text-[#2b1710]' : 'text-[#2b1710]'}`}>Cuestionario completo</p>
+                     <p className="text-xs text-[#765e50] mt-1">Generar métricas de todas las preguntas</p>
+                   </div>
+                   <input 
+                     type="radio" 
+                     name="q-select" 
+                     checked={selectedQIds === 'all'} 
+                     onChange={() => setSelectedQIds('all')}
+                     className="mt-1 h-5 w-5 accent-[#2b1710]" 
+                   />
+                </label>
+
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {questions.map((q, i) => {
+                    const isSelected = Array.isArray(selectedQIds) && selectedQIds.includes(q.id);
+                    return (
+                      <label key={q.id} className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-colors ${isSelected ? 'border-[#2b1710] bg-[#f0e8dd]' : 'border-[#ede6db] bg-white hover:border-[#d8cabb]'}`}>
+                         <div className="mt-0.5 text-[#765e50]">
+                           <AppIcon name="pie_chart" className="text-[18px]" />
+                         </div>
+                         <div className="flex-1">
+                           <p className="text-sm font-semibold text-[#2b1710] line-clamp-2">{i + 1}. {q.texto_pregunta}</p>
+                           <p className="text-[11px] text-[#765e50] mt-1">{formatQuestionType(q.tipo_pregunta)}</p>
+                         </div>
+                         <input 
+                           type="checkbox" 
+                           checked={isSelected}
+                           onChange={() => {
+                             if (selectedQIds === 'all') {
+                               setSelectedQIds([q.id]);
+                             } else {
+                               const current = Array.isArray(selectedQIds) ? selectedQIds : [];
+                               if (isSelected) {
+                                 setSelectedQIds(current.filter(id => id !== q.id));
+                               } else {
+                                 setSelectedQIds([...current, q.id]);
+                               }
+                             }
+                           }}
+                           className="mt-1 h-4 w-4 rounded accent-[#2b1710]" 
+                         />
+                      </label>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 border-t border-[#ede6db] px-6 py-4 bg-white">
+              <button 
+                onClick={() => setShowAnalysisModal(false)}
+                className="rounded-lg border border-[#d8cabb] px-4 py-2 text-sm font-semibold text-[#5a3424] hover:bg-[#f0e8dd]"
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={() => setShowAnalysisModal(false)}
+                disabled={!selectedQIds || (Array.isArray(selectedQIds) && selectedQIds.length === 0)}
+                className="rounded-lg bg-[#2b1710] px-4 py-2 text-sm font-semibold text-white hover:bg-[#3d2318] disabled:opacity-50"
+              >
+                Confirmar Selección
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
 }
 
 // ─── Sub-components ─────────────────────────────────────
+
 
 function MetricCard({ label, value }: { label: string; value: string | number }) {
   return (

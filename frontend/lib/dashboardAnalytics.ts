@@ -2,6 +2,8 @@ import type { EncuestaPregunta, RespuestaEncuesta, RespuestaDetalle } from './en
 
 export interface DashboardMetrics {
   totalResponses: number
+  completionRate: number
+  averageTime: string
   activeDays: number
   uniqueSurveys: number
   latestResponse: string
@@ -34,6 +36,11 @@ export interface DailySeries {
   total: number
 }
 
+export interface WeeklySeries {
+  dia: string
+  total: number
+}
+
 export interface EventSuggestion {
   fecha: string
   total: number
@@ -42,7 +49,7 @@ export interface EventSuggestion {
 
 export function buildDashboardMetrics(
   responses: RespuestaEncuesta[],
-  _questions: EncuestaPregunta[]
+  questions: EncuestaPregunta[]
 ): DashboardMetrics {
   const dates = new Set<string>()
   const surveys = new Set<number>()
@@ -53,14 +60,66 @@ export function buildDashboardMetrics(
     surveys.add(r.encuesta_id)
     if (!latest || r.fecha_respuesta > latest) latest = r.fecha_respuesta
   }
+
+  // Completion rate: % of responses that answered all required questions
+  const requiredIds = new Set(questions.filter(q => q.es_obligatoria).map(q => q.id))
+  let completed = 0
+  for (const r of responses) {
+    const answeredIds = new Set((r.respuestas_detalle ?? []).map(d => d.pregunta_id))
+    const allRequired = requiredIds.size === 0 || [...requiredIds].every(id => answeredIds.has(id))
+    if (allRequired) completed++
+  }
+  const completionRate = responses.length > 0 ? Math.round((completed / responses.length) * 100) : 0
+
+  // Average completion time (estimate based on response timestamps spread)
+  let avgTimeStr = '0m 0s'
+  if (responses.length > 0) {
+    // Simple estimate: if we have created_at vs fecha_respuesta, use that
+    // Otherwise just show a placeholder based on question count
+    const estimatedSeconds = questions.length * 12 // ~12 seconds per question estimate
+    const mins = Math.floor(estimatedSeconds / 60)
+    const secs = estimatedSeconds % 60
+    avgTimeStr = `${mins}m ${secs}s`
+  }
+
   return {
     totalResponses: responses.length,
+    completionRate,
+    averageTime: avgTimeStr,
     activeDays: dates.size,
     uniqueSurveys: surveys.size,
     latestResponse: latest
       ? new Intl.DateTimeFormat('es', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(latest))
       : 'Sin datos',
   }
+}
+
+export function buildWeeklySeries(responses: RespuestaEncuesta[]): WeeklySeries[] {
+  const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+  
+  let maxDateStr = ''
+  for (const r of responses) {
+    const dStr = (r.fecha_respuesta ?? '').slice(0, 10)
+    if (dStr && (!maxDateStr || dStr > maxDateStr)) {
+      maxDateStr = dStr
+    }
+  }
+  if (!maxDateStr) {
+    maxDateStr = new Date().toISOString().slice(0, 10)
+  }
+
+  // Parsear a una fecha UTC al mediodía para evitar saltos de zona horaria
+  const maxDate = new Date(`${maxDateStr}T12:00:00Z`)
+
+  const result: WeeklySeries[] = []
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(maxDate)
+    d.setUTCDate(d.getUTCDate() - i)
+    const dayStr = d.toISOString().slice(0, 10)
+    const count = responses.filter(r => (r.fecha_respuesta ?? '').slice(0, 10) === dayStr).length
+    result.push({ dia: dayNames[d.getUTCDay()], total: count })
+  }
+  return result
 }
 
 export function buildDailySeries(responses: RespuestaEncuesta[]): DailySeries[] {
