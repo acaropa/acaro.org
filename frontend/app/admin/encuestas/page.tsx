@@ -111,17 +111,22 @@ export default function AdminEncuestas() {
     }
   }
 
+  const totalRespuestas = encuestas.reduce((sum, e) => sum + (e.response_count ?? 0), 0)
+  const totalPublicadas = encuestas.filter(e => e.estado === 'publicada').length
+  const totalBorradores = encuestas.filter(e => e.estado === 'borrador').length
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#2b1710]">Encuestas</h1>
-          <p className="text-sm text-[#765e50]">Gestiona las encuestas de ACARO</p>
+          <h1 className="text-3xl font-bold text-[#2b1710]">Encuestas</h1>
+          <p className="mt-1 text-sm text-[#765e50]">Gestiona las encuestas de ACARO</p>
         </div>
         {canCreate && (
           <Link
             href="/admin/encuestas/nueva"
-            className="inline-flex items-center gap-2 rounded-lg bg-[#2b1710] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#3d2318]"
+            className="inline-flex items-center gap-2 rounded-lg bg-[#2b1710] px-5 py-3 text-sm font-semibold text-white hover:bg-[#3d2318]"
           >
             <AppIcon name="add" className="text-[18px]" />
             Nueva encuesta
@@ -129,13 +134,34 @@ export default function AdminEncuestas() {
         )}
       </div>
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+      {/* Stats cards */}
+      {!loading && (
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {[
+            { label: 'Total', value: encuestas.length, icon: 'assignment', color: 'text-[#2b1710]', bg: 'bg-[#f5f0ea]' },
+            { label: 'Publicadas', value: totalPublicadas, icon: 'public', color: 'text-green-700', bg: 'bg-green-50' },
+            { label: 'Borradores', value: totalBorradores, icon: 'edit_note', color: 'text-yellow-700', bg: 'bg-yellow-50' },
+            { label: 'Respuestas', value: totalRespuestas, icon: 'how_to_vote', color: 'text-[#a66f2e]', bg: 'bg-[#fdf6ec]' },
+          ].map(stat => (
+            <div key={stat.label} className="rounded-xl border border-[#e5ddd2] bg-white p-5">
+              <div className={`mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg ${stat.bg}`}>
+                <AppIcon name={stat.icon} className={`text-[20px] ${stat.color}`} />
+              </div>
+              <p className="text-2xl font-bold text-[#2b1710]">{stat.value}</p>
+              <p className="text-xs font-medium text-[#765e50]">{stat.label}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Filters */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="flex gap-1 rounded-lg border border-[#e5e7eb] bg-white p-1">
           {tabs.map(tab => (
             <button
               key={tab.estado}
               onClick={() => setActiveTab(tab.estado)}
-              className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
+              className={`rounded-md px-4 py-2 text-xs font-semibold transition-colors ${
                 activeTab === tab.estado
                   ? 'bg-[#2b1710] text-white'
                   : 'text-[#5a3424] hover:bg-[#f3f4f6]'
@@ -150,7 +176,7 @@ export default function AdminEncuestas() {
           placeholder="Buscar encuesta..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="h-9 rounded-lg border border-[#d8cabb] bg-white px-3 text-sm text-[#2b1710] focus:outline-none focus:ring-2 focus:ring-[#a66f2e]/30 sm:w-64"
+          className="h-10 rounded-lg border border-[#d8cabb] bg-white px-4 text-sm text-[#2b1710] focus:outline-none focus:ring-2 focus:ring-[#a66f2e]/30 sm:w-72"
         />
       </div>
 
@@ -161,111 +187,111 @@ export default function AdminEncuestas() {
       )}
 
       {loading ? (
-        <p className="py-12 text-center text-sm text-[#765e50]">Cargando encuestas...</p>
+        <p className="py-16 text-center text-sm text-[#765e50]">Cargando encuestas...</p>
       ) : !filtered.length ? (
-        <p className="py-12 text-center text-sm text-[#765e50]">No hay encuestas para mostrar.</p>
+        <p className="py-16 text-center text-sm text-[#765e50]">No hay encuestas para mostrar.</p>
       ) : (
         <div className="overflow-hidden rounded-xl border border-[#d8cabb]">
-          <table className="w-full text-sm">
-            <thead className="bg-[#f9fafb] text-left text-[11px] font-semibold uppercase tracking-wider text-[#765e50]">
+          <table className="w-full">
+            <thead className="bg-[#f5f0ea] text-left text-[11px] font-semibold uppercase tracking-wider text-[#765e50]">
               <tr>
-                <th className="px-4 py-3">Título</th>
-                <th className="hidden px-4 py-3 md:table-cell">Estado</th>
-                <th className="hidden px-4 py-3 lg:table-cell">Preguntas</th>
-                <th className="hidden px-4 py-3 lg:table-cell">Respuestas</th>
-                <th className="hidden px-4 py-3 xl:table-cell">Creador</th>
-                <th className="px-4 py-3 text-right">Acciones</th>
+                <th className="px-6 py-4">Título</th>
+                <th className="hidden px-6 py-4 md:table-cell">Estado</th>
+                <th className="hidden px-6 py-4 lg:table-cell">Preguntas</th>
+                <th className="hidden px-6 py-4 lg:table-cell">Respuestas</th>
+                <th className="hidden px-6 py-4 xl:table-cell">Creador</th>
+                <th className="px-6 py-4 text-right">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#ede6db]">
               {filtered.map(enc => (
-                <tr key={enc.id} className="bg-white transition-colors hover:bg-[#f9fafb]">
-                  <td className="px-4 py-3 font-medium text-[#2b1710]">
-                    <Link href={`/admin/encuestas/editar?id=${enc.id}`} className="hover:underline">
+                <tr key={enc.id} className="bg-white transition-colors hover:bg-[#faf7f3]">
+                  <td className="px-6 py-5 font-medium text-[#2b1710]">
+                    <Link href={`/admin/encuestas/editar?id=${enc.id}`} className="text-base font-semibold hover:underline">
                       {enc.titulo}
                     </Link>
-                    <p className="mt-0.5 text-xs text-[#a08c7a]">/{enc.slug}</p>
+                    <p className="mt-1 text-xs text-[#a08c7a]">/{enc.slug}</p>
                   </td>
-                  <td className="hidden px-4 py-3 md:table-cell">
-                    <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${stateColors[enc.estado] ?? ''}`}>
+                  <td className="hidden px-6 py-5 md:table-cell">
+                    <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${stateColors[enc.estado] ?? ''}`}>
                       {stateLabels[enc.estado] ?? enc.estado}
                     </span>
                   </td>
-                  <td className="hidden px-4 py-3 text-[#765e50] lg:table-cell">{enc.question_count ?? 0}</td>
-                  <td className="hidden px-4 py-3 text-[#765e50] lg:table-cell">{enc.response_count ?? 0}</td>
-                  <td className="hidden px-4 py-3 text-xs text-[#765e50] xl:table-cell">{enc.creado_por_nombre ?? enc.creado_por_email}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-1">
+                  <td className="hidden px-6 py-5 text-sm text-[#765e50] lg:table-cell">{enc.question_count ?? 0}</td>
+                  <td className="hidden px-6 py-5 text-sm text-[#765e50] lg:table-cell">{enc.response_count ?? 0}</td>
+                  <td className="hidden px-6 py-5 text-sm text-[#765e50] xl:table-cell">{enc.creado_por_nombre ?? enc.creado_por_email}</td>
+                  <td className="px-6 py-5">
+                    <div className="flex items-center justify-end gap-1.5">
                       <Link
                         href={`/admin/encuestas/editar?id=${enc.id}`}
-                        className="rounded-md p-1.5 text-[#5a3424] hover:bg-[#f0e8dd]"
+                        className="rounded-lg p-2 text-[#5a3424] hover:bg-[#f0e8dd]"
                         title="Editar"
                       >
-                        <AppIcon name="edit" className="text-[18px]" />
+                        <AppIcon name="edit" className="text-[20px]" />
                       </Link>
                       <Link
                         href={`/admin/encuestas/resultados?id=${enc.id}`}
-                        className="rounded-md p-1.5 text-[#5a3424] hover:bg-[#f0e8dd]"
+                        className="rounded-lg p-2 text-[#5a3424] hover:bg-[#f0e8dd]"
                         title="Resultados"
                       >
-                        <AppIcon name="bar_chart" className="text-[18px]" />
+                        <AppIcon name="bar_chart" className="text-[20px]" />
                       </Link>
                       {enc.estado === 'publicada' && (
                         <button
                           onClick={() => copyLink(enc)}
-                          className="rounded-md p-1.5 text-[#5a3424] hover:bg-[#f0e8dd]"
+                          className="rounded-lg p-2 text-[#5a3424] hover:bg-[#f0e8dd]"
                           title={copiedId === enc.id ? '¡Copiado!' : 'Copiar enlace'}
                         >
-                          <AppIcon name={copiedId === enc.id ? 'check' : 'link'} className="text-[18px]" />
+                          <AppIcon name={copiedId === enc.id ? 'check' : 'link'} className="text-[20px]" />
                         </button>
                       )}
                       {canPublish && enc.estado === 'borrador' && (
                         <button
                           onClick={() => handleChangeEstado(enc, 'publicada')}
                           disabled={changingId === enc.id}
-                          className="rounded-md p-1.5 text-green-700 hover:bg-green-50 disabled:cursor-wait disabled:opacity-50"
+                          className="rounded-lg p-2 text-green-700 hover:bg-green-50 disabled:cursor-wait disabled:opacity-50"
                           title="Publicar"
                         >
-                          <AppIcon name="publish" className="text-[18px]" />
+                          <AppIcon name="publish" className="text-[20px]" />
                         </button>
                       )}
                       {canPublish && enc.estado === 'publicada' && (
                         <button
                           onClick={() => handleChangeEstado(enc, 'cerrada')}
                           disabled={changingId === enc.id}
-                          className="rounded-md p-1.5 text-orange-700 hover:bg-orange-50 disabled:cursor-wait disabled:opacity-50"
+                          className="rounded-lg p-2 text-orange-700 hover:bg-orange-50 disabled:cursor-wait disabled:opacity-50"
                           title="Cerrar"
                         >
-                          <AppIcon name="lock" className="text-[18px]" />
+                          <AppIcon name="lock" className="text-[20px]" />
                         </button>
                       )}
                       {canPublish && enc.estado === 'cerrada' && (
                         <button
                           onClick={() => handleChangeEstado(enc, 'publicada')}
                           disabled={changingId === enc.id}
-                          className="rounded-md p-1.5 text-green-700 hover:bg-green-50 disabled:cursor-wait disabled:opacity-50"
+                          className="rounded-lg p-2 text-green-700 hover:bg-green-50 disabled:cursor-wait disabled:opacity-50"
                           title="Volver a publicar"
                           aria-label={`Volver a publicar ${enc.titulo}`}
                         >
-                          <AppIcon name="publish" className="text-[18px]" />
+                          <AppIcon name="publish" className="text-[20px]" />
                         </button>
                       )}
                       {canDuplicate && (
                         <button
                           onClick={() => handleDuplicate(enc)}
-                          className="rounded-md p-1.5 text-[#5a3424] hover:bg-[#f0e8dd]"
+                          className="rounded-lg p-2 text-[#5a3424] hover:bg-[#f0e8dd]"
                           title="Duplicar"
                         >
-                          <AppIcon name="content_copy" className="text-[18px]" />
+                          <AppIcon name="content_copy" className="text-[20px]" />
                         </button>
                       )}
                       {canDelete && (
                         <button
                           onClick={() => setDeleteTarget(enc)}
-                          className="rounded-md p-1.5 text-red-600 hover:bg-red-50"
+                          className="rounded-lg p-2 text-red-600 hover:bg-red-50"
                           title="Eliminar"
                         >
-                          <AppIcon name="delete" className="text-[18px]" />
+                          <AppIcon name="delete" className="text-[20px]" />
                         </button>
                       )}
                     </div>
