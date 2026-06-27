@@ -31,6 +31,8 @@ export function AnalyticsDashboard({ encuestaId }: Props) {
   const [loading, setLoading] = useState(true)
   const [exporting, setExporting] = useState(false)
   const [showAnalysisModal, setShowAnalysisModal] = useState(false)
+  const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   const [selectedQIds, setSelectedQIds] = useState<number[] | 'all' | null>(null)
   const [chartTypes, setChartTypes] = useState<Record<number, ChartType>>({})
@@ -80,10 +82,18 @@ export function AnalyticsDashboard({ encuestaId }: Props) {
     finally { setExporting(false) }
   }
 
-  const handleDeleteResponse = async (id: number) => {
-    if (!confirm('¿Eliminar esta respuesta?')) return
-    try { await encuestasApi.deleteResponse(id); setResponses(prev => prev.filter(r => r.id !== id)) }
-    catch { /* empty */ }
+  const handleDeleteResponse = (id: number) => {
+    setDeleteTargetId(id)
+  }
+
+  const confirmDelete = async () => {
+    if (!deleteTargetId) return
+    setDeleting(true)
+    try {
+      await encuestasApi.deleteResponse(deleteTargetId)
+      setResponses(prev => prev.filter(r => r.id !== deleteTargetId))
+      setDeleteTargetId(null)
+    } catch { /* empty */ } finally { setDeleting(false) }
   }
 
   if (loading) return <p className="py-12 text-center text-sm text-[#6b7280]">Cargando resultados...</p>
@@ -249,6 +259,49 @@ export function AnalyticsDashboard({ encuestaId }: Props) {
             </div>
           )}
       {/* Fin Contenido Principal */}
+
+      {/* Respuestas individuales */}
+      <ResponseList
+        responses={responses}
+        questions={questions}
+        canDelete={canDeleteResp}
+        onDelete={handleDeleteResponse}
+      />
+
+      {/* Delete Confirmation Modal */}
+      {deleteTargetId !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-2xl bg-white shadow-xl overflow-hidden">
+            <div className="flex items-start gap-4 p-6">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-50">
+                <AppIcon name="delete" className="text-[20px] text-red-500" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-[#2b1710]">Eliminar respuesta</h3>
+                <p className="mt-1 text-sm text-[#765e50]">
+                  Esta acción es permanente y no se puede deshacer. ¿Deseas continuar?
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-3 border-t border-[#ede6db] px-6 py-4 bg-[#fdfcfb]">
+              <button
+                onClick={() => setDeleteTargetId(null)}
+                disabled={deleting}
+                className="rounded-lg border border-[#d8cabb] px-4 py-2 text-sm font-semibold text-[#5a3424] hover:bg-[#f0e8dd] disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmDelete}
+                disabled={deleting}
+                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                {deleting ? 'Eliminando...' : 'Eliminar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Analysis Selection Modal */}
       {showAnalysisModal && (
