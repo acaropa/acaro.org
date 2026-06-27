@@ -32,6 +32,19 @@ const BASE_SELECT = `
   LEFT JOIN users reviewer ON reviewer.id = b.revisado_por
 `;
 
+function parseDocumentRows(rows) {
+  return rows.map(row => {
+    if (typeof row.etiquetas === 'string') {
+      try {
+        row.etiquetas = JSON.parse(row.etiquetas);
+      } catch {
+        row.etiquetas = null;
+      }
+    }
+    return row;
+  });
+}
+
 async function getAll({ user = null, status = null, scope = null }) {
   const audience = user ? `${user.role}:${user.id}` : 'public';
   const key = `library:list:${audience}:${status || 'all'}:${scope || 'all'}`;
@@ -87,7 +100,7 @@ async function queryAll({ user = null, status = null, scope = null }) {
     `${BASE_SELECT} ${where} ORDER BY b.fecha_creacion DESC`,
     values
   );
-  return rows;
+  return parseDocumentRows(rows);
 }
 
 async function canSupervisorAccess(documentId, supervisorId) {
@@ -119,7 +132,7 @@ async function getById(id) {
 
 async function queryById(id) {
   const [rows] = await db.query(`${BASE_SELECT} WHERE b.id = ?`, [id]);
-  return rows[0] || null;
+  return parseDocumentRows(rows)[0] || null;
 }
 
 async function getBySlug(slug) {
@@ -132,7 +145,7 @@ async function getBySlug(slug) {
 
 async function queryBySlug(slug) {
   const [rows] = await db.query(`${BASE_SELECT} WHERE b.slug = ?`, [slug]);
-  return rows[0] || null;
+  return parseDocumentRows(rows)[0] || null;
 }
 
 async function create(data, actor) {
@@ -240,7 +253,7 @@ async function getBySerie(serie) {
     `${BASE_SELECT} WHERE b.serie = ? AND b.estado = 'aprobado' AND b.visibilidad = 'publica' ORDER BY b.orden_lectura ASC, b.fecha_creacion ASC`,
     [serie]
   );
-  return rows;
+  return parseDocumentRows(rows);
 }
 
 module.exports = {
