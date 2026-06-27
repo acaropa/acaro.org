@@ -108,7 +108,7 @@ const icons: Record<string, LucideIcon> = {
   power_settings_new: Power,
   person: User,
   progress_activity: RotateCw,
-  publish: Upload,
+  publish: ArrowUp,
   refresh: RefreshCw,
   search: Search,
   search_off: SearchX,
