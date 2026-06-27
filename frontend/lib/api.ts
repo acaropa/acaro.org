@@ -4,6 +4,22 @@ const BASE =
     ? 'https://api.acaro.org/api'
     : 'http://localhost:3000/api');
 
+// Clave no sensible en localStorage. Solo indica si el usuario alguna vez
+// completó un login. Nunca contiene tokens ni datos de sesión.
+const SESSION_HINT_KEY = 'acaro_has_session';
+
+function setSessionHint(active: boolean) {
+  try {
+    if (active) localStorage.setItem(SESSION_HINT_KEY, '1');
+    else localStorage.removeItem(SESSION_HINT_KEY);
+  } catch { /* localStorage no disponible (SSR, modo privado estricto) */ }
+}
+
+function hasSessionHint(): boolean {
+  try { return localStorage.getItem(SESSION_HINT_KEY) === '1'; }
+  catch { return false; }
+}
+
 interface SessionResponse<TUser = unknown> {
   accessToken: string;
   user: TUser;
@@ -57,7 +73,12 @@ async function refreshSession<TUser = unknown>(): Promise<SessionResponse<TUser>
       .then(res => parseResponse<SessionResponse>(res))
       .then(session => {
         setAccessToken(session.accessToken);
+        setSessionHint(true);
         return session;
+      })
+      .catch(err => {
+        setSessionHint(false);
+        throw err;
       })
       .finally(() => {
         refreshPromise = null;
@@ -81,7 +102,6 @@ async function request<T>(
     ...options.headers,
   };
 
-  console.log('Fetching URL:', `${BASE}${path}`);
   const res = await fetch(`${BASE}${path}`, {
     ...options,
     headers,
@@ -89,12 +109,15 @@ async function request<T>(
   });
 
   if (res.status === 401 && allowRefresh && shouldAttemptRefresh(path)) {
+    // Solo redirigir al login si el usuario tenía una sesión activa antes del 401.
+    // Visitantes sin sesión no deben ser redirigidos al recibir un 401 inesperado.
+    const hadActiveSession = accessToken !== null;
     try {
       await refreshSession();
       return request<T>(path, options, false);
     } catch {
       setAccessToken(null);
-      if (typeof window !== 'undefined') {
+      if (hadActiveSession && typeof window !== 'undefined') {
         window.dispatchEvent(new Event('acaro:unauthorized'));
       }
     }
@@ -110,6 +133,7 @@ async function login<TUser>(email: string, password: string) {
     false
   );
   setAccessToken(session.accessToken);
+  setSessionHint(true);
   return session;
 }
 
@@ -122,12 +146,21 @@ async function logout(allSessions = false) {
     );
   } finally {
     setAccessToken(null);
+    setSessionHint(false);
   }
 }
 
 export const api = {
-  forgetSession: () => setAccessToken(null),
-  restoreSession: <TUser>() => refreshSession<TUser>(),
+  // Limpia sesión en memoria y el hint de localStorage.
+  forgetSession: () => { setAccessToken(null); setSessionHint(false); },
+
+  // Solo intenta refresh si hay un hint de sesión previa.
+  // Visitantes sin sesión obtienen un rechazo inmediato sin hacer la petición de red.
+  restoreSession: <TUser>(): Promise<SessionResponse<TUser>> => {
+    if (!hasSessionHint()) return Promise.reject(new Error('No session'));
+    return refreshSession<TUser>();
+  },
+
   login,
   logout,
   get:    <T>(path: string)                    => request<T>(path),
