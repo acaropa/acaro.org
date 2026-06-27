@@ -25,13 +25,6 @@ const stateColors: Record<string, string> = {
   archivada: 'bg-gray-100 text-gray-600',
 }
 
-const tabs = [
-  { estado: '', label: 'Todas' },
-  { estado: 'borrador', label: 'Borradores' },
-  { estado: 'publicada', label: 'Publicadas' },
-  { estado: 'cerrada', label: 'Cerradas' },
-]
-
 export default function AdminEncuestas() {
   const { can } = useAuth()
   const canCreate = can(PERMISSIONS.ENCUESTAS_CREATE)
@@ -68,6 +61,22 @@ export default function AdminEncuestas() {
   }, [])
 
   useEffect(() => { void load() }, [load])
+
+  const stats = useMemo(() => {
+    const total = encuestas.length
+    const publicadas = encuestas.filter(e => e.estado === 'publicada').length
+    const borradores = encuestas.filter(e => e.estado === 'borrador').length
+    const cerradas = encuestas.filter(e => e.estado === 'cerrada').length
+    const respuestas = encuestas.reduce((sum, e) => sum + (e.response_count || 0), 0)
+    return { total, publicadas, borradores, cerradas, respuestas }
+  }, [encuestas])
+
+  const tabs = useMemo(() => [
+    { estado: '', label: 'Todas', count: stats.total },
+    { estado: 'borrador', label: 'Borradores', count: stats.borradores },
+    { estado: 'publicada', label: 'Publicadas', count: stats.publicadas },
+    { estado: 'cerrada', label: 'Cerradas', count: stats.cerradas },
+  ], [stats])
 
   const filtered = useMemo(() => {
     let list = encuestas
@@ -116,12 +125,12 @@ export default function AdminEncuestas() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[#2b1710]">Encuestas</h1>
-          <p className="text-sm text-[#765e50]">Gestiona las encuestas de ACARO</p>
+          <p className="text-sm text-[#765e50]">Crea, publica y analiza las encuestas de la comunidad cafetalera.</p>
         </div>
         {canCreate && (
           <Link
             href="/admin/encuestas/nueva"
-            className="inline-flex items-center gap-2 rounded-lg bg-[#2b1710] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#3d2318]"
+            className="inline-flex items-center gap-2 rounded-lg bg-[#2f6542] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#224f31] transition-colors"
           >
             <AppIcon name="add" className="text-[18px]" />
             Nueva encuesta
@@ -129,19 +138,43 @@ export default function AdminEncuestas() {
         )}
       </div>
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        <div className="flex gap-1 rounded-lg border border-[#e5e7eb] bg-white p-1">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {[
+          { label: 'Total de encuestas', value: stats.total, icon: 'assignment' },
+          { label: 'Publicadas', value: stats.publicadas, icon: 'send' },
+          { label: 'Borradores', value: stats.borradores, icon: 'draft' },
+          { label: 'Respuestas totales', value: stats.respuestas, icon: 'message_square' },
+        ].map((kpi, i) => (
+          <div key={i} className="flex items-center gap-4 rounded-xl border border-[#e5e7eb] bg-white p-4 shadow-sm">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#eef5f0] text-[#2f6542]">
+              <AppIcon name={kpi.icon} className="text-2xl" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-[#2b1710]">{kpi.value}</p>
+              <p className="text-xs text-[#765e50]">{kpi.label}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex gap-1 rounded-full border border-[#e5e7eb] bg-white p-1 shadow-sm overflow-x-auto">
           {tabs.map(tab => (
             <button
               key={tab.estado}
               onClick={() => setActiveTab(tab.estado)}
-              className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
+              className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors whitespace-nowrap ${
                 activeTab === tab.estado
-                  ? 'bg-[#2b1710] text-white'
+                  ? 'bg-[#2f6542] text-white'
                   : 'text-[#5a3424] hover:bg-[#f3f4f6]'
               }`}
             >
               {tab.label}
+              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                activeTab === tab.estado ? 'bg-white/20 text-white' : 'bg-[#f3f4f6] text-[#5a3424]'
+              }`}>
+                {tab.count}
+              </span>
             </button>
           ))}
         </div>
