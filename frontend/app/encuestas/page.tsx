@@ -108,9 +108,10 @@ export default function EncuestasPublicas() {
                   const delayStyle = { transitionDelay: `${(index % 4) * 150}ms` } as React.CSSProperties;
                   
                   return (
-                    <article 
+                    <Link 
+                      href={`/encuestas/responder?slug=${survey.slug}`}
                       key={survey.id} 
-                      className="group bg-white dark:bg-surface-container-low p-7 lg:p-10 border-l-[3px] border-l-transparent hover:border-l-primary border-y border-r border-outline-variant/30 hover:border-outline-variant/60 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_-10px_rgba(0,0,0,0.1)] transition-all duration-700 relative overflow-hidden scroll-reveal"
+                      className="block group bg-white dark:bg-surface-container-low p-7 lg:p-10 border-l-[3px] border-l-transparent hover:border-l-primary border-y border-r border-outline-variant/30 hover:border-outline-variant/60 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_-10px_rgba(0,0,0,0.1)] transition-all duration-700 relative overflow-hidden scroll-reveal"
                       data-direction="up"
                       data-distance="lg"
                       style={delayStyle}
@@ -144,16 +145,15 @@ export default function EncuestasPublicas() {
                             <span>{survey.question_count || 0} PREGUNTAS</span>
                           </div>
                           
-                          <Link 
-                            href={`/encuestas/responder?slug=${survey.slug}`}
-                            className="inline-flex items-center gap-3 px-5 py-2.5 lg:px-6 lg:py-3 bg-transparent border border-primary/30 text-primary font-label-caps hover:bg-primary hover:text-on-primary hover:border-primary transition-all duration-500 group/btn"
+                          <span 
+                            className="inline-flex items-center gap-3 px-5 py-2.5 lg:px-6 lg:py-3 bg-transparent border border-primary/30 text-primary font-label-caps group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all duration-500"
                           >
                             RESPONDER
-                            <AppIcon name="arrow_forward" className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
-                          </Link>
+                            <AppIcon name="arrow_forward" className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                          </span>
                         </div>
                       </div>
-                    </article>
+                    </Link>
                   );
                 })}
               </div>

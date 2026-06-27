@@ -221,8 +221,8 @@ export function SurveyPublicContainer({ slug }: Props) {
       </section>
 
       {/* Right Panel: Content */}
-      <section className="w-full lg:w-1/2 flex flex-col justify-center p-8 lg:px-20 relative min-h-[70vh] lg:min-h-screen">
-        <main className="w-full max-w-xl mx-auto flex flex-col justify-center relative my-auto">
+      <section className="w-full lg:w-1/2 flex flex-col justify-start lg:justify-center p-8 pt-12 lg:px-20 relative min-h-[70vh] lg:min-h-screen">
+        <main className="w-full max-w-xl mx-auto flex flex-col justify-start lg:justify-center relative lg:my-auto">
           <div key={`q-${index}`} className={`w-full flex flex-col justify-center ${animClass}`}>
           {/* Question Section */}
           <section className="mb-12">
