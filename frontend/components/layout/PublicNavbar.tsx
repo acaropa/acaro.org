@@ -22,6 +22,7 @@ const navItems: NavItem[] = [
     submenu: [
       { href: "/nosotros", label: "Acerca de la Asociación", info: "Conoce nuestra historia, misión y propósito." },
       { href: "/noticias", label: "Noticias y Novedades", info: "Explora los últimos avances y eventos de la comunidad." },
+      { href: "/encuestas", label: "Encuestas", info: "Participa en las encuestas activas de la asociación." },
       { href: "/login", label: "Acceso Interno", info: "Portal de administración para miembros autorizados." },
     ],
   },
@@ -32,7 +33,6 @@ const navItems: NavItem[] = [
     ],
   },
   { href: "/biblioteca", label: "Biblioteca" },
-  { href: "/encuestas", label: "Encuestas" },
 ]
 
 export function PublicNavbar() {
@@ -57,7 +57,7 @@ export function PublicNavbar() {
         "sticky top-0 z-50 h-[72px] w-full text-[#f8efe3] transition-colors duration-300",
         isTransparent
           ? "border-b border-transparent bg-transparent"
-          : "border-b border-[#3a2a20]/80 bg-[#120c08]/95 backdrop-blur-xl"
+          : "border-b border-[#3a2a20]/80 bg-[#120c08]/85 backdrop-blur-xl"
       )}
     >
       <div className="mx-auto h-full max-w-7xl px-5 sm:px-8 lg:px-10">
@@ -70,7 +70,7 @@ export function PublicNavbar() {
             {navItems.map((item) =>
               item.submenu ? (
                 <div key={item.label} className="group relative">
-                  <button className="flex items-center gap-1.5 py-6 text-sm font-medium text-[#d8c9bb] transition-colors hover:text-[#d7a24a]">
+                  <button className="flex items-center gap-1.5 py-6 text-sm font-medium text-[#d8c9bb] transition-colors hover:text-white">
                     {item.label}
                     <ChevronDown className="h-3.5 w-3.5 transition-transform duration-300 group-hover:rotate-180" />
                   </button>
@@ -109,18 +109,22 @@ export function PublicNavbar() {
                   key={item.href}
                   href={item.href!}
                   className={cn(
-                    "relative py-6 text-sm font-medium transition-colors hover:text-[#d7a24a]",
-                    pathname === item.href ? "text-[#d7a24a]" : "text-[#d8c9bb]"
+                    "relative py-6 text-sm font-medium transition-colors hover:text-white",
+                    pathname === item.href ? "text-white" : "text-[#d8c9bb]"
                   )}
                 >
                   {item.label}
-                  {pathname === item.href && <span className="absolute inset-x-0 bottom-4 mx-auto h-px w-4 bg-[#d7a24a]" />}
+                  {pathname === item.href && <span className="absolute inset-x-0 bottom-4 mx-auto h-px w-4 bg-white" />}
                 </Link>
               )
             )}
           </nav>
 
-          <div className="hidden items-center gap-3 md:flex" />
+          <div className="hidden items-center gap-3 md:flex">
+            <Link href="/contacto" className="bg-white px-6 py-2 text-xs font-bold uppercase tracking-widest text-[#271310] transition-all hover:bg-[#f3ede3]">
+              Únete
+            </Link>
+          </div>
 
           <div className="flex items-center gap-2 md:hidden">
             <button
@@ -151,7 +155,7 @@ export function PublicNavbar() {
                         target={sub.href.startsWith("http") ? "_blank" : undefined}
                         rel={sub.href.startsWith("http") ? "noopener noreferrer" : undefined}
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className="flex items-center gap-3 py-2.5 text-sm text-[#d8c9bb] transition-colors hover:text-[#d7a24a]"
+                        className="flex items-center gap-3 py-2.5 text-sm text-[#d8c9bb] transition-colors hover:text-white"
                       >
                         {sub.social && <SocialIcon network={sub.social} className="h-4 w-4" />}
                         {sub.label}

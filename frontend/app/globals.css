@@ -3,6 +3,7 @@
 @theme {
   --font-sans: "Avenir Next", Avenir, var(--font-sans-source), Inter, system-ui, sans-serif;
   --font-serif: var(--font-display), Montserrat, var(--font-sans-source), Inter, system-ui, sans-serif;
+  --font-handwritten: var(--font-handwritten-source), "Beth Ellen", cursive;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -380,6 +381,16 @@ a,
   content: "";
   background: linear-gradient(90deg, transparent, rgba(255, 253, 248, 0.38), transparent);
   animation: cta-sheen 5.5s ease-in-out infinite;
+}
+
+@keyframes draw-path {
+  to { stroke-dashoffset: 0; }
+}
+
+.growth-path {
+  stroke-dasharray: 1500;
+  stroke-dashoffset: 1500;
+  animation: draw-path 3.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 @media (max-width: 639px) {

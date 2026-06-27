@@ -1,31 +1,27 @@
-import Image from "next/image"
 import Link from "next/link"
-import {
-  ArrowDown,
-  ArrowRight,
-  MapPin,
-  Newspaper,
-} from "lucide-react"
+import { ArrowRight, ArrowUpRight, PlayCircle } from "lucide-react"
 
 import { PublicLayout } from "@/components/layout/PublicLayout"
-import { HeroParallaxImage, ScrollReveal, ScrollScene } from "@/components/landing/LandingMotion"
-import { FeaturedProjects } from "@/components/home/FeaturedProjects"
-import { LatestNews } from "@/components/home/LatestNews"
+import { HeroParallaxImage, ScrollReveal } from "@/components/landing/LandingMotion"
+import { ProjectsStoryline } from "@/components/home/ProjectsStoryline"
+import { NewsGrid } from "@/components/home/NewsGrid"
+import { CommunitySection } from "@/components/home/CommunitySection"
+import { LibraryPreview } from "@/components/home/LibraryPreview"
 
 export default function Home() {
   return (
     <PublicLayout className="landing-typography">
       <section className="relative isolate -mt-18 flex min-h-[100svh] items-end overflow-hidden bg-[#24130d] text-[#fffaf1]">
         <HeroParallaxImage />
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(24,12,8,0.94)_0%,rgba(42,24,16,0.78)_42%,rgba(42,24,16,0.18)_76%,rgba(18,12,8,0.38)_100%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(18,12,8,0.78)_0%,transparent_48%)]" />
+        <div className="absolute inset-0 bg-[#120c08]/30" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(12,8,4,0.96)_0%,rgba(12,8,4,0.72)_22%,rgba(12,8,4,0.18)_52%,transparent_72%)]" />
 
         <div className="relative mx-auto w-full max-w-7xl px-5 pb-12 pt-32 sm:px-8 sm:pb-16 lg:px-10 lg:pb-20">
           <div className="max-w-4xl -translate-y-6 sm:-translate-y-8 lg:-translate-y-10">
             <div className="hero-reveal mb-7 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.24em] text-[#e2b86f]" style={{ animationDelay: "80ms" }}>
               Café Robusta · Panamá
             </div>
-            <h1 className="font-serif font-semibold hero-reveal max-w-4xl text-5xl leading-[1.0] tracking-[-0.02em] sm:text-6xl lg:text-[5rem]" style={{ animationDelay: "170ms" }}>
+            <h1 className="font-serif font-bold hero-reveal max-w-4xl text-5xl leading-[1.0] tracking-[-0.02em] sm:text-6xl lg:text-[5rem]" style={{ animationDelay: "170ms" }}>
               Asociación Café
               <span className="block text-[#fffaf1]">Robusta OBC</span>
             </h1>
@@ -33,10 +29,10 @@ export default function Home() {
               Impulsamos el desarrollo del café robusta con organización, conocimiento técnico y visión productiva.
             </p>
             <div className="hero-reveal mt-9 flex flex-col gap-3 sm:flex-row" style={{ animationDelay: "460ms" }}>
-              <Link href="/nosotros" className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-[#fffaf1] bg-[#fffaf1] px-6 text-sm font-semibold text-[#24130d] transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_14px_34px_rgba(255,250,241,0.16)] active:translate-y-0">
+              <Link href="/nosotros" className="group inline-flex items-center gap-2 bg-[#fffaf1] px-8 py-4 text-xs font-bold uppercase tracking-widest text-[#271310] transition-all hover:bg-white">
                 Conocer la asociación <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
-              <Link href="/biblioteca" className="inline-flex min-h-12 items-center justify-center rounded-md border border-[#fffaf1]/35 bg-[#fffaf1]/5 px-6 text-sm font-semibold text-[#fffaf1] backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-[#fffaf1]/12 active:translate-y-0">
+              <Link href="/biblioteca" className="inline-flex items-center border border-[#fffaf1]/40 px-8 py-4 text-xs font-bold uppercase tracking-widest text-[#fffaf1] transition-all hover:bg-[#fffaf1]/10">
                 Explorar biblioteca
               </Link>
             </div>
@@ -47,133 +43,168 @@ export default function Home() {
         </div>
       </section>
 
-      <ScrollScene className="overflow-hidden bg-[#faf4ea] py-24 text-[#2b1710] sm:py-32">
-        <div className="absolute inset-0">
-          <Image
-            src="/assets/coffee-beans-texture.png"
-            alt=""
-            fill
-            className="scene-scale object-cover opacity-30 mix-blend-multiply"
-            sizes="100vw"
-          />
-        </div>
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(250,244,234,0.68),rgba(255,253,248,0.94)_34%,rgba(255,253,248,0.94)_66%,rgba(250,244,234,0.68))]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,253,248,0.42),transparent_68%)]" />
-        <div className="scene-line absolute left-0 top-0 h-px w-full bg-[linear-gradient(90deg,transparent,#c28a3a,transparent)]" />
-        <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
-          <div className="grid items-center gap-14 lg:grid-cols-12 lg:gap-10">
-            <ScrollReveal className="lg:col-span-5 lg:col-start-2" direction="left" distance="lg">
-              <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#a66f2e]">Nuestra identidad</p>
-              <h2 className="scene-drift-up mt-6 font-serif text-4xl font-semibold leading-[1.08] tracking-[-0.025em] sm:text-5xl">
-                Excelencia que nace del campo.
+      {/* Línea de transición */}
+      <div className="relative h-28 w-full overflow-hidden pointer-events-none bg-[#faf9f5]">
+        <svg className="h-full w-full" fill="none" preserveAspectRatio="none" viewBox="0 0 1000 100">
+          <path className="growth-path" d="M0,50 C200,10 400,90 600,50 C800,10 1000,50" stroke="#E0DCD0" strokeWidth="1" opacity="0.7" />
+        </svg>
+      </div>
+
+      {/* Una asociación creada para crecer juntos */}
+      <section className="bg-[#faf9f5] pb-32 pt-24 sm:pb-40 sm:pt-32">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+          <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-12">
+
+            {/* Left: editorial content */}
+            <ScrollReveal className="lg:col-span-5" direction="left" distance="lg">
+              <span className="mb-4 block text-xs font-bold uppercase tracking-[0.2em] text-[#1b6d24]">
+                Nuestra Identidad
+              </span>
+              <h2 className="mb-6 font-serif text-4xl font-bold leading-tight tracking-[-0.025em] text-[#271310] sm:text-5xl">
+                Una asociación creada para crecer juntos.
               </h2>
-              <p className="mt-7 text-base leading-7 text-[#765e50] sm:text-lg sm:leading-8">
-                Somos una organización comprometida con la excelencia agrícola, trabajando mano a mano con productores locales para elevar el estándar del café robusta.
+              <div className="mb-8 h-px bg-[#E0DCD0]" />
+              <p className="mb-6 text-base leading-7 text-[#504442]">
+                Desde nuestra fundación, ACARO OBC ha operado bajo la premisa de que la tecnificación no es un fin, sino una herramienta de justicia social. No solo producimos café; cultivamos comunidades resilientes que lideran el mercado de robusta con estándares internacionales.
               </p>
-              <p className="mt-5 text-base leading-7 text-[#765e50] sm:text-lg sm:leading-8">
-                Fusionamos las prácticas tradicionales con innovación tecnológica y gestión profesional para asegurar trazabilidad, calidad y sostenibilidad en cada etapa del proceso.
-              </p>
-              <Link href="/nosotros" className="group mt-8 inline-flex items-center gap-2 border-b border-[#b57931]/45 pb-1 text-sm font-semibold text-[#8a5925] transition-all hover:gap-4 hover:border-[#b57931]">
-                Conocer nuestros métodos <ArrowRight className="h-4 w-4" />
+              <Link
+                href="/nosotros"
+                className="inline-block border-b border-[#271310] pb-1 text-xs font-bold uppercase tracking-[0.15em] text-[#271310] transition-opacity hover:opacity-60"
+              >
+                Conoce nuestra misión
               </Link>
             </ScrollReveal>
 
-            <ScrollReveal className="relative h-[460px] lg:col-span-5 lg:col-start-8 lg:h-[580px]" direction="right" delay={180}>
-              <div className="absolute -inset-5 border border-[#c28a3a]/15 bg-[#f6efe5] blur-2xl" />
-              <div className="premium-project relative h-full overflow-hidden rounded-[10px] border border-[#c9ad8b]/45 bg-[#2b1710]">
-                <Image
-                  src="/assets/hero-bg.jpg"
-                  alt="Cerezas de café robusta en la planta"
-                  fill
-                  className="scene-scale object-cover"
-                  sizes="(min-width: 1024px) 40vw, 100vw"
-                />
-                <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(31,17,11,0.65),transparent_55%)]" />
-                <div className="absolute bottom-0 left-0 p-7 text-[#fffaf1]">
-                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#e7c792]">Origen · Panamá</p>
-                  <p className="mt-3 max-w-sm text-sm leading-6 text-[#f3e8d8]/80">Conocimiento técnico y trabajo colectivo desde la finca.</p>
+            {/* Right: asymmetric image + editorial callout */}
+            <ScrollReveal className="relative lg:col-span-7" direction="right" delay={180}>
+              <div className="relative">
+                <div className="-mr-5 aspect-[4/3] overflow-hidden sm:-mr-8 lg:-mr-10">
+                  <img
+                    src="/assets/landing-hero-v2.jpg"
+                    alt="Productores de café robusta en Panamá"
+                    className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
+                  />
+                </div>
+                <div className="absolute -bottom-10 left-0 hidden w-72 bg-[#120c08] p-8 text-white md:block">
+                  <p className="mb-3 font-serif text-base italic leading-snug">
+                    &ldquo;La educación es la semilla del cambio en nuestras montañas.&rdquo;
+                  </p>
+                  <span className="block text-[10px] font-bold uppercase tracking-widest text-white/60">
+                    — Programa de Relevo Generacional
+                  </span>
                 </div>
               </div>
             </ScrollReveal>
+
           </div>
-
         </div>
-      </ScrollScene>
+      </section>
 
-      <ScrollScene className="relative overflow-hidden bg-[#160d08] py-24 text-[#f3e8d8] sm:py-32">
-        <div className="absolute -inset-8">
-          <Image
-            src="/assets/hero-bg.jpg"
-            alt=""
-            fill
-            className="scene-scale scale-105 object-cover blur-[3px]"
-            sizes="100vw"
-          />
+      {/* Metadata Bar */}
+      <div className="w-full bg-[#120c08] py-8">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+          <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
+            <div className="flex flex-col items-center border-r border-white/10 last:border-0">
+              <span className="mb-1 text-[10px] font-bold uppercase tracking-[0.15em] text-white/50">Altitud Promedio</span>
+              <span className="font-serif text-lg font-semibold text-white">0 – 800 msnm</span>
+            </div>
+            <div className="flex flex-col items-center border-r border-white/10 last:border-0">
+              <span className="mb-1 text-[10px] font-bold uppercase tracking-[0.15em] text-white/50">Precipitación Anual</span>
+              <span className="font-serif text-lg font-semibold text-white">2,000 – 3,000 mm</span>
+            </div>
+            <div className="flex flex-col items-center border-r border-white/10 last:border-0">
+              <span className="mb-1 text-[10px] font-bold uppercase tracking-[0.15em] text-white/50">Variedades</span>
+              <span className="font-serif text-lg font-semibold text-white">Coffea canephora</span>
+            </div>
+            <div className="flex flex-col items-center">
+              <span className="mb-1 text-[10px] font-bold uppercase tracking-[0.15em] text-white/50">Estándar de Calidad</span>
+              <span className="font-serif text-lg font-semibold text-white">OBC Premium</span>
+            </div>
+          </div>
         </div>
-        <div className="absolute inset-0 bg-[#160d08]/75" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_38%,rgba(116,55,30,0.25),rgba(16,9,6,0.9)_82%)]" />
+      </div>
 
-        <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
-          <ScrollReveal className="text-center" distance="sm">
-            <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#d7a24a]">Nuestra excelencia</p>
-            <h2 className="mt-4 font-serif text-4xl font-semibold tracking-[-0.025em] text-[#fff8eb] sm:text-5xl lg:text-6xl">Proyectos destacados</h2>
-          </ScrollReveal>
-
-          <FeaturedProjects />
-
-          <ScrollReveal className="mt-10 flex justify-center" delay={240} distance="sm">
-            <Link href="/proyectos" className="group inline-flex items-center gap-2 border-b border-[#d7a24a]/55 pb-1.5 text-sm font-semibold text-[#e0ad55] transition-all hover:gap-4 hover:border-[#e0ad55] hover:text-[#f0c87e]">
+      {/* Proyectos que abren oportunidades */}
+      <section className="overflow-hidden bg-[#f4f4f0] py-24 sm:py-32">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+          <ScrollReveal className="mb-20 flex items-end justify-between border-b border-[#d3c3c0]/40 pb-6" distance="sm">
+            <div>
+              <span className="mb-4 block text-xs font-bold uppercase tracking-[0.2em] text-[#1b6d24]">
+                Capítulos de Progreso
+              </span>
+              <h2 className="font-serif text-4xl font-bold text-[#271310] sm:text-5xl lg:text-[3rem]">
+                Proyectos que abren oportunidades
+              </h2>
+            </div>
+            <Link href="/proyectos" className="group hidden shrink-0 items-center gap-2 text-sm font-semibold text-[#271310] transition-transform hover:translate-x-2 md:flex">
               Ver todos los proyectos <ArrowRight className="h-4 w-4" />
             </Link>
           </ScrollReveal>
+          <ProjectsStoryline />
         </div>
-      </ScrollScene>
+      </section>
 
-      <ScrollScene className="overflow-hidden bg-[#fbf7f0] py-24 text-[#2b1710] sm:py-32">
-        <div className="absolute inset-0 scale-105">
-          <Image
-            src="/assets/coffee-beans-texture.png"
-            alt=""
-            fill
-            className="scene-scale -scale-x-100 object-cover opacity-[0.22] mix-blend-multiply"
-            sizes="100vw"
-          />
+      {/* Avances Institucionales (Noticias) */}
+      <section className="bg-[#faf9f5] py-24 sm:py-32">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+          <NewsGrid />
         </div>
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(251,247,240,0.62),rgba(255,253,248,0.9)_27%,rgba(255,253,248,0.9)_73%,rgba(251,247,240,0.62))]" />
-        <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
-          <ScrollReveal className="flex flex-col gap-5 border-b border-[#d8cabb] pb-8 sm:flex-row sm:items-end sm:justify-between" distance="sm">
-            <div>
-              <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.24em] text-[#a66f2e]">
-                <Newspaper className="h-4 w-4" />Actualidad institucional
-              </div>
-              <h2 className="mt-4 font-serif text-4xl font-semibold tracking-[-0.025em] sm:text-5xl">Noticias y comunicados</h2>
-              <p className="mt-4 text-[#765e50]">Conoce los avances, acuerdos y actividades de la asociación.</p>
-            </div>
-            <Link href="/noticias" className="group inline-flex items-center gap-2 text-sm font-semibold text-[#5a3424]">
-              Ver todas las noticias <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+      </section>
+
+      {/* Línea de transición — desde la derecha */}
+      <div className="relative h-28 w-full overflow-hidden pointer-events-none bg-[#faf9f5]">
+        <svg className="h-full w-full" fill="none" preserveAspectRatio="none" viewBox="0 0 1000 100">
+          <path className="growth-path" d="M1000,50 C800,10 600,90 400,50 C200,10 0,50" stroke="#E0DCD0" strokeWidth="1" opacity="0.7" />
+        </svg>
+      </div>
+
+      {/* Las personas son el corazón */}
+      <CommunitySection />
+
+      {/* Biblioteca de Excelencia */}
+      <section className="bg-[#faf9f5] py-24 sm:py-32">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+          <ScrollReveal className="mb-16 text-center" distance="sm">
+            <h2 className="font-serif text-3xl font-bold text-[#271310] sm:text-4xl">
+              Biblioteca de Excelencia
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-[#504442]">
+              Un repositorio técnico diseñado como un toolkit para el empoderamiento del productor rural.
+            </p>
+          </ScrollReveal>
+          <LibraryPreview />
+          <ScrollReveal className="mt-10 flex justify-center" delay={200} distance="sm">
+            <Link href="/biblioteca" className="bg-[#271310] px-8 py-3 text-sm font-semibold text-white transition-all hover:bg-[#3e2723]">
+              Explorar Biblioteca
             </Link>
           </ScrollReveal>
-
-          <LatestNews />
         </div>
-      </ScrollScene>
+      </section>
 
-      <ScrollScene className="relative overflow-hidden bg-[#24130d] py-24 text-[#fffaf1] transition-colors duration-1000 sm:py-28">
-        <div className="scene-orbit absolute -right-28 -top-36 h-96 w-96 rounded-full border border-[#c28a3a]/15" />
-        <div className="scene-orbit absolute -right-12 -top-20 h-72 w-72 rounded-full border border-[#c28a3a]/15" />
-        <div className="scene-line absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,#c28a3a,transparent)]" />
-        <ScrollReveal className="scene-wipe relative mx-auto max-w-5xl px-5 text-center sm:px-8" distance="lg">
-          <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#d7a24a]">Crecer en colectivo</p>
-          <h2 className="mx-auto mt-6 max-w-4xl font-serif text-4xl font-semibold leading-[1.08] tracking-[-0.025em] sm:text-5xl lg:text-6xl">¿Deseas más información o unirte a la asociación?</h2>
-          <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-[#d8c9bb] sm:text-lg">Conversemos sobre afiliación, cooperación técnica y nuevas oportunidades para el sector.</p>
-          <Link href="/contacto" className="cta-sheen mt-9 inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-[#fffaf1] bg-[#fffaf1] px-7 text-sm font-semibold text-[#24130d] transition-all duration-500 hover:-translate-y-1 hover:bg-white hover:shadow-[0_16px_40px_rgba(255,250,241,0.16)] active:translate-y-0">
-            Contáctanos ahora <ArrowRight className="h-4 w-4" />
+      {/* Cultivar café robusta también es cultivar futuro — CTA final */}
+      <section className="relative overflow-hidden bg-[#faf9f5] py-32 text-center sm:py-40">
+        {/* Subtle SVG wave */}
+        <div className="pointer-events-none absolute inset-0 z-0 opacity-[0.04]">
+          <svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 100 100">
+            <path d="M0,50 Q25,0 50,50 T100,50" fill="none" stroke="#271310" strokeWidth="0.5" />
+          </svg>
+        </div>
+
+        <ScrollReveal className="relative z-10 mx-auto max-w-4xl px-5 sm:px-8" distance="lg">
+          <h2 className="mb-10 font-serif text-[2.5rem] font-bold leading-[1.1] tracking-[-0.02em] text-[#271310] sm:text-5xl lg:text-[4rem]">
+            &ldquo;Cultivar café robusta también es cultivar futuro.&rdquo;
+          </h2>
+          <p className="mx-auto mb-14 max-w-2xl font-sans text-lg leading-relaxed text-[#504442]">
+            Únete a nuestra red de productores y profesionales para transformar la industria.
+          </p>
+          <Link
+            href="/contacto"
+            className="inline-block bg-[#271310] px-12 py-5 text-xs font-bold uppercase tracking-widest text-white transition-transform duration-300 hover:scale-105 active:scale-95"
+          >
+            Contáctanos
           </Link>
-          <div className="mt-14 flex items-center justify-center gap-2 text-xs uppercase tracking-[0.16em] text-[#b8a99a]">
-            <MapPin className="h-3.5 w-3.5 text-[#d7a24a]" />Fortaleciendo la caficultura robusta desde la organización
-          </div>
         </ScrollReveal>
-      </ScrollScene>
+      </section>
     </PublicLayout>
   )
 }

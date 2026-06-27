@@ -36,33 +36,24 @@ export function PublicFooter() {
           </ScrollReveal>
 
           <ScrollReveal delay={100} distance="sm">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#d7a24a]">Enlaces rápidos</p>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-white">Enlaces rápidos</p>
             <nav className="mt-6 flex flex-col gap-4 text-sm text-[#d8c9bb]">
               <Link href="/" className="hover:text-white transition-colors">Inicio</Link>
               <Link href="/nosotros" className="hover:text-white transition-colors">Nosotros</Link>
               <Link href="/proyectos" className="hover:text-white transition-colors">Proyectos</Link>
               <Link href="/biblioteca" className="hover:text-white transition-colors">Biblioteca</Link>
               <Link href="/contacto" className="hover:text-white transition-colors">Contacto</Link>
-              <a 
-                href="https://acaro.vercel.app/" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="mt-2 inline-flex items-center gap-1.5 font-semibold text-[#d7a24a] transition-colors hover:text-[#fffaf1]"
-              >
-                Acceso a Plataforma
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-              </a>
             </nav>
           </ScrollReveal>
 
           <ScrollReveal delay={200} distance="sm">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#d7a24a]">Contacto</p>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-white">Contacto</p>
             <div className="mt-6 space-y-5 text-sm leading-6 text-[#d8c9bb]">
               <a href="mailto:contacto@acaro.org" className="flex items-start gap-3 hover:text-white">
-                <Mail className="mt-0.5 h-4 w-4 shrink-0 text-[#d7a24a]" />contacto@acaro.org
+                <Mail className="mt-0.5 h-4 w-4 shrink-0 text-white" />contacto@acaro.org
               </a>
               <p className="flex items-start gap-3">
-                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#d7a24a]" />República de Panamá
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-white" />República de Panamá
               </p>
             </div>
           </ScrollReveal>
