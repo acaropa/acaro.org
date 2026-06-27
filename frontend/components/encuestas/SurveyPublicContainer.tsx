@@ -239,9 +239,9 @@ export function SurveyPublicContainer({ slug }: Props) {
               <h1 className="font-serif text-3xl md:text-4xl font-bold text-primary mb-2 leading-tight">
                 {index + 1} - {q.texto_pregunta.replace(/^[\s\d.\-)]+/, '').trim()}
               </h1>
-              {q.texto_ayuda && (
-                <p className="text-[15px] text-muted mt-3 leading-relaxed">{q.texto_ayuda}</p>
-              )}
+              <p className="text-[15px] text-muted mt-3 leading-relaxed">
+                {q.texto_ayuda || "Por favor, indique su respuesta a continuación."}
+              </p>
               {!required && (
                 <div>
                   <span className="inline-block mt-4 px-2 py-1 text-[10px] font-bold tracking-[0.2em] uppercase text-muted border border-primary/10">
