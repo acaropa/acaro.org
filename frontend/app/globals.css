@@ -591,3 +591,64 @@ a,
     opacity: 1;
   }
 }
+
+/* Public Surveys Theme (Material Design 3 Palette & Fonts) */
+.theme-public-surveys {
+  background-color: #fff8f5;
+  color: #211a14;
+  -webkit-font-smoothing: antialiased;
+
+  --background: #fff8f5;
+  --foreground: #211a14;
+  --primary: #26170c;
+  --surface: #fff8f5;
+
+  --color-background: #fff8f5;
+  --color-surface: #fff8f5;
+  --color-tertiary-container: #1a3427;
+  --color-error: #ba1a1a;
+  --color-secondary-container: #e1dfdc;
+  --color-inverse-surface: #372f28;
+  --color-secondary-fixed: #e4e2de;
+  --color-on-tertiary-fixed: #062014;
+  --color-surface-container-lowest: #ffffff;
+  --color-tertiary: #041f13;
+  --color-outline: #81756e;
+  --color-on-error-container: #93000a;
+  --color-surface-container-highest: #eee0d6;
+  --color-on-surface: #211a14;
+  --color-surface-tint: #705a4c;
+  --color-on-surface-variant: #4f453f;
+  --color-primary-container: #3d2b1f;
+  --color-outline-variant: #d2c4bc;
+  --color-on-primary-container: #ac9181;
+  --color-secondary-fixed-dim: #c8c6c3;
+  --color-on-tertiary: #ffffff;
+  --color-on-secondary-fixed-variant: #474744;
+  --color-primary: #26170c;
+  --color-on-secondary-container: #636360;
+  --color-primary-fixed: #fbddca;
+  --color-on-secondary-fixed: #1b1c1a;
+  --color-surface-dim: #e5d8ce;
+  --color-inverse-primary: #dec1af;
+  --color-surface-container-high: #f4e6db;
+  --color-on-secondary: #ffffff;
+  --color-on-error: #ffffff;
+  --color-surface-container-low: #fff1e7;
+  --color-on-tertiary-container: #819d8c;
+  --color-surface-variant: #eee0d6;
+  --color-tertiary-fixed: #ccead6;
+  --color-inverse-on-surface: #fceee4;
+  --color-on-tertiary-fixed-variant: #324c3e;
+  --color-primary-fixed-dim: #dec1af;
+  --color-on-primary-fixed-variant: #574335;
+  --color-on-primary: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-secondary: #5e5e5c;
+  --color-on-background: #211a14;
+  --color-tertiary-fixed-dim: #b0cdbb;
+  --color-surface-container: #faebe1;
+  --color-surface-bright: #fff8f5;
+  --color-on-primary-fixed: #28180d;
+}
+

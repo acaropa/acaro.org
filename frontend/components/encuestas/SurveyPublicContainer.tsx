@@ -181,76 +181,86 @@ export function SurveyPublicContainer({ slug }: Props) {
   const q = visibleQuestions[index] ?? visibleQuestions[0]
   const pos = visibleQuestions.findIndex(qq => qq.id === q.id) + 1
   const total = visibleQuestions.length
-  const section = (q as any).seccion_titulo ?? ''
+  const section = (q as any).seccion_titulo ?? 'Encuesta'
   const pct = total > 0 ? (pos / total) * 100 : 0
   const isLast = pos === total
   const required = isQuestionRequired(q as any, answersByCode)
   const animClass = direction === 'forward' ? 'q-enter-forward' : 'q-enter-back'
 
   return (
-    <div className="landing-typography min-h-screen bg-surface">
+    <div className="theme-public-surveys bg-background text-on-surface font-body-md overflow-x-hidden min-h-screen flex flex-col lg:flex-row w-full">
       <style>{STYLES}</style>
 
-      {/* Header — círculo de progreso a la derecha */}
-      <div className="border-b border-primary/10 bg-surface/95 backdrop-blur-sm sticky top-0 z-10">
-        <div className="mx-auto max-w-[960px] flex items-center justify-between px-5 py-3 sm:px-8">
-          <Link href="/encuestas" className="text-xs font-bold tracking-widest uppercase text-muted hover:text-primary transition-colors flex items-center gap-2">
-            <AppIcon name="arrow_back" className="text-[16px]" />
-            Volver
-          </Link>
-          <div className="flex items-center gap-3">
-            {survey.logo_url && (
-              <img src={survey.logo_url} alt="" className="h-7 w-auto" onError={e => { e.currentTarget.style.display = 'none' }} />
-            )}
-            <AnimatedCircularProgress value={pct} size={52} strokeWidth={5} />
+      {/* Left Panel: Photo */}
+      <section className="relative lg:sticky lg:top-0 lg:h-screen w-full lg:w-1/2 h-[30vh] min-h-[250px] bg-[#120C08] flex flex-col justify-end p-8 lg:p-[64px] overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <div 
+            className="w-full h-full bg-cover bg-center opacity-80" 
+            style={{backgroundImage: "url('/coffee_farmers_survey.png')"}}>
           </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#120C08]/95 via-[#120C08]/50 to-[#120C08]/10"></div>
         </div>
-      </div>
+        
+        {/* Absolute 'volver' button at top left */}
+        <div className="absolute top-6 left-6 lg:top-8 lg:left-8 z-20">
+          <Link href="/encuestas" className="text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase text-white hover:text-white transition-all flex items-center gap-2 bg-black/40 backdrop-blur-md px-4 py-2.5 rounded-full border border-white/20 hover:bg-black/60 shadow-lg">
+            <AppIcon name="close" className="text-[16px]" />
+            Salir
+          </Link>
+        </div>
 
-      <main className="mx-auto max-w-[960px] px-5 sm:px-8 py-12 md:py-16">
-
-        {/* Survey meta */}
-        <div className="mb-10">
-          {section && (
-            <p className="text-xs font-bold tracking-[0.2em] uppercase text-accent mb-2">{section}</p>
-          )}
-          <h1 className="font-serif text-3xl md:text-4xl font-bold text-primary leading-tight mb-3">
-            {survey.titulo}
-          </h1>
-          <p className="text-[15px] leading-[1.6] text-muted max-w-2xl">
-            {survey.descripcion?.trim() || 'Complete el formulario siguiendo el orden de las preguntas.'}
+        <div className="relative z-10 space-y-4 max-w-xl hidden lg:block">
+          <h2 className="font-serif text-3xl lg:text-5xl font-bold text-[#f8efe3] leading-none drop-shadow-lg">
+            {survey?.titulo ?? "Encuesta"}
+          </h2>
+          <div className="w-12 h-[2px] bg-primary/80 my-4"></div>
+          <p className="font-body-lg text-lg text-[#d8c9bb] max-w-md drop-shadow-md">
+            Complete las siguientes preguntas para continuar.
           </p>
         </div>
+      </section>
 
-        <div className="h-[1px] bg-primary/10 mb-10" />
-
-        {/* Animated question */}
-        <div key={`q-${index}`} className={`max-w-2xl ${animClass}`}>
-          <div className="flex flex-wrap items-center gap-3 mb-4">
-            <span className="px-3 py-1 text-[10px] font-bold tracking-[0.2em] uppercase border border-primary/20 text-primary">
-              Pregunta {pos}
-            </span>
-            {required
-              ? <span className="px-3 py-1 text-[10px] font-bold tracking-[0.2em] uppercase bg-accent/10 text-accent border border-accent/20">Obligatoria</span>
-              : <span className="px-3 py-1 text-[10px] font-bold tracking-[0.2em] uppercase text-muted border border-primary/10">Opcional</span>
-            }
-          </div>
-
-          <h2 className="font-serif text-2xl md:text-3xl font-bold text-primary leading-snug mb-2">
-            {q.texto_pregunta.replace(/^\s*\d+[.)\-]?\s*/, '').trim()}
-          </h2>
-          {q.texto_ayuda && (
-            <p className="text-sm text-muted mb-6">{q.texto_ayuda}</p>
-          )}
+      {/* Right Panel: Content */}
+      <section className="w-full lg:w-1/2 flex flex-col justify-center p-8 lg:px-20 relative min-h-[70vh] lg:min-h-screen">
+        <main className="w-full max-w-xl mx-auto flex flex-col justify-center relative my-auto">
+          <div key={`q-${index}`} className={`w-full flex flex-col justify-center ${animClass}`}>
+          {/* Question Section */}
+          <section className="mb-12">
+            <div className="flex justify-between items-center mb-6">
+              <span className="inline-block text-xs md:text-sm font-bold tracking-[0.2em] uppercase text-white px-4 py-1.5 bg-primary">
+                {section === 'Sección principal' ? 'PREGUNTA' : section}
+              </span>
+              <div className="flex-shrink-0">
+                <AnimatedCircularProgress value={pct} size={56} strokeWidth={2} />
+              </div>
+            </div>
+            
+            <div className="flex-grow">
+              <h1 className="font-serif text-3xl md:text-4xl font-bold text-primary mb-2 leading-tight">
+                {index + 1} - {q.texto_pregunta.replace(/^[\s\d.\-)]+/, '').trim()}
+              </h1>
+              {q.texto_ayuda && (
+                <p className="text-[15px] text-muted mt-3 leading-relaxed">{q.texto_ayuda}</p>
+              )}
+              {!required && (
+                <div>
+                  <span className="inline-block mt-4 px-2 py-1 text-[10px] font-bold tracking-[0.2em] uppercase text-muted border border-primary/10">
+                    Opcional
+                  </span>
+                </div>
+              )}
+            </div>
+          </section>
 
           {saveError && (
-            <div className="text-sm text-red-600 bg-red-50 border border-red-200 px-4 py-3 flex items-center gap-2 mb-6">
+            <div className="text-sm text-red-600 bg-red-50 border border-red-200 px-4 py-3 rounded-xl flex items-center gap-2 mb-6">
               <AppIcon name="error" className="text-[18px]" />
               {saveError}
             </div>
           )}
 
-          <div className="mt-6">
+          {/* Options Grid */}
+          <div className="flex-1">
             <SurveyQuestionRenderer
               question={q}
               initialValue={answersByCode[q.codigo_pregunta ?? q.id]}
@@ -258,26 +268,13 @@ export function SurveyPublicContainer({ slug }: Props) {
               continueLabel={isLast ? 'Enviar encuesta' : 'Continuar'}
               onAnswer={handleAnswer}
               isSubmitting={isSaving}
+              onGoBack={goBack}
+              canGoBack={index > 0}
             />
-          </div>
-
-          <div className="flex items-center justify-between mt-10 pt-6 border-t border-primary/10">
-            <button
-              type="button"
-              onClick={goBack}
-              disabled={index === 0 || isSaving}
-              className="px-6 py-2.5 border border-primary text-primary text-xs font-bold tracking-widest uppercase hover:bg-primary hover:text-primary-foreground transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              Anterior
-            </button>
-            <p className="text-xs text-muted max-w-[280px] text-right leading-relaxed hidden sm:block">
-              {isLast
-                ? (isSaving ? 'Enviando respuestas...' : 'Al continuar se enviará la encuesta.')
-                : 'Continúe hasta el final para enviar.'}
-            </p>
           </div>
         </div>
       </main>
-    </div>
+    </section>
+  </div>
   )
 }

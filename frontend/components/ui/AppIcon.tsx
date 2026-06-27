@@ -13,6 +13,7 @@ import {
   Check,
   CheckCircle2,
   ChevronDown,
+  ChevronLeft,
   CircleX,
   ClipboardList,
   Clock,
@@ -58,6 +59,8 @@ import {
   UserRoundX,
   Users,
   X,
+  Coffee,
+  Info,
   type LucideIcon,
 } from "lucide-react"
 
@@ -83,6 +86,7 @@ const icons: Record<string, LucideIcon> = {
   cancel: CircleX,
   check: Check,
   check_circle: CheckCircle2,
+  chevron_left: ChevronLeft,
   close: X,
   content_copy: Copy,
   contract_edit: Pencil,
@@ -130,6 +134,8 @@ const icons: Record<string, LucideIcon> = {
   sparkles: Sparkles,
   toggle_left: ToggleLeft,
   trending_up: TrendingUp,
+  coffee: Coffee,
+  info: Info,
 }
 
 type AppIconProps = {

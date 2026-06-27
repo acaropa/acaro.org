@@ -81,6 +81,7 @@ async function request<T>(
     ...options.headers,
   };
 
+  console.log('Fetching URL:', `${BASE}${path}`);
   const res = await fetch(`${BASE}${path}`, {
     ...options,
     headers,
