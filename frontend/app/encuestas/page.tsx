@@ -166,7 +166,7 @@ export default function EncuestasPublicas() {
                 <div>
                   <h4 className="font-label-caps text-on-surface mb-3">ASISTENCIA TÉCNICA</h4>
                   <p className="font-body-md text-on-surface-variant">
-                    Si encuentra dificultades al completar su encuesta, nuestro equipo está a su disposición en su cooperativa local o contactando a soporte@acaro.org.
+                    Si encuentra dificultades al completar su encuesta, nuestro equipo está a su disposición en su cooperativa local o contactando a soporte@acaro.org
                   </p>
                 </div>
               </div>
