@@ -43,6 +43,14 @@ export default function LoginPage() {
           className="absolute inset-0 w-full h-full object-cover z-0 transform hover:scale-105 transition-transform duration-[10s] ease-out" 
           src="/assets/login-bg-v2.jpg"
         />
+        
+        {/* Back button top left */}
+        <div className="absolute top-10 left-12 z-30">
+          <Link href="/" className="inline-flex items-center gap-2 text-xs font-bold tracking-[0.2em] uppercase text-white hover:text-white transition-all bg-black/40 backdrop-blur-md px-5 py-2.5 rounded-full border border-white/20 hover:bg-black/60 shadow-lg">
+            <AppIcon name="arrow_back" className="text-[16px]" />
+            <span>Volver al portal</span>
+          </Link>
+        </div>
         <div className="absolute bottom-12 left-12 z-20 max-w-md">
           <h2 className="text-4xl font-serif font-bold text-[#fdf9f4] mb-4 drop-shadow-lg">Cultivando excelencia.</h2>
           <p className="text-lg text-[#fdf9f4]/90 drop-shadow">Plataforma interna para la gestión integral de nuestra cadena productiva.</p>
@@ -51,8 +59,14 @@ export default function LoginPage() {
       
       {/* Right Panel: Login Form */}
       <div className="w-full md:w-1/2 flex items-center justify-center p-6 md:p-12 relative overflow-hidden bg-[#fdf9f4]">
-        <Link href="/" className="absolute top-6 left-6 md:top-10 md:left-10 z-30 transition-transform hover:scale-105 active:scale-95" title="Volver al portal">
+        {/* Logo */}
+        <div className="absolute top-6 left-6 md:top-10 md:left-10 z-30">
           <Logo className="scale-90 origin-left" />
+        </div>
+        
+        {/* Mobile back button */}
+        <Link href="/" className="md:hidden absolute top-6 right-6 z-30 flex items-center justify-center bg-white shadow-sm border border-outline-variant/20 rounded-full p-2 text-muted hover:text-primary transition-colors">
+          <AppIcon name="close" className="text-[18px]" />
         </Link>
         
         {/* Subtle decorative element (Glassmorphism blur blob) */}
