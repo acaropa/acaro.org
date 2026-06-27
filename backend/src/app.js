@@ -60,6 +60,15 @@ app.use(express.json({ limit: '12mb' }));
 app.use(defaultLimiter);
 app.use(idempotency);
 
+// Garantiza que POST/PUT/PATCH/DELETE nunca sean cacheados por el CDN.
+// Los GET públicos establecen sus propios headers Cache-Control en cada ruta.
+app.use((req, res, next) => {
+  if (req.method !== 'GET' && req.method !== 'HEAD') {
+    res.set('Cache-Control', 'private, no-store, max-age=0');
+  }
+  next();
+});
+
 app.use('/api/health', healthRoutes);
 app.use('/api/auth',   authRoutes);
 app.use('/api/socios',   sociosRoutes);

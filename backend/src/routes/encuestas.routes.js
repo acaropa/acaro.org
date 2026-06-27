@@ -6,10 +6,11 @@ const {
   optionalAuth,
 } = require('../middlewares/auth.middleware');
 const { PERMISSIONS } = require('../config/permissions');
+const { publicCache, privateNoStore } = require('../middlewares/cache.middleware');
 
-// ─── Rutas publicas ───────────────────────────────────────
-router.get('/publicas', ctrl.getPublicList);
-router.get('/publica/:slug', ctrl.getPublicSurvey);
+// ─── Rutas públicas ───────────────────────────────────────
+router.get('/publicas', publicCache(120, 300), ctrl.getPublicList);
+router.get('/publica/:slug', publicCache(120, 300), ctrl.getPublicSurvey);
 router.post('/publica/:slug/responder', optionalAuth, ctrl.submitPublicResponse);
 
 // ─── Rutas admin (protegidas) ─────────────────────────────
@@ -17,6 +18,7 @@ router.get(
   '/',
   verifyToken,
   requirePermission(PERMISSIONS.ENCUESTAS_READ),
+  privateNoStore,
   ctrl.getAll
 );
 
@@ -24,6 +26,7 @@ router.get(
   '/:id',
   verifyToken,
   requirePermission(PERMISSIONS.ENCUESTAS_READ),
+  privateNoStore,
   ctrl.getById
 );
 

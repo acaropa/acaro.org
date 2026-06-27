@@ -2,8 +2,8 @@ const db = require('../config/db');
 const cache = require('../utils/memoryCache');
 const { generateUniqueSlug } = require('../utils/slug');
 
-const PUBLIC_CACHE_TTL_MS = 60 * 1000;
-const PRIVATE_CACHE_TTL_MS = 15 * 1000;
+const PUBLIC_CACHE_TTL_MS = 300 * 1000;
+const PRIVATE_CACHE_TTL_MS = 30 * 1000;
 const MAX_PROJECT_PHASES = 6;
 
 function invalidateProjectCache() {

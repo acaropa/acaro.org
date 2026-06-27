@@ -7,11 +7,13 @@ const {
   optionalAuth,
 } = require('../middlewares/auth.middleware');
 const { PERMISSIONS } = require('../config/permissions');
+const { smartCache } = require('../middlewares/cache.middleware');
 
-router.get('/', optionalAuth, ctrl.getAll);
-router.get('/slug/:slug', optionalAuth, ctrl.getBySlug);
+router.get('/', smartCache(300, 600), optionalAuth, ctrl.getAll);
+router.get('/slug/:slug', smartCache(300, 600), optionalAuth, ctrl.getBySlug);
 router.get(
   '/:id',
+  smartCache(300, 600),
   optionalAuth,
   ctrl.getById
 );

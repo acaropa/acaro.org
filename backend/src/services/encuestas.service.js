@@ -7,11 +7,17 @@ function invalidateCache() {
   cache.invalidatePrefix('enc:');
 }
 
+// Solo invalida los listados (donde aparece response_count).
+// La estructura de una encuesta (slug, preguntas, opciones) no cambia al enviar respuestas.
+function invalidateListCache() {
+  cache.invalidatePrefix('enc:list:');
+}
+
 // ─── ENCUESTAS ────────────────────────────────────────────
 
 async function getAll(includeAll = false) {
   const cacheKey = `enc:list:${includeAll ? 'all' : 'published'}`;
-  return cache.getOrSet(cacheKey, () => queryAll(includeAll), includeAll ? 10_000 : 60_000);
+  return cache.getOrSet(cacheKey, () => queryAll(includeAll), includeAll ? 15_000 : 120_000);
 }
 
 async function queryAll(includeAll = false) {
@@ -34,7 +40,7 @@ async function queryAll(includeAll = false) {
 }
 
 async function getById(id) {
-  return cache.getOrSet(`enc:item:${id}`, () => queryById(id), 15_000);
+  return cache.getOrSet(`enc:item:${id}`, () => queryById(id), 30_000);
 }
 
 async function queryById(id) {
@@ -89,7 +95,7 @@ async function getPublicBySlug(slug) {
   return cache.getOrSet(
     `enc:slug:${slug}`,
     () => queryPublicBySlug(slug),
-    60_000
+    300_000
   );
 }
 
@@ -400,56 +406,61 @@ function hashIp(ip) {
 }
 
 async function submitResponse(encuestaId, respuestas, { userId, ip, origen, token } = {}) {
-  const [result] = await db.query(
-    `INSERT INTO encuesta_respuestas
-       (encuesta_id, user_id, estado, ip_hash, origen, token_acceso, datos_crudos, fecha_inicio, fecha_envio)
-     VALUES (?, ?, 'enviada', ?, ?, ?, ?, NOW(), NOW())`,
-    [
-      encuestaId,
-      userId || null,
-      hashIp(ip),
-      origen || 'web',
-      token || null,
-      JSON.stringify(respuestas),
-    ]
-  );
-  const respuestaId = result.insertId;
+  const conn = await db.getConnection();
+  try {
+    await conn.beginTransaction();
 
-  for (const r of respuestas) {
-    const [detResult] = await db.query(
-      `INSERT INTO encuesta_respuestas_detalle
-         (respuesta_encuesta_id, pregunta_id, respuesta_texto, respuesta_numero, respuesta_booleano, respuesta_fecha)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [
-        respuestaId,
-        r.pregunta_id,
-        r.respuesta_texto ?? null,
-        r.respuesta_numero ?? null,
-        r.respuesta_booleano ?? null,
-        r.respuesta_fecha ?? null,
-      ]
+    const [result] = await conn.query(
+      `INSERT INTO encuesta_respuestas
+         (encuesta_id, user_id, estado, ip_hash, origen, token_acceso, datos_crudos, fecha_inicio, fecha_envio)
+       VALUES (?, ?, 'enviada', ?, ?, ?, ?, NOW(), NOW())`,
+      [encuestaId, userId || null, hashIp(ip), origen || 'web', token || null, JSON.stringify(respuestas)]
     );
+    const respuestaId = result.insertId;
 
-    if (r.opciones_seleccionadas && r.opciones_seleccionadas.length) {
-      for (const opc of r.opciones_seleccionadas) {
-        await db.query(
-          `INSERT INTO encuesta_respuestas_opciones (respuesta_detalle_id, opcion_id, texto_libre)
-           VALUES (?, ?, ?)`,
-          [detResult.insertId, opc.opcion_id, opc.texto_libre || null]
-        );
+    // Inserta cada fila de detalle individualmente para obtener su ID y mapear opciones.
+    const opcionRows = [];
+    for (const r of respuestas) {
+      const [det] = await conn.query(
+        `INSERT INTO encuesta_respuestas_detalle
+           (respuesta_encuesta_id, pregunta_id, respuesta_texto, respuesta_numero, respuesta_booleano, respuesta_fecha)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [respuestaId, r.pregunta_id, r.respuesta_texto ?? null, r.respuesta_numero ?? null, r.respuesta_booleano ?? null, r.respuesta_fecha ?? null]
+      );
+      if (r.opciones_seleccionadas && r.opciones_seleccionadas.length) {
+        for (const opc of r.opciones_seleccionadas) {
+          opcionRows.push([det.insertId, opc.opcion_id, opc.texto_libre || null]);
+        }
       }
     }
-  }
 
-  if (token) {
-    await db.query(
-      "UPDATE encuesta_tokens SET usado = 1 WHERE token = ? AND encuesta_id = ?",
-      [token, encuestaId]
-    );
-  }
+    // Inserta todas las opciones seleccionadas en una sola consulta.
+    if (opcionRows.length) {
+      await conn.query(
+        'INSERT INTO encuesta_respuestas_opciones (respuesta_detalle_id, opcion_id, texto_libre) VALUES ?',
+        [opcionRows]
+      );
+    }
 
-  invalidateCache();
-  return { id: respuestaId };
+    if (token) {
+      await conn.query(
+        'UPDATE encuesta_tokens SET usado = 1 WHERE token = ? AND encuesta_id = ?',
+        [token, encuestaId]
+      );
+    }
+
+    await conn.commit();
+
+    // Solo invalida los listados donde aparece response_count.
+    // La estructura de la encuesta (preguntas, opciones, slug) no cambió.
+    invalidateListCache();
+    return { id: respuestaId };
+  } catch (err) {
+    await conn.rollback();
+    throw err;
+  } finally {
+    conn.release();
+  }
 }
 
 // ─── RESULTADOS (admin) ──────────────────────────────────
@@ -513,7 +524,7 @@ async function getResponses(encuestaId, filters = {}) {
 
 async function deleteResponse(responseId) {
   const [result] = await db.query('DELETE FROM encuesta_respuestas WHERE id = ?', [responseId]);
-  if (result.affectedRows > 0) invalidateCache();
+  if (result.affectedRows > 0) invalidateListCache();
   return result.affectedRows > 0;
 }
 

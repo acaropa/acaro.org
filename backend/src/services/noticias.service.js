@@ -13,7 +13,7 @@ async function getAll(includeInternal = false, user = null) {
   return cache.getOrSet(
     `news:list:${audience}`,
     () => queryAll(includeInternal, user),
-    includeInternal || user ? 15 * 1000 : 60 * 1000
+    includeInternal || user ? 15 * 1000 : 300 * 1000
   );
 }
 
@@ -60,7 +60,7 @@ async function getBySlug(slug, includeInternal = false) {
   return cache.getOrSet(
     `news:slug:${slug}:${includeInternal ? 'internal' : 'public'}`,
     () => queryBySlug(slug, includeInternal),
-    includeInternal ? 15 * 1000 : 60 * 1000
+    includeInternal ? 15 * 1000 : 300 * 1000
   );
 }
 
