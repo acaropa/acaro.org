@@ -22,7 +22,7 @@ const VISIBILITIES = ['publica', 'interna'];
 
 const BASE_SELECT = `
   SELECT b.id, b.titulo, b.slug, b.descripcion, b.archivo_url, b.categoria, b.imagen_portada,
-         b.etiquetas, b.serie, b.orden_lectura,
+         b.etiquetas, b.serie, b.orden_lectura, b.destacado, b.orden_portada,
          b.estado, b.visibilidad, b.creado_por, b.revisado_por,
          b.fecha_creacion, b.fecha_revision, b.observacion_revision,
          creator.email AS creado_por_email, creator.full_name AS creado_por_nombre,
@@ -45,17 +45,44 @@ function parseDocumentRows(rows) {
   });
 }
 
-async function getAll({ user = null, status = null, scope = null }) {
+function addResourceTypeCondition(conditions, values, type) {
+  if (!type || type === 'Todos') return;
+  const file = 'LOWER(COALESCE(b.archivo_url, ""))';
+  if (type === 'pdf') {
+    conditions.push(`${file} LIKE ?`);
+    values.push('%.pdf%');
+  } else if (type === 'video') {
+    conditions.push(`(${file} LIKE ? OR ${file} LIKE ? OR ${file} LIKE ?)`);
+    values.push('%.mp4%', '%.webm%', '%.mov%');
+  } else if (type === 'doc') {
+    conditions.push(`(${file} LIKE ? OR ${file} LIKE ? OR ${file} LIKE ? OR ${file} LIKE ? OR ${file} LIKE ? OR ${file} LIKE ?)`);
+    values.push('%.doc%', '%.docx%', '%.odt%', '%.xls%', '%.xlsx%', '%.ppt%');
+  } else if (type === 'link') {
+    conditions.push(`NOT (${file} LIKE ? OR ${file} LIKE ? OR ${file} LIKE ? OR ${file} LIKE ? OR ${file} LIKE ? OR ${file} LIKE ? OR ${file} LIKE ? OR ${file} LIKE ? OR ${file} LIKE ?)`);
+    values.push('%.pdf%', '%.mp4%', '%.webm%', '%.mov%', '%.doc%', '%.docx%', '%.odt%', '%.xls%', '%.xlsx%');
+  }
+}
+
+function getOrderBy(sort, featuredFirst = false) {
+  const prefix = featuredFirst
+    ? 'b.destacado DESC, CASE WHEN b.orden_portada IS NULL THEN 1 ELSE 0 END ASC, b.orden_portada ASC, '
+    : '';
+  if (sort === 'az') return `${prefix}b.titulo ASC`;
+  if (sort === 'oldest') return `${prefix}b.fecha_creacion ASC`;
+  return `${prefix}b.fecha_creacion DESC`;
+}
+
+async function getAll({ user = null, status = null, scope = null, q = '', categoria = '', tipo = '', anio = '', orden = 'recent', limit = null, offset = null }) {
   const audience = user ? `${user.role}:${user.id}` : 'public';
-  const key = `library:list:${audience}:${status || 'all'}:${scope || 'all'}`;
+  const key = `library:list:${audience}:${status || 'all'}:${scope || 'all'}:${q}:${categoria}:${tipo}:${anio}:${orden}:${limit || 'all'}:${offset || 0}`;
   return cache.getOrSet(
     key,
-    () => queryAll({ user, status, scope }),
+    () => queryAll({ user, status, scope, q, categoria, tipo, anio, orden, limit, offset }),
     user ? PRIVATE_CACHE_TTL_MS : PUBLIC_CACHE_TTL_MS
   );
 }
 
-async function queryAll({ user = null, status = null, scope = null }) {
+async function queryAll({ user = null, status = null, scope = null, q = '', categoria = '', tipo = '', anio = '', orden = 'recent', limit = null, offset = null }) {
   const conditions = [];
   const values = [];
 
@@ -95,12 +122,57 @@ async function queryAll({ user = null, status = null, scope = null }) {
     values.push(status);
   }
 
+  if (q) {
+    const term = `%${q.toLowerCase()}%`;
+    conditions.push(`(
+      LOWER(b.titulo) LIKE ?
+      OR LOWER(COALESCE(b.descripcion, '')) LIKE ?
+      OR LOWER(b.categoria) LIKE ?
+      OR LOWER(COALESCE(b.serie, '')) LIKE ?
+      OR LOWER(COALESCE(CAST(b.etiquetas AS CHAR), '')) LIKE ?
+      OR LOWER(COALESCE(creator.full_name, creator.email, '')) LIKE ?
+    )`);
+    values.push(term, term, term, term, term, term);
+  }
+
+  if (categoria && categoria !== 'Todos') {
+    conditions.push('b.categoria = ?');
+    values.push(categoria);
+  }
+
+  addResourceTypeCondition(conditions, values, tipo);
+
+  if (anio && anio !== 'Todos') {
+    conditions.push('YEAR(b.fecha_creacion) = ?');
+    values.push(Number(anio));
+  }
+
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+  const limitClause = Number.isInteger(limit) && limit > 0
+    ? ` LIMIT ${limit}${Number.isInteger(offset) && offset > 0 ? ` OFFSET ${offset}` : ''}`
+    : '';
   const [rows] = await db.query(
-    `${BASE_SELECT} ${where} ORDER BY b.fecha_creacion DESC`,
+    `${BASE_SELECT} ${where} ORDER BY ${getOrderBy(orden)}${limitClause}`,
     values
   );
   return parseDocumentRows(rows);
+}
+
+async function getHomepage({ limit = 12 } = {}) {
+  return cache.getOrSet(
+    `library:homepage:${limit}`,
+    async () => {
+      const [rows] = await db.query(
+        `${BASE_SELECT}
+         WHERE b.estado = 'aprobado' AND b.visibilidad = 'publica'
+         ORDER BY ${getOrderBy('recent', true)}
+         LIMIT ?`,
+        [Number(limit) || 12]
+      );
+      return parseDocumentRows(rows);
+    },
+    PUBLIC_CACHE_TTL_MS
+  );
 }
 
 async function canSupervisorAccess(documentId, supervisorId) {
@@ -162,10 +234,10 @@ async function create(data, actor) {
   const [result] = await db.query(
     `INSERT INTO biblioteca
       (titulo, slug, descripcion, archivo_url, categoria, imagen_portada,
-       etiquetas, serie, orden_lectura,
+       etiquetas, serie, orden_lectura, destacado, orden_portada,
        estado, visibilidad,
        creado_por, revisado_por, fecha_revision, observacion_revision)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       data.titulo,
       slug,
@@ -176,6 +248,8 @@ async function create(data, actor) {
       data.etiquetas ? JSON.stringify(data.etiquetas) : null,
       data.serie || null,
       data.orden_lectura != null ? Number(data.orden_lectura) : null,
+      Boolean(data.destacado),
+      data.orden_portada != null ? Number(data.orden_portada) : null,
       initialState,
       data.visibilidad,
       actor.id,
@@ -189,7 +263,7 @@ async function create(data, actor) {
 }
 
 async function update(id, data) {
-  const allowed = ['titulo', 'descripcion', 'archivo_url', 'categoria', 'imagen_portada', 'visibilidad', 'etiquetas', 'serie', 'orden_lectura'];
+  const allowed = ['titulo', 'descripcion', 'archivo_url', 'categoria', 'imagen_portada', 'visibilidad', 'etiquetas', 'serie', 'orden_lectura', 'destacado', 'orden_portada'];
   const fields = Object.keys(data).filter(field => allowed.includes(field));
   if (fields.length === 0) {
     const err = new Error('Sin campos válidos para actualizar');
@@ -207,6 +281,12 @@ async function update(id, data) {
   }
   if (fields.includes('orden_lectura') && values.orden_lectura != null) {
     values.orden_lectura = Number(values.orden_lectura);
+  }
+  if (fields.includes('orden_portada') && values.orden_portada != null) {
+    values.orden_portada = Number(values.orden_portada);
+  }
+  if (fields.includes('destacado')) {
+    values.destacado = Boolean(values.destacado);
   }
 
   await db.query(
@@ -260,6 +340,7 @@ module.exports = {
   STATES,
   VISIBILITIES,
   getAll,
+  getHomepage,
   getById,
   getBySlug,
   create,

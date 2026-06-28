@@ -28,7 +28,7 @@ export function FeaturedProducers() {
           <ScrollReveal key={producer.id} delay={index * 120}>
             <div className="grid items-center gap-12 md:grid-cols-2">
 
-              <div className={`relative aspect-square w-full overflow-hidden border-4 border-white shadow-xl grayscale transition-all duration-700 hover:grayscale-0 ${isReversed ? 'md:order-2' : ''}`}>
+              <div className={`relative aspect-square w-full overflow-hidden border-4 border-white shadow-xl transition-all duration-700 ${isReversed ? 'md:order-2' : ''}`}>
                 <img
                   src={producerImage(producer)}
                   alt={producer.nombre}

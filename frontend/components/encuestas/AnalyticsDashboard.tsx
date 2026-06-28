@@ -419,7 +419,7 @@ function QuestionInsightsCard({
   return (
     <div className="rounded-xl border border-[#d8cabb] bg-white overflow-hidden">
       {/* Header */}
-      <div className="border-b border-[#e5e7eb] bg-white px-5 py-4">
+      <div className="border-b border-[#d8cabb] bg-white px-5 py-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
@@ -518,7 +518,7 @@ function QuestionInsightsCard({
                   </thead>
                   <tbody className="divide-y divide-[#ede6db]">
                     {data.respondentItems.map(item => (
-                      <tr key={item.responseId} className="hover:bg-[#f3f4f6]">
+                      <tr key={item.responseId} className="hover:bg-[#faf9f5]">
                         <td className="px-3 py-2.5 font-medium text-[#2b1710] max-w-[140px] truncate">{item.respondentName}</td>
                         <td className="px-3 py-2.5 text-[#5a3424] max-w-[200px] truncate">{item.answerPreview}</td>
                         <td className="px-3 py-2.5 text-xs text-[#a08c7a] whitespace-nowrap">{item.fecha}</td>
@@ -542,7 +542,7 @@ function QuestionInsightsCard({
 
 function MiniStat({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-lg border border-[#e5e7eb] bg-white px-4 py-3">
+    <div className="rounded-lg border border-[#d8cabb] bg-white px-4 py-3">
       <p className="text-lg font-bold text-[#2b1710]">{value}</p>
       <p className="text-xs text-[#765e50]">{label}</p>
     </div>
@@ -588,7 +588,7 @@ function ResponseList({
           placeholder="Buscar respondente..."
           value={search}
           onChange={e => { setSearch(e.target.value); setPage(0) }}
-          className="h-9 rounded-lg border border-[#d8cabb] bg-white px-3 text-sm text-[#2b1710] focus:outline-none focus:ring-2 focus:ring-[#a66f2e]/30 sm:w-56"
+          className="h-9 rounded-lg border border-[#d8cabb] bg-white px-3 text-sm text-[#2b1710] focus:outline-none focus:ring-2 focus:ring-[#c28a3a]/30 sm:w-56"
         />
       </div>
 
@@ -608,7 +608,7 @@ function ResponseList({
                 ? r.respuestas_detalle?.find(d => d.pregunta_id === firstTextQ.id)?.respuesta_texto ?? ''
                 : ''
               return (
-                <tr key={r.id} className="hover:bg-[#f3f4f6] transition-colors">
+                <tr key={r.id} className="hover:bg-[#faf9f5] transition-colors">
                   <td className="px-5 py-3">
                     <p className="font-medium text-[#2b1710]">
                       {r.respondente_nombre || r.respondente_email || `Anónimo #${r.id}`}

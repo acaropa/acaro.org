@@ -1,5 +1,6 @@
 import Link from "next/link"
-import { ArrowRight, ArrowUpRight, PlayCircle } from "lucide-react"
+import { ArrowRight } from "lucide-react"
+import type { Metadata } from "next"
 
 import { PublicLayout } from "@/components/layout/PublicLayout"
 import { HeroParallaxImage, ScrollReveal } from "@/components/landing/LandingMotion"
@@ -7,37 +8,54 @@ import { ProjectsStoryline } from "@/components/home/ProjectsStoryline"
 import { NewsGrid } from "@/components/home/NewsGrid"
 import { CommunitySection } from "@/components/home/CommunitySection"
 import { LibraryPreview } from "@/components/home/LibraryPreview"
+import { LandingMetadataBar } from "@/components/home/LandingMetadataBar"
+
+export const metadata: Metadata = {
+  title: "ACARO OBC | Cafe Robusta de Panama",
+  description:
+    "Asociacion Cafe Robusta OBC impulsa organizacion, conocimiento tecnico y desarrollo productivo para comunidades cafetaleras en Panama.",
+  openGraph: {
+    title: "ACARO OBC | Cafe Robusta de Panama",
+    description:
+      "Organizacion, conocimiento tecnico y desarrollo productivo para comunidades cafetaleras de robusta.",
+    url: "https://acaro.org",
+    siteName: "ACARO OBC",
+    images: [{ url: "/assets/landing-hero-v2.jpg", width: 1200, height: 630 }],
+    locale: "es_PA",
+    type: "website",
+  },
+}
 
 export default function Home() {
   return (
     <PublicLayout className="landing-typography">
-      <section className="relative isolate -mt-18 flex min-h-[100svh] items-end overflow-hidden bg-[#24130d] text-[#fffaf1]">
+      <section className="relative isolate flex min-h-[100svh] items-end overflow-hidden bg-[#24130d] text-[#fffaf1]">
         <HeroParallaxImage />
         <div className="absolute inset-0 bg-[#120c08]/30" />
         <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(12,8,4,0.96)_0%,rgba(12,8,4,0.72)_22%,rgba(12,8,4,0.18)_52%,transparent_72%)]" />
 
         <div className="relative mx-auto w-full max-w-7xl px-5 pb-12 pt-32 sm:px-8 sm:pb-16 lg:px-10 lg:pb-20">
           <div className="max-w-4xl -translate-y-6 sm:-translate-y-8 lg:-translate-y-10">
-            <div className="hero-reveal mb-7 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.24em] text-[#e2b86f]" style={{ animationDelay: "80ms" }}>
+            <div className="hero-reveal mb-7 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.24em] text-[#e2b86f]" style={{ animationDelay: "20ms" }}>
               Café Robusta · Panamá
             </div>
-            <h1 className="font-serif font-bold hero-reveal max-w-4xl text-5xl leading-[1.0] tracking-[-0.02em] sm:text-6xl lg:text-[5rem]" style={{ animationDelay: "170ms" }}>
+            <h1 className="font-serif font-bold hero-reveal max-w-4xl text-5xl leading-[1.0] tracking-[-0.02em] sm:text-6xl lg:text-[5rem]" style={{ animationDelay: "60ms" }}>
               Asociación Café
               <span className="block text-[#fffaf1]">Robusta OBC</span>
             </h1>
-            <p className="hero-reveal mt-7 max-w-2xl text-lg leading-8 text-[#f3e8d8]/85 sm:text-xl" style={{ animationDelay: "320ms" }}>
+            <p className="hero-reveal mt-7 max-w-2xl text-lg leading-8 text-[#f3e8d8]/85 sm:text-xl" style={{ animationDelay: "100ms" }}>
               Impulsamos el desarrollo del café robusta con organización, conocimiento técnico y visión productiva.
             </p>
-            <div className="hero-reveal mt-9 flex flex-col gap-3 sm:flex-row" style={{ animationDelay: "460ms" }}>
-              <Link href="/nosotros" className="group inline-flex items-center gap-2 bg-[#fffaf1] px-8 py-4 text-xs font-bold uppercase tracking-widest text-[#271310] transition-all hover:bg-white">
+            <div className="hero-reveal mt-9 flex flex-col items-start gap-3 sm:flex-row" style={{ animationDelay: "140ms" }}>
+              <Link href="/nosotros" className="group inline-flex w-[270px] items-center justify-center gap-2 whitespace-nowrap bg-[#fffaf1] px-5 py-3.5 text-xs font-bold uppercase tracking-widest text-[#271310] transition-all hover:bg-white sm:w-auto sm:px-8 sm:py-4">
                 Conocer la asociación <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
-              <Link href="/biblioteca" className="inline-flex items-center border border-[#fffaf1]/40 px-8 py-4 text-xs font-bold uppercase tracking-widest text-[#fffaf1] transition-all hover:bg-[#fffaf1]/10">
+              <Link href="/biblioteca" className="inline-flex w-[270px] items-center justify-center whitespace-nowrap border border-[#fffaf1]/40 px-5 py-3.5 text-xs font-bold uppercase tracking-widest text-[#fffaf1] transition-all hover:bg-[#fffaf1]/10 sm:w-auto sm:px-8 sm:py-4">
                 Explorar biblioteca
               </Link>
             </div>
           </div>
-          <div className="hero-reveal mt-24 text-xs uppercase tracking-[0.25em] text-[#f3e8d8]/30 font-medium" style={{ animationDelay: "620ms" }}>
+          <div className="hero-reveal mt-24 text-xs uppercase tracking-[0.25em] text-[#f3e8d8]/30 font-medium" style={{ animationDelay: "180ms" }}>
             Organización · Conocimiento · Producción
           </div>
         </div>
@@ -100,29 +118,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Metadata Bar */}
-      <div className="w-full bg-[#120c08] py-8">
-        <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
-          <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-            <div className="flex flex-col items-center border-r border-white/10 last:border-0">
-              <span className="mb-1 text-[10px] font-bold uppercase tracking-[0.15em] text-white/50">Altitud Promedio</span>
-              <span className="font-serif text-lg font-semibold text-white">0 – 800 msnm</span>
-            </div>
-            <div className="flex flex-col items-center border-r border-white/10 last:border-0">
-              <span className="mb-1 text-[10px] font-bold uppercase tracking-[0.15em] text-white/50">Precipitación Anual</span>
-              <span className="font-serif text-lg font-semibold text-white">2,000 – 3,000 mm</span>
-            </div>
-            <div className="flex flex-col items-center border-r border-white/10 last:border-0">
-              <span className="mb-1 text-[10px] font-bold uppercase tracking-[0.15em] text-white/50">Variedades</span>
-              <span className="font-serif text-lg font-semibold text-white">Coffea canephora</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <span className="mb-1 text-[10px] font-bold uppercase tracking-[0.15em] text-white/50">Estándar de Calidad</span>
-              <span className="font-serif text-lg font-semibold text-white">OBC Premium</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <LandingMetadataBar />
 
       {/* Proyectos que abren oportunidades */}
       <section className="overflow-hidden bg-[#f4f4f0] py-24 sm:py-32">
@@ -201,7 +197,7 @@ export default function Home() {
             href="/contacto"
             className="inline-block bg-[#271310] px-12 py-5 text-xs font-bold uppercase tracking-widest text-white transition-transform duration-300 hover:scale-105 active:scale-95"
           >
-            Contáctanos
+            Quiero contactar a ACARO
           </Link>
         </ScrollReveal>
       </section>

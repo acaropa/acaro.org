@@ -15,6 +15,8 @@ export interface LibraryRecord {
   etiquetas?: string[] | string | null;
   serie?: string | null;
   orden_lectura?: number | null;
+  destacado?: boolean | number;
+  orden_portada?: number | null;
 }
 
 export type ResourceType = "pdf" | "video" | "link" | "doc";
@@ -43,6 +45,8 @@ export interface LibraryDocument {
   tags: string[];
   serie: string | null;
   ordenLectura: number | null;
+  featured: boolean;
+  coverOrder: number | null;
 }
 
 export const libraryCategories: LibraryCategory[] = [
@@ -125,6 +129,8 @@ export function toLibraryDocument(record: LibraryRecord): LibraryDocument {
     })(),
     serie: record.serie || null,
     ordenLectura: record.orden_lectura ?? null,
+    featured: Boolean(record.destacado),
+    coverOrder: record.orden_portada ?? null,
   };
 }
 

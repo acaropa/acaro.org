@@ -18,7 +18,25 @@ export function NewsGrid() {
       .catch(() => setNews([]));
   }, []);
 
-  if (news.length === 0) return null;
+  if (news.length === 0) {
+    return (
+      <>
+        <ScrollReveal className="mb-12 max-w-xl" distance="sm">
+          <span className="mb-4 block text-xs font-bold uppercase tracking-[0.2em] text-[#1b6d24]">Actualidad Institucional</span>
+          <h2 className="font-serif text-3xl font-bold text-[#271310] sm:text-4xl">Noticias y comunicados</h2>
+          <p className="mt-4 text-base leading-7 text-[#504442]">
+            Aun no hay noticias publicadas. Los comunicados institucionales apareceran aqui cuando esten disponibles.
+          </p>
+        </ScrollReveal>
+        <div className="border border-dashed border-[#d8cabb] bg-white p-8 text-center">
+          <p className="text-sm leading-6 text-[#504442]">El equipo de ACARO OBC esta preparando nuevas actualizaciones.</p>
+          <Link href="/noticias" className="mt-5 inline-flex border-b border-[#271310] pb-1 text-xs font-bold uppercase tracking-widest text-[#271310]">
+            Ir a noticias
+          </Link>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>

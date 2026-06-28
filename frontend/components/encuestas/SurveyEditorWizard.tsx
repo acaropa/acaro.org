@@ -165,7 +165,7 @@ export function SurveyEditorWizard({ encuestaId }: Props) {
         </div>
         <button
           onClick={() => router.push('/admin/encuestas')}
-          className="rounded-lg border border-[#d8cabb] px-3 py-2 text-sm font-semibold text-[#5a3424] hover:bg-[#f3f4f6]"
+          className="rounded-lg border border-[#d8cabb] px-3 py-2 text-sm font-semibold text-[#5a3424] hover:bg-[#faf9f5]"
         >
           Cancelar
         </button>
@@ -181,7 +181,7 @@ export function SurveyEditorWizard({ encuestaId }: Props) {
                 ? 'border-[#2b1710] bg-[#2b1710] text-white'
                 : i < step
                   ? 'border-green-300 bg-green-50 text-green-700'
-                  : 'border-[#e5e7eb] bg-white text-[#765e50]'
+                  : 'border-[#d8cabb] bg-white text-[#765e50]'
             }`}
           >
             {s}
@@ -196,7 +196,7 @@ export function SurveyEditorWizard({ encuestaId }: Props) {
             <input
               value={titulo}
               onChange={e => setTitulo(e.target.value)}
-              className="w-full rounded-lg border border-[#d8cabb] px-3 py-2.5 text-sm text-[#2b1710] focus:outline-none focus:ring-2 focus:ring-[#a66f2e]/30"
+              className="w-full rounded-lg border border-[#d8cabb] px-3 py-2.5 text-sm text-[#2b1710] focus:outline-none focus:ring-2 focus:ring-[#c28a3a]/30"
               placeholder="Ej: Encuesta de satisfacción 2026"
             />
           </div>
@@ -206,7 +206,7 @@ export function SurveyEditorWizard({ encuestaId }: Props) {
               value={descripcion}
               onChange={e => setDescripcion(e.target.value)}
               rows={3}
-              className="w-full rounded-lg border border-[#d8cabb] px-3 py-2.5 text-sm text-[#2b1710] focus:outline-none focus:ring-2 focus:ring-[#a66f2e]/30"
+              className="w-full rounded-lg border border-[#d8cabb] px-3 py-2.5 text-sm text-[#2b1710] focus:outline-none focus:ring-2 focus:ring-[#c28a3a]/30"
               placeholder="Breve descripción de la encuesta"
             />
           </div>
@@ -290,7 +290,7 @@ export function SurveyEditorWizard({ encuestaId }: Props) {
           ))}
           <button
             onClick={addQuestion}
-            className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[#d8cabb] py-4 text-sm font-semibold text-[#5a3424] hover:border-[#a66f2e] hover:text-[#a66f2e]"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[#d8cabb] py-4 text-sm font-semibold text-[#5a3424] hover:border-[#c28a3a] hover:text-[#c28a3a]"
           >
             <AppIcon name="add" className="text-[18px]" />
             Agregar pregunta
@@ -298,7 +298,7 @@ export function SurveyEditorWizard({ encuestaId }: Props) {
           <div className="flex justify-between">
             <button
               onClick={() => setStep(0)}
-              className="rounded-lg border border-[#d8cabb] px-6 py-2.5 text-sm font-semibold text-[#5a3424] hover:bg-[#f3f4f6]"
+              className="rounded-lg border border-[#d8cabb] px-6 py-2.5 text-sm font-semibold text-[#5a3424] hover:bg-[#faf9f5]"
             >
               Anterior
             </button>
@@ -341,7 +341,7 @@ export function SurveyEditorWizard({ encuestaId }: Props) {
           <div className="flex justify-between pt-4">
             <button
               onClick={() => setStep(1)}
-              className="rounded-lg border border-[#d8cabb] px-6 py-2.5 text-sm font-semibold text-[#5a3424] hover:bg-[#f3f4f6]"
+              className="rounded-lg border border-[#d8cabb] px-6 py-2.5 text-sm font-semibold text-[#5a3424] hover:bg-[#faf9f5]"
             >
               Anterior
             </button>

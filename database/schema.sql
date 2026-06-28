@@ -44,6 +44,15 @@ CREATE TABLE IF NOT EXISTS user_sessions (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS site_settings (
+  setting_key   VARCHAR(100) NOT NULL,
+  setting_value JSON         NOT NULL,
+  updated_by    INT UNSIGNED          DEFAULT NULL,
+  updated_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (setting_key),
+  FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ─────────────────────────────────────────
 -- SOCIOS (miembros de la asociación)
 -- ─────────────────────────────────────────
@@ -95,6 +104,8 @@ CREATE TABLE IF NOT EXISTS biblioteca (
   etiquetas     JSON                     DEFAULT NULL,
   serie         VARCHAR(200)             DEFAULT NULL,
   orden_lectura SMALLINT UNSIGNED        DEFAULT NULL,
+  destacado     BOOLEAN         NOT NULL DEFAULT FALSE,
+  orden_portada SMALLINT UNSIGNED        DEFAULT NULL,
   estado        ENUM('borrador','pendiente_revision','requiere_correccion','aprobado','rechazado','archivado') NOT NULL DEFAULT 'pendiente_revision',
   visibilidad   ENUM('publica','interna') NOT NULL DEFAULT 'interna',
   creado_por    INT UNSIGNED    NOT NULL,

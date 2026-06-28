@@ -99,7 +99,7 @@ export default function Noticias() {
                         <img
                           alt={featured.titulo}
                           loading="lazy"
-                          className="w-full h-full object-cover filter brightness-95 grayscale-[20%] group-hover:grayscale-0 transition-all duration-700"
+                          className="w-full h-full object-cover transition-all duration-700"
                           src={apiAssetUrl(featured.imagen_portada)}
                         />
                       )}
@@ -142,7 +142,7 @@ export default function Noticias() {
                           <img
                             alt={item.titulo}
                             loading="lazy"
-                            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                            className="w-full h-full object-cover transition-all duration-500"
                             src={apiAssetUrl(item.imagen_portada)}
                           />
                         )}

@@ -18,6 +18,8 @@ const noticiasRoutes = require('./routes/noticias.routes');
 const productoresRoutes = require('./routes/productores.routes');
 const notasConceptualesRoutes = require('./routes/notasConceptuales.routes');
 const logsRoutes = require('./routes/logs.routes');
+const settingsRoutes = require('./routes/settings.routes');
+const contactRoutes = require('./routes/contact.routes');
 const encuestasRoutes = require('./routes/encuestas.routes');
 const { cleanupOldSessions } = require('./services/sessions.service');
 const { uploadRoot } = require('./config/uploads');
@@ -80,6 +82,8 @@ app.use('/api/noticias', noticiasRoutes);
 app.use('/api/productores', productoresRoutes);
 app.use('/api/notas-conceptuales', notasConceptualesRoutes);
 app.use('/api/logs', logsRoutes);
+app.use('/api/settings', settingsRoutes);
+app.use('/api/contacto', contactRoutes);
 app.use('/api/encuestas', encuestasRoutes);
 const uploadStaticOptions = {
   fallthrough: false,

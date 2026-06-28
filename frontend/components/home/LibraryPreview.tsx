@@ -43,7 +43,17 @@ export function LibraryPreview() {
       .catch(() => setItems([]));
   }, []);
 
-  if (items.length === 0) return null;
+  if (items.length === 0) {
+    return (
+      <div className="border border-dashed border-[#d8cabb] bg-white p-8 text-center">
+        <BookOpen className="mx-auto mb-4 h-9 w-9 text-[#1b6d24]" />
+        <h5 className="font-serif text-xl font-semibold text-[#271310]">Biblioteca en preparacion</h5>
+        <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-[#504442]">
+          Los documentos tecnicos aprobados apareceran aqui como recursos para productores, tecnicos e investigadores.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-4">
@@ -51,7 +61,7 @@ export function LibraryPreview() {
         const Icon = getIcon(item);
         return (
           <ScrollReveal key={item.id} delay={index * 80}>
-            <div className="group border border-[#d8cabb]/40 bg-[#eeeeea] p-8 transition-all duration-500 hover:bg-white hover:shadow-xl">
+            <div className="group border border-[#d8cabb]/50 bg-[#f4f4f0] p-8 transition-all duration-500 hover:bg-white hover:shadow-xl">
               <Icon className="mb-6 h-9 w-9 text-[#1b6d24]" />
               <h5 className="mb-2 font-serif text-lg font-semibold text-[#271310]">{item.title}</h5>
               <p className="mb-6 text-sm leading-6 text-[#504442]">{item.description}</p>

@@ -102,7 +102,7 @@ export function QuestionBuilder({ index, data, onChange, onRemove, onMoveUp, onM
             <input
               value={data.texto_pregunta}
               onChange={e => set('texto_pregunta', e.target.value)}
-              className="w-full rounded-lg border border-[#d8cabb] px-3 py-2 text-sm text-[#2b1710] focus:outline-none focus:ring-2 focus:ring-[#a66f2e]/30"
+              className="w-full rounded-lg border border-[#d8cabb] px-3 py-2 text-sm text-[#2b1710] focus:outline-none focus:ring-2 focus:ring-[#c28a3a]/30"
               placeholder="Escribe tu pregunta aquí"
             />
           </div>
@@ -156,7 +156,7 @@ export function QuestionBuilder({ index, data, onChange, onRemove, onMoveUp, onM
         </label>
 
         {hasOptions(data.tipo_pregunta) && (
-          <div className="space-y-2 rounded-lg border border-dashed border-[#d1d5db] bg-white p-3">
+          <div className="space-y-2 rounded-lg border border-dashed border-[#d8cabb] bg-white p-3">
             <p className="text-xs font-semibold text-[#765e50]">Opciones de respuesta</p>
             {data.opciones.map((opc, i) => (
               <div key={i} className="flex items-center gap-2">
@@ -186,7 +186,7 @@ export function QuestionBuilder({ index, data, onChange, onRemove, onMoveUp, onM
             ))}
             <button
               onClick={addOption}
-              className="text-xs font-semibold text-[#a66f2e] hover:underline"
+              className="text-xs font-semibold text-[#c28a3a] hover:underline"
             >
               + Agregar opción
             </button>

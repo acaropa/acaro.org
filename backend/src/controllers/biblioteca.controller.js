@@ -66,6 +66,13 @@ function validateDocument(data = {}, partial = false, trustedFileUrl = false) {
     const n = Number(data.orden_lectura);
     if (!Number.isInteger(n) || n < 1) return 'orden_lectura debe ser un entero positivo';
   }
+  if ('orden_portada' in data && data.orden_portada !== null) {
+    const n = Number(data.orden_portada);
+    if (!Number.isInteger(n) || n < 1) return 'orden_portada debe ser un entero positivo';
+  }
+  if ('destacado' in data && typeof data.destacado !== 'boolean') {
+    return 'destacado debe ser booleano';
+  }
   if ('descripcion' in data && data.descripcion !== null && typeof data.descripcion !== 'string') {
     return 'descripcion debe ser texto';
   }
@@ -96,6 +103,21 @@ async function getAll(req, res, next) {
       user: req.user,
       status,
       scope: req.query.scope || null,
+      q: String(req.query.q || '').trim(),
+      categoria: String(req.query.categoria || '').trim(),
+      tipo: String(req.query.tipo || '').trim(),
+      anio: String(req.query.anio || '').trim(),
+      orden: String(req.query.orden || 'recent').trim(),
+      limit: req.query.limit ? Number(req.query.limit) : null,
+      offset: req.query.offset ? Number(req.query.offset) : null,
+    }));
+  } catch (err) { next(err); }
+}
+
+async function getHomepage(req, res, next) {
+  try {
+    res.json(await biblioteca.getHomepage({
+      limit: req.query.limit ? Number(req.query.limit) : 12,
     }));
   } catch (err) { next(err); }
 }
@@ -141,6 +163,8 @@ async function create(req, res, next) {
       etiquetas: Array.isArray(body.etiquetas) ? body.etiquetas.map(t => t.trim()).filter(Boolean) : null,
       serie: body.serie?.trim() || null,
       orden_lectura: body.orden_lectura != null ? Number(body.orden_lectura) : null,
+      destacado: Boolean(body.destacado),
+      orden_portada: body.orden_portada != null ? Number(body.orden_portada) : null,
     }, req.user));
   } catch (err) { next(err); }
 }
@@ -257,4 +281,4 @@ async function getBySerie(req, res, next) {
   } catch (err) { next(err); }
 }
 
-module.exports = { getAll, getById, getBySlug, getBySerie, create, update, resubmit, review, remove };
+module.exports = { getAll, getHomepage, getById, getBySlug, getBySerie, create, update, resubmit, review, remove };

@@ -43,20 +43,20 @@ export function LatestNews() {
       {secondary.length > 0 && (
         <div className="scene-drift-up grid gap-4">
           {secondary.map((item, index) => (
-            <ScrollReveal key={item.id} delay={index * 120} className="premium-project group flex min-h-[238px] flex-col rounded-[10px] border border-[#d8cabb] bg-[#f6efe5]/65 p-6 hover:border-[#b57931]/60 hover:bg-[#f6efe5]" direction="right">
+            <ScrollReveal key={item.id} delay={index * 120} className="premium-project group flex min-h-[238px] flex-col rounded-[10px] border border-[#d8cabb] bg-[#faf9f5] p-6 hover:border-[#c28a3a]/60 hover:bg-[#fffaf1]" direction="right">
               <Link href={`/noticias/detalle/?slug=${item.slug}`} className="flex h-full flex-col">
                 <div className="flex items-start justify-between gap-4">
-                  <Newspaper className="h-6 w-6 text-[#b57931]" strokeWidth={1.5} />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#9a755c]">{formatNoticiaDate(item)}</span>
+                  <Newspaper className="h-6 w-6 text-[#c28a3a]" strokeWidth={1.5} />
+                  <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#8b6a4f]">{formatNoticiaDate(item)}</span>
                 </div>
                 <div className="mt-6 flex-1">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.17em] text-[#a66f2e]">{item.categoria}</p>
-                  <h3 className="mt-3 font-serif text-2xl font-semibold leading-tight tracking-[-0.01em] transition-colors group-hover:text-[#a66f2e]">{item.titulo}</h3>
-                  {item.resumen && <p className="mt-3 line-clamp-2 text-sm leading-6 text-[#806b5f]">{item.resumen}</p>}
+                  <p className="text-[10px] font-bold uppercase tracking-[0.17em] text-[#c28a3a]">{item.categoria}</p>
+                  <h3 className="mt-3 font-serif text-2xl font-semibold leading-tight tracking-[-0.01em] transition-colors group-hover:text-[#c28a3a]">{item.titulo}</h3>
+                  {item.resumen && <p className="mt-3 line-clamp-2 text-sm leading-6 text-[#504442]">{item.resumen}</p>}
                 </div>
                 <div className="mt-5 flex items-center justify-between border-t border-[#d8cabb] pt-3">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#8e705e]">Comunicado 0{index + 2}</span>
-                  <ArrowRight className="h-4 w-4 text-[#9d7145] transition-transform group-hover:translate-x-1" />
+                  <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#8b6a4f]">Comunicado 0{index + 2}</span>
+                  <ArrowRight className="h-4 w-4 text-[#c28a3a] transition-transform group-hover:translate-x-1" />
                 </div>
               </Link>
             </ScrollReveal>

@@ -18,7 +18,29 @@ export function ProjectsStoryline() {
       .catch(() => setProjects([]));
   }, []);
 
-  if (projects.length === 0) return null;
+  if (projects.length === 0) {
+    return (
+      <ScrollReveal>
+        <div className="grid grid-cols-1 items-center gap-10 border border-[#d8cabb] bg-[#faf9f5] p-8 md:grid-cols-12 md:p-10">
+          <div className="md:col-span-7">
+            <div className="aspect-[16/10] overflow-hidden">
+              <img src="/assets/landing-hero-v2.jpg" alt="Cultivo de cafe robusta" className="h-full w-full object-cover" />
+            </div>
+          </div>
+          <div className="md:col-span-5">
+            <span className="mb-2 block text-xs font-bold uppercase tracking-[0.2em] text-[#1b6d24]">Proximas iniciativas</span>
+            <h3 className="mb-4 font-serif text-3xl font-bold text-[#271310]">Estamos documentando nuevos proyectos productivos.</h3>
+            <p className="mb-8 text-base leading-7 text-[#504442]">
+              Las iniciativas publicas apareceran aqui cuando sean aprobadas por el equipo de ACARO OBC.
+            </p>
+            <Link href="/proyectos" className="inline-block bg-[#271310] px-6 py-3 text-sm font-semibold text-white hover:bg-[#120c08]">
+              Explorar proyectos
+            </Link>
+          </div>
+        </div>
+      </ScrollReveal>
+    );
+  }
 
   return (
     <div className="space-y-24">

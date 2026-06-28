@@ -26,4 +26,12 @@ const registerLimiter = rateLimit({
   message: { error: 'Demasiados registros desde esta dirección. Intenta nuevamente más tarde.' },
 });
 
-module.exports = { defaultLimiter, loginLimiter, registerLimiter };
+const contactLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiados mensajes enviados. Intenta nuevamente en unos minutos.' },
+});
+
+module.exports = { defaultLimiter, loginLimiter, registerLimiter, contactLimiter };

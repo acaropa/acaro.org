@@ -46,7 +46,7 @@ export function FeaturedProjects() {
                 src={project.imageUrl || FALLBACK_IMAGES[index % FALLBACK_IMAGES.length]}
                 alt=""
                 loading="lazy"
-                className="h-full w-full object-cover grayscale transition-all duration-500 group-hover:grayscale-0"
+                className="h-full w-full object-cover transition-all duration-500"
               />
             </div>
             <div className="flex flex-1 flex-col p-7">

@@ -84,17 +84,17 @@
 }
 
 :root {
-  --background: var(--color-ivory);
+  --background: #faf9f5;
   --foreground: var(--color-chocolate);
   --primary: var(--color-chocolate);
-  --primary-foreground: var(--color-ivory);
-  --surface: var(--color-cream);
+  --primary-foreground: #fffaf1;
+  --surface: #faf9f5;
   --card: #ffffff;
   --accent: var(--color-caramel);
   --accent-hover: #D7A24A; /* slightly lighter caramel */
   --muted: var(--color-earth);
   --brand-green: var(--color-leaf);
-  --border: #e6dfd5; /* light beige border */
+  --border: #d8cabb; /* warm beige border */
 }
 
 .dark {
@@ -123,14 +123,14 @@
   --muted: #765e50;
   --secondary: #5a3424;
   --brand-green: #2f5d3a;
-  --border: #e5e7eb;
+  --border: #d8cabb;
 
   --color-surface-bright: #ffffff;
   --color-surface-container-lowest: #ffffff;
   --color-surface-container-low: #ffffff;
-  --color-surface-container: #f9fafb;
-  --color-surface-container-high: #f3f4f6;
-  --color-outline-variant: #e5e7eb;
+  --color-surface-container: #faf9f5;
+  --color-surface-container-high: #f4f4f0;
+  --color-outline-variant: #d8cabb;
   --color-outline: #9ca3af;
   --color-on-surface-variant: #765e50;
   --color-primary-fixed: #f3e8d8;
@@ -256,7 +256,7 @@ a,
 @keyframes hero-reveal {
   from {
     opacity: 0;
-    transform: translateY(36px);
+    transform: translateY(14px);
   }
   to {
     opacity: 1;
@@ -275,7 +275,7 @@ a,
 
 .hero-reveal {
   opacity: 0;
-  animation: hero-reveal 760ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: hero-reveal 420ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .scroll-reveal {
@@ -538,6 +538,79 @@ a,
   animation: coffee-ripple 820ms ease-out both;
 }
 
+/* ─── Page view transitions ─── */
+
+@keyframes page-out {
+  to { opacity: 0; }
+}
+
+@keyframes page-in {
+  from { opacity: 0; }
+}
+
+@keyframes library-below-out {
+  to { opacity: 0; transform: translateY(-4px); }
+}
+
+@keyframes library-below-in {
+  from { opacity: 0; transform: translateY(8px); }
+}
+
+::view-transition-old(page-content) {
+  animation: 110ms ease-out both page-out;
+  mix-blend-mode: normal;
+}
+
+::view-transition-new(page-content) {
+  animation: 170ms ease-out both page-in;
+  mix-blend-mode: normal;
+}
+
+/* Navbar stays fixed during page transitions */
+::view-transition-group(site-header) {
+  z-index: 100;
+}
+
+::view-transition-old(site-header),
+::view-transition-new(site-header) {
+  animation: none;
+}
+
+::view-transition-group(library-search-hero) {
+  z-index: 5;
+  background: #faf9f5;
+}
+
+::view-transition-old(library-search-hero),
+::view-transition-new(library-search-hero) {
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(library-search-hero) {
+  animation: 80ms ease-out both page-out;
+}
+
+::view-transition-new(library-search-hero) {
+  animation: 120ms ease-out both page-in;
+}
+
+::view-transition-group(library-below-content) {
+  z-index: 1;
+  background: #faf9f5;
+}
+
+::view-transition-old(library-below-content) {
+  animation: 140ms ease-out both library-below-out;
+  background: #faf9f5;
+  mix-blend-mode: normal;
+}
+
+::view-transition-new(library-below-content) {
+  animation: 220ms cubic-bezier(0.16, 1, 0.3, 1) 60ms both library-below-in;
+  background: #faf9f5;
+  mix-blend-mode: normal;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-reveal,
   .scroll-reveal,
@@ -589,6 +662,13 @@ a,
   .coffee-top {
     transform: translateY(0);
     opacity: 1;
+  }
+
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
   }
 }
 

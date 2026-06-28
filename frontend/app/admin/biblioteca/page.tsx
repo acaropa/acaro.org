@@ -7,7 +7,6 @@ import { useAuth } from '@/context/AuthContext';
 import { Modal } from '@/components/ui/Modal';
 import { api, apiAssetUrl } from '@/lib/api';
 import { PERMISSIONS } from '@/lib/permissions';
-import { EmptyState } from '@/components/ui/EmptyState';
 import { ImageUploadField, UploadedFile } from '@/components/admin/ImageUploadField';
 import { libraryCategories } from '@/lib/library';
 
@@ -40,6 +39,8 @@ interface LibraryRecord {
   etiquetas: string[] | null;
   serie: string | null;
   orden_lectura: number | null;
+  destacado: boolean | number;
+  orden_portada: number | null;
 }
 
 const emptyForm = {
@@ -52,6 +53,8 @@ const emptyForm = {
   etiquetas: '',
   serie: '',
   orden_lectura: '',
+  destacado: false,
+  orden_portada: '',
 };
 
 const stateLabels: Record<DocumentState, string> = {
@@ -134,6 +137,8 @@ export default function AdminBiblioteca() {
       etiquetas: (document.etiquetas || []).join(', '),
       serie: document.serie || '',
       orden_lectura: document.orden_lectura != null ? String(document.orden_lectura) : '',
+      destacado: Boolean(document.destacado),
+      orden_portada: document.orden_portada != null ? String(document.orden_portada) : '',
     });
     setUploadMode('url');
     setFile(null);
@@ -153,6 +158,8 @@ export default function AdminBiblioteca() {
         : null;
       payload.serie = form.serie.trim() || null;
       payload.orden_lectura = form.orden_lectura ? Number(form.orden_lectura) : null;
+      payload.destacado = Boolean(form.destacado);
+      payload.orden_portada = form.orden_portada ? Number(form.orden_portada) : null;
       if (uploadMode === 'file' && file) {
         delete payload.archivo_url;
         payload.archivo_base64 = file.base64;
@@ -366,6 +373,31 @@ export default function AdminBiblioteca() {
               <input type="number" min="1" value={form.orden_lectura} onChange={event => setForm(current => ({ ...current, orden_lectura: event.target.value }))} placeholder="Ej: 1" className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
               <p className="mt-1 text-[11px] text-muted">El orden en que se debe leer este documento dentro de la serie.</p>
             </div>
+            <div>
+              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Portada editorial</label>
+              <label className="flex items-center gap-3 border border-border bg-background px-4 py-3 text-sm text-foreground">
+                <input
+                  type="checkbox"
+                  checked={Boolean(form.destacado)}
+                  onChange={event => setForm(current => ({ ...current, destacado: event.target.checked }))}
+                  className="h-4 w-4 accent-primary"
+                />
+                Destacar en la portada de biblioteca
+              </label>
+              <p className="mt-1 text-[11px] text-muted">Los destacados aparecen primero en /biblioteca.</p>
+            </div>
+            <div>
+              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Orden en portada (opcional)</label>
+              <input
+                type="number"
+                min="1"
+                value={form.orden_portada}
+                onChange={event => setForm(current => ({ ...current, orden_portada: event.target.value }))}
+                placeholder="Ej: 1"
+                className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors"
+              />
+              <p className="mt-1 text-[11px] text-muted">Menor numero aparece antes entre los destacados.</p>
+            </div>
             <div className="md:col-span-2">
               <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Descripción</label>
               <textarea value={form.descripcion} onChange={event => setForm(current => ({ ...current, descripcion: event.target.value }))} rows={3} className="w-full bg-background border border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors resize-none" />
@@ -411,6 +443,11 @@ export default function AdminBiblioteca() {
                       {document.categoria}
                     </span>
                     <span className="text-xs text-muted font-mono">{document.visibilidad}</span>
+                    {Boolean(document.destacado) && (
+                      <span className="text-[10px] tracking-wide text-accent bg-accent/10 border border-accent/20 px-2 py-1 rounded">
+                        Destacado{document.orden_portada ? ` · Orden ${document.orden_portada}` : ''}
+                      </span>
+                    )}
                     {document.serie && (
                       <span className="text-[10px] tracking-wide text-primary/80 bg-primary/5 border border-primary/15 px-2 py-1 rounded">
                         📖 {document.serie}{document.orden_lectura ? ` · Paso ${document.orden_lectura}` : ''}

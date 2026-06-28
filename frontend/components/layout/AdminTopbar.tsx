@@ -13,14 +13,14 @@ export function AdminTopbar({ sidebarOpen, onToggleSidebar }: AdminTopbarProps) 
   const { user } = useAuth()
 
   return (
-    <header className="sticky top-0 z-50 flex justify-between items-center w-full px-5 py-4 bg-white/95 backdrop-blur-xl border-b border-[#e5e7eb] md:px-16">
+    <header className="sticky top-0 z-50 flex justify-between items-center w-full px-5 py-4 bg-white/95 backdrop-blur-xl border-b border-[#d8cabb] md:px-16">
       <div className="flex items-center gap-4">
         <button
           type="button"
           onClick={onToggleSidebar}
           aria-label={sidebarOpen ? "Cerrar menú lateral" : "Abrir menú lateral"}
           aria-expanded={sidebarOpen}
-          className="flex h-10 w-10 items-center justify-center rounded-md text-[#2b1710] transition-colors duration-200 hover:bg-[#f3f4f6]"
+          className="flex h-10 w-10 items-center justify-center rounded-md text-[#2b1710] transition-colors duration-200 hover:bg-[#faf9f5]"
         >
           <Menu className="h-5 w-5" aria-hidden="true" />
         </button>
@@ -40,7 +40,7 @@ export function AdminTopbar({ sidebarOpen, onToggleSidebar }: AdminTopbarProps) 
             <Settings className="h-5 w-5" aria-hidden="true" />
           </button>
           
-          <div className="h-8 w-8 rounded-full border border-[#d1d5db] bg-[#f3f4f6] flex items-center justify-center text-[#2b1710] font-bold shrink-0">
+          <div className="h-8 w-8 rounded-full border border-[#d8cabb] bg-[#faf9f5] flex items-center justify-center text-[#2b1710] font-bold shrink-0">
             {user?.email?.charAt(0).toUpperCase() || 'A'}
           </div>
         </div>

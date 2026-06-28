@@ -141,7 +141,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
       <nav
         aria-hidden={!isOpen}
         className={cn(
-          "fixed left-0 top-0 z-40 flex h-full w-64 flex-col border-r border-[#e5e7eb] bg-white py-7 shadow-[8px_0_30px_rgba(15,23,42,0.05)] transition-transform duration-300 ease-out",
+          "fixed left-0 top-0 z-40 flex h-full w-64 flex-col border-r border-[#d8cabb] bg-white py-7 shadow-[8px_0_30px_rgba(15,23,42,0.05)] transition-transform duration-300 ease-out",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -154,7 +154,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
               <h2 className="whitespace-nowrap text-[22px] font-bold leading-none tracking-[0.14em] text-[#2b1710]">
                 ACARO
               </h2>
-              <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#a66f2e]">
+              <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#c28a3a]">
                 Admin
               </p>
             </div>
@@ -177,7 +177,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                     onClick={() => toggleGroup(item.name)}
                     className={cn(
                       "flex w-full items-center justify-between rounded-lg px-3 py-3 transition-all duration-200",
-                      "text-[#5a3424] hover:bg-[#f3f4f6] hover:text-[#2b1710]"
+                      "text-[#5a3424] hover:bg-[#faf9f5] hover:text-[#2b1710]"
                     )}
                   >
                     <div className="flex items-center gap-3">
@@ -199,7 +199,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                               "flex w-full items-center gap-3 rounded-lg py-2 pr-3 pl-11 transition-all duration-200",
                               isActive
                                 ? "bg-[#5a3424]/12 text-[#3d2118] ring-1 ring-inset ring-[#5a3424]/10"
-                                : "text-[#5a3424] hover:bg-[#f3f4f6] hover:text-[#2b1710]"
+                                : "text-[#5a3424] hover:bg-[#faf9f5] hover:text-[#2b1710]"
                             )}
                           >
                             <SubItemIcon className="h-[18px] w-[18px]" aria-hidden="true" />
@@ -224,7 +224,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                   "flex w-full items-center gap-3 rounded-lg px-3 py-3 transition-all duration-200",
                   isActive
                     ? "bg-[#5a3424]/12 text-[#3d2118] ring-1 ring-inset ring-[#5a3424]/10"
-                    : "text-[#5a3424] hover:bg-[#f3f4f6] hover:text-[#2b1710]"
+                    : "text-[#5a3424] hover:bg-[#faf9f5] hover:text-[#2b1710]"
                 )}
               >
                 <ItemIcon className="h-[21px] w-[21px]" aria-hidden="true" />

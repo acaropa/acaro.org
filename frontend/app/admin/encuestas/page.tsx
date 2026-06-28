@@ -145,7 +145,7 @@ export default function AdminEncuestas() {
           { label: 'Borradores', value: stats.borradores, icon: 'draft' },
           { label: 'Respuestas totales', value: stats.respuestas, icon: 'message_square' },
         ].map((kpi, i) => (
-          <div key={i} className="flex items-center gap-4 rounded-xl border border-[#e5e7eb] bg-white p-4 shadow-sm">
+          <div key={i} className="flex items-center gap-4 rounded-xl border border-[#d8cabb] bg-white p-4 shadow-sm">
             <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#eef5f0] text-[#2f6542]">
               <AppIcon name={kpi.icon} className="text-2xl" />
             </div>
@@ -158,7 +158,7 @@ export default function AdminEncuestas() {
       </div>
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex gap-1 rounded-full border border-[#e5e7eb] bg-white p-1 shadow-sm overflow-x-auto">
+        <div className="flex gap-1 rounded-full border border-[#d8cabb] bg-white p-1 shadow-sm overflow-x-auto">
           {tabs.map(tab => (
             <button
               key={tab.estado}
@@ -166,12 +166,12 @@ export default function AdminEncuestas() {
               className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors whitespace-nowrap ${
                 activeTab === tab.estado
                   ? 'bg-[#2f6542] text-white'
-                  : 'text-[#5a3424] hover:bg-[#f3f4f6]'
+                  : 'text-[#5a3424] hover:bg-[#faf9f5]'
               }`}
             >
               {tab.label}
               <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                activeTab === tab.estado ? 'bg-white/20 text-white' : 'bg-[#f3f4f6] text-[#5a3424]'
+                activeTab === tab.estado ? 'bg-white/20 text-white' : 'bg-[#faf9f5] text-[#5a3424]'
               }`}>
                 {tab.count}
               </span>
@@ -183,7 +183,7 @@ export default function AdminEncuestas() {
           placeholder="Buscar encuesta..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="h-9 rounded-lg border border-[#d8cabb] bg-white px-3 text-sm text-[#2b1710] focus:outline-none focus:ring-2 focus:ring-[#a66f2e]/30 sm:w-64"
+          className="h-9 rounded-lg border border-[#d8cabb] bg-white px-3 text-sm text-[#2b1710] focus:outline-none focus:ring-2 focus:ring-[#c28a3a]/30 sm:w-64"
         />
       </div>
 
@@ -200,7 +200,7 @@ export default function AdminEncuestas() {
       ) : (
         <div className="overflow-hidden rounded-xl border border-[#d8cabb]">
           <table className="w-full text-sm">
-            <thead className="bg-[#f9fafb] text-left text-[11px] font-semibold uppercase tracking-wider text-[#765e50]">
+            <thead className="bg-[#faf9f5] text-left text-[11px] font-semibold uppercase tracking-wider text-[#765e50]">
               <tr>
                 <th className="px-6 py-4">Título</th>
                 <th className="hidden px-6 py-4 md:table-cell">Estado</th>
@@ -212,7 +212,7 @@ export default function AdminEncuestas() {
             </thead>
             <tbody className="divide-y divide-[#ede6db]">
               {filtered.map(enc => (
-                <tr key={enc.id} className="bg-white transition-colors hover:bg-[#f9fafb]">
+                <tr key={enc.id} className="bg-white transition-colors hover:bg-[#faf9f5]">
                   <td className="px-6 py-5 font-medium text-[#2b1710]">
                     <Link href={`/admin/encuestas/editar?id=${enc.id}`} className="text-[15px] font-semibold hover:underline">
                       {enc.titulo}
@@ -318,7 +318,7 @@ export default function AdminEncuestas() {
         <div className="flex justify-end gap-2">
           <button
             onClick={() => setDeleteTarget(null)}
-            className="rounded-lg border border-[#d8cabb] px-4 py-2 text-sm font-semibold text-[#5a3424] hover:bg-[#f3f4f6]"
+            className="rounded-lg border border-[#d8cabb] px-4 py-2 text-sm font-semibold text-[#5a3424] hover:bg-[#faf9f5]"
           >
             Cancelar
           </button>

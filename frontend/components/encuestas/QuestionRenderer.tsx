@@ -26,7 +26,7 @@ export function QuestionRenderer({ question, value, onChange, required }: Props)
           type="text"
           value={(value as string) ?? ''}
           onChange={e => onChange(e.target.value)}
-          className="w-full rounded-lg border border-[#d8cabb] px-3 py-2.5 text-sm text-[#2b1710] focus:outline-none focus:ring-2 focus:ring-[#a66f2e]/30"
+          className="w-full rounded-lg border border-[#d8cabb] px-3 py-2.5 text-sm text-[#2b1710] focus:outline-none focus:ring-2 focus:ring-[#c28a3a]/30"
         />
       )}
 
@@ -35,7 +35,7 @@ export function QuestionRenderer({ question, value, onChange, required }: Props)
           rows={4}
           value={(value as string) ?? ''}
           onChange={e => onChange(e.target.value)}
-          className="w-full rounded-lg border border-[#d8cabb] px-3 py-2.5 text-sm text-[#2b1710] focus:outline-none focus:ring-2 focus:ring-[#a66f2e]/30"
+          className="w-full rounded-lg border border-[#d8cabb] px-3 py-2.5 text-sm text-[#2b1710] focus:outline-none focus:ring-2 focus:ring-[#c28a3a]/30"
         />
       )}
 
@@ -44,7 +44,7 @@ export function QuestionRenderer({ question, value, onChange, required }: Props)
           type="number"
           value={(value as number) ?? ''}
           onChange={e => onChange(e.target.value ? Number(e.target.value) : '')}
-          className="w-full rounded-lg border border-[#d8cabb] px-3 py-2.5 text-sm text-[#2b1710] focus:outline-none focus:ring-2 focus:ring-[#a66f2e]/30"
+          className="w-full rounded-lg border border-[#d8cabb] px-3 py-2.5 text-sm text-[#2b1710] focus:outline-none focus:ring-2 focus:ring-[#c28a3a]/30"
         />
       )}
 
@@ -53,7 +53,7 @@ export function QuestionRenderer({ question, value, onChange, required }: Props)
           type="date"
           value={(value as string) ?? ''}
           onChange={e => onChange(e.target.value)}
-          className="w-full rounded-lg border border-[#d8cabb] px-3 py-2.5 text-sm text-[#2b1710] focus:outline-none focus:ring-2 focus:ring-[#a66f2e]/30"
+          className="w-full rounded-lg border border-[#d8cabb] px-3 py-2.5 text-sm text-[#2b1710] focus:outline-none focus:ring-2 focus:ring-[#c28a3a]/30"
         />
       )}
 
@@ -70,7 +70,7 @@ export function QuestionRenderer({ question, value, onChange, required }: Props)
               className={`flex-1 rounded-lg border px-4 py-2.5 text-sm font-semibold transition-colors ${
                 value === opt.val
                   ? 'border-[#2b1710] bg-[#2b1710] text-white'
-                  : 'border-[#d8cabb] text-[#5a3424] hover:bg-[#f3f4f6]'
+                  : 'border-[#d8cabb] text-[#5a3424] hover:bg-[#faf9f5]'
               }`}
             >
               {opt.label}
@@ -97,7 +97,7 @@ export function QuestionRenderer({ question, value, onChange, required }: Props)
                   className={`w-full rounded-lg border px-4 py-2.5 text-left text-sm transition-colors ${
                     selected
                       ? 'border-[#2b1710] bg-[#2b1710] text-white'
-                      : 'border-[#d8cabb] text-[#5a3424] hover:bg-[#f3f4f6]'
+                      : 'border-[#d8cabb] text-[#5a3424] hover:bg-[#faf9f5]'
                   }`}
                 >
                   {opc.etiqueta_opcion}
@@ -152,7 +152,7 @@ export function QuestionRenderer({ question, value, onChange, required }: Props)
                   className={`w-full rounded-lg border px-4 py-2.5 text-left text-sm transition-colors ${
                     isChecked
                       ? 'border-[#2b1710] bg-[#2b1710]/10 text-[#2b1710]'
-                      : 'border-[#d8cabb] text-[#5a3424] hover:bg-[#f3f4f6]'
+                      : 'border-[#d8cabb] text-[#5a3424] hover:bg-[#faf9f5]'
                   }`}
                 >
                   <span className="mr-2">{isChecked ? '☑' : '☐'}</span>

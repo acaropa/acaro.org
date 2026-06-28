@@ -37,28 +37,12 @@ const navItems: NavItem[] = [
 
 export function PublicNavbar() {
   const pathname = usePathname()
-  const isHome = pathname === "/" || pathname === ""
-  const hasTransparentHero = isHome || pathname === "/biblioteca" || pathname === "/biblioteca/" || pathname === "/nosotros" || pathname === "/nosotros/"
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false)
-  const [isScrolled, setIsScrolled] = React.useState(false)
-
-  React.useEffect(() => {
-    const onScroll = () => setIsScrolled(window.scrollY > 8)
-    onScroll()
-    window.addEventListener("scroll", onScroll, { passive: true })
-    return () => window.removeEventListener("scroll", onScroll)
-  }, [])
-
-  const isTransparent = hasTransparentHero && !isScrolled && !isMobileMenuOpen
 
   return (
     <header
-      className={cn(
-        "sticky top-0 z-50 h-[72px] w-full text-[#f8efe3] transition-colors duration-300",
-        isTransparent
-          ? "border-b border-transparent bg-transparent"
-          : "border-b border-[#3a2a20]/80 bg-[#120c08]/85 backdrop-blur-xl"
-      )}
+      style={{ viewTransitionName: 'site-header' }}
+      className="sticky top-0 z-50 h-[72px] w-full text-[#f8efe3] border-b border-[#3a2a20]/80 bg-[#120c08]"
     >
       <div className="mx-auto h-full max-w-7xl px-5 sm:px-8 lg:px-10">
         <div className="flex h-full items-center justify-between">
@@ -75,7 +59,7 @@ export function PublicNavbar() {
                     <ChevronDown className="h-3.5 w-3.5 transition-transform duration-300 group-hover:rotate-180" />
                   </button>
                   <div className="invisible absolute left-1/2 top-full w-[340px] -translate-x-1/2 -translate-y-2 pt-3 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
-                    <div className="rounded-2xl border border-[#2a1a12]/80 bg-[#120a06]/80 p-2 shadow-[0_20px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+                    <div className="rounded-2xl border border-[#2a1a12]/80 bg-[#120a06] p-2 shadow-[0_20px_60px_rgba(0,0,0,0.5)]">
                       {item.submenu.map((sub) => (
                         <Link
                           key={sub.href}

@@ -34,7 +34,7 @@ export default function Nosotros() {
               <ScrollReveal delay={0} distance="md">
                 <img
                   alt="Hands holding coffee beans"
-                  className="w-full h-[600px] object-cover rounded-none grayscale hover:grayscale-0 transition-all duration-700"
+                  className="w-full h-[600px] object-cover rounded-none transition-all duration-700"
                   src="https://lh3.googleusercontent.com/aida-public/AB6AXuCHafrxwpiLPrptQN7mXGoFg-3DVeBESHNxSWqvFQi491KAbvvBo422XEi-CJ7whKPJ4Ctv9x_Lq7ZfDwa1rigTY_mGk5vZqpEuw3KmpjMWt2FcM4VmBvqhbvRlu8YLrURbzG77ZpVbVsKBgdgEh11OG-2weAlkWjcERJSad3ki2wIT155TQc0wz8fgoU4IOVmd5ujNwFiZddV-frYJcKkHfrSOMR9j71DnNJ9nAL_nckZDoc2RPCdLKoBo_X2UxILdsZo4ZgBnu00F"
                 />
               </ScrollReveal>

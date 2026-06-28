@@ -83,7 +83,7 @@ function WideProject({ project, index }: { project: Project, index: number }) {
           <img
             alt={project.title}
             loading="lazy"
-            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+            className="w-full h-full object-cover transition-all duration-500"
             src={project.imageUrl}
           />
         )}
@@ -114,7 +114,7 @@ function HalfProject({ project, index }: { project: Project, index: number }) {
           <img
             alt={project.title}
             loading="lazy"
-            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+            className="w-full h-full object-cover transition-all duration-500"
             src={project.imageUrl}
           />
         )}
@@ -151,7 +151,7 @@ function StandardProject({ project, index }: { project: Project, index: number }
           <img
             alt={project.title}
             loading="lazy"
-            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+            className="w-full h-full object-cover transition-all duration-500"
             src={project.imageUrl}
           />
         )}

@@ -23,7 +23,7 @@ function ProducerCard({ producer, index }: { producer: ProductorRecord; index: n
           <img
             alt={producer.nombre}
             loading="lazy"
-            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+            className="w-full h-full object-cover transition-all duration-500"
             src={producerImage(producer)}
           />
           {producer.destacado && (

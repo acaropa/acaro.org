@@ -2,7 +2,9 @@
 
 import { AppIcon } from "@/components/ui/AppIcon"
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { api } from '@/lib/api';
+import { LandingMetadataItem, defaultLandingSettings } from '@/lib/settings';
 
 type SettingsTab = 'institucion' | 'documentos' | 'contenido' | 'seguridad';
 
@@ -32,6 +34,7 @@ type AdminSettings = {
   featuredProjectsLimit: number;
   latestNewsLimit: number;
   publicContactEmail: string;
+  landingMetadata: LandingMetadataItem[];
   requireNewsApproval: boolean;
   requireLibraryReview: boolean;
   sessionMinutes: number;
@@ -71,6 +74,7 @@ const defaultSettings: AdminSettings = {
   featuredProjectsLimit: 3,
   latestNewsLimit: 3,
   publicContactEmail: 'info@acaro.org',
+  landingMetadata: defaultLandingSettings.metadata,
   requireNewsApproval: true,
   requireLibraryReview: true,
   sessionMinutes: 120,
@@ -136,6 +140,20 @@ export default function AdminConfiguracion() {
   const preview = useMemo(() => settingPreview(settings), [settings]);
   const active = tabs.find(tab => tab.id === activeTab) || tabs[0];
 
+  useEffect(() => {
+    api.get<Partial<{ heroTitle: string; heroSubtitle: string; heroImage: string; metadata: LandingMetadataItem[] }>>('/settings/landing')
+      .then(data => {
+        setSettings(current => ({
+          ...current,
+          heroTitle: data.heroTitle || current.heroTitle,
+          heroSubtitle: data.heroSubtitle || current.heroSubtitle,
+          heroImage: data.heroImage || current.heroImage,
+          landingMetadata: Array.isArray(data.metadata) ? data.metadata : current.landingMetadata,
+        }));
+      })
+      .catch(() => {});
+  }, []);
+
   function update<K extends keyof AdminSettings>(key: K, value: AdminSettings[K]) {
     setSettings(current => ({ ...current, [key]: value }));
     setSaved(false);
@@ -143,6 +161,12 @@ export default function AdminConfiguracion() {
 
   function saveSettings() {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+    void api.put('/settings/landing', {
+      heroTitle: settings.heroTitle,
+      heroSubtitle: settings.heroSubtitle,
+      heroImage: settings.heroImage,
+      metadata: settings.landingMetadata,
+    }).catch(() => {});
     setSaved(true);
   }
 
@@ -185,7 +209,7 @@ export default function AdminConfiguracion() {
       </section>
 
       {saved && (
-        <div className="rounded-lg border border-[#e5e7eb] bg-white px-4 py-3 text-sm font-medium text-[#5a3424]">
+        <div className="rounded-lg border border-[#d8cabb] bg-white px-4 py-3 text-sm font-medium text-[#5a3424]">
           Ajustes guardados en este navegador. Cuando exista API de configuracion, estos mismos campos se pueden sincronizar con la base de datos.
         </div>
       )}
@@ -391,6 +415,34 @@ function ContentSettings({ settings, update }: SettingsProps) {
         onChange={value => update('latestNewsLimit', Number(value))}
       />
       <Field label="Correo publico de contacto" value={settings.publicContactEmail} onChange={value => update('publicContactEmail', value)} type="email" />
+      <div className="md:col-span-2 border-t border-border pt-6">
+        <h3 className="font-headline-md text-xl text-foreground">Barra institucional del landing</h3>
+        <p className="mt-1 text-sm text-muted">Estos datos aparecen debajo del hero principal.</p>
+        <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+          {settings.landingMetadata.slice(0, 4).map((item, index) => (
+            <div key={index} className="grid grid-cols-1 gap-3 rounded-lg border border-border p-4 md:grid-cols-2">
+              <Field
+                label={`Etiqueta ${index + 1}`}
+                value={item.label}
+                onChange={value => {
+                  const next = [...settings.landingMetadata];
+                  next[index] = { ...next[index], label: value };
+                  update('landingMetadata', next);
+                }}
+              />
+              <Field
+                label={`Valor ${index + 1}`}
+                value={item.value}
+                onChange={value => {
+                  const next = [...settings.landingMetadata];
+                  next[index] = { ...next[index], value };
+                  update('landingMetadata', next);
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
