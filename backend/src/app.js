@@ -38,13 +38,23 @@ app.use(helmet({
   // El frontend carga imágenes y archivos desde api.acaro.org cross-origin.
   crossOriginResourcePolicy: false,
 
-  // CSP mínima para una API pura; el frontend tiene su propia CSP.
+  // CSP completa para la API. Se listan todos los directives explícitamente
+  // para que Helmet v8 no inyecte sus defaults (https: wildcard en font-src/style-src,
+  // unsafe-inline en style-src). Una API pura no sirve HTML con recursos externos.
   contentSecurityPolicy: {
     directives: {
-      defaultSrc:     ["'none'"],
-      imgSrc:         ["'self'"],
-      connectSrc:     ["'self'"],
-      frameAncestors: ["'none'"],
+      defaultSrc:            ["'none'"],
+      scriptSrc:             ["'self'"],
+      scriptSrcAttr:         ["'none'"],
+      styleSrc:              ["'self'"],
+      fontSrc:               ["'self'"],
+      imgSrc:                ["'self'"],
+      connectSrc:            ["'self'"],
+      objectSrc:             ["'none'"],
+      baseUri:               ["'self'"],
+      formAction:            ["'self'"],
+      frameAncestors:        ["'none'"],
+      upgradeInsecureRequests: [],
     },
   },
 
@@ -103,12 +113,10 @@ app.use(sanitize);
 app.use(defaultLimiter);
 app.use(idempotency);
 
-// Garantiza que POST/PUT/PATCH/DELETE nunca sean cacheados por el CDN.
-// Los GET públicos establecen sus propios headers Cache-Control en cada ruta.
-app.use((req, res, next) => {
-  if (req.method !== 'GET' && req.method !== 'HEAD') {
-    res.set('Cache-Control', 'private, no-store, max-age=0');
-  }
+// Default: nunca cachear. Las rutas que sirven contenido público usan
+// publicCache() o smartCache() para sobreescribir este header.
+app.use((_req, res, next) => {
+  res.set('Cache-Control', 'no-store');
   next();
 });
 
