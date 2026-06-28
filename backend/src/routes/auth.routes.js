@@ -4,9 +4,11 @@ const { verifyToken, optionalAuth } = require('../middlewares/auth.middleware');
 const { loginLimiter, registerLimiter } = require('../middlewares/rateLimiter');
 const requireTrustedOrigin = require('../middlewares/origin.middleware');
 const { privateNoStore } = require('../middlewares/cache.middleware');
+const { validate } = require('../middlewares/validate');
+const { loginSchema, registerSchema } = require('../schemas/auth');
 
-router.post('/login', requireTrustedOrigin, loginLimiter, login);
-router.post('/register', requireTrustedOrigin, registerLimiter, register);
+router.post('/login', requireTrustedOrigin, loginLimiter, validate(loginSchema), login);
+router.post('/register', requireTrustedOrigin, registerLimiter, validate(registerSchema), register);
 router.post('/refresh', requireTrustedOrigin, refresh);
 router.post('/logout', requireTrustedOrigin, optionalAuth, logout);
 router.post('/logout-all', requireTrustedOrigin, verifyToken, logoutAll);
