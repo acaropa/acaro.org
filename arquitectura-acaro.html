@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arquitectura - ACARO.ORG</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #f0f4f8;
+    color: #1e293b;
+    padding: 30px;
+    min-width: 1200px;
+  }
+
+  .main-title {
+    text-align: center;
+    font-size: 28px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+  .main-subtitle {
+    text-align: center;
+    font-size: 14px;
+    color: #64748b;
+    margin-bottom: 30px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 160px 1fr 220px;
+    gap: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* ── LEFT SIDEBAR: Users ── */
+  .sidebar-left {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding-top: 40px;
+  }
+  .user-card {
+    background: #fff;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px 10px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  }
+  .user-card .icon { font-size: 32px; margin-bottom: 4px; }
+  .user-card .label { font-size: 11px; font-weight: 600; color: #475569; }
+
+  .arrow-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 0;
+    margin: 10px 0;
+  }
+  .arrow-right::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 3px;
+    background: #3b82f6;
+    position: relative;
+  }
+  .arrow-right-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #3b82f6;
+    text-align: center;
+    margin-top: -4px;
+  }
+
+  /* ── CENTER: Layers ── */
+  .layers {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .layer {
+    border-radius: 14px;
+    padding: 18px 22px;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .layer-header {
+    font-size: 14px;
+    font-weight: 800;
+    color: #fff;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+    padding: 8px;
+    border-radius: 8px;
+  }
+
+  .layer-content {
+    background: rgba(255,255,255,.92);
+    border-radius: 10px;
+    padding: 16px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  /* Layer colors */
+  .layer-1 { background: linear-gradient(135deg, #1e40af, #3b82f6); }
+  .layer-1 .layer-header { background: rgba(0,0,0,.2); }
+
+  .layer-2 { background: linear-gradient(135deg, #065f46, #10b981); }
+  .layer-2 .layer-header { background: rgba(0,0,0,.2); }
+
+  .layer-3 { background: linear-gradient(135deg, #1e3a5f, #2563eb); }
+  .layer-3 .layer-header { background: rgba(0,0,0,.2); }
+
+  .layer-4 { background: linear-gradient(135deg, #581c87, #8b5cf6); }
+  .layer-4 .layer-header { background: rgba(0,0,0,.2); }
+
+  .layer-5 { background: linear-gradient(135deg, #c2410c, #f97316); }
+  .layer-5 .layer-header { background: rgba(0,0,0,.2); }
+
+  .layer-6 { background: linear-gradient(135deg, #0e7490, #06b6d4); }
+  .layer-6 .layer-header { background: rgba(0,0,0,.2); }
+
+  /* Sub-blocks inside layers */
+  .info-block {
+    flex: 1;
+    min-width: 160px;
+    text-align: center;
+  }
+  .info-block .block-icon { font-size: 28px; margin-bottom: 6px; }
+  .info-block .block-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 4px;
+  }
+  .info-block .block-desc {
+    font-size: 10px;
+    color: #64748b;
+    line-height: 1.4;
+  }
+
+  /* Rate limit table */
+  .rate-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+  }
+  .rate-table th {
+    background: #1e40af;
+    color: #fff;
+    padding: 6px 12px;
+    text-align: left;
+    font-weight: 600;
+  }
+  .rate-table td {
+    padding: 5px 12px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .rate-table tr:nth-child(even) { background: #f1f5f9; }
+  .rate-table .limit { font-weight: 700; color: #1e40af; }
+
+  /* Error badge */
+  .error-badge {
+    background: #dc2626;
+    color: #fff;
+    border-radius: 50%;
+    width: 70px;
+    height: 70px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    margin: 0 auto;
+  }
+  .error-badge .code { font-size: 22px; }
+  .error-badge .text { font-size: 7px; text-transform: uppercase; }
+
+  /* Roles table */
+  .roles-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+  }
+  .role-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+  }
+  .role-icon { font-size: 20px; }
+  .role-path {
+    font-size: 11px;
+    font-weight: 600;
+    color: #475569;
+    font-family: monospace;
+  }
+  .role-arrow { color: #8b5cf6; font-weight: 800; font-size: 14px; }
+  .role-name { font-size: 11px; font-weight: 700; color: #7c3aed; }
+
+  /* Routes grid */
+  .routes-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    width: 100%;
+  }
+  .route-chip {
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #c2410c;
+    text-align: center;
+    font-family: monospace;
+  }
+
+  /* Arrow connectors between layers */
+  .layer-arrow {
+    text-align: center;
+    margin: -6px 0;
+    position: relative;
+    z-index: 2;
+  }
+  .layer-arrow::after {
+    content: '▼';
+    font-size: 18px;
+    color: #94a3b8;
+  }
+
+  /* ── RIGHT SIDEBAR ── */
+  .sidebar-right {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-top: 0;
+  }
+
+  .sidebar-box {
+    background: #fff;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  }
+  .sidebar-box-header {
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #fff;
+    text-align: center;
+  }
+  .sidebar-box-body {
+    padding: 12px;
+  }
+
+  .ext-service {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .ext-service:last-child { border-bottom: none; }
+  .ext-icon { font-size: 22px; }
+  .ext-label { font-size: 11px; font-weight: 600; color: #334155; }
+  .ext-desc { font-size: 9px; color: #94a3b8; }
+
+  .security-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .security-item:last-child { border-bottom: none; }
+  .check { color: #16a34a; font-weight: 800; font-size: 14px; }
+  .security-title { font-size: 11px; font-weight: 700; color: #0f172a; }
+  .security-desc { font-size: 9px; color: #64748b; }
+
+  /* Pipeline flow */
+  .pipeline {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+  }
+  .pipe-step {
+    background: #dbeafe;
+    border: 1px solid #93c5fd;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #1e40af;
+  }
+  .pipe-arrow { color: #93c5fd; font-size: 14px; font-weight: 800; }
+
+  /* Architecture pattern */
+  .arch-flow {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    width: 100%;
+  }
+  .arch-col {
+    flex: 1;
+    text-align: center;
+    padding: 10px 6px;
+    border-radius: 8px;
+    position: relative;
+  }
+  .arch-col-title {
+    font-size: 10px;
+    font-weight: 800;
+    color: #fff;
+    background: rgba(0,0,0,.25);
+    border-radius: 6px;
+    padding: 4px 8px;
+    margin-bottom: 8px;
+    display: inline-block;
+  }
+  .arch-item {
+    font-size: 9px;
+    color: rgba(255,255,255,.9);
+    padding: 2px 0;
+    font-weight: 500;
+  }
+  .arch-arrow-col {
+    display: flex;
+    align-items: center;
+    color: rgba(255,255,255,.6);
+    font-size: 16px;
+    padding: 0 2px;
+  }
+
+  .col-routes { background: #ea580c; border-radius: 8px 0 0 8px; }
+  .col-controllers { background: #d97706; }
+  .col-services { background: #ca8a04; }
+  .col-utils { background: #65a30d; border-radius: 0 8px 8px 0; }
+
+  /* Database specifics */
+  .db-content {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    width: 100%;
+  }
+  .db-icon-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .db-icon-section .db-logo { font-size: 40px; }
+  .db-tech { font-size: 13px; font-weight: 800; color: #0e7490; }
+  .db-host { font-size: 9px; color: #64748b; }
+
+  .tables-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+    flex: 1;
+  }
+  .table-chip {
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    border-radius: 5px;
+    padding: 4px 8px;
+    font-size: 9px;
+    font-weight: 600;
+    color: #065f46;
+    text-align: center;
+    font-family: monospace;
+  }
+
+  /* Footer flow */
+  .flow-section {
+    max-width: 1400px;
+    margin: 24px auto 0;
+    background: #0f172a;
+    border-radius: 14px;
+    padding: 20px 28px;
+    color: #fff;
+  }
+  .flow-title {
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+    text-align: center;
+    color: #94a3b8;
+  }
+  .flow-diagram {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .flow-node {
+    background: rgba(255,255,255,.1);
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 10px;
+    padding: 12px 18px;
+    text-align: center;
+    min-width: 140px;
+  }
+  .flow-node .fn-icon { font-size: 24px; margin-bottom: 4px; }
+  .flow-node .fn-title { font-size: 11px; font-weight: 700; }
+  .flow-node .fn-tech { font-size: 9px; color: #94a3b8; }
+  .flow-arrow { font-size: 20px; color: #3b82f6; font-weight: 800; }
+
+  .tech-badges {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  .tech-badge {
+    background: rgba(59,130,246,.15);
+    border: 1px solid rgba(59,130,246,.3);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #93c5fd;
+  }
+</style>
+</head>
+<body>
+
+<div class="main-title">ACARO.ORG</div>
+<div class="main-subtitle">Plataforma de Gesti&oacute;n para la Asociaci&oacute;n de Caficultores &mdash; Arquitectura del Sistema</div>
+
+<div class="grid">
+
+  <!-- ══════ LEFT SIDEBAR: Users ══════ -->
+  <div class="sidebar-left">
+    <div style="font-size:13px;font-weight:800;color:#0f172a;text-align:center;text-transform:uppercase;letter-spacing:1px;border-bottom:2px solid #3b82f6;padding-bottom:6px;">Usuarios / Clientes</div>
+    <div class="user-card">
+      <div class="icon">🖥️</div>
+      <div class="label">Navegador<br>(Usuario)</div>
+    </div>
+    <div class="user-card">
+      <div class="icon">📱</div>
+      <div class="label">Aplicaciones<br>M&oacute;viles</div>
+    </div>
+    <div class="user-card">
+      <div class="icon">🤖</div>
+      <div class="label">Bots /<br>Crawlers</div>
+    </div>
+    <div class="arrow-right"></div>
+    <div class="arrow-right-label">HTTPS</div>
+  </div>
+
+  <!-- ══════ CENTER: Layers ══════ -->
+  <div class="layers">
+
+    <!-- LAYER 1: Helmet / CORS -->
+    <div class="layer layer-1">
+      <div class="layer-header">1. Capa de Protecci&oacute;n Perimetral</div>
+      <div class="layer-content">
+        <div class="info-block">
+          <div class="block-icon">🛡️</div>
+          <div class="block-title">Helmet.js</div>
+          <div class="block-desc">Headers de seguridad HTTP<br>Content-Security-Policy<br>X-Frame-Options</div>
+        </div>
+        <div class="info-block">
+          <div class="block-icon">🌐</div>
+          <div class="block-title">CORS</div>
+          <div class="block-desc">Origen permitido:<br>acaro.org / www.acaro.org<br>localhost (dev)</div>
+        </div>
+        <div class="info-block">
+          <div class="block-icon">🔥</div>
+          <div class="block-title">WAF (Firewall)</div>
+          <div class="block-desc">Bloqueo de herramientas de ataque<br>(sqlmap, nikto, burpsuite...)<br>Detecci&oacute;n XSS, SQLi, Path Traversal</div>
+        </div>
+        <div class="info-block">
+          <div class="block-icon">🧹</div>
+          <div class="block-title">Sanitizaci&oacute;n</div>
+          <div class="block-desc">sanitize-html en body<br>Limpieza de tags HTML<br>Protecci&oacute;n passwords/base64</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layer-arrow"></div>
+
+    <!-- LAYER 2: Rate Limiting -->
+    <div class="layer layer-2">
+      <div class="layer-header">2. Limitaci&oacute;n de Peticiones (Rate Limiting)</div>
+      <div class="layer-content" style="flex-direction:column;align-items:center;">
+        <div style="display:flex;gap:20px;align-items:center;width:100%;">
+          <div style="text-align:center;min-width:120px;">
+            <div style="font-size:36px;">⏱️</div>
+            <div style="font-size:11px;font-weight:700;color:#065f46;">express-rate-limit</div>
+            <div style="font-size:9px;color:#64748b;">Basado en IP</div>
+          </div>
+          <table class="rate-table" style="flex:1;">
+            <tr><th>Regla</th><th>L&iacute;mite</th></tr>
+            <tr><td>Tr&aacute;fico Global (Rutas p&uacute;blicas)</td><td class="limit">600 peticiones / 15 min</td></tr>
+            <tr><td>Login (Anti-Fuerza Bruta)</td><td class="limit">10 intentos fallidos / 15 min</td></tr>
+            <tr><td>Registro de Usuarios</td><td class="limit">5 registros / hora</td></tr>
+          </table>
+          <div style="text-align:center;min-width:80px;">
+            <div class="error-badge">
+              <div class="code">429</div>
+              <div class="text">Demasiadas<br>Peticiones</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layer-arrow"></div>
+
+    <!-- LAYER 3: Cache -->
+    <div class="layer layer-3">
+      <div class="layer-header">3. Sistema de Cach&eacute; HTTP</div>
+      <div class="layer-content">
+        <div class="info-block">
+          <div class="block-icon">📄</div>
+          <div class="block-title">publicCache()</div>
+          <div class="block-desc">GET p&uacute;blicos con s-maxage<br>CDN cachea respuestas<br>stale-while-revalidate</div>
+        </div>
+        <div class="info-block">
+          <div class="block-icon">🔒</div>
+          <div class="block-title">privateNoStore()</div>
+          <div class="block-desc">Endpoints autenticados<br>no-store, max-age=0<br>Sin cach&eacute; CDN</div>
+        </div>
+        <div class="info-block">
+          <div class="block-icon">🧠</div>
+          <div class="block-title">smartCache()</div>
+          <div class="block-desc">Detecta Authorization header<br>Con auth &rarr; privado<br>Sin auth &rarr; cacheable</div>
+        </div>
+        <div class="info-block">
+          <div class="block-icon">🔄</div>
+          <div class="block-title">Idempotencia</div>
+          <div class="block-desc">Idempotency-Key header<br>Replay de respuestas exitosas<br>TTL: 10 min, max 1000</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layer-arrow"></div>
+
+    <!-- LAYER 4: Auth & Roles -->
+    <div class="layer layer-4">
+      <div class="layer-header">4. Autenticaci&oacute;n, Roles y Control de Acceso</div>
+      <div class="layer-content" style="flex-direction:column;gap:14px;">
+        <div style="display:flex;gap:14px;width:100%;">
+          <div class="info-block">
+            <div class="block-icon">🔐</div>
+            <div class="block-title">Autenticaci&oacute;n</div>
+            <div class="block-desc">JWT (HS256)<br>issuer: acaro-api<br>audience: acaro-web<br>HTTP-only Cookies</div>
+          </div>
+          <div class="info-block">
+            <div class="block-icon">👥</div>
+            <div class="block-title">Permisos Granulares</div>
+            <div class="block-desc">60+ permisos definidos<br>requirePermission() middleware<br>Verificaci&oacute;n por recurso y acci&oacute;n</div>
+          </div>
+          <div class="info-block">
+            <div class="block-icon">🛂</div>
+            <div class="block-title">Sesiones Activas</div>
+            <div class="block-desc">Validaci&oacute;n en BD por request<br>Invalidaci&oacute;n inmediata<br>Logout multi-sesi&oacute;n</div>
+          </div>
+        </div>
+        <div style="font-size:11px;font-weight:700;color:#581c87;text-align:center;width:100%;">ROLES Y ACCESO A RUTAS</div>
+        <div class="roles-grid">
+          <div class="role-item">
+            <span class="role-icon">👑</span>
+            <span class="role-path">/admin/*</span>
+            <span class="role-arrow">&rarr;</span>
+            <span class="role-name">Admin</span>
+          </div>
+          <div class="role-item">
+            <span class="role-icon">📋</span>
+            <span class="role-path">/admin/*</span>
+            <span class="role-arrow">&rarr;</span>
+            <span class="role-name">Supervisor</span>
+          </div>
+          <div class="role-item">
+            <span class="role-icon">🔧</span>
+            <span class="role-path">/admin/*</span>
+            <span class="role-arrow">&rarr;</span>
+            <span class="role-name">T&eacute;cnico</span>
+          </div>
+          <div class="role-item">
+            <span class="role-icon">👤</span>
+            <span class="role-path">/ (p&uacute;blico)</span>
+            <span class="role-arrow">&rarr;</span>
+            <span class="role-name">Visitante</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layer-arrow"></div>
+
+    <!-- LAYER 5: Application -->
+    <div class="layer layer-5">
+      <div class="layer-header">5. Aplicaci&oacute;n (Arquitectura en 3 Capas)</div>
+      <div class="layer-content" style="flex-direction:column;gap:12px;">
+
+        <div style="display:flex;gap:0;width:100%;">
+          <!-- Frontend -->
+          <div style="flex:1;background:#fff7ed;border-radius:10px 0 0 10px;padding:12px;border:1px solid #fed7aa;">
+            <div style="text-align:center;margin-bottom:8px;">
+              <span style="font-size:24px;">⚛️</span>
+              <div style="font-size:12px;font-weight:800;color:#c2410c;">FRONTEND &mdash; Next.js + TypeScript</div>
+              <div style="font-size:9px;color:#94a3b8;">App Router &bull; Tailwind CSS &bull; shadcn/ui</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+              <div class="route-chip">/</div>
+              <div class="route-chip">/nosotros</div>
+              <div class="route-chip">/noticias</div>
+              <div class="route-chip">/biblioteca</div>
+              <div class="route-chip">/proyectos</div>
+              <div class="route-chip">/productores</div>
+              <div class="route-chip">/encuestas</div>
+              <div class="route-chip">/contacto</div>
+              <div class="route-chip">/login</div>
+              <div class="route-chip">/admin/*</div>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;padding:0 8px;font-size:24px;color:#f97316;">⇄</div>
+
+          <!-- Backend -->
+          <div style="flex:1.3;background:#fef3c7;border-radius:0 10px 10px 0;padding:12px;border:1px solid #fde68a;">
+            <div style="text-align:center;margin-bottom:8px;">
+              <span style="font-size:24px;">🚀</span>
+              <div style="font-size:12px;font-weight:800;color:#92400e;">BACKEND &mdash; Express.js + Node.js</div>
+              <div style="font-size:9px;color:#94a3b8;">API REST &bull; MVC &bull; mysql2/promise</div>
+            </div>
+            <div class="arch-flow" style="border-radius:8px;overflow:hidden;">
+              <div class="arch-col col-routes">
+                <div class="arch-col-title">Routes</div>
+                <div class="arch-item">auth</div>
+                <div class="arch-item">usuarios</div>
+                <div class="arch-item">noticias</div>
+                <div class="arch-item">biblioteca</div>
+                <div class="arch-item">proyectos</div>
+                <div class="arch-item">productores</div>
+                <div class="arch-item">socios</div>
+                <div class="arch-item">tecnicos</div>
+                <div class="arch-item">encuestas</div>
+                <div class="arch-item">notas-conc.</div>
+                <div class="arch-item">logs</div>
+                <div class="arch-item">health</div>
+              </div>
+              <div class="arch-arrow-col">►</div>
+              <div class="arch-col col-controllers">
+                <div class="arch-col-title">Controllers</div>
+                <div class="arch-item">auth</div>
+                <div class="arch-item">usuarios</div>
+                <div class="arch-item">noticias</div>
+                <div class="arch-item">biblioteca</div>
+                <div class="arch-item">proyectos</div>
+                <div class="arch-item">productores</div>
+                <div class="arch-item">socios</div>
+                <div class="arch-item">tecnicos</div>
+                <div class="arch-item">encuestas</div>
+                <div class="arch-item">notas-conc.</div>
+                <div class="arch-item">logs</div>
+                <div class="arch-item">project-mgmt</div>
+              </div>
+              <div class="arch-arrow-col">►</div>
+              <div class="arch-col col-services">
+                <div class="arch-col-title">Services</div>
+                <div class="arch-item">auth</div>
+                <div class="arch-item">usuarios</div>
+                <div class="arch-item">noticias</div>
+                <div class="arch-item">biblioteca</div>
+                <div class="arch-item">proyectos</div>
+                <div class="arch-item">productores</div>
+                <div class="arch-item">socios</div>
+                <div class="arch-item">tecnicos</div>
+                <div class="arch-item">encuestas</div>
+                <div class="arch-item">notas-conc.</div>
+                <div class="arch-item">logs</div>
+                <div class="arch-item">sessions</div>
+              </div>
+              <div class="arch-arrow-col">►</div>
+              <div class="arch-col col-utils">
+                <div class="arch-col-title">Utils</div>
+                <div class="arch-item">password</div>
+                <div class="arch-item">cookies</div>
+                <div class="arch-item">memoryCache</div>
+                <div class="arch-item">logger</div>
+                <div class="arch-item">slug</div>
+                <div class="arch-item">uploads</div>
+                <div class="arch-item" style="margin-top:6px;border-top:1px solid rgba(255,255,255,.3);padding-top:4px;font-weight:700;">Schemas</div>
+                <div class="arch-item">auth (Zod)</div>
+                <div class="arch-item">usuarios (Zod)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Middleware pipeline -->
+        <div style="text-align:center;">
+          <div style="font-size:10px;font-weight:700;color:#7c2d12;margin-bottom:6px;">PIPELINE DE MIDDLEWARES (orden de ejecuci&oacute;n)</div>
+          <div class="pipeline">
+            <span class="pipe-step">Helmet</span>
+            <span class="pipe-arrow">►</span>
+            <span class="pipe-step">CORS</span>
+            <span class="pipe-arrow">►</span>
+            <span class="pipe-step">Morgan</span>
+            <span class="pipe-arrow">►</span>
+            <span class="pipe-step">JSON Parser</span>
+            <span class="pipe-arrow">►</span>
+            <span class="pipe-step">WAF</span>
+            <span class="pipe-arrow">►</span>
+            <span class="pipe-step">Sanitize</span>
+            <span class="pipe-arrow">►</span>
+            <span class="pipe-step">Rate Limit</span>
+            <span class="pipe-arrow">►</span>
+            <span class="pipe-step">Idempotency</span>
+            <span class="pipe-arrow">►</span>
+            <span class="pipe-step">Cache</span>
+            <span class="pipe-arrow">►</span>
+            <span class="pipe-step" style="background:#ede9fe;border-color:#c4b5fd;color:#6d28d9;">Auth / Permission</span>
+            <span class="pipe-arrow">►</span>
+            <span class="pipe-step" style="background:#fef3c7;border-color:#fde68a;color:#92400e;">Controller</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layer-arrow"></div>
+
+    <!-- LAYER 6: Database -->
+    <div class="layer layer-6">
+      <div class="layer-header">6. Base de Datos</div>
+      <div class="layer-content">
+        <div class="db-content">
+          <div class="db-icon-section">
+            <div class="db-logo">🗄️</div>
+            <div class="db-tech">MySQL</div>
+            <div class="db-host">Hostinger (pool: 10 conn)</div>
+            <div style="font-size:9px;color:#64748b;margin-top:4px;">mysql2/promise</div>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:10px;font-weight:700;color:#0e7490;margin-bottom:6px;text-align:center;">Tablas Principales</div>
+            <div class="tables-grid">
+              <div class="table-chip">usuarios</div>
+              <div class="table-chip">sesiones</div>
+              <div class="table-chip">noticias</div>
+              <div class="table-chip">biblioteca</div>
+              <div class="table-chip">proyectos</div>
+              <div class="table-chip">productores</div>
+              <div class="table-chip">socios</div>
+              <div class="table-chip">tecnicos</div>
+              <div class="table-chip">encuestas</div>
+              <div class="table-chip">respuestas</div>
+              <div class="table-chip">notas_conceptuales</div>
+              <div class="table-chip">login_attempts</div>
+            </div>
+            <div style="font-size:9px;color:#64748b;text-align:center;margin-top:8px;">19 archivos de migraci&oacute;n &bull; Schema + Seed &bull; &Iacute;ndices optimizados</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════ RIGHT SIDEBAR ══════ -->
+  <div class="sidebar-right">
+
+    <!-- External Services -->
+    <div class="sidebar-box">
+      <div class="sidebar-box-header" style="background:linear-gradient(135deg,#1e40af,#3b82f6);">Servicios Externos</div>
+      <div class="sidebar-box-body">
+        <div class="ext-service">
+          <span class="ext-icon">☁️</span>
+          <div>
+            <div class="ext-label">Hostinger / LiteSpeed</div>
+            <div class="ext-desc">Hosting, HTTPS termination, CDN</div>
+          </div>
+        </div>
+        <div class="ext-service">
+          <span class="ext-icon">📁</span>
+          <div>
+            <div class="ext-label">Almacenamiento Local</div>
+            <div class="ext-desc">Multer (uploads de archivos/im&aacute;genes)</div>
+          </div>
+        </div>
+        <div class="ext-service">
+          <span class="ext-icon">🗃️</span>
+          <div>
+            <div class="ext-label">MySQL Hostinger</div>
+            <div class="ext-desc">Base de datos en la nube</div>
+          </div>
+        </div>
+        <div class="ext-service">
+          <span class="ext-icon">📊</span>
+          <div>
+            <div class="ext-label">Winston Logger</div>
+            <div class="ext-desc">Logs del sistema (archivo + consola)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Security -->
+    <div class="sidebar-box">
+      <div class="sidebar-box-header" style="background:linear-gradient(135deg,#065f46,#16a34a);">Seguridad Aplicativa</div>
+      <div class="sidebar-box-body">
+        <div class="security-item">
+          <span class="check">✓</span>
+          <div>
+            <div class="security-title">WAF (Web App Firewall)</div>
+            <div class="security-desc">Bloqueo de XSS, SQLi, Path Traversal, herramientas de ataque</div>
+          </div>
+        </div>
+        <div class="security-item">
+          <span class="check">✓</span>
+          <div>
+            <div class="security-title">Prevenci&oacute;n SQL Injection</div>
+            <div class="security-desc">Prepared statements (mysql2)</div>
+          </div>
+        </div>
+        <div class="security-item">
+          <span class="check">✓</span>
+          <div>
+            <div class="security-title">Prevenci&oacute;n XSS</div>
+            <div class="security-desc">sanitize-html en todos los inputs</div>
+          </div>
+        </div>
+        <div class="security-item">
+          <span class="check">✓</span>
+          <div>
+            <div class="security-title">Helmet.js Headers</div>
+            <div class="security-desc">CSP, X-Frame-Options, HSTS</div>
+          </div>
+        </div>
+        <div class="security-item">
+          <span class="check">✓</span>
+          <div>
+            <div class="security-title">Validaci&oacute;n de Datos</div>
+            <div class="security-desc">Zod schemas (auth, usuarios)</div>
+          </div>
+        </div>
+        <div class="security-item">
+          <span class="check">✓</span>
+          <div>
+            <div class="security-title">Bcrypt Hashing</div>
+            <div class="security-desc">Contrase&ntilde;as hasheadas con salt</div>
+          </div>
+        </div>
+        <div class="security-item">
+          <span class="check">✓</span>
+          <div>
+            <div class="security-title">Cookies HTTP-Only</div>
+            <div class="security-desc">Tokens no accesibles desde JS</div>
+          </div>
+        </div>
+        <div class="security-item">
+          <span class="check">✓</span>
+          <div>
+            <div class="security-title">CORS Estricto</div>
+            <div class="security-desc">Solo or&iacute;genes de confianza</div>
+          </div>
+        </div>
+        <div class="security-item">
+          <span class="check">✓</span>
+          <div>
+            <div class="security-title">Anti Fuerza Bruta</div>
+            <div class="security-desc">Rate limit en login + registro</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tests -->
+    <div class="sidebar-box">
+      <div class="sidebar-box-header" style="background:linear-gradient(135deg,#92400e,#f59e0b);">Testing</div>
+      <div class="sidebar-box-body">
+        <div class="security-item">
+          <span class="check">✓</span>
+          <div>
+            <div class="security-title">auth.login.test.js</div>
+            <div class="security-desc">Tests de autenticaci&oacute;n</div>
+          </div>
+        </div>
+        <div class="security-item">
+          <span class="check">✓</span>
+          <div>
+            <div class="security-title">auth.middleware.test.js</div>
+            <div class="security-desc">Tests de middleware de auth</div>
+          </div>
+        </div>
+        <div class="security-item">
+          <span class="check">✓</span>
+          <div>
+            <div class="security-title">sanitize.test.js</div>
+            <div class="security-desc">Tests de sanitizaci&oacute;n</div>
+          </div>
+        </div>
+        <div class="security-item">
+          <span class="check">✓</span>
+          <div>
+            <div class="security-title">waf.test.js</div>
+            <div class="security-desc">Tests del firewall</div>
+          </div>
+        </div>
+        <div class="security-item">
+          <span class="check">✓</span>
+          <div>
+            <div class="security-title">password.test.js</div>
+            <div class="security-desc">Tests de hashing</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ══════ BOTTOM: Data Flow ══════ -->
+<div class="flow-section">
+  <div class="flow-title">Flujo de Datos</div>
+  <div class="flow-diagram">
+    <div class="flow-node">
+      <div class="fn-icon">👤</div>
+      <div class="fn-title">Usuario</div>
+      <div class="fn-tech">Navegador / M&oacute;vil</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">
+      <div class="fn-icon">⚛️</div>
+      <div class="fn-title">Next.js</div>
+      <div class="fn-tech">SSR / CSR / App Router</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">
+      <div class="fn-icon">🚀</div>
+      <div class="fn-title">API REST</div>
+      <div class="fn-tech">Express.js + Middlewares</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">
+      <div class="fn-icon">🗄️</div>
+      <div class="fn-title">MySQL</div>
+      <div class="fn-tech">Hostinger (pool: 10)</div>
+    </div>
+  </div>
+  <div class="tech-badges">
+    <span class="tech-badge">JWT + HTTP-only Cookies</span>
+    <span class="tech-badge">Bcrypt Hashing</span>
+    <span class="tech-badge">WAF + Rate Limiter</span>
+    <span class="tech-badge">LRU Memory Cache</span>
+    <span class="tech-badge">Winston Logging</span>
+    <span class="tech-badge">Multer Uploads</span>
+    <span class="tech-badge">Zod Validation</span>
+    <span class="tech-badge">Idempotency Keys</span>
+    <span class="tech-badge">Tailwind CSS</span>
+    <span class="tech-badge">BroadcastChannel Auth Sync</span>
+  </div>
+</div>
+
+</body>
+</html>
