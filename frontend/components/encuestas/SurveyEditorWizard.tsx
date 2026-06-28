@@ -39,6 +39,7 @@ export function SurveyEditorWizard({ encuestaId }: Props) {
   const isNew = !encuestaId
   const [step, setStep] = useState(0)
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState('')
   const [loading, setLoading] = useState(!!encuestaId)
 
   const [titulo, setTitulo] = useState('')
@@ -125,7 +126,9 @@ export function SurveyEditorWizard({ encuestaId }: Props) {
       })
 
       router.push('/admin/encuestas')
-    } catch { /* empty */ } finally {
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'No se pudo guardar la encuesta.')
+    } finally {
       setSaving(false)
     }
   }
@@ -338,6 +341,9 @@ export function SurveyEditorWizard({ encuestaId }: Props) {
               ))}
             </ol>
           </div>
+          {saveError && (
+            <p className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">{saveError}</p>
+          )}
           <div className="flex justify-between pt-4">
             <button
               onClick={() => setStep(1)}

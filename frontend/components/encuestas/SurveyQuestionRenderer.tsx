@@ -188,12 +188,12 @@ export function SurveyQuestionRenderer({
             const sel = selectedSingleId === opt.id
             return (
               <div key={opt.id}>
-                <button type="button" disabled={isSubmitting} 
+                <button type="button" disabled={isSubmitting}
                   className={`group w-full flex items-center text-left px-6 py-5 border transition-all duration-300 ${
                     sel ? 'border-primary bg-primary/5 text-primary' : 'border-outline-variant/40 hover:border-primary/50 bg-white/50'
                   }`}
                   onClick={() => setSelectedSingleId(opt.id)}>
-                  
+
                   <span className={`w-8 h-8 shrink-0 flex items-center justify-center border font-bold text-xs tracking-wider mr-6 transition-colors ${
                     sel ? 'border-primary bg-primary text-white' : 'border-outline-variant/50 text-muted group-hover:border-primary/50 group-hover:text-primary'
                   }`}>
@@ -232,12 +232,12 @@ export function SurveyQuestionRenderer({
             const sel = selectedMultiIds.includes(opt.id)
             return (
               <div key={opt.id}>
-                <button type="button" disabled={isSubmitting} 
+                <button type="button" disabled={isSubmitting}
                   className={`group w-full flex items-center text-left px-6 py-5 border transition-all duration-300 ${
                     sel ? 'border-primary bg-primary/5 text-primary' : 'border-outline-variant/40 hover:border-primary/50 bg-white/50'
                   }`}
                   onClick={() => setSelectedMultiIds(prev => prev.includes(opt.id) ? prev.filter(id => id !== opt.id) : [...prev, opt.id])}>
-                  
+
                   <span className={`w-8 h-8 shrink-0 flex items-center justify-center border font-bold text-xs tracking-wider mr-6 transition-colors ${
                     sel ? 'border-primary bg-primary text-white' : 'border-outline-variant/50 text-muted group-hover:border-primary/50 group-hover:text-primary'
                   }`}>

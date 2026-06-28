@@ -2,31 +2,32 @@ const { z } = require('../middlewares/validate');
 
 const ESTADOS = ['borrador', 'publicada', 'cerrada', 'archivada'];
 const VISIBILIDADES = ['publica', 'enlace_privado', 'interna'];
-const TIPOS_PREGUNTA = ['texto_corto', 'texto_largo', 'opcion_unica', 'opcion_multiple', 'escala', 'fecha', 'si_no'];
+const TIPOS_PREGUNTA = ['texto_corto', 'texto_largo', 'numero', 'booleano', 'opcion_unica', 'opcion_multiple', 'fecha'];
 
 const seccionShape = z.object({
   id:          z.coerce.number().int().positive().optional(),
   titulo:      z.string().trim().min(1).max(255),
   descripcion: z.string().max(2000).optional().nullable(),
-  orden:       z.coerce.number().int().min(0).optional(),
+  posicion:    z.coerce.number().int().min(0).optional(),
 });
 
 const preguntaShape = z.object({
-  id:            z.coerce.number().int().positive().optional(),
-  tipo:          z.enum(TIPOS_PREGUNTA, { error: 'Tipo de pregunta inválido' }),
-  texto:         z.string().trim().min(1, 'El texto de la pregunta es requerido').max(1000),
-  descripcion:   z.string().max(2000).optional().nullable(),
-  requerida:     z.boolean().optional(),
-  orden:         z.coerce.number().int().min(0).optional(),
-  seccion_id:    z.coerce.number().int().positive().optional().nullable(),
-  opciones:      z.array(z.object({
-    id:     z.coerce.number().int().positive().optional(),
-    texto:  z.string().trim().min(1).max(500),
-    orden:  z.coerce.number().int().min(0).optional(),
+  id:                z.coerce.number().int().positive().optional(),
+  seccion_id:        z.coerce.number().int().positive().optional().nullable(),
+  codigo_pregunta:   z.string().max(50).optional().nullable(),
+  texto_pregunta:    z.string().trim().min(1, 'El texto de la pregunta es requerido').max(1000),
+  tipo_pregunta:     z.enum(TIPOS_PREGUNTA, { error: 'Tipo de pregunta inválido' }),
+  es_obligatoria:    z.boolean().optional(),
+  texto_ayuda:       z.string().max(2000).optional().nullable(),
+  posicion:          z.coerce.number().int().min(0).optional(),
+  reglas_validacion: z.record(z.string(), z.unknown()).optional().nullable(),
+  opciones: z.array(z.object({
+    id:                  z.coerce.number().int().positive().optional(),
+    valor_opcion:        z.string().trim().min(1).max(500),
+    etiqueta_opcion:     z.string().trim().min(1).max(500),
+    permite_texto_libre: z.boolean().optional(),
+    posicion:            z.coerce.number().int().min(0).optional(),
   })).max(50, 'Máximo 50 opciones por pregunta').optional(),
-  min_valor:     z.coerce.number().int().min(0).optional().nullable(),
-  max_valor:     z.coerce.number().int().max(10).optional().nullable(),
-  config_extra:  z.record(z.string(), z.unknown()).optional().nullable(),
 });
 
 const createEncuestaSchema = z.object({

@@ -194,13 +194,13 @@ export function SurveyPublicContainer({ slug }: Props) {
       {/* Left Panel: Photo */}
       <section className="relative lg:sticky lg:top-0 lg:h-screen w-full lg:w-1/2 h-[30vh] min-h-[250px] bg-[#120C08] flex flex-col justify-end p-8 lg:p-[64px] overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <div 
-            className="w-full h-full bg-cover bg-center opacity-80" 
+          <div
+            className="w-full h-full bg-cover bg-center opacity-80"
             style={{backgroundImage: "url('/coffee_farmers_survey.png')"}}>
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-[#120C08]/95 via-[#120C08]/50 to-[#120C08]/10"></div>
         </div>
-        
+
         {/* Absolute 'volver' button at top left */}
         <div className="absolute top-6 left-6 lg:top-8 lg:left-8 z-20">
           <Link href="/encuestas" className="text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase text-white hover:text-white transition-all flex items-center gap-2 bg-black/40 backdrop-blur-md px-4 py-2.5 rounded-full border border-white/20 hover:bg-black/60 shadow-lg">
@@ -234,7 +234,7 @@ export function SurveyPublicContainer({ slug }: Props) {
                 <AnimatedCircularProgress value={pct} size={56} strokeWidth={2} />
               </div>
             </div>
-            
+
             <div className="flex-grow">
               <h1 className="font-serif text-3xl md:text-4xl font-bold text-primary mb-2 leading-tight">
                 {index + 1} - {q.texto_pregunta.replace(/^[\s\d.\-)]+/, '').trim()}
