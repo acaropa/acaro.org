@@ -64,7 +64,7 @@ export default function Home() {
       {/* Línea de transición */}
       <div className="relative h-28 w-full overflow-hidden pointer-events-none bg-[#faf9f5]">
         <svg className="h-full w-full" fill="none" preserveAspectRatio="none" viewBox="0 0 1000 100">
-          <path className="growth-path" d="M0,50 C200,10 400,90 600,50 C800,10 1000,50" stroke="#E0DCD0" strokeWidth="1" opacity="0.7" />
+          <path className="growth-path" d="M0,50 C200,10 400,90 600,50 C800,10 900,90 1000,50" stroke="#E0DCD0" strokeWidth="1" opacity="0.7" />
         </svg>
       </div>
 
@@ -150,7 +150,7 @@ export default function Home() {
       {/* Línea de transición — desde la derecha */}
       <div className="relative h-28 w-full overflow-hidden pointer-events-none bg-[#faf9f5]">
         <svg className="h-full w-full" fill="none" preserveAspectRatio="none" viewBox="0 0 1000 100">
-          <path className="growth-path" d="M1000,50 C800,10 600,90 400,50 C200,10 0,50" stroke="#E0DCD0" strokeWidth="1" opacity="0.7" />
+          <path className="growth-path" d="M1000,50 C800,10 600,90 400,50 C200,10 100,90 0,50" stroke="#E0DCD0" strokeWidth="1" opacity="0.7" />
         </svg>
       </div>
 
