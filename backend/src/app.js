@@ -140,8 +140,14 @@ app.use('/api/contacto', contactRoutes);
 app.use('/api/encuestas', encuestasRoutes);
 
 const uploadStaticOptions = { fallthrough: false, maxAge: '1d' };
-app.use('/uploads', express.static(uploadRoot, uploadStaticOptions));
-app.use('/api/uploads', express.static(uploadRoot, uploadStaticOptions));
+const allowEmbedFromFrontend = (_req, res, next) => {
+  const origin = process.env.FRONTEND_URL || 'https://acaro.org';
+  res.set('X-Frame-Options', `ALLOW-FROM ${origin}`);
+  res.set('Content-Security-Policy', `frame-ancestors ${origin} https://www.acaro.org`);
+  next();
+};
+app.use('/uploads', allowEmbedFromFrontend, express.static(uploadRoot, uploadStaticOptions));
+app.use('/api/uploads', allowEmbedFromFrontend, express.static(uploadRoot, uploadStaticOptions));
 
 app.use(errorHandler);
 
