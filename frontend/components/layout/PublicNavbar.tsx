@@ -21,17 +21,12 @@ const navItems: NavItem[] = [
     label: "Nosotros",
     submenu: [
       { href: "/nosotros", label: "Acerca de la Asociación", info: "Conoce nuestra historia, misión y propósito." },
+      { href: "/productores", label: "Productores", info: "Conoce a los productores de café robusta de ACARO." },
       { href: "/noticias", label: "Noticias y Novedades", info: "Explora los últimos avances y eventos de la comunidad." },
       { href: "/encuestas", label: "Encuestas", info: "Participa en las encuestas activas de la asociación." },
-      { href: "/login", label: "Acceso Interno", info: "Portal de administración para miembros autorizados." },
     ],
   },
-  {
-    label: "Proyectos",
-    submenu: [
-      { href: "/proyectos", label: "Todos los proyectos", info: "Explora todas nuestras iniciativas." },
-    ],
-  },
+  { href: "/proyectos", label: "Proyectos" },
   { href: "/biblioteca", label: "Biblioteca" },
 ]
 
@@ -54,7 +49,12 @@ export function PublicNavbar() {
             {navItems.map((item) =>
               item.submenu ? (
                 <div key={item.label} className="group relative">
-                  <button className="flex items-center gap-1.5 py-6 text-sm font-medium text-[#d8c9bb] transition-colors hover:text-white">
+                  <button className={cn(
+                    "flex items-center gap-1.5 py-6 text-sm font-medium transition-colors hover:text-white",
+                    item.submenu.some(sub => pathname === sub.href || pathname.startsWith(sub.href + '/'))
+                      ? "text-white"
+                      : "text-[#d8c9bb]"
+                  )}>
                     {item.label}
                     <ChevronDown className="h-3.5 w-3.5 transition-transform duration-300 group-hover:rotate-180" />
                   </button>
@@ -153,6 +153,15 @@ export function PublicNavbar() {
                 </Link>
               )
             )}
+            <div className="pt-5 pb-2">
+              <Link
+                href="/contacto"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block w-full bg-white py-3 text-center text-xs font-bold uppercase tracking-widest text-[#271310] transition-all hover:bg-[#f3ede3]"
+              >
+                Únete a ACARO
+              </Link>
+            </div>
           </div>
         </div>
       </div>

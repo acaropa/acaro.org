@@ -28,4 +28,12 @@
     <loc>https://acaro.org/proyectos</loc>
     <priority>0.8</priority>
   </url>
+  <url>
+    <loc>https://acaro.org/productores</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://acaro.org/encuestas</loc>
+    <priority>0.6</priority>
+  </url>
 </urlset>

@@ -43,7 +43,7 @@ export function ProjectsStoryline() {
   }
 
   return (
-    <div className="space-y-24">
+    <div className="space-y-16 md:space-y-24">
         {projects.map((project, index) => {
           const isReversed = index % 2 === 1;
           const rawImg = project.imagen_portada;
@@ -53,10 +53,10 @@ export function ProjectsStoryline() {
 
           return (
             <ScrollReveal key={project.id} delay={index * 100}>
-              <div className="grid grid-cols-1 items-center gap-16 md:grid-cols-12">
+              <div className="grid grid-cols-1 items-center gap-10 md:grid-cols-12 md:gap-16">
 
                 {/* Image column */}
-                <div className={`relative h-[500px] md:col-span-7 ${isReversed ? 'md:order-2' : ''}`}>
+                <div className={`relative aspect-[4/3] md:aspect-auto md:h-[500px] md:col-span-7 ${isReversed ? 'md:order-2' : ''}`}>
                   <div className="h-full w-full overflow-hidden rounded-sm shadow-sm">
                     <img
                       src={imageUrl}

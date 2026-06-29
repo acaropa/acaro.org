@@ -39,23 +39,23 @@ export default function Home() {
             <div className="hero-reveal mb-7 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.24em] text-[#e2b86f]" style={{ animationDelay: "20ms" }}>
               Café Robusta · Panamá
             </div>
-            <h1 className="font-serif font-bold hero-reveal max-w-4xl text-5xl leading-[1.0] tracking-[-0.02em] sm:text-6xl lg:text-[5rem]" style={{ animationDelay: "60ms" }}>
+            <h1 className="font-serif font-bold hero-reveal max-w-4xl text-4xl leading-[1.0] tracking-[-0.02em] sm:text-6xl lg:text-[5rem]" style={{ animationDelay: "60ms" }}>
               Asociación Café
               <span className="block text-[#fffaf1]">Robusta OBC</span>
             </h1>
-            <p className="hero-reveal mt-7 max-w-2xl text-lg leading-8 text-[#f3e8d8]/85 sm:text-xl" style={{ animationDelay: "100ms" }}>
+            <p className="hero-reveal mt-5 max-w-2xl text-base leading-7 text-[#f3e8d8]/85 sm:mt-7 sm:text-xl sm:leading-8" style={{ animationDelay: "100ms" }}>
               Impulsamos el desarrollo del café robusta con organización, conocimiento técnico y visión productiva.
             </p>
-            <div className="hero-reveal mt-9 flex flex-col items-start gap-3 sm:flex-row" style={{ animationDelay: "140ms" }}>
-              <Link href="/nosotros" className="group inline-flex w-[270px] items-center justify-center gap-2 whitespace-nowrap bg-[#fffaf1] px-5 py-3.5 text-xs font-bold uppercase tracking-widest text-[#271310] transition-all hover:bg-white sm:w-auto sm:px-8 sm:py-4">
+            <div className="hero-reveal mt-7 flex flex-col items-stretch gap-3 sm:mt-9 sm:flex-row sm:items-start" style={{ animationDelay: "140ms" }}>
+              <Link href="/nosotros" className="group inline-flex w-full items-center justify-center gap-2 whitespace-nowrap bg-[#fffaf1] px-5 py-3.5 text-xs font-bold uppercase tracking-widest text-[#271310] transition-all hover:bg-white sm:w-auto sm:px-8 sm:py-4">
                 Conocer la asociación <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
-              <Link href="/biblioteca" className="inline-flex w-[270px] items-center justify-center whitespace-nowrap border border-[#fffaf1]/40 px-5 py-3.5 text-xs font-bold uppercase tracking-widest text-[#fffaf1] transition-all hover:bg-[#fffaf1]/10 sm:w-auto sm:px-8 sm:py-4">
+              <Link href="/biblioteca" className="inline-flex w-full items-center justify-center whitespace-nowrap border border-[#fffaf1]/40 px-5 py-3.5 text-xs font-bold uppercase tracking-widest text-[#fffaf1] transition-all hover:bg-[#fffaf1]/10 sm:w-auto sm:px-8 sm:py-4">
                 Explorar biblioteca
               </Link>
             </div>
           </div>
-          <div className="hero-reveal mt-24 text-xs uppercase tracking-[0.25em] text-[#f3e8d8]/30 font-medium" style={{ animationDelay: "180ms" }}>
+          <div className="hero-reveal mt-10 text-xs uppercase tracking-[0.25em] text-[#f3e8d8]/30 font-medium sm:mt-24" style={{ animationDelay: "180ms" }}>
             Organización · Conocimiento · Producción
           </div>
         </div>
@@ -69,9 +69,9 @@ export default function Home() {
       </div>
 
       {/* Una asociación creada para crecer juntos */}
-      <section className="bg-[#faf9f5] pb-32 pt-24 sm:pb-40 sm:pt-32">
+      <section className="bg-[#faf9f5] overflow-hidden pb-16 pt-14 sm:pb-32 sm:pt-24">
         <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
-          <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-12">
+          <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-16">
 
             {/* Left: editorial content */}
             <ScrollReveal className="lg:col-span-5" direction="left" distance="lg">
@@ -96,7 +96,7 @@ export default function Home() {
             {/* Right: asymmetric image + editorial callout */}
             <ScrollReveal className="relative lg:col-span-7" direction="right" delay={180}>
               <div className="relative">
-                <div className="-mr-5 aspect-[4/3] overflow-hidden sm:-mr-8 lg:-mr-10">
+                <div className="aspect-[4/3] overflow-hidden sm:-mr-8 lg:-mr-10">
                   <img
                     src="/assets/landing-hero-v2.jpg"
                     alt="Productores de café robusta en Panamá"
@@ -121,14 +121,14 @@ export default function Home() {
       <LandingMetadataBar />
 
       {/* Proyectos que abren oportunidades */}
-      <section className="overflow-hidden bg-[#f4f4f0] py-24 sm:py-32">
+      <section className="overflow-hidden bg-[#f4f4f0] py-16 sm:py-24 lg:py-32">
         <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
-          <ScrollReveal className="mb-20 flex items-end justify-between border-b border-[#d3c3c0]/40 pb-6" distance="sm">
+          <ScrollReveal className="mb-12 flex items-end justify-between border-b border-[#d3c3c0]/40 pb-6 sm:mb-20" distance="sm">
             <div>
               <span className="mb-4 block text-xs font-bold uppercase tracking-[0.2em] text-[#1b6d24]">
                 Capítulos de Progreso
               </span>
-              <h2 className="font-serif text-4xl font-bold text-[#271310] sm:text-5xl lg:text-[3rem]">
+              <h2 className="font-serif text-3xl font-bold text-[#271310] sm:text-5xl lg:text-[3rem]">
                 Proyectos que abren oportunidades
               </h2>
             </div>
@@ -141,7 +141,7 @@ export default function Home() {
       </section>
 
       {/* Avances Institucionales (Noticias) */}
-      <section className="bg-[#faf9f5] py-24 sm:py-32">
+      <section className="bg-[#faf9f5] py-16 sm:py-24 lg:py-32">
         <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
           <NewsGrid />
         </div>
@@ -158,10 +158,10 @@ export default function Home() {
       <CommunitySection />
 
       {/* Biblioteca de Excelencia */}
-      <section className="bg-[#faf9f5] py-24 sm:py-32">
+      <section className="bg-[#faf9f5] py-16 sm:py-24 lg:py-32">
         <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
-          <ScrollReveal className="mb-16 text-center" distance="sm">
-            <h2 className="font-serif text-3xl font-bold text-[#271310] sm:text-4xl">
+          <ScrollReveal className="mb-10 text-center sm:mb-16" distance="sm">
+            <h2 className="font-serif text-2xl font-bold text-[#271310] sm:text-4xl">
               Biblioteca de Excelencia
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-[#504442]">
@@ -170,7 +170,7 @@ export default function Home() {
           </ScrollReveal>
           <LibraryPreview />
           <ScrollReveal className="mt-10 flex justify-center" delay={200} distance="sm">
-            <Link href="/biblioteca" className="bg-[#271310] px-8 py-3 text-sm font-semibold text-white transition-all hover:bg-[#3e2723]">
+            <Link href="/biblioteca" className="w-full max-w-xs bg-[#271310] px-8 py-3 text-center text-sm font-semibold text-white transition-all hover:bg-[#3e2723] sm:w-auto">
               Explorar Biblioteca
             </Link>
           </ScrollReveal>
@@ -178,7 +178,7 @@ export default function Home() {
       </section>
 
       {/* Cultivar café robusta también es cultivar futuro — CTA final */}
-      <section className="relative overflow-hidden bg-[#faf9f5] py-32 text-center sm:py-40">
+      <section className="relative overflow-hidden bg-[#faf9f5] py-20 text-center sm:py-32 lg:py-40">
         {/* Subtle SVG wave */}
         <div className="pointer-events-none absolute inset-0 z-0 opacity-[0.04]">
           <svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 100 100">
@@ -187,15 +187,15 @@ export default function Home() {
         </div>
 
         <ScrollReveal className="relative z-10 mx-auto max-w-4xl px-5 sm:px-8" distance="lg">
-          <h2 className="mb-10 font-serif text-[2.5rem] font-bold leading-[1.1] tracking-[-0.02em] text-[#271310] sm:text-5xl lg:text-[4rem]">
+          <h2 className="mb-7 font-serif text-3xl font-bold leading-[1.1] tracking-[-0.02em] text-[#271310] sm:mb-10 sm:text-5xl lg:text-[4rem]">
             &ldquo;Cultivar café robusta también es cultivar futuro.&rdquo;
           </h2>
-          <p className="mx-auto mb-14 max-w-2xl font-sans text-lg leading-relaxed text-[#504442]">
+          <p className="mx-auto mb-10 max-w-2xl font-sans text-base leading-relaxed text-[#504442] sm:mb-14 sm:text-lg">
             Únete a nuestra red de productores y profesionales para transformar la industria.
           </p>
           <Link
             href="/contacto"
-            className="inline-block bg-[#271310] px-12 py-5 text-xs font-bold uppercase tracking-widest text-white transition-transform duration-300 hover:scale-105 active:scale-95"
+            className="inline-block w-full max-w-xs bg-[#271310] px-8 py-4 text-xs font-bold uppercase tracking-widest text-white transition-transform duration-300 hover:scale-105 active:scale-95 sm:w-auto sm:px-12 sm:py-5"
           >
             Quiero contactar a ACARO
           </Link>

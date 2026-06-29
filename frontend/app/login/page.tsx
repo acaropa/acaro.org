@@ -129,11 +129,11 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between mt-2">
+            <div className="flex items-center mt-2">
               <label className="flex items-center gap-2 cursor-pointer group">
                 <div className="relative flex items-center justify-center">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
                     className="w-4 h-4 border-[#81756f] rounded text-[#26170c] focus:ring-[#26170c] cursor-pointer"
@@ -141,10 +141,6 @@ export default function LoginPage() {
                 </div>
                 <span className="text-sm text-[#4f453f] group-hover:text-[#120c08] transition-colors">Recordarme</span>
               </label>
-              
-              <Link href="#" className="text-sm text-[#4f453f] hover:text-[#26170c] transition-colors">
-                Olvidé mi contraseña
-              </Link>
             </div>
 
             {error && (

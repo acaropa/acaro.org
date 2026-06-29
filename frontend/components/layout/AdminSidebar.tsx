@@ -8,6 +8,7 @@ import {
   Building2,
   ChevronDown,
   ClipboardList,
+  ExternalLink,
   FilePenLine,
   GitBranch,
   Globe2,
@@ -15,6 +16,7 @@ import {
   Home,
   LogOut,
   Newspaper,
+  ScrollText,
   Settings,
   ShieldCheck,
   Tractor,
@@ -103,6 +105,12 @@ const navigation = [
         name: "Configuración",
         href: "/admin/configuracion",
         icon: Settings,
+        permissions: [PERMISSIONS.CONFIGURACION_MANAGE],
+      },
+      {
+        name: "Registros de actividad",
+        href: "/admin/configuracion/logs",
+        icon: ScrollText,
         permissions: [PERMISSIONS.CONFIGURACION_MANAGE],
       },
     ]
@@ -234,7 +242,16 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
           })}
         </div>
 
-        <div className="mt-auto border-t border-[#d8cabb] p-4">
+        <div className="mt-auto border-t border-[#d8cabb] p-4 space-y-1">
+          <a
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[#5a3424] transition-colors hover:bg-[#faf9f5] hover:text-[#2b1710]"
+          >
+            <ExternalLink className="h-[18px] w-[18px]" aria-hidden="true" />
+            <span className="text-[13px] font-semibold">Ver sitio público</span>
+          </a>
           <button
             onClick={() => void logout()}
             className="group flex w-full items-center gap-3 rounded-lg px-3 py-3 text-[#5a3424] transition-colors hover:bg-red-500/10 hover:text-red-700"

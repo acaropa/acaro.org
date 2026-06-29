@@ -24,10 +24,10 @@ export function CommunitySection() {
   }, [producers.length]);
 
   return (
-    <section className="overflow-hidden bg-[#120c08] py-24 text-white sm:py-32">
+    <section className="overflow-hidden bg-[#120c08] py-16 text-white sm:py-24 lg:py-32">
       <div className="mx-auto max-w-7xl items-center gap-16 px-5 sm:px-8 md:grid md:grid-cols-12 lg:px-10">
         <ScrollReveal className="md:col-span-5" direction="left" distance="lg">
-          <h2 className="mb-8 font-serif text-4xl font-bold leading-tight tracking-[-0.025em] sm:text-5xl">
+          <h2 className="mb-6 font-serif text-3xl font-bold leading-tight tracking-[-0.025em] sm:mb-8 sm:text-5xl">
             Las personas son el corazon de nuestro trabajo
           </h2>
           <blockquote className="relative mb-12 border-l border-[#ae8d87]/30 pl-10 font-serif text-lg italic leading-8 text-[#c9b5b0]">
@@ -45,8 +45,8 @@ export function CommunitySection() {
         </ScrollReveal>
 
         {producers.length > 0 ? (
-          <ScrollReveal className="mt-16 md:col-span-6 md:col-start-7 md:mt-0" direction="right" delay={200}>
-            <div className="relative min-h-[420px] sm:min-h-[460px]">
+          <ScrollReveal className="mt-12 md:col-span-6 md:col-start-7 md:mt-0" direction="right" delay={200}>
+            <div className="relative min-h-[380px] sm:min-h-[460px]">
               {producers.map((producer, index) => (
                 <div
                   key={producer.id}
@@ -55,7 +55,7 @@ export function CommunitySection() {
                   }`}
                 >
                   <div className="flex flex-col gap-8 sm:flex-row sm:items-start">
-                    <div className="h-52 w-52 shrink-0 overflow-hidden shadow-xl sm:h-64 sm:w-64">
+                    <div className="mx-auto h-52 w-52 shrink-0 overflow-hidden shadow-xl sm:mx-0 sm:h-64 sm:w-64">
                       <img src={producerImage(producer)} alt={producer.nombre} className="h-full w-full object-cover" />
                     </div>
                     <div className="flex flex-col justify-center">
