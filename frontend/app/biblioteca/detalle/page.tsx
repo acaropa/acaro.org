@@ -155,12 +155,24 @@ function DocumentDetail() {
                 )}
 
                 {isPdf && fileHref && (
-                  <div className="mt-10 overflow-hidden rounded-lg border border-[#ded6cc] dark:border-border">
-                    <iframe
-                      src={`${fileHref}#view=FitH`}
-                      title={document.title}
-                      className="h-[75vh] min-h-[640px] w-full bg-white"
-                    />
+                  <div className="mt-10">
+                    <div className="mb-3 flex justify-end">
+                      <a
+                        href={fileHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#705a4f] transition-colors hover:text-[#25160e] dark:text-muted dark:hover:text-foreground"
+                      >
+                        <ExternalLink className="h-3.5 w-3.5" /> Abrir en una pestaña nueva
+                      </a>
+                    </div>
+                    <div className="overflow-hidden rounded-lg border border-[#ded6cc] dark:border-border">
+                      <iframe
+                        src={`${fileHref}#view=FitH`}
+                        title={document.title}
+                        className="h-[75vh] min-h-[640px] w-full bg-white"
+                      />
+                    </div>
                   </div>
                 )}
               </article>
