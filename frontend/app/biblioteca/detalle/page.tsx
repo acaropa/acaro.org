@@ -82,7 +82,7 @@ function DocumentDetail() {
                   <span className="uppercase">{document.type}</span>
                 </div>
 
-                <p className="mt-6 max-w-2xl text-justify text-[15px] leading-7 text-[#5f514a] [hyphens:auto] dark:text-muted">
+                <p className="mt-6 max-w-2xl text-[15px] leading-7 text-[#5f514a] dark:text-muted">
                   {document.description}
                 </p>
 

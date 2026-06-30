@@ -438,23 +438,23 @@ export default function AdminBiblioteca() {
                   </div>
                 )}
                 <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="font-label-caps text-[10px] tracking-widest uppercase text-accent bg-accent/10 px-2 py-1 rounded">
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <span className="shrink-0 whitespace-nowrap font-label-caps text-[10px] tracking-widest uppercase text-accent bg-accent/10 px-2 py-1 rounded">
                       {document.categoria}
                     </span>
-                    <span className="text-xs text-muted font-mono">{document.visibilidad}</span>
+                    <span className="shrink-0 whitespace-nowrap text-xs text-muted font-mono">{document.visibilidad}</span>
                     {Boolean(document.destacado) && (
-                      <span className="text-[10px] tracking-wide text-accent bg-accent/10 border border-accent/20 px-2 py-1 rounded">
+                      <span className="shrink-0 whitespace-nowrap text-[10px] tracking-wide text-accent bg-accent/10 border border-accent/20 px-2 py-1 rounded">
                         Destacado{document.orden_portada ? ` · Orden ${document.orden_portada}` : ''}
                       </span>
                     )}
                     {document.serie && (
-                      <span className="text-[10px] tracking-wide text-primary/80 bg-primary/5 border border-primary/15 px-2 py-1 rounded">
+                      <span className="shrink-0 whitespace-nowrap text-[10px] tracking-wide text-primary/80 bg-primary/5 border border-primary/15 px-2 py-1 rounded">
                         📖 {document.serie}{document.orden_lectura ? ` · Paso ${document.orden_lectura}` : ''}
                       </span>
                     )}
                     {document.etiquetas?.map(tag => (
-                      <span key={tag} className="text-[10px] tracking-wide text-muted bg-surface px-2 py-0.5 rounded border border-border">
+                      <span key={tag} className="shrink-0 whitespace-nowrap text-[10px] tracking-wide text-muted bg-surface px-2 py-0.5 rounded border border-border">
                         {tag}
                       </span>
                     ))}
