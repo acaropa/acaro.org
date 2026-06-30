@@ -112,8 +112,7 @@ export function QuestionBuilder({ index, data, onChange, onRemove, onMoveUp, onM
               value={data.tipo_pregunta}
               onChange={e => {
                 const tipo = e.target.value as TipoPregunta
-                set('tipo_pregunta', tipo)
-                if (!hasOptions(tipo)) set('opciones', [])
+                onChange({ ...data, tipo_pregunta: tipo, opciones: hasOptions(tipo) ? data.opciones : [] })
               }}
               className="w-full rounded-lg border border-[#d8cabb] px-3 py-2 text-sm text-[#2b1710]"
             >
