@@ -253,24 +253,44 @@ export function getRespondentName(response: RespuestaEncuesta, questions: Encues
 export function exportToExcelHtml(
   titulo: string, estado: string, questions: EncuestaPregunta[], responses: RespuestaEncuesta[]
 ): void {
-  const esc = (v: string) => v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const XLSX = require('xlsx') as typeof import('xlsx')
+
   const headers = ['Fecha de respuesta', ...questions.map(q => q.texto_pregunta)]
-  const rows = responses
+
+  const dataRows = responses
     .map(r => {
       const map = new Map((r.respuestas_detalle ?? []).map(d => [d.pregunta_id, d]))
       const cells = questions.map(q => resolveDetailValue(map.get(q.id), q) ?? '')
       if (cells.every(c => !c.trim())) return null
-      const fecha = r.fecha_respuesta ? new Intl.DateTimeFormat('es', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(r.fecha_respuesta)) : ''
+      const fecha = r.fecha_respuesta
+        ? new Intl.DateTimeFormat('es', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(r.fecha_respuesta))
+        : ''
       return [fecha, ...cells]
     })
     .filter((r): r is string[] => !!r)
-  const head = `<tr>${headers.map(h => `<th style="background:#f3efe7;font-weight:700;border:1px solid #d8cfbf;padding:8px;">${esc(h)}</th>`).join('')}</tr>`
-  const body = rows.map(row => `<tr>${row.map(c => `<td style="border:1px solid #e1d8c9;padding:8px;">${esc(c)}</td>`).join('')}</tr>`).join('')
-  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"/></head><body><table><tr><td colspan="${headers.length}" style="font-size:20px;font-weight:700;padding:10px 8px;">${esc(titulo)}</td></tr><tr><td colspan="${headers.length}" style="padding:0 8px 12px;color:#6d665d;">Estado: ${esc(estado)}</td></tr></table><table><thead>${head}</thead><tbody>${body}</tbody></table></body></html>`
+
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...dataRows])
+
+  // Ancho de columnas: fecha fija, preguntas más anchas
+  ws['!cols'] = [
+    { wch: 20 },
+    ...questions.map(() => ({ wch: 35 })),
+  ]
+
+  const wb = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb, ws, 'Respuestas')
+
+  // Hoja de metadatos
+  const meta = XLSX.utils.aoa_to_sheet([
+    ['Encuesta', titulo],
+    ['Estado', estado],
+    ['Exportado', new Intl.DateTimeFormat('es', { dateStyle: 'long', timeStyle: 'short' }).format(new Date())],
+    ['Total respuestas', dataRows.length],
+  ])
+  meta['!cols'] = [{ wch: 20 }, { wch: 50 }]
+  XLSX.utils.book_append_sheet(wb, meta, 'Info')
+
   const slug = titulo.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-zA-Z0-9]+/g, '-').toLowerCase()
-  const blob = new Blob(['﻿', html], { type: 'application/vnd.ms-excel;charset=utf-8;' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url; a.download = `${slug || 'encuesta'}-respuestas.xls`
-  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url)
+  XLSX.writeFile(wb, `${slug || 'encuesta'}-respuestas.xlsx`)
 }
