@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { BookOpen, TrendingUp, ShieldCheck, GraduationCap, FileText } from 'lucide-react';
 import { ScrollReveal } from '@/components/landing/LandingMotion';
-import { api } from '@/lib/api';
+import { api, apiAssetUrl } from '@/lib/api';
 import { LibraryRecord, toLibraryDocument, LibraryDocument } from '@/lib/library';
 
 type IconKey = 'pdf' | 'video' | 'doc' | 'link' | string;
@@ -66,7 +66,7 @@ export function LibraryPreview() {
               <h5 className="mb-2 font-serif text-lg font-semibold text-[#271310]">{item.title}</h5>
               <p className="mb-6 text-sm leading-6 text-[#504442]">{item.description}</p>
               <a
-                href={item.link || '/biblioteca'}
+                href={item.link ? apiAssetUrl(item.link) : '/biblioteca'}
                 target={item.link ? '_blank' : undefined}
                 rel="noopener noreferrer"
                 className="text-xs font-bold uppercase tracking-widest text-[#271310] group-hover:underline"

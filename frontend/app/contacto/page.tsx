@@ -12,7 +12,7 @@ const motivoTemplates: Record<string, string> = {
   "Asistencia técnica": "Buenos días, necesito información sobre la asistencia técnica disponible para productores de café robusta en Panamá Oeste.",
 };
 
-const partners = ["MIDA", "PROPANAMA", "FAO", "AMUPA"];
+const partners = ["IDIAP", "ACP", "FUNDACIÓN NATURA", "FAO", "PROMECAFE", "MIDA", "SENACYT"];
 
 export default function Contacto() {
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
@@ -193,18 +193,6 @@ export default function Contacto() {
                     title="Panamá Oeste"
                     className="h-full w-full"
                   />
-                </div>
-                <div className="bg-[#f5f2ea] p-5">
-                  <ul className="space-y-2.5">
-                    <li className="flex items-center gap-3 text-xs text-[#504442]">
-                      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#271310]" />
-                      Centros de acopio y capacitación
-                    </li>
-                    <li className="flex items-center gap-3 text-xs text-[#504442]">
-                      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#c28a3a]" />
-                      Oficinas de atención al productor
-                    </li>
-                  </ul>
                 </div>
               </div>
             </div>
