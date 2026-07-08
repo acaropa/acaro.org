@@ -110,7 +110,7 @@ export default function Nosotros() {
                   <img
                     alt="Productores de café en campo"
                     className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    src="/assets/landing-hero-v2.jpg"
+                    src="/assets/productores-card.jpg"
                   />
                   <div className="absolute inset-0 bg-[#120c08]/0 transition-colors duration-500 group-hover:bg-[#120c08]/20" />
                   <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#120c08]/90 to-transparent p-8 md:p-12">
@@ -124,9 +124,9 @@ export default function Nosotros() {
               <ScrollReveal delay={250} distance="sm" className="md:col-span-4">
                 <Link href="/biblioteca" className="group relative block h-[320px] overflow-hidden md:h-[500px]">
                   <img
-                    alt="Tecnificación del café robusta"
+                    alt="Conocimiento técnico en café robusta"
                     className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    src="/assets/library-hero-v2.png"
+                    src="/assets/biblioteca-card.jpg"
                   />
                   <div className="absolute inset-0 bg-[#120c08]/0 transition-colors duration-500 group-hover:bg-[#120c08]/20" />
                   <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#120c08]/90 to-transparent p-8 md:p-12">

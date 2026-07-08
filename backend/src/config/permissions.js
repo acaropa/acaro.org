@@ -58,11 +58,15 @@ const PERMISSIONS = Object.freeze({
   ENCUESTAS_RESULTS_EXPORT: 'encuestas.results.export',
   ENCUESTAS_RESULTS_DELETE: 'encuestas.results.delete',
   ENCUESTAS_RESPOND_INTERNAL: 'encuestas.respond.internal',
+  CONTACTO_READ: 'contacto.read',
+  CONTACTO_REPLY: 'contacto.reply',
 });
 
 const ROLE_PERMISSIONS = Object.freeze({
   admin: Object.values(PERMISSIONS),
   supervisor: [
+    PERMISSIONS.CONTACTO_READ,
+    PERMISSIONS.CONTACTO_REPLY,
     PERMISSIONS.NOTAS_CONCEPTUALES_CREATE,
     PERMISSIONS.NOTAS_CONCEPTUALES_UPDATE,
     PERMISSIONS.NOTAS_CONCEPTUALES_DELETE,

@@ -58,6 +58,8 @@ export const PERMISSIONS = {
   ENCUESTAS_RESULTS_EXPORT: 'encuestas.results.export',
   ENCUESTAS_RESULTS_DELETE: 'encuestas.results.delete',
   ENCUESTAS_RESPOND_INTERNAL: 'encuestas.respond.internal',
+  CONTACTO_READ: 'contacto.read',
+  CONTACTO_REPLY: 'contacto.reply',
 } as const;
 
 export type Permission = typeof PERMISSIONS[keyof typeof PERMISSIONS];

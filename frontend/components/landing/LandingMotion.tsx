@@ -158,7 +158,7 @@ export function HeroParallaxImage() {
         src="/assets/library-hero-v2.png"
         alt="Cultivo de café robusta al amanecer"
         fill
-        className="object-cover object-[62%_center]"
+        className="object-cover object-center"
         priority
         sizes="100vw"
       />

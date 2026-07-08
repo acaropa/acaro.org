@@ -41,7 +41,17 @@ export function PublicNavbar() {
     >
       <div className="mx-auto h-full max-w-7xl px-5 sm:px-8 lg:px-10">
         <div className="flex h-full items-center justify-between">
-          <Link href="/" aria-label="Ir al inicio" className="transition-opacity hover:opacity-80">
+          <Link
+            href="/"
+            aria-label="Ir al inicio"
+            className="transition-opacity hover:opacity-80"
+            onClick={(e) => {
+              if (pathname === "/") {
+                e.preventDefault()
+                window.scrollTo({ top: 0, behavior: "smooth" })
+              }
+            }}
+          >
             <Logo variant="white" className="[&_span]:text-[16px] [&_span]:leading-[0.95]" />
           </Link>
 

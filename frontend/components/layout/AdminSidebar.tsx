@@ -15,6 +15,7 @@ import {
   HardHat,
   Home,
   LogOut,
+  Mail,
   Newspaper,
   ScrollText,
   Settings,
@@ -90,6 +91,12 @@ const navigation = [
         permissions: [PERMISSIONS.SOCIOS_READ],
       },
     ]
+  },
+  {
+    name: "Contacto",
+    href: "/admin/contacto",
+    icon: Mail,
+    permissions: [PERMISSIONS.CONTACTO_READ],
   },
   {
     name: "Administración",
