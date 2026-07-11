@@ -155,7 +155,7 @@ export function HeroParallaxImage() {
   return (
     <div ref={ref} className="absolute -inset-y-8 inset-x-0 will-change-transform">
       <Image
-        src="/assets/library-hero-v2.png"
+        src="/assets/landing-hero-main.jpg"
         alt="Cultivo de café robusta al amanecer"
         fill
         className="object-cover object-center"

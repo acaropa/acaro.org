@@ -12,4 +12,16 @@ async function updateLanding(req, res, next) {
   } catch (err) { next(err); }
 }
 
-module.exports = { getLanding, updateLanding };
+async function getLibraryThemes(req, res, next) {
+  try {
+    res.json(await settings.getLibraryThemes());
+  } catch (err) { next(err); }
+}
+
+async function updateLibraryThemes(req, res, next) {
+  try {
+    res.json(await settings.updateLibraryThemes(req.body || {}, req.user));
+  } catch (err) { next(err); }
+}
+
+module.exports = { getLanding, updateLanding, getLibraryThemes, updateLibraryThemes };

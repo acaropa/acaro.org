@@ -82,9 +82,9 @@ export default function AdminBiblioteca() {
   const [activeState, setActiveState] = useState<DocumentState>('pendiente_revision');
   const [mineOnly, setMineOnly] = useState(!canReview);
   const [form, setForm] = useState(emptyForm);
-  const [uploadMode, setUploadMode] = useState<'url' | 'file'>('url');
+  const [uploadMode, setUploadMode] = useState<'url' | 'file' | 'keep'>('url');
   const [file, setFile] = useState<UploadedFile | null>(null);
-  const [coverMode, setCoverMode] = useState<'url' | 'file'>('url');
+  const [coverMode, setCoverMode] = useState<'url' | 'file' | 'keep'>('url');
   const [cover, setCover] = useState<UploadedFile | null>(null);
   const [editing, setEditing] = useState<LibraryRecord | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -127,12 +127,14 @@ export default function AdminBiblioteca() {
 
   function startEdit(document: LibraryRecord) {
     setEditing(document);
+    const archivoEsSubido = document.archivo_url?.startsWith('/uploads/');
+    const portadaEsSubida = document.imagen_portada?.startsWith('/uploads/');
     setForm({
       titulo: document.titulo,
       descripcion: document.descripcion || '',
-      archivo_url: document.archivo_url,
+      archivo_url: archivoEsSubido ? '' : (document.archivo_url || ''),
       categoria: document.categoria,
-      imagen_portada: document.imagen_portada || '',
+      imagen_portada: portadaEsSubida ? '' : (document.imagen_portada || ''),
       visibilidad: document.visibilidad,
       etiquetas: (document.etiquetas || []).join(', '),
       serie: document.serie || '',
@@ -140,9 +142,9 @@ export default function AdminBiblioteca() {
       destacado: Boolean(document.destacado),
       orden_portada: document.orden_portada != null ? String(document.orden_portada) : '',
     });
-    setUploadMode('url');
+    setUploadMode(archivoEsSubido ? 'keep' : 'url');
     setFile(null);
-    setCoverMode('url');
+    setCoverMode(portadaEsSubida ? 'keep' : 'url');
     setCover(null);
     setShowForm(true);
   }
@@ -164,11 +166,15 @@ export default function AdminBiblioteca() {
         delete payload.archivo_url;
         payload.archivo_base64 = file.base64;
         payload.archivo_nombre = file.fileName;
+      } else if (uploadMode === 'keep') {
+        delete payload.archivo_url; // el backend mantiene el archivo existente
       }
       if (coverMode === 'file' && cover) {
         delete payload.imagen_portada;
         payload.portada_base64 = cover.base64;
         payload.portada_nombre = cover.fileName;
+      } else if (coverMode === 'keep') {
+        delete payload.imagen_portada; // el backend mantiene la portada existente
       } else {
         payload.imagen_portada = form.imagen_portada.trim() || null;
       }
@@ -295,67 +301,129 @@ export default function AdminBiblioteca() {
               </select>
             </div>
             <div className="md:col-span-2">
-              <div className="flex items-center gap-2 mb-3">
-                <button
-                  type="button"
-                  onClick={() => setUploadMode('url')}
-                  className={`px-4 py-2 font-label-caps text-[11px] uppercase tracking-widest border transition-colors ${uploadMode === 'url' ? 'border-primary text-primary bg-primary/5' : 'border-border text-muted hover:bg-surface'}`}
-                >
-                  URL externa
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setUploadMode('file')}
-                  className={`px-4 py-2 font-label-caps text-[11px] uppercase tracking-widest border transition-colors ${uploadMode === 'file' ? 'border-primary text-primary bg-primary/5' : 'border-border text-muted hover:bg-surface'}`}
-                >
-                  Subir archivo
-                </button>
-              </div>
-              {uploadMode === 'url' ? (
-                <div>
-                  <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">URL del archivo</label>
-                  <input required type="url" value={form.archivo_url} onChange={event => setForm(current => ({ ...current, archivo_url: event.target.value }))} className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
+              {uploadMode === 'keep' ? (
+                <div className="rounded border border-border bg-surface px-4 py-3 flex items-center justify-between gap-4">
+                  <div className="min-w-0">
+                    <p className="font-label-caps text-[10px] uppercase tracking-widest text-muted mb-1">Archivo actual</p>
+                    <a
+                      href={apiAssetUrl(editing?.archivo_url || '')}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="block truncate text-sm font-medium text-primary hover:underline"
+                    >
+                      {editing?.archivo_url?.split('/').pop()}
+                    </a>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setUploadMode('file')}
+                    className="shrink-0 border border-border px-3 py-1.5 font-label-caps text-[11px] uppercase tracking-widest text-foreground hover:bg-background transition-colors"
+                  >
+                    Cambiar archivo
+                  </button>
                 </div>
               ) : (
-                <ImageUploadField
-                  label="Archivo"
-                  value={file}
-                  onChange={setFile}
-                  existingUrl={editing?.archivo_url}
-                  accept={DOCUMENT_ACCEPT}
-                  maxSizeMb={8}
-                  showPreview={false}
-                  helperText="PDF, Word, Excel, PowerPoint, texto o imagen. Máximo 8 MB."
-                />
+                <>
+                  <div className="flex items-center gap-2 mb-3">
+                    <button
+                      type="button"
+                      onClick={() => setUploadMode('url')}
+                      className={`px-4 py-2 font-label-caps text-[11px] uppercase tracking-widest border transition-colors ${uploadMode === 'url' ? 'border-primary text-primary bg-primary/5' : 'border-border text-muted hover:bg-surface'}`}
+                    >
+                      URL externa
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setUploadMode('file')}
+                      className={`px-4 py-2 font-label-caps text-[11px] uppercase tracking-widest border transition-colors ${uploadMode === 'file' ? 'border-primary text-primary bg-primary/5' : 'border-border text-muted hover:bg-surface'}`}
+                    >
+                      Subir archivo
+                    </button>
+                    {editing && (
+                      <button
+                        type="button"
+                        onClick={() => { setUploadMode('keep'); setFile(null); }}
+                        className="px-4 py-2 font-label-caps text-[11px] uppercase tracking-widest border border-border text-muted hover:bg-surface transition-colors"
+                      >
+                        Mantener actual
+                      </button>
+                    )}
+                  </div>
+                  {uploadMode === 'url' ? (
+                    <div>
+                      <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">URL del archivo</label>
+                      <input required type="url" value={form.archivo_url} onChange={event => setForm(current => ({ ...current, archivo_url: event.target.value }))} className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
+                    </div>
+                  ) : (
+                    <ImageUploadField
+                      label="Archivo"
+                      value={file}
+                      onChange={setFile}
+                      existingUrl={undefined}
+                      accept={DOCUMENT_ACCEPT}
+                      maxSizeMb={8}
+                      showPreview={false}
+                      helperText="PDF, Word, Excel, PowerPoint, texto o imagen. Máximo 8 MB."
+                    />
+                  )}
+                </>
               )}
             </div>
             <div className="md:col-span-2">
               <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Imagen de portada (opcional)</label>
-              <div className="flex items-center gap-2 mb-3">
-                <button
-                  type="button"
-                  onClick={() => setCoverMode('url')}
-                  className={`px-4 py-2 font-label-caps text-[11px] uppercase tracking-widest border transition-colors ${coverMode === 'url' ? 'border-primary text-primary bg-primary/5' : 'border-border text-muted hover:bg-surface'}`}
-                >
-                  URL externa
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCoverMode('file')}
-                  className={`px-4 py-2 font-label-caps text-[11px] uppercase tracking-widest border transition-colors ${coverMode === 'file' ? 'border-primary text-primary bg-primary/5' : 'border-border text-muted hover:bg-surface'}`}
-                >
-                  Subir archivo
-                </button>
-              </div>
-              {coverMode === 'url' ? (
-                <input type="url" value={form.imagen_portada} onChange={event => setForm(current => ({ ...current, imagen_portada: event.target.value }))} placeholder="https://..." className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
+              {coverMode === 'keep' ? (
+                <div className="rounded border border-border bg-surface flex items-center gap-4 p-3">
+                  <img src={apiAssetUrl(editing?.imagen_portada || '')} alt="Portada actual" className="h-16 w-24 shrink-0 object-cover rounded border border-border" />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-label-caps text-[10px] uppercase tracking-widest text-muted mb-1">Portada actual</p>
+                    <p className="truncate text-sm text-foreground">{editing?.imagen_portada?.split('/').pop()}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setCoverMode('file')}
+                    className="shrink-0 border border-border px-3 py-1.5 font-label-caps text-[11px] uppercase tracking-widest text-foreground hover:bg-background transition-colors"
+                  >
+                    Cambiar
+                  </button>
+                </div>
               ) : (
-                <ImageUploadField
-                  value={cover}
-                  onChange={setCover}
-                  existingUrl={editing?.imagen_portada}
-                  helperText="Formatos JPG, PNG o WEBP, máximo 4 MB."
-                />
+                <>
+                  <div className="flex items-center gap-2 mb-3">
+                    <button
+                      type="button"
+                      onClick={() => setCoverMode('url')}
+                      className={`px-4 py-2 font-label-caps text-[11px] uppercase tracking-widest border transition-colors ${coverMode === 'url' ? 'border-primary text-primary bg-primary/5' : 'border-border text-muted hover:bg-surface'}`}
+                    >
+                      URL externa
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCoverMode('file')}
+                      className={`px-4 py-2 font-label-caps text-[11px] uppercase tracking-widest border transition-colors ${coverMode === 'file' ? 'border-primary text-primary bg-primary/5' : 'border-border text-muted hover:bg-surface'}`}
+                    >
+                      Subir imagen
+                    </button>
+                    {editing?.imagen_portada?.startsWith('/uploads/') && (
+                      <button
+                        type="button"
+                        onClick={() => { setCoverMode('keep'); setCover(null); }}
+                        className="px-4 py-2 font-label-caps text-[11px] uppercase tracking-widest border border-border text-muted hover:bg-surface transition-colors"
+                      >
+                        Mantener actual
+                      </button>
+                    )}
+                  </div>
+                  {coverMode === 'url' ? (
+                    <input type="url" value={form.imagen_portada} onChange={event => setForm(current => ({ ...current, imagen_portada: event.target.value }))} placeholder="https://..." className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
+                  ) : (
+                    <ImageUploadField
+                      value={cover}
+                      onChange={setCover}
+                      existingUrl={undefined}
+                      helperText="Formatos JPG, PNG o WEBP, máximo 4 MB."
+                    />
+                  )}
+                </>
               )}
             </div>
             <div className="md:col-span-2">

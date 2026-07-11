@@ -2,11 +2,11 @@
 
 import { AppIcon } from "@/components/ui/AppIcon"
 
-import { useEffect, useMemo, useState } from 'react';
-import { api } from '@/lib/api';
-import { LandingMetadataItem, defaultLandingSettings } from '@/lib/settings';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { api, apiAssetUrl } from '@/lib/api';
+import { LandingMetadataItem, defaultLandingSettings, defaultLibraryThemes, LibraryThemes } from '@/lib/settings';
 
-type SettingsTab = 'institucion' | 'documentos' | 'contenido' | 'seguridad';
+type SettingsTab = 'institucion' | 'documentos' | 'contenido' | 'seguridad' | 'biblioteca';
 
 type AdminSettings = {
   institutionName: string;
@@ -109,6 +109,12 @@ const tabs: Array<{ id: SettingsTab; label: string; icon: string; description: s
     icon: 'admin_panel_settings',
     description: 'Revision, sesiones, acceso y notificaciones.',
   },
+  {
+    id: 'biblioteca',
+    label: 'Biblioteca',
+    icon: 'collections',
+    description: 'Imagenes fijas para los temas de la biblioteca.',
+  },
 ];
 
 const inputClass =
@@ -137,6 +143,9 @@ export default function AdminConfiguracion() {
   const [activeTab, setActiveTab] = useState<SettingsTab>('institucion');
   const [settings, setSettings] = useState<AdminSettings>(loadSettings);
   const [saved, setSaved] = useState(false);
+  const [libraryThemes, setLibraryThemes] = useState<LibraryThemes>({ ...defaultLibraryThemes });
+  const [libraryThemesSaving, setLibraryThemesSaving] = useState(false);
+  const [libraryThemesSaved, setLibraryThemesSaved] = useState(false);
   const preview = useMemo(() => settingPreview(settings), [settings]);
   const active = tabs.find(tab => tab.id === activeTab) || tabs[0];
 
@@ -151,6 +160,9 @@ export default function AdminConfiguracion() {
           landingMetadata: Array.isArray(data.metadata) ? data.metadata : current.landingMetadata,
         }));
       })
+      .catch(() => {});
+    api.get<LibraryThemes>('/settings/library-themes')
+      .then(data => setLibraryThemes(current => ({ ...current, ...data })))
       .catch(() => {});
   }, []);
 
@@ -168,6 +180,28 @@ export default function AdminConfiguracion() {
       metadata: settings.landingMetadata,
     }).catch(() => {});
     setSaved(true);
+  }
+
+  async function saveLibraryTheme(title: string, file: { base64: string; fileName: string } | null) {
+    setLibraryThemesSaving(true);
+    setLibraryThemesSaved(false);
+    try {
+      const updated = await api.put<LibraryThemes>('/settings/library-themes', { [title]: file });
+      setLibraryThemes(current => ({ ...current, ...updated }));
+      setLibraryThemesSaved(true);
+    } finally {
+      setLibraryThemesSaving(false);
+    }
+  }
+
+  async function clearLibraryTheme(title: string) {
+    setLibraryThemesSaving(true);
+    try {
+      const updated = await api.put<LibraryThemes>('/settings/library-themes', { [title]: null });
+      setLibraryThemes(current => ({ ...current, ...updated }));
+    } finally {
+      setLibraryThemesSaving(false);
+    }
   }
 
   function restoreDefaults() {
@@ -272,6 +306,15 @@ export default function AdminConfiguracion() {
             {activeTab === 'documentos' && <DocumentSettings settings={settings} update={update} />}
             {activeTab === 'contenido' && <ContentSettings settings={settings} update={update} />}
             {activeTab === 'seguridad' && <SecuritySettings settings={settings} update={update} />}
+            {activeTab === 'biblioteca' && (
+              <LibraryThemesSettings
+                themes={libraryThemes}
+                saving={libraryThemesSaving}
+                saved={libraryThemesSaved}
+                onSave={saveLibraryTheme}
+                onClear={clearLibraryTheme}
+              />
+            )}
           </div>
         </main>
       </section>
@@ -490,3 +533,168 @@ type SettingsProps = {
   settings: AdminSettings;
   update: <K extends keyof AdminSettings>(key: K, value: AdminSettings[K]) => void;
 };
+
+const THEME_LABELS: Record<string, string> = {
+  Institucional: 'Institucional',
+  Proyectos: 'Proyectos',
+  Formacion: 'Formacion',
+  'Guias tecnicas': 'Guias tecnicas',
+};
+
+function LibraryThemesSettings({
+  themes,
+  saving,
+  saved,
+  onSave,
+  onClear,
+}: {
+  themes: LibraryThemes;
+  saving: boolean;
+  saved: boolean;
+  onSave: (title: string, file: { base64: string; fileName: string }) => void;
+  onClear: (title: string) => void;
+}) {
+  return (
+    <div className="space-y-8">
+      <div>
+        <h3 className="font-headline-md text-xl text-foreground">Imagenes de temas</h3>
+        <p className="mt-1 text-sm text-muted">
+          Asigna una imagen fija a cada tema de la biblioteca. Tiene prioridad sobre la portada del documento.
+        </p>
+        {saved && (
+          <p className="mt-3 text-sm font-medium text-green-700">Imagen guardada correctamente.</p>
+        )}
+      </div>
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        {Object.keys(THEME_LABELS).map(title => (
+          <ThemeImageCard
+            key={title}
+            title={title}
+            label={THEME_LABELS[title]}
+            currentUrl={themes[title] ?? null}
+            saving={saving}
+            onSave={onSave}
+            onClear={onClear}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ThemeImageCard({
+  title,
+  label,
+  currentUrl,
+  saving,
+  onSave,
+  onClear,
+}: {
+  title: string;
+  label: string;
+  currentUrl: string | null;
+  saving: boolean;
+  onSave: (title: string, file: { base64: string; fileName: string }) => void;
+  onClear: (title: string) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [pending, setPending] = useState<{ base64: string; fileName: string } | null>(null);
+  const [error, setError] = useState('');
+
+  function handleFile(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setError('');
+    if (file.size > 8 * 1024 * 1024) {
+      setError('El archivo supera el límite de 8 MB');
+      event.target.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = String(reader.result);
+      setPreview(base64);
+      setPending({ base64, fileName: file.name });
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function discard() {
+    setPreview(null);
+    setPending(null);
+    if (inputRef.current) inputRef.current.value = '';
+  }
+
+  async function save() {
+    if (!pending) return;
+    await onSave(title, pending);
+    setPreview(null);
+    setPending(null);
+    if (inputRef.current) inputRef.current.value = '';
+  }
+
+  const displayUrl = preview || (currentUrl ? apiAssetUrl(currentUrl) : null);
+
+  return (
+    <div className="rounded-lg border border-border bg-surface p-5 space-y-4">
+      <span className="block font-label-caps text-[11px] uppercase tracking-widest text-foreground font-bold">{label}</span>
+
+      {displayUrl ? (
+        <div className="relative h-40 overflow-hidden rounded border border-border">
+          <img src={displayUrl} alt={label} className="h-full w-full object-cover" />
+          {!pending && currentUrl && (
+            <span className="absolute top-2 left-2 rounded bg-black/60 px-2 py-0.5 text-[10px] uppercase tracking-widest text-white">Actual</span>
+          )}
+          {pending && (
+            <span className="absolute top-2 left-2 rounded bg-amber-600/80 px-2 py-0.5 text-[10px] uppercase tracking-widest text-white">Sin guardar</span>
+          )}
+        </div>
+      ) : (
+        <div className="flex h-40 items-center justify-center rounded border border-dashed border-border text-sm text-muted">
+          Sin imagen asignada
+        </div>
+      )}
+
+      {error && <p className="text-xs text-red-600">{error}</p>}
+
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          disabled={saving}
+          className="border border-border px-4 py-2 font-label-caps text-[11px] uppercase tracking-widest text-foreground transition-colors hover:bg-background disabled:opacity-50"
+        >
+          {displayUrl ? 'Cambiar imagen' : 'Subir imagen'}
+        </button>
+        {pending && (
+          <>
+            <button
+              type="button"
+              onClick={save}
+              disabled={saving}
+              className="bg-primary px-4 py-2 font-label-caps text-[11px] uppercase tracking-widest text-primary-foreground transition-colors hover:bg-accent disabled:opacity-50"
+            >
+              {saving ? 'Guardando...' : 'Guardar'}
+            </button>
+            <button type="button" onClick={discard} disabled={saving} className="text-sm text-muted hover:text-foreground">
+              Descartar
+            </button>
+          </>
+        )}
+        {!pending && currentUrl && (
+          <button
+            type="button"
+            onClick={() => onClear(title)}
+            disabled={saving}
+            className="text-sm text-red-600 hover:text-red-800 disabled:opacity-50"
+          >
+            Quitar imagen
+          </button>
+        )}
+      </div>
+
+      <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleFile} className="hidden" />
+    </div>
+  );
+}

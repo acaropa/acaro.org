@@ -24,6 +24,7 @@ import {
   matchesLibraryQuery,
   toLibraryDocument,
 } from "@/lib/library";
+import { getLibraryThemes, LibraryThemes } from "@/lib/settings";
 
 const themeCards = [
   {
@@ -31,24 +32,28 @@ const themeCards = [
     category: libraryCategories[4],
     description: "Archivos historicos, protocolos y reportes de la organizacion.",
     className: "md:col-span-2 md:row-span-2",
+    staticImage: "/assets/theme-institucional.jpg",
   },
   {
     title: "Proyectos",
     category: libraryCategories[2],
     description: "Documentacion de iniciativas y resultados de campo.",
     className: "md:col-span-1",
+    staticImage: "/assets/theme-proyectos.jpg",
   },
   {
     title: "Formacion",
     category: libraryCategories[3],
     description: "Materiales para talleres, capacitaciones y aprendizaje continuo.",
     className: "md:col-span-1",
+    staticImage: "/assets/theme-formacion.jpg",
   },
   {
     title: "Guias tecnicas",
     category: libraryCategories[1],
     description: "Manuales detallados para la excelencia tecnica.",
     className: "md:col-span-2",
+    staticImage: "/assets/theme-guias.jpg",
   },
 ];
 
@@ -56,12 +61,20 @@ function documentHref(document: LibraryDocument) {
   return `/biblioteca/detalle/?slug=${document.slug || ""}`;
 }
 
-function LibraryBackdrop({ document, className = "" }: { document?: LibraryDocument; className?: string }) {
-  if (document?.coverImage) {
+function LibraryBackdrop({ document, themeImage, staticImage, className = "" }: { document?: LibraryDocument; themeImage?: string | null; staticImage?: string; className?: string }) {
+  const resolvedUrl = themeImage
+    ? apiAssetUrl(themeImage)
+    : staticImage
+      ? staticImage
+      : document?.coverImage
+        ? apiAssetUrl(document.coverImage)
+        : null;
+
+  if (resolvedUrl) {
     return (
       <div
         className={`absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105 ${className}`}
-        style={{ backgroundImage: `url('${apiAssetUrl(document.coverImage)}')` }}
+        style={{ backgroundImage: `url('${resolvedUrl}')` }}
       />
     );
   }
@@ -78,6 +91,8 @@ function ThemeCard({
   description,
   category,
   document,
+  themeImage,
+  staticImage,
   className,
   onSelect,
 }: {
@@ -85,6 +100,8 @@ function ThemeCard({
   description: string;
   category: string;
   document?: LibraryDocument;
+  themeImage?: string | null;
+  staticImage?: string;
   className: string;
   onSelect: () => void;
 }) {
@@ -94,7 +111,7 @@ function ThemeCard({
       onClick={onSelect}
       className={`group relative min-h-[260px] overflow-hidden border border-[#d3c3c0] text-left ${className}`}
     >
-      <LibraryBackdrop document={document} />
+      <LibraryBackdrop document={document} themeImage={themeImage} staticImage={staticImage} />
       <div className="absolute inset-0 bg-[#271310]/45 transition-colors group-hover:bg-[#271310]/55" />
       <div className="absolute inset-x-0 bottom-0 z-10 p-6 md:p-8">
         <p className="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-[#ffdea5]">{category}</p>
@@ -225,6 +242,7 @@ export default function Biblioteca() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
+  const [themeImages, setThemeImages] = useState<LibraryThemes>({});
 
   useEffect(() => {
     api
@@ -236,6 +254,7 @@ export default function Biblioteca() {
       .get<LibraryRecord[]>("/biblioteca?limit=60")
       .then(data => setSuggestionDocs(data.map(toLibraryDocument)))
       .catch(() => setSuggestionDocs([]));
+    getLibraryThemes().then(setThemeImages).catch(() => {});
   }, []);
 
   const featured = documents[0] || null;
@@ -330,6 +349,8 @@ export default function Biblioteca() {
                   key={card.title}
                   {...card}
                   document={docsByCategory[card.category] || documents.find(doc => doc.category === card.category)}
+                  themeImage={themeImages[card.title] ?? null}
+                  staticImage={card.staticImage}
                   onSelect={() => goToSearch({ categoria: card.category })}
                 />
               ))}

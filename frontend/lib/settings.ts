@@ -33,3 +33,20 @@ export async function getLandingSettings() {
     return defaultLandingSettings;
   }
 }
+
+export type LibraryThemes = Record<string, string | null>;
+
+export const defaultLibraryThemes: LibraryThemes = {
+  Institucional: null,
+  Proyectos: null,
+  Formacion: null,
+  "Guias tecnicas": null,
+};
+
+export async function getLibraryThemes(): Promise<LibraryThemes> {
+  try {
+    return await api.get<LibraryThemes>("/settings/library-themes");
+  } catch {
+    return defaultLibraryThemes;
+  }
+}
