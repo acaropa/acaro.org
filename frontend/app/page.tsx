@@ -44,7 +44,7 @@ export default function Home() {
               <span className="block text-[#fffaf1]">Robusta OBC</span>
             </h1>
             <p className="hero-reveal mt-5 max-w-2xl text-base leading-7 text-[#f3e8d8]/85 sm:mt-7 sm:text-xl sm:leading-8" style={{ animationDelay: "100ms" }}>
-              Impulsamos el desarrollo del café robusta con organización, conocimiento técnico y visión productiva.
+              Impulsamos el desarrollo del café robusta con organización, conocimiento técnico, tecnología e innovación, y visión productiva.
             </p>
             <div className="hero-reveal mt-7 flex flex-col items-stretch gap-3 sm:mt-9 sm:flex-row sm:items-start" style={{ animationDelay: "140ms" }}>
               <Link href="/nosotros" className="group inline-flex w-full items-center justify-center gap-2 whitespace-nowrap bg-[#fffaf1] px-5 py-3.5 text-xs font-bold uppercase tracking-widest text-[#271310] transition-all hover:bg-white sm:w-auto sm:px-8 sm:py-4">

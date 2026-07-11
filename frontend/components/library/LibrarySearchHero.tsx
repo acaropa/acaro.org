@@ -41,7 +41,7 @@ export function LibrarySearchHero({
     >
       <div
         className="absolute inset-0 bg-cover bg-center opacity-[0.16]"
-        style={{ backgroundImage: "url('/assets/library-hero-v2.png')" }}
+        style={{ backgroundImage: "url('/assets/landing-hero-main.jpg')" }}
       />
       <div className="absolute inset-0 bg-gradient-to-b from-[#faf9f5]/10 via-[#faf9f5]/68 to-[#faf9f5]" />
 
