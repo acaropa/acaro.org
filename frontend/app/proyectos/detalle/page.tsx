@@ -7,8 +7,9 @@ import { Download, FileText } from 'lucide-react';
 import { PublicLayout } from '@/components/layout/PublicLayout';
 import { ScrollReveal } from '@/components/landing/LandingMotion';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { AppIcon } from '@/components/ui/AppIcon';
 import { api, apiAssetUrl } from '@/lib/api';
-import { ProyectoRecord, STATUS_MAP, formatProjectDate } from '@/lib/projects';
+import { ProyectoRecord, STATUS_MAP, formatProjectDate, formatProjectDuration } from '@/lib/projects';
 
 const FASE_LABELS: Record<string, string> = {
   pendiente: 'Pendiente',
@@ -72,6 +73,12 @@ function ProyectoDetalle() {
                     <span className="text-xs font-bold tracking-widest uppercase text-muted">{formatProjectDate(proyecto)}</span>
                   </>
                 )}
+                {formatProjectDuration(proyecto) && (
+                  <>
+                    <span className="w-1 h-1 rounded-full bg-primary/30"></span>
+                    <span className="text-xs font-bold tracking-widest uppercase text-muted">Duración: {formatProjectDuration(proyecto)}</span>
+                  </>
+                )}
               </div>
 
               <h1 className={`font-serif font-semibold text-[32px] md:text-[52px] leading-[1.2] tracking-[-0.015em] text-primary ${(proyecto.responsable_nombre || proyecto.responsable_email) ? 'mb-[16px]' : 'mb-[40px]'}`}>
@@ -97,6 +104,19 @@ function ProyectoDetalle() {
 
               {proyecto.descripcion && (
                 <p className="max-w-3xl mb-[64px] text-justify text-[18px] leading-[1.8] text-muted [hyphens:auto]">{proyecto.descripcion}</p>
+              )}
+
+              {/* Indicadores destacados */}
+              {proyecto.indicadores && proyecto.indicadores.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-[24px] mb-[64px]">
+                  {proyecto.indicadores.map(indicador => (
+                    <div key={indicador.id} className="border border-primary/10 bg-surface p-[24px] text-center">
+                      <AppIcon name={indicador.icono} className="text-[32px] text-accent" decorative={false} />
+                      <strong className="mt-3 block font-serif text-[28px] leading-[1.2] text-primary">{indicador.valor}</strong>
+                      <span className="mt-1 block text-[13px] leading-[1.4] text-muted">{indicador.etiqueta}</span>
+                    </div>
+                  ))}
+                </div>
               )}
 
               {/* Fases */}
@@ -141,6 +161,13 @@ function ProyectoDetalle() {
                     ))}
                   </div>
                 </section>
+              )}
+
+              {/* Impacto */}
+              {proyecto.impacto && (
+                <div className="mb-[64px] bg-primary p-[32px] text-primary-foreground">
+                  <p className="text-[16px] leading-[1.6]">{proyecto.impacto}</p>
+                </div>
               )}
 
               {/* Evidencias públicas */}

@@ -193,6 +193,54 @@ async function removeFase(req, res, next) {
   } catch (err) { next(err); }
 }
 
+// ─── INDICADORES DESTACADOS ───────────────────────────────────────────────────
+
+async function createIndicador(req, res, next) {
+  try {
+    const project = await svc.getById(req.params.id);
+    if (!project) return res.status(404).json({ error: 'Proyecto no encontrado' });
+    if (!canUpdateProject(req.user, project)) {
+      return res.status(403).json({ error: 'Solo puedes gestionar proyectos asignados' });
+    }
+    const { valor, etiqueta } = req.body;
+    if (!valor || !etiqueta) return res.status(400).json({ error: 'valor y etiqueta son requeridos' });
+    const indicador = await svc.createIndicador(req.params.id, req.body);
+    res.status(201).json(indicador);
+  } catch (err) { next(err); }
+}
+
+async function updateIndicador(req, res, next) {
+  try {
+    const project = await svc.getById(req.params.id);
+    if (!project) return res.status(404).json({ error: 'Proyecto no encontrado' });
+    if (!canUpdateProject(req.user, project)) {
+      return res.status(403).json({ error: 'Solo puedes gestionar proyectos asignados' });
+    }
+    if (!(await svc.indicadorBelongsToProject(req.params.indicadorId, req.params.id))) {
+      return res.status(404).json({ error: 'Indicador no encontrado en este proyecto' });
+    }
+    const indicador = await svc.updateIndicador(req.params.indicadorId, req.body);
+    if (!indicador) return res.status(404).json({ error: 'Indicador no encontrado' });
+    res.json(indicador);
+  } catch (err) { next(err); }
+}
+
+async function removeIndicador(req, res, next) {
+  try {
+    const project = await svc.getById(req.params.id);
+    if (!project) return res.status(404).json({ error: 'Proyecto no encontrado' });
+    if (!canUpdateProject(req.user, project)) {
+      return res.status(403).json({ error: 'Solo puedes gestionar proyectos asignados' });
+    }
+    if (!(await svc.indicadorBelongsToProject(req.params.indicadorId, req.params.id))) {
+      return res.status(404).json({ error: 'Indicador no encontrado en este proyecto' });
+    }
+    const deleted = await svc.removeIndicador(req.params.indicadorId);
+    if (!deleted) return res.status(404).json({ error: 'Indicador no encontrado' });
+    res.status(204).send();
+  } catch (err) { next(err); }
+}
+
 // ─── IMÁGENES ─────────────────────────────────────────────────────────────────
 
 async function addImagen(req, res, next) {
@@ -230,4 +278,5 @@ module.exports = {
   assignTecnico, removeTecnico,
   createFase, updateFase, removeFase,
   addImagen, removeImagen,
+  createIndicador, updateIndicador, removeIndicador,
 };

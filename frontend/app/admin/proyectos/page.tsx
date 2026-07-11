@@ -15,6 +15,7 @@ interface Project {
   nombre: string;
   slug?: string;
   descripcion: string | null;
+  impacto: string | null;
   tipo: 'publico' | 'privado';
   clasificacion: string | null;
   imagen_portada: string | null;
@@ -26,7 +27,7 @@ interface Project {
 }
 
 const emptyForm = {
-  nombre: '', descripcion: '', tipo: 'privado', clasificacion: '',
+  nombre: '', descripcion: '', impacto: '', tipo: 'privado', clasificacion: '',
   estado: 'pendiente', fecha_inicio: '', fecha_fin: '', supervisor_id: '',
 };
 
@@ -83,6 +84,7 @@ export default function AdminProyectos() {
     setForm({
       nombre: project.nombre,
       descripcion: project.descripcion || '',
+      impacto: project.impacto || '',
       tipo: project.tipo,
       clasificacion: project.clasificacion || '',
       estado: project.estado,
@@ -241,6 +243,7 @@ export default function AdminProyectos() {
         <form onSubmit={save} className="grid gap-5 md:grid-cols-2">
           <Field label="Nombre" wide><input required value={form.nombre} onChange={event => setForm({ ...form, nombre: event.target.value })} className="form-control" /></Field>
           <Field label="Descripción" wide><textarea rows={4} value={form.descripcion} onChange={event => setForm({ ...form, descripcion: event.target.value })} className="form-control resize-y" /></Field>
+          <Field label="Impacto (mensaje de cierre, opcional)" wide><textarea rows={2} value={form.impacto} onChange={event => setForm({ ...form, impacto: event.target.value })} className="form-control resize-y" placeholder="Ej. Impacto directo en la sostenibilidad productiva y ambiental del sector." /></Field>
           <Field label="Categoría"><input value={form.clasificacion} onChange={event => setForm({ ...form, clasificacion: event.target.value })} className="form-control" /></Field>
           <Field label="Visibilidad"><select value={form.tipo} onChange={event => setForm({ ...form, tipo: event.target.value })} className="form-control"><option value="privado">Privado</option><option value="publico">Público</option></select></Field>
           <Field label="Estado"><select value={form.estado} onChange={event => setForm({ ...form, estado: event.target.value })} className="form-control"><option value="pendiente">Pendiente</option><option value="en_progreso">En progreso</option><option value="completado">Completado</option>{editing && <option value="cancelado">Cancelado</option>}</select></Field>

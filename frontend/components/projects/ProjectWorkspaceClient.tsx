@@ -14,7 +14,7 @@ type Row = Record<string, string | number | null>;
 type PhaseTab = 'resumen' | 'tareas' | 'avances' | 'documentos' | 'evidencias' | 'riesgos' | 'decisiones' | 'reuniones' | 'finanzas' | 'auditoria';
 
 interface Workspace {
-  project: Row & { tecnicos?: Row[] };
+  project: Row & { tecnicos?: Row[]; indicadores?: Row[] };
   fases: Row[];
   tareas: Row[];
   avances: Row[];
@@ -37,6 +37,8 @@ interface Workspace {
 }
 
 const MAX_PHASES = 6;
+const MAX_INDICADORES = 4;
+const INDICADOR_ICONS = ['groups', 'water', 'trees', 'eco', 'sparkles', 'coffee', 'trending_up', 'star'];
 const phaseTabs: Array<[PhaseTab, string, string]> = [
   ['resumen', 'Resumen', 'dashboard'],
   ['tareas', 'Tareas', 'task_alt'],
@@ -201,6 +203,11 @@ export default function ProjectWorkspacePage() {
       await mutate(() => api.post(`/proyectos/${id}/fases`, body));
       return;
     }
+    if (createKind === 'indicadores') {
+      body.orden = data?.project.indicadores?.length || 0;
+      await mutate(() => api.post(`/proyectos/${id}/indicadores`, body));
+      return;
+    }
     if (!activePhaseId) {
       setError('Selecciona o crea una fase antes de registrar contenido.');
       return;
@@ -334,6 +341,8 @@ export default function ProjectWorkspacePage() {
           onAssign={assignTechnician}
           onRemove={technicianId => mutate(() => api.delete(`/proyectos/${id}/tecnicos/${technicianId}`))}
           onOpenPhases={() => setProjectView('fases')}
+          onAddIndicador={() => setCreateKind('indicadores')}
+          onRemoveIndicador={indicadorId => mutate(() => api.delete(`/proyectos/${id}/indicadores/${indicadorId}`))}
         />
       ) : (
         <div className="mt-6 grid gap-6 xl:grid-cols-[330px_minmax(0,1fr)]">
@@ -411,7 +420,7 @@ export default function ProjectWorkspacePage() {
         </div>
       )}
 
-      <Modal isOpen={Boolean(createKind)} onClose={() => setCreateKind(null)} title={createKind === 'fases' ? 'Crear fase' : `Nuevo registro · ${createKind || ''}`} maxWidth="max-w-3xl">
+      <Modal isOpen={Boolean(createKind)} onClose={() => setCreateKind(null)} title={createKind === 'fases' ? 'Crear fase' : createKind === 'indicadores' ? 'Agregar indicador destacado' : `Nuevo registro · ${createKind || ''}`} maxWidth="max-w-3xl">
         {createKind && (
           <form onSubmit={createRecord} className="grid gap-5 md:grid-cols-2">
             {createKind === 'fases' ? (
@@ -424,6 +433,12 @@ export default function ProjectWorkspacePage() {
                 <DynamicField field={{ name: 'porcentaje_avance', label: 'Avance inicial', type: 'number' }} />
                 <DynamicField field={{ name: 'fecha_inicio', label: 'Fecha de inicio', type: 'date' }} />
                 <DynamicField field={{ name: 'fecha_fin', label: 'Fecha de cierre', type: 'date' }} />
+              </>
+            ) : createKind === 'indicadores' ? (
+              <>
+                <DynamicField field={{ name: 'icono', label: 'Ícono', type: 'select', options: INDICADOR_ICONS }} />
+                <DynamicField field={{ name: 'valor', label: 'Valor (ej. 99 productores)', required: true }} />
+                <DynamicField field={{ name: 'etiqueta', label: 'Etiqueta (ej. beneficiados, 49 mujeres y 50 hombres)', required: true }} />
               </>
             ) : creationFields[createKind].map(field => <DynamicField key={field.name} field={field} />)}
             <div className="md:col-span-2 flex justify-end"><button disabled={busy} className="bg-primary px-7 py-3 text-xs font-bold uppercase tracking-widest text-primary-foreground">{busy ? 'Guardando...' : 'Guardar registro'}</button></div>
@@ -458,6 +473,7 @@ export default function ProjectWorkspacePage() {
         <form onSubmit={saveProject} className="grid gap-5 md:grid-cols-2">
           <label className="md:col-span-2"><FieldLabel>Nombre</FieldLabel><input name="nombre" defaultValue={String(project.nombre)} required className="form-control" /></label>
           <label className="md:col-span-2"><FieldLabel>Descripción</FieldLabel><textarea name="descripcion" defaultValue={String(project.descripcion || '')} rows={4} className="form-control" /></label>
+          <label className="md:col-span-2"><FieldLabel>Impacto (mensaje de cierre, opcional)</FieldLabel><textarea name="impacto" defaultValue={String(project.impacto || '')} rows={2} className="form-control" /></label>
           <label><FieldLabel>Clasificación</FieldLabel><input name="clasificacion" defaultValue={String(project.clasificacion || '')} className="form-control" /></label>
           <label><FieldLabel>Estado</FieldLabel><select name="estado" defaultValue={String(project.estado)} className="form-control"><option value="pendiente">Pendiente</option><option value="en_progreso">En progreso</option><option value="completado">Completado</option><option value="cancelado">Cancelado</option></select></label>
           <label><FieldLabel>Inicio</FieldLabel><input name="fecha_inicio" type="date" defaultValue={String(project.fecha_inicio || '').slice(0, 10)} className="form-control" /></label>
@@ -469,7 +485,7 @@ export default function ProjectWorkspacePage() {
   );
 }
 
-function ProjectSummary({ data, progress, technicians, canManage, unassignedCount, onAssign, onRemove, onOpenPhases }: {
+function ProjectSummary({ data, progress, technicians, canManage, unassignedCount, onAssign, onRemove, onOpenPhases, onAddIndicador, onRemoveIndicador }: {
   data: Workspace;
   progress: number;
   technicians: Row[];
@@ -478,8 +494,11 @@ function ProjectSummary({ data, progress, technicians, canManage, unassignedCoun
   onAssign: (event: React.FormEvent<HTMLFormElement>) => void;
   onRemove: (id: number) => void;
   onOpenPhases: () => void;
+  onAddIndicador: () => void;
+  onRemoveIndicador: (id: number) => void;
 }) {
   const project = data.project;
+  const indicadores = project.indicadores || [];
   return <main className="mt-6 grid gap-5 xl:grid-cols-[1fr_360px]">
     <div className="grid gap-5 sm:grid-cols-2">
       <Metric label="Avance ponderado" value={`${progress}%`} helper={`${data.fases.length} de ${MAX_PHASES} fases`} />
@@ -490,6 +509,41 @@ function ProjectSummary({ data, progress, technicians, canManage, unassignedCoun
         <div className="flex items-end justify-between gap-4"><SectionHeading title="Ruta de ejecución" subtitle="Las fases concentran toda la operación del proyecto." /><button onClick={onOpenPhases} className="text-[10px] font-bold uppercase tracking-widest text-primary">Gestionar fases →</button></div>
         <div className="mt-5 grid gap-3 md:grid-cols-3">{data.fases.map((phase, index) => <div key={Number(phase.id)} className="rounded-xl bg-background p-4"><span className="text-[10px] font-bold uppercase tracking-widest text-accent">Fase {index + 1}</span><strong className="mt-2 block">{String(phase.nombre)}</strong><div className="mt-3 h-1.5 overflow-hidden rounded-full bg-border"><div className="h-full bg-accent" style={{ width: `${Number(phase.porcentaje_avance || 0)}%` }} /></div></div>)}</div>
         {unassignedCount > 0 && <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">{unassignedCount} registro(s) antiguo(s) no tienen fase asignada. Se conservan en la base de datos, pero el nuevo flujo crea todo dentro de una fase.</p>}
+      </section>
+      <section className="sm:col-span-2 rounded-2xl border border-border bg-card p-6">
+        <div className="flex items-end justify-between gap-4">
+          <SectionHeading title="Indicadores destacados" subtitle="Cifras de impacto que se muestran en la ficha pública del proyecto." />
+          {canManage && (
+            <button
+              onClick={onAddIndicador}
+              disabled={indicadores.length >= MAX_INDICADORES}
+              className="text-[10px] font-bold uppercase tracking-widest text-primary disabled:cursor-not-allowed disabled:text-muted"
+            >
+              {indicadores.length >= MAX_INDICADORES ? `Límite de ${MAX_INDICADORES}` : '+ Agregar indicador'}
+            </button>
+          )}
+        </div>
+        {indicadores.length ? (
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {indicadores.map(indicador => (
+              <div key={Number(indicador.id)} className="relative rounded-xl bg-background p-4 text-center">
+                <AppIcon name={String(indicador.icono)} className="text-[22px] text-accent" />
+                <strong className="mt-2 block text-xl">{String(indicador.valor)}</strong>
+                <span className="mt-1 block text-xs text-muted">{String(indicador.etiqueta)}</span>
+                {canManage && (
+                  <button
+                    onClick={() => onRemoveIndicador(Number(indicador.id))}
+                    className="absolute right-2 top-2 text-[10px] font-bold uppercase text-red-700"
+                  >
+                    Quitar
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-5 rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted">Sin indicadores destacados todavía.</div>
+        )}
       </section>
       <section className="sm:col-span-2 rounded-2xl border border-border bg-card p-6">
         <SectionHeading title="Equipo del proyecto" subtitle="Personas disponibles como responsables de fase." />

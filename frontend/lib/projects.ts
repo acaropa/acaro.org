@@ -31,6 +31,14 @@ export interface ProyectoFase {
   imagenes: ProyectoFaseImagen[];
 }
 
+export interface ProyectoIndicador {
+  id: number;
+  icono: string;
+  valor: string;
+  etiqueta: string;
+  orden: number;
+}
+
 export interface ProyectoArchivo {
   id: number;
   fase_id: number | null;
@@ -49,6 +57,7 @@ export interface ProyectoRecord {
   nombre: string;
   slug: string;
   descripcion: string | null;
+  impacto: string | null;
   tipo: "publico" | "privado";
   clasificacion: string | null;
   imagen_portada: string | null;
@@ -66,6 +75,7 @@ export interface ProyectoRecord {
   tecnicos?: ProyectoTecnico[];
   fases?: ProyectoFase[];
   evidencias?: ProyectoArchivo[];
+  indicadores?: ProyectoIndicador[];
 }
 
 export const STATUS_MAP: Record<ProyectoRecord["estado"], ProjectStatus> = {
@@ -92,6 +102,14 @@ export function formatProjectDate(proyecto: ProyectoRecord) {
     return `Inicio proyectado: ${start}`;
   }
   return `${start} - Presente`;
+}
+
+export function formatProjectDuration(proyecto: ProyectoRecord) {
+  if (!proyecto.fecha_inicio || !proyecto.fecha_fin) return "";
+  const start = new Date(proyecto.fecha_inicio);
+  const end = new Date(proyecto.fecha_fin);
+  const months = Math.max(1, Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 30.44)));
+  return `${months} ${months === 1 ? "mes" : "meses"}`;
 }
 
 export function toProjectCard(proyecto: ProyectoRecord, index: number): Project {

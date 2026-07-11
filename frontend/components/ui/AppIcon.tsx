@@ -61,6 +61,8 @@ import {
   X,
   Coffee,
   Info,
+  Droplet,
+  TreePine,
   type LucideIcon,
 } from "lucide-react"
 
@@ -136,6 +138,8 @@ const icons: Record<string, LucideIcon> = {
   trending_up: TrendingUp,
   coffee: Coffee,
   info: Info,
+  water: Droplet,
+  trees: TreePine,
 }
 
 type AppIconProps = {

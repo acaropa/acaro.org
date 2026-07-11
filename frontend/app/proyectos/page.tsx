@@ -24,7 +24,7 @@ function HeroRightProject({ project, index }: { project: Project, index: number 
             {project.category}
           </div>
           <h2 className="font-serif text-[32px] font-semibold leading-[1.2] text-primary mb-4">{project.title}</h2>
-          <p className="text-[16px] leading-[1.6] text-muted mb-8">{project.description}</p>
+          <p className="text-[16px] leading-[1.6] text-muted mb-8 line-clamp-6">{project.description}</p>
         </div>
         <Link href={`/proyectos/detalle/?slug=${project.slug || ''}`} className="self-start border border-primary text-primary px-6 py-3 text-[12px] font-semibold tracking-[0.1em] leading-none hover:bg-primary hover:text-primary-foreground transition-colors duration-300 rounded-none uppercase">
           Ver Detalles
@@ -63,7 +63,7 @@ function HeroLeftProject({ project, index }: { project: Project, index: number }
             </div>
           </div>
           <h2 className="font-serif text-[32px] font-semibold leading-[1.2] text-primary mb-4 text-right">{project.title}</h2>
-          <p className="text-[16px] leading-[1.6] text-muted mb-8 text-right">{project.description}</p>
+          <p className="text-[16px] leading-[1.6] text-muted mb-8 text-right line-clamp-6">{project.description}</p>
         </div>
         <Link href={`/proyectos/detalle/?slug=${project.slug || ''}`} className="self-end border border-primary text-primary px-6 py-3 text-[12px] font-semibold tracking-[0.1em] leading-none hover:bg-primary hover:text-primary-foreground transition-colors duration-300 rounded-none uppercase">
           Ver Detalles
@@ -93,7 +93,7 @@ function WideProject({ project, index }: { project: Project, index: number }) {
           {String(index + 1).padStart(2, '0')}
         </span>
         <h4 className="font-serif text-[28px] font-semibold leading-[1.3] text-primary mb-4">{project.title}</h4>
-        <p className="text-[16px] leading-[1.6] text-muted flex-grow mb-8">{project.description}</p>
+        <p className="text-[16px] leading-[1.6] text-muted flex-grow mb-8 line-clamp-4">{project.description}</p>
         <div className="flex justify-between items-center text-[12px] font-semibold tracking-[0.1em] leading-none text-primary/80 uppercase">
           <span>{project.category}</span>
           <span className="text-accent">{project.status}</span>
@@ -129,7 +129,7 @@ function HalfProject({ project, index }: { project: Project, index: number }) {
           </span>
         </div>
         <h4 className="font-serif text-[28px] font-semibold leading-[1.3] text-primary mb-3">{project.title}</h4>
-        <p className="text-[16px] leading-[1.6] text-muted flex-grow mb-6">{project.description}</p>
+        <p className="text-[16px] leading-[1.6] text-muted flex-grow mb-6 line-clamp-4">{project.description}</p>
         <div className="h-[1px] bg-primary/10 mb-4"></div>
         <div className="flex justify-between items-center text-[12px] font-semibold tracking-[0.1em] leading-none text-primary/80 uppercase">
           <span>Estado:</span>
@@ -160,7 +160,7 @@ function StandardProject({ project, index }: { project: Project, index: number }
         {String(index + 1).padStart(2, '0')}
       </span>
       <h4 className="font-serif text-[24px] font-semibold leading-[1.3] text-primary mb-3">{project.title}</h4>
-      <p className="text-[16px] leading-[1.6] text-muted flex-grow mb-6">{project.description}</p>
+      <p className="text-[16px] leading-[1.6] text-muted flex-grow mb-6 line-clamp-3">{project.description}</p>
       <div className="h-[1px] bg-primary/10 mb-4"></div>
       <div className="flex justify-between items-center text-[12px] font-semibold tracking-[0.1em] leading-none text-primary/80 uppercase">
         <span>Estado:</span>
@@ -186,7 +186,7 @@ function SolidProject({ project, index }: { project: Project, index: number }) {
         <h4 className="font-serif text-[24px] font-semibold leading-[1.3] text-primary-foreground mb-4 relative z-10">
           {project.title}
         </h4>
-        <p className="text-[16px] leading-[1.6] text-primary-foreground/80 relative z-10 mb-8 flex-grow">
+        <p className="text-[16px] leading-[1.6] text-primary-foreground/80 relative z-10 mb-8 flex-grow line-clamp-4">
           {project.description}
         </p>
         <span className="self-start border border-primary-foreground text-primary-foreground px-4 py-2 text-[12px] font-semibold tracking-[0.1em] leading-none hover:bg-primary-foreground hover:text-primary transition-colors duration-300 rounded-none relative z-10 uppercase">

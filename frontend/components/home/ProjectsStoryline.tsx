@@ -75,7 +75,7 @@ export function ProjectsStoryline() {
                     {project.nombre}
                   </h3>
                   {project.descripcion && (
-                    <p className="mb-8 text-base leading-7 text-[#504442]">
+                    <p className="mb-8 text-base leading-7 text-[#504442] line-clamp-6">
                       {project.descripcion}
                     </p>
                   )}

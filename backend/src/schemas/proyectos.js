@@ -13,6 +13,7 @@ const imageUploadShape = {
 const createProyectoSchema = z.object({
   nombre:        z.string({ required_error: 'nombre es requerido' }).trim().min(1, 'nombre es requerido').max(255, 'Nombre demasiado largo'),
   descripcion:   z.string().max(10_000, 'Descripción máximo 10,000 caracteres').optional().nullable(),
+  impacto:       z.string().max(2000, 'Impacto máximo 2,000 caracteres').optional().nullable(),
   estado:        z.enum(ESTADOS).optional(),
   tipo:          z.enum(TIPOS).optional(),
   fecha_inicio:  z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Fecha inválida (YYYY-MM-DD)').optional().nullable(),
@@ -25,6 +26,7 @@ const createProyectoSchema = z.object({
 const updateProyectoSchema = z.object({
   nombre:        z.string().trim().min(1).max(255).optional(),
   descripcion:   z.string().max(10_000).optional().nullable(),
+  impacto:       z.string().max(2000).optional().nullable(),
   estado:        z.enum(ESTADOS).optional(),
   tipo:          z.enum(TIPOS).optional(),
   fecha_inicio:  z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
@@ -63,6 +65,20 @@ const addImagenSchema = z.object({
   descripcion: z.string().trim().max(500).optional().nullable(),
 });
 
+const createIndicadorSchema = z.object({
+  icono:    z.string().trim().min(1).max(50).optional(),
+  valor:    z.string({ required_error: 'valor es requerido' }).trim().min(1, 'valor es requerido').max(100),
+  etiqueta: z.string({ required_error: 'etiqueta es requerida' }).trim().min(1, 'etiqueta es requerida').max(255),
+  orden:    z.coerce.number().int().min(0).optional(),
+});
+
+const updateIndicadorSchema = z.object({
+  icono:    z.string().trim().min(1).max(50).optional(),
+  valor:    z.string().trim().min(1).max(100).optional(),
+  etiqueta: z.string().trim().min(1).max(255).optional(),
+  orden:    z.coerce.number().int().min(0).optional(),
+});
+
 module.exports = {
   createProyectoSchema,
   updateProyectoSchema,
@@ -70,4 +86,6 @@ module.exports = {
   updateFaseSchema,
   assignTecnicoSchema,
   addImagenSchema,
+  createIndicadorSchema,
+  updateIndicadorSchema,
 };

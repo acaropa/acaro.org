@@ -17,6 +17,8 @@ const {
   updateFaseSchema,
   assignTecnicoSchema,
   addImagenSchema,
+  createIndicadorSchema,
+  updateIndicadorSchema,
 } = require('../schemas/proyectos');
 const { uploadLimiter } = require('../middlewares/rateLimiter');
 
@@ -110,6 +112,30 @@ router.delete(
   verifyToken,
   requirePermission(PERMISSIONS.PROYECTOS_DELETE),
   ctrl.removeImagen
+);
+
+router.post(
+  '/:id/indicadores',
+  validateParams(idParamSchema),
+  verifyToken,
+  requirePermission(PERMISSIONS.PROYECTOS_UPDATE_ASSIGNED, PERMISSIONS.PROYECTOS_UPDATE_ALL),
+  validate(createIndicadorSchema),
+  ctrl.createIndicador
+);
+router.put(
+  '/:id/indicadores/:indicadorId',
+  validateParams(idParamSchema),
+  verifyToken,
+  requirePermission(PERMISSIONS.PROYECTOS_UPDATE_ASSIGNED, PERMISSIONS.PROYECTOS_UPDATE_ALL),
+  validate(updateIndicadorSchema),
+  ctrl.updateIndicador
+);
+router.delete(
+  '/:id/indicadores/:indicadorId',
+  validateParams(idParamSchema),
+  verifyToken,
+  requirePermission(PERMISSIONS.PROYECTOS_UPDATE_ASSIGNED, PERMISSIONS.PROYECTOS_UPDATE_ALL),
+  ctrl.removeIndicador
 );
 
 module.exports = router;

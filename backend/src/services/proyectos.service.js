@@ -5,6 +5,7 @@ const { generateUniqueSlug } = require('../utils/slug');
 const PUBLIC_CACHE_TTL_MS = 300 * 1000;
 const PRIVATE_CACHE_TTL_MS = 30 * 1000;
 const MAX_PROJECT_PHASES = 6;
+const MAX_PROJECT_INDICADORES = 4;
 
 function invalidateProjectCache() {
   cache.invalidatePrefix('projects:');
@@ -73,7 +74,7 @@ async function getById(id) {
 
 async function queryById(id) {
   const [proyectos] = await db.query(
-    `SELECT p.id, p.nombre, p.slug, p.descripcion, p.tipo, p.clasificacion, p.imagen_portada,
+    `SELECT p.id, p.nombre, p.slug, p.descripcion, p.impacto, p.tipo, p.clasificacion, p.imagen_portada,
             p.estado, p.fecha_inicio, p.fecha_fin, p.responsable_id,
             p.supervisor_id, p.created_at,
             u.email AS responsable_email, u.full_name AS responsable_nombre,
@@ -117,8 +118,17 @@ async function queryById(id) {
     fases.forEach(f => (f.imagenes = []));
   }
 
+  const [indicadores] = await db.query(
+    `SELECT id, icono, valor, etiqueta, orden
+     FROM proyecto_indicadores
+     WHERE proyecto_id = ?
+     ORDER BY orden`,
+    [id]
+  );
+
   proyecto.tecnicos = tecnicos;
   proyecto.fases = fases;
+  proyecto.indicadores = indicadores;
   return proyecto;
 }
 
@@ -147,7 +157,7 @@ async function getPublicArchivos(proyectoId) {
 
 async function create(data) {
   const {
-    nombre, descripcion = null, tipo = 'publico', clasificacion = null,
+    nombre, descripcion = null, impacto = null, tipo = 'publico', clasificacion = null,
     estado = 'pendiente', fecha_inicio = null, fecha_fin = null, responsable_id = null,
     supervisor_id = null, imagen_portada = null,
   } = data;
@@ -167,16 +177,16 @@ async function create(data) {
   const slug = await generateUniqueSlug('proyectos', nombre);
   const [result] = await db.query(
     `INSERT INTO proyectos
-      (nombre, slug, descripcion, tipo, clasificacion, imagen_portada, estado, fecha_inicio, fecha_fin, responsable_id, supervisor_id)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [nombre, slug, descripcion, tipo, clasificacion, imagen_portada, estado, fecha_inicio, fecha_fin, responsable_id, supervisor_id]
+      (nombre, slug, descripcion, impacto, tipo, clasificacion, imagen_portada, estado, fecha_inicio, fecha_fin, responsable_id, supervisor_id)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [nombre, slug, descripcion, impacto, tipo, clasificacion, imagen_portada, estado, fecha_inicio, fecha_fin, responsable_id, supervisor_id]
   );
   invalidateProjectCache();
   return getById(result.insertId);
 }
 
 async function update(id, data) {
-  const allowed = ['nombre', 'descripcion', 'tipo', 'clasificacion', 'estado', 'fecha_inicio', 'fecha_fin', 'responsable_id', 'supervisor_id', 'imagen_portada'];
+  const allowed = ['nombre', 'descripcion', 'impacto', 'tipo', 'clasificacion', 'estado', 'fecha_inicio', 'fecha_fin', 'responsable_id', 'supervisor_id', 'imagen_portada'];
   const fields = Object.keys(data).filter(k => allowed.includes(k));
 
   if (fields.length === 0) {
@@ -351,6 +361,63 @@ async function removeFase(faseId) {
   return result.affectedRows > 0;
 }
 
+// ─── INDICADORES DESTACADOS ───────────────────────────────────────────────────
+
+async function indicadorBelongsToProject(indicadorId, proyectoId) {
+  const [rows] = await db.query(
+    'SELECT 1 FROM proyecto_indicadores WHERE id = ? AND proyecto_id = ?',
+    [indicadorId, proyectoId]
+  );
+  return rows.length > 0;
+}
+
+async function createIndicador(proyectoId, data) {
+  const [indicadorCount] = await db.query(
+    'SELECT COUNT(*) AS total FROM proyecto_indicadores WHERE proyecto_id = ?',
+    [proyectoId]
+  );
+  if (Number(indicadorCount[0].total) >= MAX_PROJECT_INDICADORES) {
+    const err = new Error(`Cada proyecto puede tener un máximo de ${MAX_PROJECT_INDICADORES} indicadores`);
+    err.status = 409;
+    throw err;
+  }
+
+  const { icono = 'sparkles', valor, etiqueta, orden = 0 } = data;
+  const [result] = await db.query(
+    `INSERT INTO proyecto_indicadores (proyecto_id, icono, valor, etiqueta, orden)
+     VALUES (?, ?, ?, ?, ?)`,
+    [proyectoId, icono, valor, etiqueta, orden]
+  );
+
+  invalidateProjectCache();
+  const [rows] = await db.query('SELECT * FROM proyecto_indicadores WHERE id = ?', [result.insertId]);
+  return rows[0];
+}
+
+async function updateIndicador(indicadorId, data) {
+  const allowed = ['icono', 'valor', 'etiqueta', 'orden'];
+  const fields = Object.keys(data).filter(k => allowed.includes(k));
+
+  if (fields.length === 0) {
+    const err = new Error('Sin campos válidos para actualizar');
+    err.status = 400;
+    throw err;
+  }
+
+  const set = fields.map(k => `${k} = ?`).join(', ');
+  await db.query(`UPDATE proyecto_indicadores SET ${set} WHERE id = ?`, [...fields.map(k => data[k]), indicadorId]);
+
+  invalidateProjectCache();
+  const [rows] = await db.query('SELECT * FROM proyecto_indicadores WHERE id = ?', [indicadorId]);
+  return rows[0] || null;
+}
+
+async function removeIndicador(indicadorId) {
+  const [result] = await db.query('DELETE FROM proyecto_indicadores WHERE id = ?', [indicadorId]);
+  if (result.affectedRows > 0) invalidateProjectCache();
+  return result.affectedRows > 0;
+}
+
 // ─── IMÁGENES ─────────────────────────────────────────────────────────────────
 
 async function addImagen(faseId, url, descripcion = null) {
@@ -377,4 +444,6 @@ module.exports = {
   imageBelongsToPhase,
   createFase, updateFase, removeFase,
   addImagen, removeImagen,
+  indicadorBelongsToProject,
+  createIndicador, updateIndicador, removeIndicador,
 };
