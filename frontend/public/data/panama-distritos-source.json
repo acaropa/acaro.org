@@ -1,0 +1,14 @@
+{
+  "dataset": "Panama Districts Boundaries - 2024",
+  "expectedDistricts": 82,
+  "requiredFields": [
+    "ID_Distrito",
+    "Provincia",
+    "Distrito"
+  ],
+  "attribution": "IGNTG-ANATI",
+  "featureLayer": "https://services2.arcgis.com/HRY6x8qt5qjGnAA9/ArcGIS/rest/services/Panama_Distritos_Boundaries_2024/FeatureServer/0",
+  "geoJsonQuery": "https://services2.arcgis.com/HRY6x8qt5qjGnAA9/ArcGIS/rest/services/Panama_Distritos_Boundaries_2024/FeatureServer/0/query?where=1%3D1&outFields=ID_Distrito%2CProvincia%2CDistrito&returnGeometry=true&outSR=4326&f=geojson",
+  "localOutput": "/data/panama-distritos.geojson",
+  "note": "Ejecutar node scripts/download-panama-districts.mjs. El script aborta si no recibe 82 códigos distritales únicos."
+}

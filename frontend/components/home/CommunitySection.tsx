@@ -28,10 +28,10 @@ export function CommunitySection() {
       <div className="mx-auto max-w-7xl items-center gap-16 px-5 sm:px-8 md:grid md:grid-cols-12 lg:px-10">
         <ScrollReveal className="md:col-span-5" direction="left" distance="lg">
           <h2 className="mb-6 font-serif text-3xl font-bold leading-tight tracking-[-0.025em] sm:mb-8 sm:text-5xl">
-            Las personas son el corazon de nuestro trabajo
+            Gente del Robusta
           </h2>
           <blockquote className="relative mb-12 border-l border-[#ae8d87]/30 pl-10 font-serif text-lg italic leading-8 text-[#c9b5b0]">
-            &ldquo;El desarrollo del cafe robusta empieza con productores informados, organizados y acompanados tecnicamente.&rdquo;
+            &ldquo;Desde la finca hasta la taza, cada persona en la cadena de valor aporta pasión, técnica y orgullo para hacer del robusta panameño una experiencia excepcional.&rdquo;
             <span className="mt-4 block font-sans not-italic text-sm font-bold uppercase tracking-widest text-white">
               ACARO OBC
             </span>
@@ -101,11 +101,16 @@ export function CommunitySection() {
                 <img src="/assets/landing-hero-v2.jpg" alt="Productores de cafe robusta en campo" className="h-full w-full object-cover" />
               </div>
               <p className="mt-6 text-lg leading-8 text-[#c9b5b0]">
-                Estamos preparando historias reales de productores, tecnicos y comunidades que forman parte de ACARO OBC.
+                Estamos preparando historias reales de las personas (productores, técnicos, tostadores, baristas) que forman parte de la cadena de valor de ACARO OBC.
               </p>
-              <Link href="/productores" className="mt-6 inline-flex bg-white px-6 py-3 text-sm font-semibold text-[#271310] hover:bg-[#faf9f5]">
-                Ver productores
-              </Link>
+              <div className="mt-6 flex flex-wrap gap-4">
+                <Link href="/productores" className="inline-flex bg-white px-6 py-3 text-sm font-semibold text-[#271310] hover:bg-[#faf9f5]">
+                  Ver perfiles
+                </Link>
+                <Link href="/productores" className="inline-flex border border-white/20 text-white px-6 py-3 text-sm font-semibold hover:bg-white/5 transition-colors">
+                  Ver mapa territorial
+                </Link>
+              </div>
             </div>
           </ScrollReveal>
         )}

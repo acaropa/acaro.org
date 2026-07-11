@@ -15,6 +15,7 @@ const emptyForm = {
   comunidad: '',
   rol: '',
   anios_experiencia: '',
+  distrito_id: '',
   descripcion: '',
   imagen_url: '',
   activo: true,
@@ -37,6 +38,26 @@ export default function AdminProductores() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
+  const [provincias, setProvincias] = useState<string[]>([]);
+  const [distritos, setDistritos] = useState<{ id: number; distrito: string }[]>([]);
+  const [selectedProvincia, setSelectedProvincia] = useState<string>('');
+
+  useEffect(() => {
+    api.get<string[]>('/mapa/provincias')
+      .then(setProvincias)
+      .catch(err => console.error('Error al cargar provincias:', err));
+  }, []);
+
+  useEffect(() => {
+    if (!selectedProvincia) {
+      setDistritos([]);
+      return;
+    }
+    api.get<{ id: number; distrito: string }[]>(`/mapa/provincias/${encodeURIComponent(selectedProvincia)}/distritos`)
+      .then(setDistritos)
+      .catch(err => console.error('Error al cargar distritos:', err));
+  }, [selectedProvincia]);
+
   const load = useCallback(async () => {
     setLoading(true);
     setError('');
@@ -56,6 +77,7 @@ export default function AdminProductores() {
 
   function resetForm() {
     setForm(emptyForm);
+    setSelectedProvincia('');
     setImageMode('url');
     setImage(null);
     setEditing(null);
@@ -64,11 +86,13 @@ export default function AdminProductores() {
 
   function startEdit(item: ProductorRecord) {
     setEditing(item);
+    setSelectedProvincia(item.provincia || '');
     setForm({
       nombre: item.nombre,
       comunidad: item.comunidad || '',
       rol: item.rol || '',
       anios_experiencia: item.anios_experiencia != null ? String(item.anios_experiencia) : '',
+      distrito_id: item.distrito_id != null ? String(item.distrito_id) : '',
       descripcion: item.descripcion || '',
       imagen_url: item.imagen_url || '',
       activo: item.activo,
@@ -89,6 +113,7 @@ export default function AdminProductores() {
         comunidad: form.comunidad,
         rol: form.rol,
         anios_experiencia: form.anios_experiencia,
+        distrito_id: form.distrito_id ? Number(form.distrito_id) : null,
         descripcion: form.descripcion,
         activo: form.activo,
         destacado: form.destacado,
@@ -138,10 +163,10 @@ export default function AdminProductores() {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border pb-6">
           <div className="max-w-2xl">
             <h1 className="font-headline-lg text-[40px] md:text-[56px] text-foreground leading-tight mb-3 tracking-tight">
-              Productores
+              Gente del Robusta
             </h1>
             <p className="font-body-lg text-[16px] md:text-[18px] text-muted">
-              Administra los perfiles de productores asociados que se muestran en el sitio público.
+              Administra los perfiles de las personas en la cadena de valor del café robusta que se muestran en el sitio público.
             </p>
           </div>
           <div className="flex flex-wrap gap-3 shrink-0">
@@ -150,25 +175,55 @@ export default function AdminProductores() {
                 onClick={() => (showForm ? resetForm() : setShowForm(true))}
                 className="px-6 py-3 font-label-caps text-label-caps bg-primary text-primary-foreground hover:bg-accent transition-colors uppercase tracking-widest"
               >
-                + Nuevo productor
+                + Nueva persona
               </button>
             )}
           </div>
         </div>
       </section>
 
-      <Modal isOpen={showForm} onClose={resetForm} title={editing ? 'Editar Productor' : 'Nuevo Productor'}>
+      <Modal isOpen={showForm} onClose={resetForm} title={editing ? 'Editar Persona' : 'Nueva Persona'}>
         <form onSubmit={save} className="relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
             <div className="md:col-span-2">
               <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Nombre</label>
               <input
                 required
-                placeholder="Nombre del productor"
+                placeholder="Nombre de la persona"
                 value={form.nombre}
                 onChange={event => setForm(current => ({ ...current, nombre: event.target.value }))}
                 className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors"
               />
+            </div>
+            <div>
+              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Provincia (Opcional)</label>
+              <select
+                value={selectedProvincia}
+                onChange={event => {
+                  setSelectedProvincia(event.target.value);
+                  setForm(current => ({ ...current, distrito_id: '' }));
+                }}
+                className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors"
+              >
+                <option value="">Selecciona una provincia</option>
+                {provincias.map(prov => (
+                  <option key={prov} value={prov}>{prov}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Distrito (Opcional)</label>
+              <select
+                disabled={!selectedProvincia}
+                value={form.distrito_id}
+                onChange={event => setForm(current => ({ ...current, distrito_id: event.target.value }))}
+                className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors disabled:opacity-50"
+              >
+                <option value="">Selecciona un distrito</option>
+                {distritos.map(dist => (
+                  <option key={dist.id} value={dist.id}>{dist.distrito}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Comunidad / Ubicación (Opcional)</label>
@@ -180,9 +235,9 @@ export default function AdminProductores() {
               />
             </div>
             <div>
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Rol en la asociación (Opcional)</label>
+              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Rol en la cadena de valor (Opcional)</label>
               <input
-                placeholder="Ej. Productor asociado"
+                placeholder="Ej. Productor, Tostador, Barista..."
                 value={form.rol}
                 onChange={event => setForm(current => ({ ...current, rol: event.target.value }))}
                 className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors"
@@ -202,7 +257,7 @@ export default function AdminProductores() {
             <div className="md:col-span-2">
               <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Historia / Descripción (Opcional)</label>
               <textarea
-                placeholder="Historia o descripción personal del productor..."
+                placeholder="Historia o descripción personal (orígenes, trayectoria en el café)..."
                 value={form.descripcion}
                 onChange={event => setForm(current => ({ ...current, descripcion: event.target.value }))}
                 className="min-h-32 w-full bg-background border border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors resize-y"

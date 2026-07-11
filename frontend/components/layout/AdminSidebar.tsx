@@ -16,6 +16,7 @@ import {
   Home,
   LogOut,
   Mail,
+  Map,
   Newspaper,
   ScrollText,
   Settings,
@@ -73,9 +74,15 @@ const navigation = [
     icon: Globe2,
     subItems: [
       {
-        name: "Productores",
+        name: "Gente del Robusta",
         href: "/admin/productores",
         icon: Tractor,
+        permissions: [PERMISSIONS.PRODUCTORES_CREATE, PERMISSIONS.PRODUCTORES_UPDATE],
+      },
+      {
+        name: "Cadena de Valor",
+        href: "/admin/cadena-valor",
+        icon: Map,
         permissions: [PERMISSIONS.PRODUCTORES_CREATE, PERMISSIONS.PRODUCTORES_UPDATE],
       },
       {

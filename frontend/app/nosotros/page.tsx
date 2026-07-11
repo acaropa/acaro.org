@@ -114,7 +114,7 @@ export default function Nosotros() {
                   />
                   <div className="absolute inset-0 bg-[#120c08]/0 transition-colors duration-500 group-hover:bg-[#120c08]/20" />
                   <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#120c08]/90 to-transparent p-8 md:p-12">
-                    <h4 className="mb-3 font-serif text-2xl font-semibold text-[#fdf9f4]">Los Productores</h4>
+                    <h4 className="mb-3 font-serif text-2xl font-semibold text-[#fdf9f4]">Gente del Robusta</h4>
                     <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.1em] text-[#fdf9f4]/80 transition-colors duration-300 group-hover:text-[#e2b86f]">
                       Conocer sus historias <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                     </span>

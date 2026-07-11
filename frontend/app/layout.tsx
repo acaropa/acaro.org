@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Inter, Montserrat, Beth_Ellen } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
-import { ThemeProvider } from '@/components/ThemeProvider';
+
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans-source' });
 const montserrat = Montserrat({
@@ -46,14 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es" className={`${inter.variable} ${montserrat.variable} ${bethEllen.variable} h-full`} suppressHydrationWarning>
       <body className="h-full bg-background text-foreground antialiased font-sans" suppressHydrationWarning>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          forcedTheme="light"
-          disableTransitionOnChange
-        >
-          <AuthProvider>{children}</AuthProvider>
-        </ThemeProvider>
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

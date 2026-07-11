@@ -40,7 +40,7 @@ export function PublicFooter() {
               <Link href="/" className="hover:text-white transition-colors">Inicio</Link>
               <Link href="/nosotros" className="hover:text-white transition-colors">Nosotros</Link>
               <Link href="/proyectos" className="hover:text-white transition-colors">Proyectos</Link>
-              <Link href="/productores" className="hover:text-white transition-colors">Productores</Link>
+              <Link href="/productores" className="hover:text-white transition-colors">Gente del Robusta</Link>
               <Link href="/noticias" className="hover:text-white transition-colors">Noticias</Link>
               <Link href="/biblioteca" className="hover:text-white transition-colors">Biblioteca</Link>
               <Link href="/encuestas" className="hover:text-white transition-colors">Encuestas</Link>

@@ -9,6 +9,9 @@ export interface ProductorRecord {
   comunidad: string | null;
   rol: string | null;
   anios_experiencia: number | null;
+  distrito_id?: number | null;
+  provincia?: string | null;
+  distrito?: string | null;
   activo: boolean;
   destacado: boolean;
   creado_por?: number;

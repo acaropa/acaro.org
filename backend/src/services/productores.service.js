@@ -11,10 +11,12 @@ function invalidateProducerCache() {
 
 const BASE_SELECT = `
   SELECT p.id, p.nombre, p.slug, p.descripcion, p.imagen_url, p.comunidad, p.rol,
-         p.anios_experiencia, p.activo, p.destacado, p.creado_por, p.created_at, p.updated_at,
+         p.anios_experiencia, p.distrito_id, p.activo, p.destacado, p.creado_por, p.created_at, p.updated_at,
+         d.provincia AS provincia, d.distrito AS distrito,
          creator.email AS creado_por_email, creator.full_name AS creado_por_nombre
   FROM productores p
   JOIN users creator ON creator.id = p.creado_por
+  LEFT JOIN distritos_panama d ON d.id = p.distrito_id
 `;
 
 async function getAll(user = null) {
@@ -65,8 +67,8 @@ async function create(data, actor) {
   const slug = await generateUniqueSlug('productores', data.nombre);
   const [result] = await db.query(
     `INSERT INTO productores
-      (nombre, slug, descripcion, imagen_url, comunidad, rol, anios_experiencia, activo, destacado, creado_por)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      (nombre, slug, descripcion, imagen_url, comunidad, rol, anios_experiencia, distrito_id, activo, destacado, creado_por)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       data.nombre,
       slug,
@@ -75,6 +77,7 @@ async function create(data, actor) {
       data.comunidad || null,
       data.rol || null,
       data.anios_experiencia ?? null,
+      data.distrito_id ?? null,
       data.activo ?? true,
       data.destacado ?? false,
       actor.id,
@@ -87,7 +90,7 @@ async function create(data, actor) {
 async function update(id, data) {
   const allowed = [
     'nombre', 'descripcion', 'imagen_url', 'comunidad', 'rol',
-    'anios_experiencia', 'activo', 'destacado',
+    'anios_experiencia', 'distrito_id', 'activo', 'destacado',
   ];
   const fields = Object.keys(data).filter(field => allowed.includes(field));
   if (!fields.length) {

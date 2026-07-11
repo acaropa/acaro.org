@@ -40,15 +40,15 @@ function ProductorDetalle() {
       <main className="flex-grow max-w-[1280px] mx-auto w-full px-[20px] md:px-[64px] py-[80px]">
         <div className="mb-[48px]">
           <Link href="/productores" className="text-xs font-bold tracking-widest uppercase text-primary border-b border-accent w-max pb-1">
-            ← Volver a productores
+            ← Volver a Gente del Robusta
           </Link>
         </div>
 
         {loading ? (
-          <div className="py-24 text-center text-muted">Cargando productor...</div>
+          <div className="py-24 text-center text-muted">Cargando perfil...</div>
         ) : !hasSlug || notFound || !producer ? (
           <EmptyState
-            title="Productor no encontrado"
+            title="Perfil no encontrado"
             description="Es posible que este perfil ya no esté disponible o haya sido retirado."
           />
         ) : (
@@ -97,7 +97,7 @@ function ProductorDetalle() {
                   </div>
                 ) : (
                   <p className="text-justify text-[18px] leading-[1.8] text-muted [hyphens:auto]">
-                    Este productor forma parte de la Asociación Café Robusta OBC.
+                    Esta persona forma parte de la cadena de valor del café robusta en la Asociación Café Robusta OBC.
                   </p>
                 )}
               </div>
