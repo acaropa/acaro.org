@@ -21,7 +21,7 @@ const navItems: NavItem[] = [
     label: "Nosotros",
     submenu: [
       { href: "/nosotros", label: "Acerca de la Asociación", info: "Conoce nuestra historia, misión y propósito." },
-      { href: "/productores", label: "Gente del Robusta", info: "Explora el mapa territorial y conoce a las personas de la cadena de valor." },
+      { href: "/productores", label: "Gente del Café Robusta", info: "Explora el mapa territorial y conoce a las personas de la cadena de valor." },
       { href: "/noticias", label: "Noticias y Novedades", info: "Explora los últimos avances y eventos de la comunidad." },
       { href: "/encuestas", label: "Encuestas", info: "Participa en las encuestas activas de la asociación." },
     ],
