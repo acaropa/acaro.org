@@ -44,10 +44,10 @@ export default function SolucionesPage() {
         <div className="relative z-10 mx-auto w-full max-w-7xl px-5 py-20 sm:px-8 lg:px-10">
           <ScrollReveal className="max-w-2xl">
             <div className="mb-4 text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-[#C6A15B]">
-              Soluciones · ACARO OBC
+              Servicios · ACARO OBC
             </div>
             <h1 className="mt-4 font-serif text-[clamp(2.4rem,6.5vw,4.4rem)] font-extrabold leading-[1.02] tracking-tight">
-              Soluciones ACARO
+              Servicios ACARO
             </h1>
             <p className="mt-5 mb-8 max-w-[46ch] text-[clamp(1.05rem,1.6vw,1.24rem)] text-[#e9e2d3]">
               Servicios agronómicos, café e insumos de la asociación. Cuéntanos qué necesitas y lo coordinamos.

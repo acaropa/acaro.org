@@ -17,7 +17,7 @@ export function SolucionesPreview() {
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-16">
           <ScrollReveal className="lg:col-span-5" direction="left" distance="lg">
             <span className="mb-4 block text-xs font-bold uppercase tracking-[0.2em] text-[#C6A15B]">
-              Soluciones ACARO
+              Servicios ACARO
             </span>
             <h2 className="mb-6 font-serif text-3xl font-bold leading-tight tracking-[-0.025em] text-white sm:text-5xl">
               Servicios, café e insumos
