@@ -28,6 +28,7 @@ const navItems: NavItem[] = [
   },
   { href: "/proyectos", label: "Proyectos" },
   { href: "/biblioteca", label: "Biblioteca" },
+  { href: "/soluciones", label: "Soluciones" },
 ]
 
 export function PublicNavbar() {

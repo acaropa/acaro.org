@@ -9,7 +9,7 @@ import { NewsGrid } from "@/components/home/NewsGrid"
 import { CommunitySection } from "@/components/home/CommunitySection"
 import { LibraryPreview } from "@/components/home/LibraryPreview"
 import { LandingMetadataBar } from "@/components/home/LandingMetadataBar"
-
+import { SolucionesPreview } from "@/components/home/SolucionesPreview"
 export const metadata: Metadata = {
   title: "ACARO OBC | Cafe Robusta de Panama",
   description:
@@ -119,6 +119,8 @@ export default function Home() {
       </section>
 
       <LandingMetadataBar />
+
+      <SolucionesPreview />
 
       {/* Proyectos que abren oportunidades */}
       <section className="overflow-hidden bg-[#f4f4f0] py-16 sm:py-24 lg:py-32">
