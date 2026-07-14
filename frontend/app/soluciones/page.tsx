@@ -50,7 +50,7 @@ export default function SolucionesPage() {
               Soluciones ACARO
             </h1>
             <p className="mt-5 mb-8 max-w-[46ch] text-[clamp(1.05rem,1.6vw,1.24rem)] text-[#e9e2d3]">
-              Servicios agronómicos, café e insumos de la asociación. Contanos qué necesitás y lo coordinamos con vos.
+              Servicios agronómicos, café e insumos de la asociación. Cuéntanos qué necesitas y lo coordinamos.
             </p>
             <div className="flex flex-wrap gap-4">
               <a 
@@ -137,13 +137,13 @@ export default function SolucionesPage() {
         <div className="mx-auto max-w-4xl px-5 py-16 text-center sm:px-8 sm:py-24">
           <ScrollReveal>
             <div className="mb-4 text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-[#C6A15B]">
-              Escribinos
+              Escríbenos
             </div>
             <h2 className="mb-4 font-serif text-[clamp(1.7rem,4.5vw,2.8rem)] font-extrabold tracking-tight">
               ¿Te interesa algo?
             </h2>
             <p className="mx-auto mb-8 max-w-[44ch] text-[#e0d9c8]">
-              Contanos qué necesitás y te respondemos.
+              Cuéntanos qué necesitas y te respondemos.
             </p>
             <a 
               href={generalWa}
