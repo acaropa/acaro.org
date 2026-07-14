@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { ScrollReveal } from "@/components/landing/LandingMotion";
 
-const CONTACT = { whatsapp: "50763207461", email: "correo@acaro.org" };
+const CONTACT = { whatsapp: "50763207461", email: "contacto@acaro.org" };
 
 const SERVICIOS = [
   { t: "Elaboración de ficha técnica de finca", d: "Documentación y caracterización de tu finca." },
