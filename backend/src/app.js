@@ -147,8 +147,25 @@ const allowEmbedFromFrontend = (_req, res, next) => {
   res.set('Content-Security-Policy', 'frame-ancestors https://acaro.org https://www.acaro.org');
   next();
 };
-app.use('/uploads', allowEmbedFromFrontend, express.static(uploadRoot, uploadStaticOptions));
-app.use('/api/uploads', allowEmbedFromFrontend, express.static(uploadRoot, uploadStaticOptions));
+
+const fs = require('fs');
+const path = require('path');
+const devUploadsRedirect = (req, res, next) => {
+  if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) {
+    const localFilePath = path.join(uploadRoot, req.path);
+    try {
+      if (!fs.existsSync(localFilePath) || fs.statSync(localFilePath).isDirectory()) {
+        return res.redirect(`https://api.acaro.org/uploads${req.path}`);
+      }
+    } catch (e) {
+      return res.redirect(`https://api.acaro.org/uploads${req.path}`);
+    }
+  }
+  next();
+};
+
+app.use('/uploads', allowEmbedFromFrontend, devUploadsRedirect, express.static(uploadRoot, uploadStaticOptions));
+app.use('/api/uploads', allowEmbedFromFrontend, devUploadsRedirect, express.static(uploadRoot, uploadStaticOptions));
 
 app.use(errorHandler);
 
