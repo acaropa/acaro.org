@@ -101,6 +101,7 @@ export default function Noticias() {
                           loading="lazy"
                           className="w-full h-full object-cover transition-all duration-700"
                           src={apiAssetUrl(featured.imagen_portada)}
+                          referrerPolicy="no-referrer"
                         />
                       )}
                     </div>
@@ -144,6 +145,7 @@ export default function Noticias() {
                             loading="lazy"
                             className="w-full h-full object-cover transition-all duration-500"
                             src={apiAssetUrl(item.imagen_portada)}
+                            referrerPolicy="no-referrer"
                           />
                         )}
                       </div>

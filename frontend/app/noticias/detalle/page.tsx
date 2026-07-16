@@ -83,6 +83,7 @@ function NoticiaDetalle() {
                     loading="lazy"
                     className="w-full h-full object-cover"
                     src={apiAssetUrl(noticia.imagen_portada)}
+                    referrerPolicy="no-referrer"
                   />
                 </div>
               )}
@@ -106,6 +107,7 @@ function NoticiaDetalle() {
                             alt={`Imagen del comunicado ${imageIndex + 1}`}
                             className="w-full h-full object-cover"
                             loading="lazy"
+                            referrerPolicy="no-referrer"
                           />
                         </div>
                       )}
@@ -129,6 +131,7 @@ function NoticiaDetalle() {
                             alt={`Imagen de galería ${inlineImagesCount + i + 1}`}
                             className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300"
                             loading="lazy"
+                            referrerPolicy="no-referrer"
                           />
                         </a>
                       </div>
