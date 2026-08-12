@@ -1,9 +1,10 @@
 'use client'
 
 import { AppIcon } from "@/components/ui/AppIcon"
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type RefObject } from 'react'
 import type { EncuestaPregunta } from '@/lib/encuestas'
-import type { AnswerValue, SingleChoiceAnswer, MultipleChoiceAnswer } from '@/lib/surveyRules'
+import type { AnswerValue } from '@/lib/surveyRules'
+import type { SubmitMotionPhase } from './SurveySubmitMotion'
 
 interface Props {
   question: EncuestaPregunta
@@ -14,6 +15,8 @@ interface Props {
   isSubmitting?: boolean
   onGoBack?: () => void
   canGoBack?: boolean
+  submitButtonRef?: RefObject<HTMLButtonElement | null>
+  submitMotionPhase?: SubmitMotionPhase
 }
 
 const inputCls =
@@ -27,7 +30,9 @@ export function SurveyQuestionRenderer({
   onAnswer,
   isSubmitting = false,
   onGoBack,
-  canGoBack = false
+  canGoBack = false,
+  submitButtonRef,
+  submitMotionPhase = 'idle'
 }: Props) {
   const [textValue, setTextValue] = useState('')
   const [longTextValue, setLongTextValue] = useState('')
@@ -39,22 +44,32 @@ export function SurveyQuestionRenderer({
   const [freeText, setFreeText] = useState<Record<number, string>>({})
 
   useEffect(() => {
-    setTextValue(''); setLongTextValue(''); setNumberValue(''); setDateValue('')
-    setSelectedBoolean(null); setSelectedSingleId(null); setSelectedMultiIds([]); setFreeText({})
+    let cancelled = false
 
-    if (question.tipo_pregunta === 'texto_corto' && typeof initialValue === 'string') setTextValue(initialValue)
-    if (question.tipo_pregunta === 'texto_largo' && typeof initialValue === 'string') setLongTextValue(initialValue)
-    if (question.tipo_pregunta === 'numero' && typeof initialValue === 'number') setNumberValue(String(initialValue))
-    if (question.tipo_pregunta === 'fecha' && typeof initialValue === 'string') setDateValue(initialValue)
-    if (question.tipo_pregunta === 'booleano' && typeof initialValue === 'boolean') setSelectedBoolean(initialValue)
+    queueMicrotask(() => {
+      if (cancelled) return
 
-    if (question.tipo_pregunta === 'opcion_unica' && initialValue && typeof initialValue === 'object' && 'type' in initialValue && initialValue.type === 'single_choice') {
-      setSelectedSingleId(initialValue.optionId)
-      if (initialValue.textFree) setFreeText({ [initialValue.optionId]: initialValue.textFree })
-    }
-    if (question.tipo_pregunta === 'opcion_multiple' && initialValue && typeof initialValue === 'object' && 'type' in initialValue && initialValue.type === 'multiple_choice') {
-      setSelectedMultiIds(initialValue.selections.map(s => s.optionId))
-      setFreeText(Object.fromEntries(initialValue.selections.filter(s => s.textFree).map(s => [s.optionId, s.textFree!])))
+      setTextValue(''); setLongTextValue(''); setNumberValue(''); setDateValue('')
+      setSelectedBoolean(null); setSelectedSingleId(null); setSelectedMultiIds([]); setFreeText({})
+
+      if (question.tipo_pregunta === 'texto_corto' && typeof initialValue === 'string') setTextValue(initialValue)
+      if (question.tipo_pregunta === 'texto_largo' && typeof initialValue === 'string') setLongTextValue(initialValue)
+      if (question.tipo_pregunta === 'numero' && typeof initialValue === 'number') setNumberValue(String(initialValue))
+      if (question.tipo_pregunta === 'fecha' && typeof initialValue === 'string') setDateValue(initialValue)
+      if (question.tipo_pregunta === 'booleano' && typeof initialValue === 'boolean') setSelectedBoolean(initialValue)
+
+      if (question.tipo_pregunta === 'opcion_unica' && initialValue && typeof initialValue === 'object' && 'type' in initialValue && initialValue.type === 'single_choice') {
+        setSelectedSingleId(initialValue.optionId)
+        if (initialValue.textFree) setFreeText({ [initialValue.optionId]: initialValue.textFree })
+      }
+      if (question.tipo_pregunta === 'opcion_multiple' && initialValue && typeof initialValue === 'object' && 'type' in initialValue && initialValue.type === 'multiple_choice') {
+        setSelectedMultiIds(initialValue.selections.map(s => s.optionId))
+        setFreeText(Object.fromEntries(initialValue.selections.filter(s => s.textFree).map(s => [s.optionId, s.textFree!])))
+      }
+    })
+
+    return () => {
+      cancelled = true
     }
   }, [initialValue, question.id, question.tipo_pregunta])
 
@@ -62,6 +77,9 @@ export function SurveyQuestionRenderer({
     () => [...(question.opciones ?? [])].sort((a, b) => a.posicion - b.posicion),
     [question.opciones]
   )
+
+  const isFinalSubmit = continueLabel === 'Enviar encuesta'
+  const isSubmitAnimating = isFinalSubmit && submitMotionPhase !== 'idle' && submitMotionPhase !== 'error'
 
   const renderActionBar = (disabled: boolean, onContinue: () => void) => (
     <div className="flex justify-between items-center mt-12 pt-8 w-full border-t border-outline-variant/20">
@@ -79,12 +97,22 @@ export function SurveyQuestionRenderer({
 
       <button
         type="button"
+        ref={isFinalSubmit ? submitButtonRef : undefined}
         disabled={disabled}
         onClick={onContinue}
-        className="inline-flex items-center gap-3 px-8 py-3.5 bg-primary text-white text-xs font-bold tracking-[0.2em] uppercase hover:bg-primary/90 transition-colors disabled:opacity-30 disabled:cursor-not-allowed group"
+        data-submit-state={isFinalSubmit ? submitMotionPhase : undefined}
+        className={`inline-flex items-center gap-3 px-8 py-3.5 bg-primary text-white text-xs font-bold tracking-[0.2em] uppercase hover:bg-primary/90 transition-colors disabled:opacity-30 disabled:cursor-not-allowed group ${isFinalSubmit ? 'survey-submit-button' : ''}`}
       >
-        <span>{isSubmitting ? 'Enviando...' : continueLabel}</span>
-        {!isSubmitting && <AppIcon name="arrow_forward" className="group-hover:translate-x-1 transition-transform" />}
+        <span className={isFinalSubmit ? 'survey-submit-label' : undefined}>{isSubmitting ? 'Enviando...' : continueLabel}</span>
+        {!isSubmitting && <AppIcon name="arrow_forward" className={`group-hover:translate-x-1 transition-transform ${isFinalSubmit ? 'survey-submit-arrow' : ''}`} />}
+        {isSubmitAnimating && (
+          <span className="survey-submit-plane" aria-hidden="true">
+            <svg viewBox="0 0 42 42" className="h-full w-full" fill="none">
+              <path d="M4.8 20.6 36.2 6.7 27.1 35.6 19.9 24.2 4.8 20.6Z" fill="currentColor" />
+              <path d="M19.9 24.2 36.2 6.7 15.8 26.7 16.9 34.1 19.9 24.2Z" fill="rgba(255,255,255,.34)" />
+            </svg>
+          </span>
+        )}
       </button>
     </div>
   )
