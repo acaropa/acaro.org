@@ -2,7 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 
 const SOURCE_URL = "https://services2.arcgis.com/HRY6x8qt5qjGnAA9/ArcGIS/rest/services/Panama_Distritos_Boundaries_2024/FeatureServer/0/query?where=1%3D1&outFields=ID_Distrito%2CProvincia%2CDistrito&returnGeometry=true&outSR=4326&f=geojson";
-const OUTPUT_FILE = resolve("public/data/panama-distritos.geojson");
+const OUTPUT_FILE = resolve("data/panama-distritos.raw.geojson");
 const EXPECTED_DISTRICTS = 82;
 
 function normalizeCode(value) {

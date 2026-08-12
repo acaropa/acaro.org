@@ -5,7 +5,6 @@ import {
   useRef,
   useState,
   type KeyboardEvent,
-  type MouseEvent,
   type PointerEvent,
 } from "react";
 import { MAP_HEIGHT, MAP_WIDTH } from "./constants";
@@ -82,7 +81,7 @@ export function DistrictMapSvg({
   }
 
   function updateTooltip(
-    event: PointerEvent<SVGPathElement> | MouseEvent<SVGPathElement>,
+    event: PointerEvent<SVGPathElement>,
     projected: ProjectedDistrict,
   ) {
     const rect = containerRef.current?.getBoundingClientRect();
@@ -154,9 +153,6 @@ export function DistrictMapSvg({
               aria-label={`${district.district}, ${district.province}: ${district.count} actores registrados`}
               aria-pressed={isSelected}
               onPointerEnter={(event: PointerEvent<SVGPathElement>) =>
-                updateTooltip(event, projected)
-              }
-              onPointerMove={(event: PointerEvent<SVGPathElement>) =>
                 updateTooltip(event, projected)
               }
               onPointerLeave={() => setTooltip(null)}

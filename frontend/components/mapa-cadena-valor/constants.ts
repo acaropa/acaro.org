@@ -1,7 +1,7 @@
 import type { ActorTypeOption } from "./types";
 
 export const DEFAULT_API_BASE_URL = "/api/mapa/cadena-valor";
-export const DEFAULT_GEOJSON_URL = "/data/panama-distritos.geojson";
+export const DEFAULT_GEOJSON_URL = "/data/panama-distritos-simplified.geojson";
 
 export const FALLBACK_FILTERS: ActorTypeOption[] = [
   { code: "todos", label: "Todos" },

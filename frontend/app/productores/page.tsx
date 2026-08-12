@@ -2,7 +2,8 @@
 
 import { AppIcon } from "@/components/ui/AppIcon"
 
-import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { PublicLayout } from '@/components/layout/PublicLayout';
 import { ScrollReveal } from '@/components/landing/LandingMotion';
@@ -10,7 +11,6 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { api } from '@/lib/api';
 import { ProductorRecord, producerImage, formatExperience } from '@/lib/producers';
 
-import { PanamaValueChainMap } from "@/components/mapa-cadena-valor";
 
 function ProducerCard({ producer, index }: { producer: ProductorRecord; index: number }) {
   const experience = formatExperience(producer.anios_experiencia);
@@ -65,6 +65,57 @@ function ProducerCard({ producer, index }: { producer: ProductorRecord; index: n
   );
 }
 
+const PanamaValueChainMap = dynamic(
+  () => import("@/components/mapa-cadena-valor").then(mod => mod.PanamaValueChainMap),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="grid min-h-[360px] place-items-center text-sm text-muted">
+        Preparando el territorio...
+      </div>
+    ),
+  },
+);
+
+function LazyTerritoryMap() {
+  const containerRef = useRef<HTMLElement | null>(null);
+  const [shouldRenderMap, setShouldRenderMap] = useState(false);
+
+  useEffect(() => {
+    if (shouldRenderMap) return;
+
+    const element = containerRef.current;
+    if (!element) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        setShouldRenderMap(true);
+        observer.disconnect();
+      },
+      { rootMargin: "520px 0px" },
+    );
+
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [shouldRenderMap]);
+
+  return (
+    <section ref={containerRef} className="px-[20px] md:px-[40px] lg:px-[48px] pb-20 md:pb-28 max-w-[1440px] mx-auto w-full">
+      {shouldRenderMap ? (
+        <PanamaValueChainMap
+          eyebrow="01 / TERRITORIO"
+          title="Presencia territorial del café robusta en Panamá"
+          description=""
+        />
+      ) : (
+        <div className="grid min-h-[430px] place-items-center text-sm text-muted">
+          Preparando el territorio...
+        </div>
+      )}
+    </section>
+  );
+}
 const PAGE_SIZE = 9;
 
 export default function Productores() {
@@ -118,14 +169,8 @@ export default function Productores() {
           </div>
         </section>
 
-        {/* ── Sección del Mapa — integrada directamente sin caja ── */}
-        <section className="px-[20px] md:px-[40px] lg:px-[48px] pb-20 md:pb-28 max-w-[1440px] mx-auto w-full">
-          <PanamaValueChainMap
-            eyebrow="01 / TERRITORIO"
-            title="Presencia territorial del café robusta en Panamá"
-            description=""
-          />
-        </section>
+        {/* Mapa territorial: carga diferida para mantener la navegacion fluida */}
+        <LazyTerritoryMap />
 
         {/* ── Transición editorial ── */}
         <section className="py-16 md:py-24 px-[20px] md:px-[64px]">

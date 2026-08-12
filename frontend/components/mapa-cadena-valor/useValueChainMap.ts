@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { api } from "../../lib/api";
 import {
-  DEFAULT_API_BASE_URL,
   DEFAULT_GEOJSON_URL,
   FALLBACK_FILTERS,
 } from "./constants";
@@ -36,7 +35,6 @@ interface MapState {
 }
 
 export function useValueChainMap({
-  apiBaseUrl = DEFAULT_API_BASE_URL,
   geoJsonUrl = DEFAULT_GEOJSON_URL,
   initialFilter = "todos",
 }: UseValueChainMapOptions = {}) {
