@@ -22,26 +22,48 @@ function ProyectoDetalle() {
   const slug = searchParams.get('slug') || '';
 
   const [proyecto, setProyecto] = useState<ProyectoRecord | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(Boolean(slug));
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    if (!slug) {
-      setNotFound(true);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    setNotFound(false);
-    api.get<ProyectoRecord>(`/proyectos/slug/${slug}`)
-      .then(setProyecto)
-      .catch(() => setNotFound(true))
-      .finally(() => setLoading(false));
+    if (!slug) return;
+
+    let cancelled = false;
+
+    Promise.resolve().then(() => {
+      if (cancelled) return;
+
+      setLoading(true);
+      setNotFound(false);
+      setProyecto(null);
+
+      api.get<ProyectoRecord>(`/proyectos/slug/${slug}`)
+        .then(data => {
+          if (!cancelled) setProyecto(data);
+        })
+        .catch(() => {
+          if (!cancelled) setNotFound(true);
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false);
+        });
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [slug]);
+
+  const hasProjectMeta = Boolean(
+    proyecto?.responsable_nombre ||
+    proyecto?.responsable_email ||
+    proyecto?.fecha_inicio ||
+    proyecto?.fecha_fin
+  );
 
   return (
     <PublicLayout className="landing-typography">
-      <main className="flex-grow pt-32 pb-[120px] px-[20px] md:px-[64px] max-w-[1280px] mx-auto w-full">
+      <main className="flex-grow pt-32 pb-[120px] px-[20px] md:px-[56px] lg:px-[72px] max-w-[1440px] mx-auto w-full">
         <div className="mb-12">
           <Link href="/proyectos" className="text-xs font-bold tracking-widest uppercase text-primary border-b border-accent w-max pb-1">
             ← Volver a proyectos
@@ -57,58 +79,81 @@ function ProyectoDetalle() {
           />
         ) : (
           <ScrollReveal delay={0} distance="md">
-            <article>
-              <div className="flex flex-wrap items-center gap-[16px] mb-[24px]">
-                {proyecto.clasificacion && (
-                  <span className="inline-block bg-accent text-primary-foreground px-3 py-1 text-[12px] font-semibold tracking-[0.1em] leading-none uppercase">
-                    {proyecto.clasificacion}
+            <article className="space-y-[64px]">
+              <header className="mx-auto max-w-[920px]">
+                <div className="flex flex-wrap items-center gap-[16px] mb-[24px]">
+                  {proyecto.clasificacion && (
+                    <span className="inline-block bg-accent text-primary-foreground px-3 py-1 text-[12px] font-semibold tracking-[0.1em] leading-none uppercase">
+                      {proyecto.clasificacion}
+                    </span>
+                  )}
+                  <span className="text-xs font-bold tracking-widest uppercase text-primary/60">
+                    {STATUS_MAP[proyecto.estado]}
                   </span>
+                  {formatProjectDate(proyecto) && (
+                    <>
+                      <span className="w-1 h-1 rounded-full bg-primary/30"></span>
+                      <span className="text-xs font-bold tracking-widest uppercase text-muted">{formatProjectDate(proyecto)}</span>
+                    </>
+                  )}
+                  {formatProjectDuration(proyecto) && (
+                    <>
+                      <span className="w-1 h-1 rounded-full bg-primary/30"></span>
+                      <span className="text-xs font-bold tracking-widest uppercase text-muted">Duración: {formatProjectDuration(proyecto)}</span>
+                    </>
+                  )}
+                </div>
+
+                <h1 className="font-serif font-semibold text-[32px] md:text-[52px] leading-[1.2] tracking-[-0.015em] text-primary">
+                  {proyecto.nombre}
+                </h1>
+              </header>
+
+              <div className="mx-auto max-w-[920px]">
+                {proyecto.imagen_portada && (
+                  <div className="w-full aspect-[16/9] min-h-[220px] max-h-[420px] bg-white overflow-hidden border border-primary/10">
+                    <img
+                      alt={proyecto.nombre}
+                      loading="lazy"
+                      className="w-full h-full object-contain p-[18px] md:p-[32px]"
+                      src={apiAssetUrl(proyecto.imagen_portada)}
+                    />
+                  </div>
                 )}
-                <span className="text-xs font-bold tracking-widest uppercase text-primary/60">
-                  {STATUS_MAP[proyecto.estado]}
-                </span>
-                {formatProjectDate(proyecto) && (
-                  <>
-                    <span className="w-1 h-1 rounded-full bg-primary/30"></span>
-                    <span className="text-xs font-bold tracking-widest uppercase text-muted">{formatProjectDate(proyecto)}</span>
-                  </>
+
+                {proyecto.descripcion && (
+                  <section className={`${proyecto.imagen_portada ? 'mt-[32px]' : ''} border-y border-primary/10 py-[28px]`}>
+                    <p className="text-left md:text-justify text-[17px] leading-[1.8] text-muted [hyphens:auto]">{proyecto.descripcion}</p>
+                  </section>
                 )}
-                {formatProjectDuration(proyecto) && (
-                  <>
-                    <span className="w-1 h-1 rounded-full bg-primary/30"></span>
-                    <span className="text-xs font-bold tracking-widest uppercase text-muted">Duración: {formatProjectDuration(proyecto)}</span>
-                  </>
+
+                {hasProjectMeta && (
+                  <dl className={`${proyecto.descripcion ? 'mt-[24px]' : proyecto.imagen_portada ? 'mt-[28px]' : ''} grid grid-cols-1 gap-[16px] border-b border-primary/10 pb-[28px] md:grid-cols-3`}>
+                    {(proyecto.responsable_nombre || proyecto.responsable_email) && (
+                      <div>
+                        <dt className="text-[11px] font-bold tracking-widest uppercase text-muted">Responsable</dt>
+                        <dd className="mt-1 text-[15px] font-semibold text-primary">{proyecto.responsable_nombre || proyecto.responsable_email}</dd>
+                      </div>
+                    )}
+                    {formatProjectDate(proyecto) && (
+                      <div>
+                        <dt className="text-[11px] font-bold tracking-widest uppercase text-muted">Periodo</dt>
+                        <dd className="mt-1 text-[15px] font-semibold text-primary">{formatProjectDate(proyecto)}</dd>
+                      </div>
+                    )}
+                    {formatProjectDuration(proyecto) && (
+                      <div>
+                        <dt className="text-[11px] font-bold tracking-widest uppercase text-muted">Duración</dt>
+                        <dd className="mt-1 text-[15px] font-semibold text-primary">{formatProjectDuration(proyecto)}</dd>
+                      </div>
+                    )}
+                  </dl>
                 )}
               </div>
 
-              <h1 className={`font-serif font-semibold text-[32px] md:text-[52px] leading-[1.2] tracking-[-0.015em] text-primary ${(proyecto.responsable_nombre || proyecto.responsable_email) ? 'mb-[16px]' : 'mb-[40px]'}`}>
-                {proyecto.nombre}
-              </h1>
-
-              {(proyecto.responsable_nombre || proyecto.responsable_email) && (
-                <p className="text-xs font-semibold tracking-wider text-muted mb-[40px]">
-                  Responsable: <span className="text-primary">{proyecto.responsable_nombre || proyecto.responsable_email}</span>
-                </p>
-              )}
-
-              {proyecto.imagen_portada && (
-                <div className="w-full h-[320px] md:h-[480px] bg-surface overflow-hidden mb-[48px]">
-                  <img
-                    alt={proyecto.nombre}
-                    loading="lazy"
-                    className="w-full h-full object-cover"
-                    src={apiAssetUrl(proyecto.imagen_portada)}
-                  />
-                </div>
-              )}
-
-              {proyecto.descripcion && (
-                <p className="max-w-3xl mb-[64px] text-justify text-[18px] leading-[1.8] text-muted [hyphens:auto]">{proyecto.descripcion}</p>
-              )}
-
               {/* Indicadores destacados */}
               {proyecto.indicadores && proyecto.indicadores.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-[24px] mb-[64px]">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-[24px]">
                   {proyecto.indicadores.map(indicador => (
                     <div key={indicador.id} className="border border-primary/10 bg-surface p-[24px] text-center">
                       <AppIcon name={indicador.icono} className="text-[32px] text-accent" decorative={false} />
@@ -121,7 +166,7 @@ function ProyectoDetalle() {
 
               {/* Fases */}
               {proyecto.fases && proyecto.fases.length > 0 && (
-                <section className="mb-[64px]">
+                <section>
                   <h2 className="font-serif text-[28px] font-semibold text-primary mb-[32px]">Avance del proyecto</h2>
                   <div className="flex flex-col gap-[40px]">
                     {proyecto.fases.map(fase => (
@@ -165,7 +210,7 @@ function ProyectoDetalle() {
 
               {/* Impacto */}
               {proyecto.impacto && (
-                <div className="mb-[64px] bg-primary p-[32px] text-primary-foreground">
+                <div className="bg-primary p-[32px] text-primary-foreground">
                   <p className="text-[16px] leading-[1.6]">{proyecto.impacto}</p>
                 </div>
               )}

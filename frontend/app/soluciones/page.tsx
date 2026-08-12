@@ -1,10 +1,9 @@
 'use client';
 
-import type { Metadata } from "next";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { ScrollReveal } from "@/components/landing/LandingMotion";
 
-const CONTACT = { whatsapp: "50763207461", email: "contacto@acaro.org" };
+const CONTACT = { whatsapp: "50765869456", displayWhatsapp: "+507 6586-9456", email: "contacto@acaro.org" };
 
 const SERVICIOS = [
   { t: "Elaboración de ficha técnica de finca", d: "Documentación y caracterización de tu finca." },
@@ -23,8 +22,8 @@ const PRODUCTOS = [
 
 export default function SolucionesPage() {
   const num = CONTACT.whatsapp.replace(/[^0-9]/g, "");
-  const wa = (t: string) => `https://wa.me/${num}?text=${encodeURIComponent("Hola ACARO 👋 " + t)}`;
-  const generalWa = wa("quiero más información sobre lo que ofrecen.");
+  const wa = (t: string) => `https://wa.me/${num}?text=${encodeURIComponent(t)}`;
+  const generalWa = wa("Hola ACARO, me gustaria recibir informacion sobre sus servicios.");
 
   return (
     <PublicLayout>
@@ -154,8 +153,8 @@ export default function SolucionesPage() {
               Contactar a ACARO
             </a>
             <div className="mt-8 flex flex-wrap justify-center gap-6 text-[0.92rem] font-semibold">
-              <a href={wa("hola")} target="_blank" rel="noopener noreferrer" className="text-[#C6A15B] transition-opacity hover:opacity-80">
-                WhatsApp +{num}
+              <a href={wa("Hola ACARO, me gustaria recibir informacion sobre sus servicios.")} target="_blank" rel="noopener noreferrer" className="text-[#C6A15B] transition-opacity hover:opacity-80">
+                WhatsApp {CONTACT.displayWhatsapp}
               </a>
               <a href={`mailto:${CONTACT.email}`} className="text-[#C6A15B] transition-opacity hover:opacity-80">
                 {CONTACT.email}
