@@ -23,11 +23,11 @@ const navItems: NavItem[] = [
       { href: "/nosotros", label: "Acerca de la Asociación", info: "Conoce nuestra historia, misión y propósito." },
       { href: "/productores", label: "Gente del Café Robusta", info: "Explora el mapa territorial y conoce a las personas de la cadena de valor." },
       { href: "/noticias", label: "Noticias y Novedades", info: "Explora los últimos avances y eventos de la comunidad." },
+      { href: "/encuestas", label: "Encuestas", info: "Participa en las consultas y procesos de la Asociación." },
     ],
   },
   { href: "/proyectos", label: "Proyectos" },
   { href: "/biblioteca", label: "Biblioteca" },
-  { href: "/encuestas", label: "Encuestas" },
   { href: "/servicios", label: "Servicios" },
 ]
 
