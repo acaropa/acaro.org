@@ -94,7 +94,9 @@ app.use(cors({
       if (isLocalIp) return callback(null, true);
     }
 
-    callback(new Error('Not allowed by CORS'));
+    const error = new Error('Origen no permitido');
+    error.status = 403;
+    callback(error);
   },
   credentials: true,
 }));

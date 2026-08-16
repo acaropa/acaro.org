@@ -1,9 +1,11 @@
 'use client';
 
+import { DataLoadingState } from "@/components/ui/TypingIndicator";
+
 import { AppIcon } from "@/components/ui/AppIcon"
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Modal } from '@/components/ui/Modal';
+import { Modal, ModalActions } from '@/components/ui/Modal';
 import { api } from '@/lib/api';
 
 type AgendaRow = {
@@ -522,7 +524,7 @@ export default function AdminNotasConceptualesPage() {
             />
           </div>
           {loading ? (
-            <div className="py-8 text-center text-sm text-muted">Cargando...</div>
+            <DataLoadingState label="Cargando..." className="py-8" />
           ) : notes.length === 0 ? (
             <div className="border border-dashed border-border rounded-lg p-6 text-center">
               <AppIcon name="contract_edit" className="text-[36px] text-muted mb-3" />
@@ -615,7 +617,7 @@ export default function AdminNotasConceptualesPage() {
         maxWidth="max-w-5xl"
       >
         <form
-          className="relative z-10 space-y-8"
+          className="relative z-10 space-y-6"
           onSubmit={event => {
             event.preventDefault();
             saveDraft();
@@ -727,21 +729,11 @@ export default function AdminNotasConceptualesPage() {
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-2">
-            <button
-              type="button"
-              onClick={() => setShowForm(false)}
-              className="px-6 py-3 border border-border text-foreground hover:bg-surface transition-colors uppercase tracking-widest font-label-caps text-label-caps"
-            >
-              Cancelar
-            </button>
-            <button
-              disabled={saving}
-              className="px-8 py-3 bg-primary text-primary-foreground font-label-caps text-label-caps uppercase tracking-widest hover:bg-accent transition-colors disabled:opacity-50"
-            >
-              {saving ? 'Guardando...' : editingId ? 'Guardar cambios' : 'Crear nota'}
-            </button>
-          </div>
+          <ModalActions
+            onCancel={() => setShowForm(false)}
+            submitLabel={editingId ? 'Guardar cambios' : 'Crear nota'}
+            pending={saving}
+          />
         </form>
       </Modal>
     </>

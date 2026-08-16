@@ -46,7 +46,7 @@ export function SolucionesPreview() {
               Acompañamiento agronómico, asesoría técnica especializada, material vegetal de alta calidad y la mejor selección de café robusta para tu proyecto o negocio.
             </p>
             <Link
-              href="/soluciones"
+              href="/servicios"
               className="group inline-flex items-center gap-2 bg-[#f4f4f0] px-6 py-3.5 text-xs font-bold uppercase tracking-widest text-[#120c08] transition-all hover:bg-white"
             >
               Ver catálogo completo

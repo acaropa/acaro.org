@@ -21,14 +21,14 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://acaro.org'),
   title: 'ACARO | Asociación Café Robusta OBC',
   description:
-    'Portal institucional de la Asociación Café Robusta OBC, organización dedicada al desarrollo del café robusta en Panamá.',
+    'Portal institucional de la Asociación Café Robusta OBC, asociación dedicada al desarrollo del café robusta en Panamá.',
   alternates: {
     canonical: 'https://acaro.org',
   },
   openGraph: {
     title: 'ACARO | Asociación Café Robusta OBC',
     description:
-      'Portal institucional de la Asociación Café Robusta OBC, organización dedicada al desarrollo del café robusta en Panamá.',
+      'Portal institucional de la Asociación Café Robusta OBC, asociación dedicada al desarrollo del café robusta en Panamá.',
     url: 'https://acaro.org',
     siteName: 'ACARO',
     locale: 'es_PA',
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     card: 'summary',
     title: 'ACARO | Asociación Café Robusta OBC',
     description:
-      'Portal institucional de la Asociación Café Robusta OBC, organización dedicada al desarrollo del café robusta en Panamá.',
+      'Portal institucional de la Asociación Café Robusta OBC, asociación dedicada al desarrollo del café robusta en Panamá.',
   },
 };
 

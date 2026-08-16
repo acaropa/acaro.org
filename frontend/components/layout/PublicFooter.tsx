@@ -12,7 +12,7 @@ export function PublicFooter() {
           <div>
             <Logo variant="white" />
             <p className="mt-6 max-w-md text-sm leading-7 text-[#b8a99a]">
-              Organización de productores comprometida con el desarrollo técnico, sostenible y competitivo del café robusta en Panamá.
+              asociación de productores comprometida con el desarrollo técnico, sostenible y competitivo del café robusta en Panamá.
             </p>
             <div className="mt-7">
               <p className="text-sm font-semibold text-[#f8efe3]">Redes Sociales</p>
@@ -69,7 +69,7 @@ export function PublicFooter() {
               Acceso Interno
             </Link>
           </div>
-          <p>Organización · Conocimiento · Producción</p>
+          <p>asociación · Conocimiento · Producción</p>
         </div>
       </div>
     </footer>

@@ -1,10 +1,12 @@
 'use client';
 
+import { DataLoadingState } from "@/components/ui/TypingIndicator";
+
 import { AppIcon } from "@/components/ui/AppIcon";
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
-import { Modal } from '@/components/ui/Modal';
+import { Modal, ModalActions } from '@/components/ui/Modal';
 import { PERMISSIONS } from '@/lib/permissions';
 
 interface ActorRecord {
@@ -35,7 +37,7 @@ const emptyForm = {
 const ENTITY_TYPES = [
   { code: 'persona', label: 'Persona' },
   { code: 'empresa', label: 'Empresa' },
-  { code: 'organizacion', label: 'Organización' },
+  { code: 'organizacion', label: 'Asociación' },
   { code: 'institucion', label: 'Institución' },
 ];
 
@@ -83,7 +85,8 @@ export default function AdminCadenaValor() {
   }, [statusFilter]);
 
   useEffect(() => {
-    void load();
+    const frame = window.requestAnimationFrame(() => { void load(); });
+    return () => window.cancelAnimationFrame(frame);
   }, [load]);
 
   useEffect(() => {
@@ -93,10 +96,7 @@ export default function AdminCadenaValor() {
   }, []);
 
   useEffect(() => {
-    if (!selectedProvincia) {
-      setDistritos([]);
-      return;
-    }
+    if (!selectedProvincia) return;
     api.get<{ id: number; distrito: string }[]>(`/mapa/provincias/${encodeURIComponent(selectedProvincia)}/distritos`)
       .then(setDistritos)
       .catch(err => console.error('Error al cargar distritos:', err));
@@ -105,6 +105,7 @@ export default function AdminCadenaValor() {
   function resetForm() {
     setForm(emptyForm);
     setSelectedProvincia('');
+    setDistritos([]);
     setEditing(null);
     setShowForm(false);
   }
@@ -223,9 +224,9 @@ export default function AdminCadenaValor() {
         ))}
       </div>
 
-      <Modal isOpen={showForm} onClose={resetForm} title={editing ? 'Editar Actor' : 'Nuevo Actor'}>
+      <Modal isOpen={showForm} onClose={resetForm} title={editing ? 'Editar Actor' : 'Nuevo Actor'} maxWidth="max-w-3xl">
         <form onSubmit={save} className="relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+          <div className="relative z-10 grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="md:col-span-2">
               <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Nombre del actor / entidad</label>
               <input
@@ -240,7 +241,7 @@ export default function AdminCadenaValor() {
               <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Tipo de Entidad</label>
               <select
                 value={form.tipo_entidad}
-                onChange={event => setForm(current => ({ ...current, tipo_entidad: event.target.value as any }))}
+                onChange={event => setForm(current => ({ ...current, tipo_entidad: event.target.value as ActorRecord['tipo_entidad'] }))}
                 className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors"
               >
                 {ENTITY_TYPES.map(type => (
@@ -324,11 +325,7 @@ export default function AdminCadenaValor() {
               </label>
             </div>
 
-            <div className="md:col-span-2 flex justify-end mt-4">
-              <button disabled={saving} className="px-8 py-3 bg-primary text-primary-foreground font-label-caps text-[12px] uppercase tracking-widest hover:bg-accent transition-colors disabled:opacity-50">
-                {saving ? 'Guardando...' : 'Guardar Actor'}
-              </button>
-            </div>
+            <ModalActions onCancel={resetForm} submitLabel={editing ? 'Guardar cambios' : 'Guardar actor'} pending={saving} />
           </div>
         </form>
       </Modal>
@@ -336,7 +333,7 @@ export default function AdminCadenaValor() {
       {error && <p className="rounded border-l-4 border-red-600 bg-red-50 p-4 font-body-md text-sm text-red-700 mb-8">{error}</p>}
 
       {loading ? (
-        <div className="py-12 text-center text-muted font-body-md animate-pulse">Cargando actores...</div>
+        <DataLoadingState label="Cargando actores..." className="py-12" />
       ) : actores.length === 0 ? (
         <div className="bg-surface/30 border border-border border-dashed p-16 flex flex-col items-center justify-center text-center">
           <AppIcon name="map" className="text-[48px] text-muted mb-4 opacity-50" />

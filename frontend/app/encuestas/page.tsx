@@ -1,5 +1,7 @@
 'use client'
 
+import { DataLoadingState } from "@/components/ui/TypingIndicator";
+
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { api } from '@/lib/api'
@@ -85,10 +87,7 @@ export default function EncuestasPublicas() {
             </div>
 
             {loading ? (
-              <div className="py-24 flex flex-col items-center justify-center text-primary/60 animate-pulse space-y-6">
-                <AppIcon name="loader_2" className="w-10 h-10 animate-spin" />
-                <p className="font-label-caps">CARGANDO...</p>
-              </div>
+              <DataLoadingState label="Cargando encuestas..." className="py-24" />
             ) : surveys.length === 0 ? (
               <div className="py-24 flex flex-col items-center justify-center text-center space-y-6 scroll-reveal" data-direction="up" data-distance="lg">
                 <AppIcon name="inbox" className="text-5xl text-outline-variant" />

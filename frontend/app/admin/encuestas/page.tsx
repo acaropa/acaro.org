@@ -1,8 +1,12 @@
 'use client'
 
+import { DataLoadingState } from "@/components/ui/TypingIndicator";
+
 
 import { AppIcon } from "@/components/ui/AppIcon"
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import Image from 'next/image'
+import QRCode from 'qrcode'
 import Link from 'next/link'
 import { useAuth } from '@/context/AuthContext'
 import { PERMISSIONS } from '@/lib/permissions'
@@ -24,6 +28,15 @@ const stateColors: Record<string, string> = {
   cerrada: 'bg-red-100 text-red-800',
   archivada: 'bg-gray-100 text-gray-600',
 }
+type ShareTarget = Pick<Encuesta, 'id' | 'titulo' | 'slug'> & {
+  section?: boolean
+}
+
+function publicSurveyUrl(enc: ShareTarget) {
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://acaro.org'
+  if (enc.section) return origin + '/encuestas'
+  return origin + '/encuestas/responder?slug=' + encodeURIComponent(enc.slug)
+}
 
 export default function AdminEncuestas() {
   const { can } = useAuth()
@@ -41,26 +54,79 @@ export default function AdminEncuestas() {
   const [copiedId, setCopiedId] = useState<number | null>(null)
   const [changingId, setChangingId] = useState<number | null>(null)
   const [statusError, setStatusError] = useState('')
+  const [shareTarget, setShareTarget] = useState<ShareTarget | null>(null)
+  const [qrDataUrl, setQrDataUrl] = useState('')
+  const [shareError, setShareError] = useState('')
 
-  const copyLink = (enc: Encuesta) => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://acaro.org'
-    const url = `${origin}/encuestas/responder?slug=${enc.slug}`
-    navigator.clipboard.writeText(url).then(() => {
-      setCopiedId(enc.id)
-      setTimeout(() => setCopiedId(null), 2000)
-    })
+  const copyLink = async (enc: ShareTarget) => {
+    const url = publicSurveyUrl(enc)
+
+    try {
+      await navigator.clipboard.writeText(url)
+    } catch {
+      const input = document.createElement('textarea')
+      input.value = url
+      input.style.position = 'fixed'
+      input.style.opacity = '0'
+      document.body.appendChild(input)
+      input.select()
+      document.execCommand('copy')
+      input.remove()
+    }
+
+    setCopiedId(enc.id)
+    window.setTimeout(() => setCopiedId(null), 2000)
   }
 
-  const load = useCallback(async () => {
-    try {
-      setLoading(true)
-      setEncuestas(await encuestasApi.list())
-    } catch { /* empty */ } finally {
-      setLoading(false)
+  const openShare = (enc: ShareTarget) => {
+    setQrDataUrl('')
+    setShareError('')
+    setShareTarget(enc)
+  }
+
+  useEffect(() => {
+    let cancelled = false
+
+    encuestasApi.list()
+      .then(data => {
+        if (!cancelled) setEncuestas(data)
+      })
+      .catch(() => {
+        if (!cancelled) setEncuestas([])
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+
+    return () => {
+      cancelled = true
     }
   }, [])
+  useEffect(() => {
+    if (!shareTarget) return
 
-  useEffect(() => { void load() }, [load])
+    let cancelled = false
+
+    QRCode.toDataURL(publicSurveyUrl(shareTarget), {
+      width: 640,
+      margin: 2,
+      errorCorrectionLevel: 'M',
+      color: {
+        dark: '#2b1710',
+        light: '#ffffff',
+      },
+    })
+      .then(dataUrl => {
+        if (!cancelled) setQrDataUrl(dataUrl)
+      })
+      .catch(() => {
+        if (!cancelled) setShareError('No se pudo generar el código QR.')
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [shareTarget])
 
   const stats = useMemo(() => {
     const total = encuestas.length
@@ -113,6 +179,7 @@ export default function AdminEncuestas() {
     try {
       const updated = await encuestasApi.changeEstado(enc.id, estado)
       setEncuestas(prev => prev.map(e => (e.id === updated.id ? { ...e, ...updated } : e)))
+      if (estado === 'publicada') openShare({ ...enc, ...updated })
     } catch {
       setStatusError('No se pudo cambiar el estado de la encuesta. Inténtalo nuevamente.')
     } finally {
@@ -127,15 +194,30 @@ export default function AdminEncuestas() {
           <h1 className="text-2xl font-bold text-[#2b1710]">Encuestas</h1>
           <p className="text-sm text-[#765e50]">Crea, publica y analiza las encuestas de la comunidad cafetalera.</p>
         </div>
-        {canCreate && (
-          <Link
-            href="/admin/encuestas/nueva"
-            className="inline-flex items-center gap-2 rounded-lg bg-[#2f6542] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#224f31] transition-colors"
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => openShare({
+              id: 0,
+              titulo: 'Sección pública de encuestas',
+              slug: 'encuestas',
+              section: true,
+            })}
+            className="inline-flex items-center gap-2 rounded-lg border border-[#d8cabb] bg-white px-4 py-2.5 text-sm font-semibold text-[#5a3424] transition-colors hover:bg-[#faf9f5]"
           >
-            <AppIcon name="add" className="text-[18px]" />
-            Nueva encuesta
-          </Link>
-        )}
+            <AppIcon name="qr_code" className="text-[18px]" />
+            QR de la sección
+          </button>
+          {canCreate && (
+            <Link
+              href="/admin/encuestas/nueva"
+              className="inline-flex items-center gap-2 rounded-lg bg-[#2f6542] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#224f31] transition-colors"
+            >
+              <AppIcon name="add" className="text-[18px]" />
+              Nueva encuesta
+            </Link>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -194,7 +276,7 @@ export default function AdminEncuestas() {
       )}
 
       {loading ? (
-        <p className="py-16 text-center text-sm text-[#765e50]">Cargando encuestas...</p>
+        <DataLoadingState label="Cargando encuestas..." className="py-16" />
       ) : !filtered.length ? (
         <p className="py-16 text-center text-sm text-[#765e50]">No hay encuestas para mostrar.</p>
       ) : (
@@ -245,11 +327,13 @@ export default function AdminEncuestas() {
                       </Link>
                       {enc.estado === 'publicada' && (
                         <button
-                          onClick={() => copyLink(enc)}
+                          type="button"
+                          onClick={() => openShare(enc)}
                           className="rounded-lg p-2 text-[#5a3424] hover:bg-[#f0e8dd]"
-                          title={copiedId === enc.id ? '¡Copiado!' : 'Copiar enlace'}
+                          title="Ver QR y enlace"
+                          aria-label={'Compartir ' + enc.titulo}
                         >
-                          <AppIcon name={copiedId === enc.id ? 'check' : 'link'} className="text-[20px]" />
+                          <AppIcon name="qr_code" className="text-[20px]" />
                         </button>
                       )}
                       {canPublish && enc.estado === 'borrador' && (
@@ -310,6 +394,91 @@ export default function AdminEncuestas() {
         </div>
       )}
 
+      <Modal
+        isOpen={!!shareTarget}
+        onClose={() => {
+          setShareTarget(null)
+          setQrDataUrl('')
+          setShareError('')
+        }}
+        title={shareTarget?.section ? "Compartir sección de encuestas" : "Compartir encuesta"}
+        maxWidth="max-w-lg"
+      >
+        {shareTarget && (
+          <div>
+            <p className="text-sm font-semibold leading-6 text-[#2b1710]">
+              {shareTarget.titulo}
+            </p>
+            <p className="mt-1 text-sm leading-6 text-[#765e50]">
+              {shareTarget.section
+                ? 'Comparte la página donde aparecen todas las encuestas públicas.'
+                : 'Comparte el enlace o descarga el código QR para materiales impresos y digitales.'}
+            </p>
+
+            <div className="mx-auto my-6 flex min-h-56 w-56 items-center justify-center rounded-lg border border-[#d8cabb] bg-white p-3">
+              {qrDataUrl ? (
+                <Image
+                  src={qrDataUrl}
+                  alt={'Código QR de ' + shareTarget.titulo}
+                  width={220}
+                  height={220}
+                  unoptimized
+                  className="h-auto w-full"
+                />
+              ) : shareError ? (
+                <p className="px-4 text-center text-sm text-red-700">{shareError}</p>
+              ) : (
+                <DataLoadingState label="Generando QR..." className="py-8" />
+              )}
+            </div>
+
+            <label htmlFor="survey-public-url" className="mb-2 block text-xs font-semibold uppercase tracking-wider text-[#765e50]">
+              Enlace público
+            </label>
+            <div className="flex min-w-0 gap-2">
+              <input
+                id="survey-public-url"
+                value={publicSurveyUrl(shareTarget)}
+                readOnly
+                onFocus={event => event.currentTarget.select()}
+                className="min-w-0 flex-1 rounded-lg border border-[#d8cabb] bg-[#faf9f5] px-3 py-2.5 text-sm text-[#2b1710] outline-none focus:border-[#5a3424]"
+              />
+              <button
+                type="button"
+                onClick={() => void copyLink(shareTarget)}
+                className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-[#5a3424] px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#42261a]"
+              >
+                <AppIcon name={copiedId === shareTarget.id ? 'check' : 'content_copy'} className="text-[18px]" />
+                {copiedId === shareTarget.id ? 'Copiado' : 'Copiar'}
+              </button>
+            </div>
+
+            <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-end">
+              <a
+                href={publicSurveyUrl(shareTarget)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#d8cabb] px-4 py-2.5 text-sm font-semibold text-[#5a3424] transition-colors hover:bg-[#faf9f5]"
+              >
+                <AppIcon name="open_in_new" className="text-[18px]" />
+                Abrir encuesta
+              </a>
+              <a
+                href={qrDataUrl || undefined}
+                download={shareTarget.section ? 'encuestas-acaro-qr.png' : shareTarget.slug + '-qr.png'}
+                aria-disabled={!qrDataUrl}
+                onClick={event => {
+                  if (!qrDataUrl) event.preventDefault()
+                }}
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#2f6542] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#224f31] aria-disabled:cursor-wait aria-disabled:opacity-50"
+              >
+                <AppIcon name="download" className="text-[18px]" />
+                Descargar QR
+              </a>
+            </div>
+          </div>
+        )}
+      </Modal>
       <Modal isOpen={!!deleteTarget} onClose={() => setDeleteTarget(null)} title="Eliminar encuesta">
         <p className="mb-4 text-sm text-[#5a3424]">
           ¿Seguro que deseas eliminar <strong>{deleteTarget?.titulo}</strong>?

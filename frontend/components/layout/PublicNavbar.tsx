@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation"
 import { ChevronDown, Menu, X } from "lucide-react"
 
 import { Logo } from "@/components/Logo"
-import { SocialIcon, SocialNetwork, socialNetworks } from "@/components/SocialNetworks"
+import { SocialIcon, SocialNetwork } from "@/components/SocialNetworks"
 import { cn } from "@/lib/utils"
 
 type NavItem = {
@@ -23,12 +23,12 @@ const navItems: NavItem[] = [
       { href: "/nosotros", label: "Acerca de la Asociación", info: "Conoce nuestra historia, misión y propósito." },
       { href: "/productores", label: "Gente del Café Robusta", info: "Explora el mapa territorial y conoce a las personas de la cadena de valor." },
       { href: "/noticias", label: "Noticias y Novedades", info: "Explora los últimos avances y eventos de la comunidad." },
-      { href: "/encuestas", label: "Encuestas", info: "Participa en las encuestas activas de la asociación." },
     ],
   },
   { href: "/proyectos", label: "Proyectos" },
   { href: "/biblioteca", label: "Biblioteca" },
-  { href: "/soluciones", label: "Servicios" },
+  { href: "/encuestas", label: "Encuestas" },
+  { href: "/servicios", label: "Servicios" },
 ]
 
 export function PublicNavbar() {
@@ -56,7 +56,7 @@ export function PublicNavbar() {
             <Logo variant="white" className="[&_span]:text-[16px] [&_span]:leading-[0.95]" />
           </Link>
 
-          <nav className="hidden items-center gap-7 md:flex">
+          <nav className="hidden items-center gap-4 md:flex lg:gap-7">
             {navItems.map((item) =>
               item.submenu ? (
                 <div key={item.label} className="group relative">

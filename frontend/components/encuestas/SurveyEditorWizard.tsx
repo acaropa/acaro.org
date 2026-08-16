@@ -1,5 +1,7 @@
 'use client'
 
+import { DataLoadingState } from "@/components/ui/TypingIndicator";
+
 
 import { AppIcon } from "@/components/ui/AppIcon"
 import { useCallback, useEffect, useState } from 'react'
@@ -91,7 +93,10 @@ export function SurveyEditorWizard({ encuestaId }: Props) {
     }
   }, [encuestaId])
 
-  useEffect(() => { void loadEncuesta() }, [loadEncuesta])
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => { void loadEncuesta() })
+    return () => window.cancelAnimationFrame(frame)
+  }, [loadEncuesta])
 
   const handleSave = async () => {
     setSaving(true)
@@ -154,7 +159,7 @@ export function SurveyEditorWizard({ encuestaId }: Props) {
   }
 
   if (loading) {
-    return <p className="py-12 text-center text-sm text-[#765e50]">Cargando encuesta...</p>
+    return <DataLoadingState label="Cargando encuesta..." className="py-12" />
   }
 
   return (

@@ -1,5 +1,7 @@
 'use client';
 
+import { DataLoadingState } from "@/components/ui/TypingIndicator";
+
 import { AppIcon } from "@/components/ui/AppIcon"
 
 import dynamic from 'next/dynamic';
@@ -188,7 +190,7 @@ export default function Productores() {
         {/* ── Listado de perfiles ── */}
         <section className="pb-[120px] px-[20px] md:px-[64px] max-w-[1280px] mx-auto w-full">
           {loading ? (
-            <div className="py-24 text-center text-muted">Cargando historias...</div>
+            <DataLoadingState label="Cargando historias..." className="py-24" />
           ) : producers.length === 0 ? (
             <EmptyState
               title="Sin perfiles publicados"

@@ -1,14 +1,63 @@
-'use client';
+"use client";
 
-import { useRef, useState } from 'react';
-import { apiAssetUrl } from '@/lib/api';
+import { FileUploadDropzone } from "@/components/ui/FileUploadDropzone";
+import { apiAssetUrl } from "@/lib/api";
+import { cn } from "@/lib/utils";
+import { Link2, RotateCcw, Upload } from "lucide-react";
 
 export interface UploadedFile {
   base64: string;
   fileName: string;
 }
 
+type ImageSourceMode = "file" | "url" | "keep";
+
+export function ImageSourceSwitch({
+  value,
+  onChange,
+  allowKeep = false,
+}: {
+  value: ImageSourceMode;
+  onChange: (mode: ImageSourceMode) => void;
+  allowKeep?: boolean;
+}) {
+  const options = [
+    { value: "file" as const, label: "Archivo", icon: Upload },
+    { value: "url" as const, label: "Enlace", icon: Link2 },
+    ...(allowKeep ? [{ value: "keep" as const, label: "Actual", icon: RotateCcw }] : []),
+  ];
+
+  return (
+    <div
+      className="mb-3 grid border border-border bg-background p-1"
+      style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}
+      role="group"
+      aria-label="Origen del archivo"
+    >
+      {options.map(option => {
+        const Icon = option.icon;
+        const active = value === option.value;
+        return (
+          <button
+            key={option.value}
+            type="button"
+            onClick={() => onChange(option.value)}
+            aria-pressed={active}
+            className={cn(
+              "flex h-9 items-center justify-center gap-2 px-2 text-xs font-semibold transition-colors",
+              active ? "bg-primary text-primary-foreground shadow-sm" : "text-muted hover:bg-surface hover:text-foreground",
+            )}
+          >
+            <Icon className="h-4 w-4" aria-hidden="true" />
+            {option.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 interface ImageUploadFieldProps {
+  compact?: boolean;
   label?: string;
   value: UploadedFile | null;
   onChange: (value: UploadedFile | null) => void;
@@ -20,27 +69,17 @@ interface ImageUploadFieldProps {
 }
 
 export function ImageUploadField({
+  compact = false,
   label,
   value,
   onChange,
   existingUrl,
-  accept = 'image/jpeg,image/png,image/webp',
+  accept = "image/jpeg,image/png,image/webp",
   helperText,
   maxSizeMb = 4,
   showPreview = true,
 }: ImageUploadFieldProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [error, setError] = useState('');
-
-  function handleFile(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    setError('');
-    if (file.size > maxSizeMb * 1024 * 1024) {
-      setError(`El archivo supera el límite de ${maxSizeMb} MB`);
-      event.target.value = '';
-      return;
-    }
+  function handleFile(file: File) {
     const reader = new FileReader();
     reader.onload = () => {
       onChange({ base64: String(reader.result), fileName: file.name });
@@ -48,51 +87,18 @@ export function ImageUploadField({
     reader.readAsDataURL(file);
   }
 
-  function clear() {
-    onChange(null);
-    if (inputRef.current) inputRef.current.value = '';
-  }
-
-  const previewSrc = value?.base64 || (existingUrl ? apiAssetUrl(existingUrl) : null);
-  const isImagePreview =
-    showPreview &&
-    !!previewSrc &&
-    (value?.base64.startsWith('data:image') || /\.(jpe?g|png|webp|gif)$/i.test(previewSrc));
-
   return (
-    <div>
-      {label && (
-        <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">
-          {label}
-        </label>
-      )}
-      {isImagePreview && (
-        <div className="mb-3 h-40 w-full max-w-xs bg-surface overflow-hidden border border-border">
-          <img src={previewSrc ?? undefined} alt="Vista previa" className="w-full h-full object-cover" />
-        </div>
-      )}
-      <div className="flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          className="px-4 py-2 font-label-caps text-[11px] uppercase tracking-widest border border-border text-foreground hover:bg-surface transition-colors"
-        >
-          {value || existingUrl ? 'Cambiar archivo' : 'Subir archivo'}
-        </button>
-        {(value?.fileName || existingUrl) && (
-          <span className="text-sm text-muted font-body-md truncate max-w-[200px]">
-            {value?.fileName || existingUrl?.split('/').pop()}
-          </span>
-        )}
-        {value && (
-          <button type="button" onClick={clear} className="text-sm text-red-600 hover:text-red-800">
-            Quitar
-          </button>
-        )}
-      </div>
-      <input ref={inputRef} type="file" accept={accept} onChange={handleFile} className="hidden" />
-      {helperText && <p className="mt-1 text-xs text-muted">{helperText}</p>}
-      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
-    </div>
+    <FileUploadDropzone
+      compact={compact}
+      label={label}
+      accept={accept}
+      maxSizeMb={maxSizeMb}
+      helperText={helperText}
+      existingUrl={value?.base64 || (existingUrl ? apiAssetUrl(existingUrl) : null)}
+      fileName={value?.fileName || existingUrl?.split("/").pop()}
+      onFileSelect={handleFile}
+      onClear={value ? () => onChange(null) : undefined}
+      showPreview={showPreview}
+    />
   );
 }

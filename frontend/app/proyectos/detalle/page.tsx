@@ -1,5 +1,7 @@
 'use client';
 
+import { DataLoadingState } from "@/components/ui/TypingIndicator";
+
 import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -71,7 +73,7 @@ function ProyectoDetalle() {
         </div>
 
         {loading ? (
-          <div className="py-24 text-center text-muted">Cargando proyecto...</div>
+          <DataLoadingState label="Cargando proyecto..." className="py-24" />
         ) : notFound || !proyecto ? (
           <EmptyState
             title="Proyecto no encontrado"

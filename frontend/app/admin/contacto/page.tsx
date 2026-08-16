@@ -1,5 +1,7 @@
 'use client';
 
+import { DataLoadingState, TypingIndicator } from "@/components/ui/TypingIndicator";
+
 import { useCallback, useEffect, useState } from 'react';
 import { Mail, MailOpen, Reply, Trash2, X, Send, RefreshCw } from 'lucide-react';
 import { api } from '@/lib/api';
@@ -50,7 +52,10 @@ export default function ContactoAdminPage() {
     }
   }, []);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => { void load(); });
+    return () => window.cancelAnimationFrame(frame);
+  }, [load]);
 
   async function openMensaje(msg: Mensaje) {
     try {
@@ -122,7 +127,7 @@ export default function ContactoAdminPage() {
             disabled={refreshing}
             className="inline-flex items-center justify-center gap-2 border border-border px-5 py-3 font-label-caps text-label-caps uppercase tracking-widest text-foreground transition-colors hover:bg-surface disabled:opacity-60"
           >
-            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            {refreshing ? <TypingIndicator compact label="Actualizando mensajes" /> : <RefreshCw className="h-4 w-4" />}
             Actualizar
           </button>
         </div>
@@ -132,11 +137,7 @@ export default function ContactoAdminPage() {
         {/* Lista de mensajes */}
         <div className="md:col-span-4 rounded-xl border border-border bg-card overflow-hidden">
           {loading ? (
-            <div className="space-y-3 p-4">
-              {[0,1,2,3].map(i => (
-                <div key={i} className="h-16 animate-pulse rounded-lg bg-surface" />
-              ))}
-            </div>
+            <DataLoadingState label="Cargando mensajes..." className="py-16" />
           ) : mensajes.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center px-6">
               <Mail className="mb-3 h-10 w-10 text-muted" />

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 180" role="img" aria-labelledby="title desc">
+  <title id="title">IDIAP</title>
+  <desc id="desc">Marca tipografica local de respaldo para IDIAP</desc>
+  <rect width="420" height="180" fill="#ffffff"/>
+  <text x="210" y="92" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="76" font-weight="800" fill="#087735">idiap</text>
+  <path d="M185 28c13 15 17 34 7 56-7-6-12-15-13-28-1-11 1-20 6-28Z" fill="#f4bd1b"/>
+  <path d="M202 40c-3 22-1 42 8 61 8-9 12-20 11-32-1-14-8-24-19-29Z" fill="#f4bd1b"/>
+  <text x="210" y="136" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" letter-spacing="1.8" fill="#1f1f1f">INSTITUTO DE INNOVACION AGROPECUARIA</text>
+  <text x="210" y="160" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" letter-spacing="1.4" fill="#1f1f1f">DE PANAMA</text>
+</svg>

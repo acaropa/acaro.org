@@ -1,7 +1,8 @@
 "use client";
 
 import { FocusEvent, FormEvent, ReactNode } from "react";
-import { ArrowLeft, LoaderCircle, Search, X } from "lucide-react";
+import { ArrowLeft, Search, X } from "lucide-react";
+import { TypingIndicator } from "@/components/ui/TypingIndicator";
 
 type Topic = {
   label: string;
@@ -89,7 +90,7 @@ export function LibrarySearchHero({
                   disabled={isSearching}
                   className="inline-flex h-11 shrink-0 items-center gap-2 bg-[#271310] px-5 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#3e2723] disabled:cursor-wait disabled:opacity-70"
                 >
-                  {isSearching && <LoaderCircle className="h-3.5 w-3.5 animate-spin" />}
+                  {isSearching && <TypingIndicator compact tone="light" label="Buscando documentos" />}
                   Buscar
                 </button>
               </div>

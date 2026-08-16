@@ -1,13 +1,14 @@
 'use client'
 
+import { DataLoadingState } from "@/components/ui/TypingIndicator";
+
 
 import { AppIcon } from "@/components/ui/AppIcon"
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import Link from 'next/link'
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { encuestasApi, type EncuestaPregunta, type RespuestaEncuesta, type EncuestaFull } from '@/lib/encuestas'
 import {
-  buildDashboardMetrics, buildDailySeries, buildWeeklySeries, buildEventSuggestions,
+  buildDashboardMetrics, buildDailySeries, buildWeeklySeries,
   buildAllQuestionAnalytics, exportToExcelHtml, formatQuestionType,
   type QuestionAnalytics,
 } from '@/lib/dashboardAnalytics'
@@ -49,23 +50,17 @@ export function AnalyticsDashboard({ encuestaId }: Props) {
     } catch { /* empty */ } finally { setLoading(false) }
   }, [encuestaId])
 
-  useEffect(() => { void load() }, [load])
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => { void load() })
+    return () => window.cancelAnimationFrame(frame)
+  }, [load])
 
-  const questions: EncuestaPregunta[] = encuesta?.preguntas ?? []
+  const questions = useMemo<EncuestaPregunta[]>(() => encuesta?.preguntas ?? [], [encuesta?.preguntas])
 
   const metrics = useMemo(() => buildDashboardMetrics(responses, questions), [responses, questions])
   const weeklySeries = useMemo(() => buildWeeklySeries(responses), [responses])
   const dailySeries = useMemo(() => buildDailySeries(responses), [responses])
   const analytics = useMemo(() => buildAllQuestionAnalytics(responses, questions), [responses, questions])
-
-  useEffect(() => {
-    if (!questions.length) return
-    setChartTypes(prev => {
-      const next = { ...prev }
-      questions.forEach(q => { if (!next[q.id]) next[q.id] = 'barras' })
-      return next
-    })
-  }, [questions])
 
   const selectedCards = useMemo(() => {
     if (selectedQIds === 'all') return analytics;
@@ -96,7 +91,7 @@ export function AnalyticsDashboard({ encuestaId }: Props) {
     } catch { /* empty */ } finally { setDeleting(false) }
   }
 
-  if (loading) return <p className="py-12 text-center text-sm text-[#6b7280]">Cargando resultados...</p>
+  if (loading) return <DataLoadingState label="Cargando resultados..." className="py-12" />
   if (!encuesta) return <p className="py-12 text-center text-sm text-red-600">Encuesta no encontrada.</p>
 
   const countText = responses.length === 1 ? '1 registro' : `${responses.length} registros`
@@ -396,15 +391,6 @@ export function AnalyticsDashboard({ encuestaId }: Props) {
 
 // ─── Sub-components ─────────────────────────────────────
 
-
-function MetricCard({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div className="rounded-xl border border-[#d8cabb] bg-white p-4">
-      <p className="text-xs font-semibold uppercase tracking-wider text-[#765e50]">{label}</p>
-      <p className="mt-1 text-2xl font-bold text-[#2b1710]">{value}</p>
-    </div>
-  )
-}
 
 function QuestionInsightsCard({
   data, chartType, onChartTypeChange,

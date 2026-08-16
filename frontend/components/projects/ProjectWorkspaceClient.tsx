@@ -1,11 +1,14 @@
 'use client';
 
+import { DataLoadingState } from "@/components/ui/TypingIndicator";
+
 import { AppIcon } from "@/components/ui/AppIcon"
 
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Modal } from '@/components/ui/Modal';
+import { Modal, ModalActions } from '@/components/ui/Modal';
+import { FileUploadDropzone } from '@/components/ui/FileUploadDropzone';
 import { useAuth } from '@/context/AuthContext';
 import { api, apiAssetUrl } from '@/lib/api';
 import { PERMISSIONS } from '@/lib/permissions';
@@ -286,7 +289,7 @@ export default function ProjectWorkspacePage() {
     }
   }
 
-  if (!data) return <div className="py-24 text-center text-muted">{error || 'Cargando expediente...'}</div>;
+  if (!data) return error ? <div className="py-24 text-center text-red-700">{error}</div> : <DataLoadingState label="Cargando expediente..." className="py-24" />;
   const project = data.project;
   const phaseLimitReached = data.fases.length >= MAX_PHASES;
   const projectProgress = weightedProgress(data.fases);
@@ -422,7 +425,7 @@ export default function ProjectWorkspacePage() {
 
       <Modal isOpen={Boolean(createKind)} onClose={() => setCreateKind(null)} title={createKind === 'fases' ? 'Crear fase' : createKind === 'indicadores' ? 'Agregar indicador destacado' : `Nuevo registro · ${createKind || ''}`} maxWidth="max-w-3xl">
         {createKind && (
-          <form onSubmit={createRecord} className="grid gap-5 md:grid-cols-2">
+          <form onSubmit={createRecord} className="grid gap-4 md:grid-cols-2">
             {createKind === 'fases' ? (
               <>
                 <DynamicField field={{ name: 'nombre', label: 'Nombre de la fase', required: true }} />
@@ -441,22 +444,30 @@ export default function ProjectWorkspacePage() {
                 <DynamicField field={{ name: 'etiqueta', label: 'Etiqueta (ej. beneficiados, 49 mujeres y 50 hombres)', required: true }} />
               </>
             ) : creationFields[createKind].map(field => <DynamicField key={field.name} field={field} />)}
-            <div className="md:col-span-2 flex justify-end"><button disabled={busy} className="bg-primary px-7 py-3 text-xs font-bold uppercase tracking-widest text-primary-foreground">{busy ? 'Guardando...' : 'Guardar registro'}</button></div>
+            <ModalActions onCancel={() => setCreateKind(null)} submitLabel="Guardar registro" pending={busy} />
           </form>
         )}
       </Modal>
 
       <Modal isOpen={Boolean(fileKind)} onClose={() => setFileKind(null)} title={fileKind === 'foto' ? 'Subir evidencia a la fase' : 'Subir archivo a la fase'}>
-        <form onSubmit={uploadFile} className="space-y-5">
+        <form onSubmit={uploadFile} className="space-y-4">
           <DynamicField field={{ name: 'titulo', label: 'Título' }} />
           <DynamicField field={{ name: 'descripcion', label: 'Descripción', type: 'textarea' }} />
-          <label><FieldLabel>Archivo · máximo 8 MB</FieldLabel><input required name="file" type="file" accept={fileKind === 'foto' ? 'image/*' : undefined} className="form-control" /></label>
-          <div className="flex justify-end"><button disabled={busy} className="bg-primary px-7 py-3 text-xs font-bold uppercase tracking-widest text-primary-foreground">{busy ? 'Subiendo...' : 'Subir a revisión'}</button></div>
+          <FileUploadDropzone
+            compact
+            name="file"
+            label="Archivo"
+            required
+            maxSizeMb={8}
+            accept={fileKind === 'foto' ? 'image/jpeg,image/png,image/webp,image/gif' : '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.webp,.zip'}
+            helperText={fileKind === 'foto' ? 'Evidencia fotográfica de la fase.' : 'Documento asociado a la fase del proyecto.'}
+          />
+          <ModalActions onCancel={() => setFileKind(null)} submitLabel="Subir a revisión" pending={busy} pendingLabel="Subiendo..." />
         </form>
       </Modal>
 
       <Modal isOpen={editPhase} onClose={() => setEditPhase(false)} title="Configurar fase" maxWidth="max-w-3xl">
-        {phase && <form onSubmit={savePhase} className="grid gap-5 md:grid-cols-2">
+        {phase && <form onSubmit={savePhase} className="grid gap-4 md:grid-cols-2">
           <label><FieldLabel>Nombre</FieldLabel><input name="nombre" defaultValue={String(phase.nombre)} required className="form-control" /></label>
           <label><FieldLabel>Estado</FieldLabel><select name="estado" defaultValue={String(phase.estado)} className="form-control"><option value="pendiente">Pendiente</option><option value="en_progreso">En progreso</option><option value="completado">Completado</option></select></label>
           <label className="md:col-span-2"><FieldLabel>Descripción</FieldLabel><textarea name="descripcion" defaultValue={String(phase.descripcion || '')} rows={3} className="form-control" /></label>
@@ -465,12 +476,12 @@ export default function ProjectWorkspacePage() {
           <label><FieldLabel>Progreso</FieldLabel><input name="porcentaje_avance" type="number" min="0" max="100" defaultValue={Number(phase.porcentaje_avance || 0)} className="form-control" /></label>
           <label><FieldLabel>Inicio</FieldLabel><input name="fecha_inicio" type="date" defaultValue={String(phase.fecha_inicio || '').slice(0, 10)} className="form-control" /></label>
           <label><FieldLabel>Fin</FieldLabel><input name="fecha_fin" type="date" defaultValue={String(phase.fecha_fin || '').slice(0, 10)} className="form-control" /></label>
-          <div className="md:col-span-2 flex justify-end"><button disabled={busy} className="bg-primary px-7 py-3 text-xs font-bold uppercase tracking-widest text-primary-foreground">Guardar fase</button></div>
+          <ModalActions onCancel={() => setEditPhase(false)} submitLabel="Guardar fase" pending={busy} />
         </form>}
       </Modal>
 
       <Modal isOpen={editProject} onClose={() => setEditProject(false)} title="Editar proyecto">
-        <form onSubmit={saveProject} className="grid gap-5 md:grid-cols-2">
+        <form onSubmit={saveProject} className="grid gap-4 md:grid-cols-2">
           <label className="md:col-span-2"><FieldLabel>Nombre</FieldLabel><input name="nombre" defaultValue={String(project.nombre)} required className="form-control" /></label>
           <label className="md:col-span-2"><FieldLabel>Descripción</FieldLabel><textarea name="descripcion" defaultValue={String(project.descripcion || '')} rows={4} className="form-control" /></label>
           <label className="md:col-span-2"><FieldLabel>Impacto (mensaje de cierre, opcional)</FieldLabel><textarea name="impacto" defaultValue={String(project.impacto || '')} rows={2} className="form-control" /></label>
@@ -478,7 +489,7 @@ export default function ProjectWorkspacePage() {
           <label><FieldLabel>Estado</FieldLabel><select name="estado" defaultValue={String(project.estado)} className="form-control"><option value="pendiente">Pendiente</option><option value="en_progreso">En progreso</option><option value="completado">Completado</option><option value="cancelado">Cancelado</option></select></label>
           <label><FieldLabel>Inicio</FieldLabel><input name="fecha_inicio" type="date" defaultValue={String(project.fecha_inicio || '').slice(0, 10)} className="form-control" /></label>
           <label><FieldLabel>Fin</FieldLabel><input name="fecha_fin" type="date" defaultValue={String(project.fecha_fin || '').slice(0, 10)} className="form-control" /></label>
-          <div className="md:col-span-2 flex justify-end"><button className="bg-primary px-7 py-3 text-xs font-bold uppercase tracking-widest text-primary-foreground">Guardar cambios</button></div>
+          <ModalActions onCancel={() => setEditProject(false)} submitLabel="Guardar cambios" />
         </form>
       </Modal>
     </>

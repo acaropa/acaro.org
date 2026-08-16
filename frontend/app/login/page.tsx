@@ -4,7 +4,8 @@ import { AppIcon } from "@/components/ui/AppIcon"
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Loader2, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
+import { TypingIndicator } from "@/components/ui/TypingIndicator";
 import { useAuth } from '@/context/AuthContext';
 import { Logo } from '@/components/Logo';
 
@@ -156,7 +157,7 @@ export default function LoginPage() {
               className="w-full h-12 mt-6 bg-[#26170c] hover:bg-[#120c08] text-[#fdf9f4] font-semibold rounded-md text-base shadow-lg transition-all flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {loading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
+                <TypingIndicator compact tone="light" label="Iniciando sesión" />
               ) : (
                 'Iniciar Sesión'
               )}

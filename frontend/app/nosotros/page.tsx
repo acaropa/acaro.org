@@ -91,7 +91,7 @@ export default function Nosotros() {
                 <h3 className="mb-6 mt-2 font-serif text-2xl font-semibold text-[#271310]">Visión</h3>
                 <div className="mb-6 h-px w-16 bg-[#d8cabb]" />
                 <p className="text-lg leading-[1.7] text-[#504442]">
-                  Ser la organización líder de productores de café robusta de la región de Panamá Oeste y del país, prestando servicios a sus socios y promoviendo el Café Robusta a nivel nacional e internacional.
+                  Ser la asociación líder de productores de café robusta de la región de Panamá Oeste y del país, prestando servicios a sus socios y promoviendo el Café Robusta a nivel nacional e internacional.
                 </p>
               </ScrollReveal>
             </div>

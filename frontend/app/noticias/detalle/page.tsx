@@ -1,5 +1,7 @@
 'use client';
 
+import { DataLoadingState } from "@/components/ui/TypingIndicator";
+
 import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -18,17 +20,16 @@ function NoticiaDetalle() {
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    if (!slug) {
-      setNotFound(true);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    setNotFound(false);
-    api.get<NoticiaRecord>(`/noticias/slug/${slug}`)
+    if (!slug) return;
+    const frame = window.requestAnimationFrame(() => {
+      setLoading(true);
+      setNotFound(false);
+      api.get<NoticiaRecord>(`/noticias/slug/${slug}`)
       .then(setNoticia)
       .catch(() => setNotFound(true))
-      .finally(() => setLoading(false));
+        .finally(() => setLoading(false));
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, [slug]);
 
   const secondaryImages: string[] = (() => {
@@ -52,8 +53,8 @@ function NoticiaDetalle() {
           </Link>
         </div>
 
-        {loading ? (
-          <div className="py-24 text-center text-muted">Cargando noticia...</div>
+        {loading && slug ? (
+          <DataLoadingState label="Cargando noticia..." className="py-24" />
         ) : notFound || !noticia ? (
           <EmptyState
             title="Noticia no encontrada"

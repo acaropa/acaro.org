@@ -5,7 +5,7 @@ import { AppIcon } from "@/components/ui/AppIcon"
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
-import { Modal } from '@/components/ui/Modal';
+import { Modal, ModalActions } from '@/components/ui/Modal';
 import { PERMISSIONS } from '@/lib/permissions';
 
 interface UserRecord {
@@ -109,9 +109,9 @@ export default function AdminUsuarios() {
         </div>
       </section>
 
-      <Modal isOpen={showForm} onClose={() => setShowForm(false)} title="Crear Usuario" maxWidth="max-w-4xl">
+      <Modal isOpen={showForm} onClose={() => setShowForm(false)} title="Crear Usuario" maxWidth="max-w-3xl">
         <form onSubmit={create} className="relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+          <div className="relative z-10 grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
               <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Correo Electrónico *</label>
               <input required type="email" placeholder="usuario@ejemplo.com" value={form.email}
@@ -141,11 +141,7 @@ export default function AdminUsuarios() {
               </select>
             </div>
             
-            <div className="md:col-span-3 flex justify-end mt-4">
-              <button className="px-8 py-3 bg-primary text-primary-foreground font-label-caps text-[12px] uppercase tracking-widest hover:bg-accent transition-colors">
-                Crear usuario
-              </button>
-            </div>
+            <ModalActions onCancel={() => setShowForm(false)} submitLabel="Crear usuario" />
           </div>
         </form>
       </Modal>

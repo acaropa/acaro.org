@@ -1,5 +1,7 @@
 "use client";
 
+import { DataLoadingState } from "@/components/ui/TypingIndicator";
+
 import { FormEvent, ReactNode, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -478,7 +480,7 @@ function SearchCatalog() {
             className={`transition-all duration-300 motion-reduce:transform-none motion-reduce:transition-none ${showResults ? "opacity-100 translate-y-0" : "opacity-30 translate-y-2"}`}
           >
             {loading ? (
-              <div className="py-24 text-center text-sm text-[#8d7c70]">Cargando catálogo...</div>
+              <DataLoadingState label="Cargando catálogo..." className="py-24" />
             ) : loadError ? (
               <EmptyState icon={<Library className="h-8 w-8" />} title="No se pudo cargar la biblioteca" description={loadError} />
             ) : visible.length === 0 ? (

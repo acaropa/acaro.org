@@ -1,12 +1,14 @@
 'use client'
 
+import { DataLoadingState } from "@/components/ui/TypingIndicator";
+
 import { AppIcon } from "@/components/ui/AppIcon"
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { encuestasApi, type EncuestaFull, type EncuestaPregunta } from '@/lib/encuestas'
 import { isQuestionVisible, isQuestionRequired, type AnswerValue, type ValidationRules } from '@/lib/surveyRules'
 import { SurveyQuestionRenderer } from './SurveyQuestionRenderer'
-import { AnimatedCircularProgress } from '@/components/ui/AnimatedCircularProgress'
+import { AnimatedCircularProgressBar } from '@/components/ui/AnimatedCircularProgressBar'
 import { SurveySubmitMotion, type SubmitMotionPhase } from './SurveySubmitMotion'
 
 const STYLES = `
@@ -458,7 +460,7 @@ export function SurveyPublicContainer({ slug }: Props) {
 
   if (loading) return (
     <div className="landing-typography min-h-screen bg-surface flex items-center justify-center">
-      <p className="text-muted text-sm">Cargando formulario...</p>
+      <DataLoadingState label="Cargando formulario..." />
     </div>
   )
 
@@ -560,7 +562,13 @@ export function SurveyPublicContainer({ slug }: Props) {
                 {section === 'Sección principal' ? 'PREGUNTA' : section}
               </span>
               <div className="flex-shrink-0">
-                <AnimatedCircularProgress value={pct} size={56} strokeWidth={2} />
+                <AnimatedCircularProgressBar
+                  value={pct}
+                  size={56}
+                  strokeWidth={2}
+                  gaugePrimaryColor="#c28a3a"
+                  gaugeSecondaryColor="rgba(90, 52, 36, 0.12)"
+                />
               </div>
             </div>
 

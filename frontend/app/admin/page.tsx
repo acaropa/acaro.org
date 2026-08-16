@@ -1,5 +1,7 @@
 'use client';
 
+import { DataLoadingState, TypingIndicator } from "@/components/ui/TypingIndicator";
+
 import { AppIcon } from "@/components/ui/AppIcon"
 
 import Link from 'next/link';
@@ -162,6 +164,8 @@ export default function AdminDashboardPage() {
       .slice(0, 3);
   }, [data.projects]);
 
+  if (loading) return <DataLoadingState label="Cargando panel..." className="min-h-[60vh]" />;
+
   return (
     <>
       <section className="mb-8">
@@ -180,7 +184,7 @@ export default function AdminDashboardPage() {
             disabled={refreshing}
             className="inline-flex items-center justify-center gap-2 border border-border px-5 py-3 font-label-caps text-label-caps uppercase tracking-widest text-foreground transition-colors hover:bg-surface disabled:opacity-60"
           >
-            <AppIcon name={refreshing ? 'progress_activity' : 'refresh'} className="text-[18px]" />
+            {refreshing ? <TypingIndicator compact label="Actualizando panel" /> : <AppIcon name="refresh" className="text-[18px]" />}
             Actualizar
           </button>
         </div>
@@ -262,13 +266,7 @@ export default function AdminDashboardPage() {
           </Link>
         </div>
 
-        {loading ? (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-            {[0, 1, 2].map(item => (
-              <div key={item} className="h-44 animate-pulse rounded-xl border border-border bg-surface" />
-            ))}
-          </div>
-        ) : currentProjects.length === 0 ? (
+        {currentProjects.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border bg-card p-10 text-center">
             <AppIcon name="account_tree_off" className="mb-3 text-[42px] text-muted" />
             <h3 className="font-headline-md text-xl text-foreground">Sin proyectos disponibles</h3>

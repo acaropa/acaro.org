@@ -18,7 +18,6 @@ import {
   Mail,
   Map,
   Newspaper,
-  ScrollText,
   Settings,
   ShieldCheck,
   Tractor,
@@ -119,12 +118,6 @@ const navigation = [
         name: "Configuración",
         href: "/admin/configuracion",
         icon: Settings,
-        permissions: [PERMISSIONS.CONFIGURACION_MANAGE],
-      },
-      {
-        name: "Registros de actividad",
-        href: "/admin/configuracion/logs",
-        icon: ScrollText,
         permissions: [PERMISSIONS.CONFIGURACION_MANAGE],
       },
     ]

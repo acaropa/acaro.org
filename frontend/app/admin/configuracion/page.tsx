@@ -1,8 +1,9 @@
 'use client';
 
 import { AppIcon } from "@/components/ui/AppIcon"
+import { FileUploadDropzone } from "@/components/ui/FileUploadDropzone"
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { api, apiAssetUrl } from '@/lib/api';
 import { LandingMetadataItem, defaultLandingSettings, defaultLibraryThemes, LibraryThemes } from '@/lib/settings';
 
@@ -49,7 +50,7 @@ const STORAGE_KEY = 'acaro_admin_settings';
 const defaultSettings: AdminSettings = {
   institutionName: 'Asociacion Cafe Robusta OBC',
   shortName: 'ACARO',
-  description: 'Organizacion dedicada al desarrollo del cafe robusta en Panama Oeste.',
+  description: 'asociacion dedicada al desarrollo del cafe robusta en Panama Oeste.',
   email: 'info@acaro.org',
   phone: '',
   address: 'Panama Oeste, Panama',
@@ -65,11 +66,11 @@ const defaultSettings: AdminSettings = {
   defaultSignerTechnical: '',
   defaultSignerTechnicalRole: 'Equipo Tecnico ACARO',
   defaultApprovalText:
-    'El presente documento sirve como referencia para la organizacion y desarrollo de la actividad descrita.',
+    'El presente documento sirve como referencia para la asociacion y desarrollo de la actividad descrita.',
   defaultPreparedBy: '',
   heroTitle: 'Asociacion Cafe Robusta OBC',
   heroSubtitle:
-    'Impulsamos el desarrollo del cafe robusta con organizacion, conocimiento tecnico y vision productiva.',
+    'Impulsamos el desarrollo del cafe robusta con asociacion, conocimiento tecnico y vision productiva.',
   heroImage: '/assets/landing-hero-v2.jpg',
   featuredProjectsLimit: 3,
   latestNewsLimit: 3,
@@ -132,7 +133,7 @@ function loadSettings(): AdminSettings {
 
 function settingPreview(settings: AdminSettings) {
   return [
-    { label: 'Organizacion', value: settings.shortName || settings.institutionName },
+    { label: 'asociacion', value: settings.shortName || settings.institutionName },
     { label: 'Correo', value: settings.email || 'Sin correo' },
     { label: 'Documento', value: settings.defaultSignerAcaro || 'Firmante pendiente' },
     { label: 'Sesion', value: `${settings.sessionMinutes} min` },
@@ -597,104 +598,62 @@ function ThemeImageCard({
   onSave: (title: string, file: { base64: string; fileName: string }) => void;
   onClear: (title: string) => void;
 }) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [preview, setPreview] = useState<string | null>(null);
   const [pending, setPending] = useState<{ base64: string; fileName: string } | null>(null);
-  const [error, setError] = useState('');
 
-  function handleFile(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    setError('');
-    if (file.size > 8 * 1024 * 1024) {
-      setError('El archivo supera el límite de 8 MB');
-      event.target.value = '';
-      return;
-    }
+  function handleFile(file: File) {
     const reader = new FileReader();
     reader.onload = () => {
-      const base64 = String(reader.result);
-      setPreview(base64);
-      setPending({ base64, fileName: file.name });
+      setPending({ base64: String(reader.result), fileName: file.name });
     };
     reader.readAsDataURL(file);
   }
 
   function discard() {
-    setPreview(null);
     setPending(null);
-    if (inputRef.current) inputRef.current.value = '';
   }
 
   async function save() {
     if (!pending) return;
     await onSave(title, pending);
-    setPreview(null);
     setPending(null);
-    if (inputRef.current) inputRef.current.value = '';
   }
 
-  const displayUrl = preview || (currentUrl ? apiAssetUrl(currentUrl) : null);
+  const displayUrl = pending?.base64 || (currentUrl ? apiAssetUrl(currentUrl) : null);
 
   return (
-    <div className="rounded-lg border border-border bg-surface p-5 space-y-4">
-      <span className="block font-label-caps text-[11px] uppercase tracking-widest text-foreground font-bold">{label}</span>
+    <div className="space-y-4 rounded-lg border border-border bg-surface p-5">
+      <FileUploadDropzone
+        label={label}
+        accept="image/jpeg,image/png,image/webp"
+        maxSizeMb={8}
+        existingUrl={displayUrl}
+        fileName={pending?.fileName || currentUrl?.split("/").pop()}
+        onFileSelect={handleFile}
+        onClear={pending ? discard : currentUrl ? () => onClear(title) : undefined}
+        disabled={saving}
+        helperText={pending ? "Imagen seleccionada. Guarda los cambios para publicarla." : "Imagen utilizada en la portada pública correspondiente."}
+      />
 
-      {displayUrl ? (
-        <div className="relative h-40 overflow-hidden rounded border border-border">
-          <img src={displayUrl} alt={label} className="h-full w-full object-cover" />
-          {!pending && currentUrl && (
-            <span className="absolute top-2 left-2 rounded bg-black/60 px-2 py-0.5 text-[10px] uppercase tracking-widest text-white">Actual</span>
-          )}
-          {pending && (
-            <span className="absolute top-2 left-2 rounded bg-amber-600/80 px-2 py-0.5 text-[10px] uppercase tracking-widest text-white">Sin guardar</span>
-          )}
-        </div>
-      ) : (
-        <div className="flex h-40 items-center justify-center rounded border border-dashed border-border text-sm text-muted">
-          Sin imagen asignada
-        </div>
-      )}
-
-      {error && <p className="text-xs text-red-600">{error}</p>}
-
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          disabled={saving}
-          className="border border-border px-4 py-2 font-label-caps text-[11px] uppercase tracking-widest text-foreground transition-colors hover:bg-background disabled:opacity-50"
-        >
-          {displayUrl ? 'Cambiar imagen' : 'Subir imagen'}
-        </button>
-        {pending && (
-          <>
-            <button
-              type="button"
-              onClick={save}
-              disabled={saving}
-              className="bg-primary px-4 py-2 font-label-caps text-[11px] uppercase tracking-widest text-primary-foreground transition-colors hover:bg-accent disabled:opacity-50"
-            >
-              {saving ? 'Guardando...' : 'Guardar'}
-            </button>
-            <button type="button" onClick={discard} disabled={saving} className="text-sm text-muted hover:text-foreground">
-              Descartar
-            </button>
-          </>
-        )}
-        {!pending && currentUrl && (
+      {pending && (
+        <div className="flex flex-wrap justify-end gap-2">
           <button
             type="button"
-            onClick={() => onClear(title)}
+            onClick={discard}
             disabled={saving}
-            className="text-sm text-red-600 hover:text-red-800 disabled:opacity-50"
+            className="border border-border px-4 py-2 text-xs font-bold uppercase tracking-widest text-muted transition-colors hover:bg-background hover:text-foreground disabled:opacity-50"
           >
-            Quitar imagen
+            Descartar
           </button>
-        )}
-      </div>
-
-      <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleFile} className="hidden" />
+          <button
+            type="button"
+            onClick={save}
+            disabled={saving}
+            className="bg-primary px-4 py-2 text-xs font-bold uppercase tracking-widest text-primary-foreground transition-colors hover:bg-accent disabled:opacity-50"
+          >
+            {saving ? "Guardando..." : "Guardar imagen"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

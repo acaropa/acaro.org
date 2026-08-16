@@ -1,5 +1,7 @@
 'use client';
 
+import { DataLoadingState } from "@/components/ui/TypingIndicator";
+
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { PublicLayout } from '@/components/layout/PublicLayout';
@@ -81,7 +83,7 @@ export default function Noticias() {
         )}
 
         {loading ? (
-          <div className="py-24 text-center text-muted">Cargando noticias...</div>
+          <DataLoadingState label="Cargando noticias..." className="py-24" />
         ) : filtered.length === 0 ? (
           <EmptyState
             title="Sin noticias disponibles"

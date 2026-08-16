@@ -1,11 +1,13 @@
 'use client';
 
+import { DataLoadingState } from "@/components/ui/TypingIndicator";
+
 import { AppIcon } from "@/components/ui/AppIcon"
 
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
-import { Modal } from '@/components/ui/Modal';
+import { Modal, ModalActions } from '@/components/ui/Modal';
 import { PERMISSIONS } from '@/lib/permissions';
 
 interface Tecnico {
@@ -118,9 +120,9 @@ export default function TecnicosPage() {
         </div>
       </section>
 
-      <Modal isOpen={showForm} onClose={() => setShowForm(false)} title="Registrar Técnico">
+      <Modal isOpen={showForm} onClose={() => setShowForm(false)} title="Registrar Técnico" maxWidth="max-w-3xl">
         <form onSubmit={handleSubmit} className="relative z-10">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 relative z-10">
+          <div className="relative z-10 grid grid-cols-1 gap-4 sm:grid-cols-2">
             {[
               { name: 'nombre',       label: 'Nombre *',     type: 'text',     required: true },
               { name: 'apellido',     label: 'Apellido *',   type: 'text',     required: true },
@@ -138,18 +140,13 @@ export default function TecnicosPage() {
               </div>
             ))}
             {error && <p className="sm:col-span-2 rounded border-l-4 border-red-600 bg-red-50 p-4 font-body-md text-sm text-red-700">{error}</p>}
-            <div className="sm:col-span-2 flex justify-end mt-4">
-              <button type="submit" disabled={saving}
-                className="px-8 py-3 bg-primary text-primary-foreground font-label-caps text-[12px] uppercase tracking-widest hover:bg-accent transition-colors disabled:opacity-50">
-                {saving ? 'Guardando...' : 'Registrar'}
-              </button>
-            </div>
+            <ModalActions onCancel={() => setShowForm(false)} submitLabel="Registrar técnico" pending={saving} />
           </div>
         </form>
       </Modal>
 
       {loading ? (
-        <div className="py-12 text-center text-muted font-body-md animate-pulse">Cargando técnicos...</div>
+        <DataLoadingState label="Cargando técnicos..." className="py-12" />
       ) : tecnicos.length === 0 ? (
         <div className="bg-surface/30 border border-border border-dashed p-16 flex flex-col items-center justify-center text-center">
           <AppIcon name="engineering" className="text-[48px] text-muted mb-4 opacity-50" />

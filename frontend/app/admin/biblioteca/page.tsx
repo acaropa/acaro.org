@@ -1,13 +1,15 @@
 'use client';
 
+import { DataLoadingState } from "@/components/ui/TypingIndicator";
+
 import { AppIcon } from "@/components/ui/AppIcon"
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { Modal } from '@/components/ui/Modal';
+import { Modal, ModalActions } from '@/components/ui/Modal';
 import { api, apiAssetUrl } from '@/lib/api';
 import { PERMISSIONS } from '@/lib/permissions';
-import { ImageUploadField, UploadedFile } from '@/components/admin/ImageUploadField';
+import { ImageSourceSwitch, ImageUploadField, UploadedFile } from '@/components/admin/ImageUploadField';
 import { libraryCategories } from '@/lib/library';
 
 const DOCUMENT_ACCEPT = '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.jpg,.jpeg,.png,.webp';
@@ -277,9 +279,9 @@ export default function AdminBiblioteca() {
         })}
       </div>
 
-      <Modal isOpen={showForm} onClose={resetForm} title={editing ? 'Editar Documento' : 'Subir Documento'}>
+      <Modal isOpen={showForm} onClose={resetForm} title={editing ? 'Editar Documento' : 'Subir Documento'} maxWidth="max-w-4xl">
         <form onSubmit={save} className="relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+          <div className="relative z-10 grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="md:col-span-2">
               <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Título</label>
               <input required value={form.titulo} onChange={event => setForm(current => ({ ...current, titulo: event.target.value }))} className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
@@ -324,31 +326,14 @@ export default function AdminBiblioteca() {
                 </div>
               ) : (
                 <>
-                  <div className="flex items-center gap-2 mb-3">
-                    <button
-                      type="button"
-                      onClick={() => setUploadMode('url')}
-                      className={`px-4 py-2 font-label-caps text-[11px] uppercase tracking-widest border transition-colors ${uploadMode === 'url' ? 'border-primary text-primary bg-primary/5' : 'border-border text-muted hover:bg-surface'}`}
-                    >
-                      URL externa
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setUploadMode('file')}
-                      className={`px-4 py-2 font-label-caps text-[11px] uppercase tracking-widest border transition-colors ${uploadMode === 'file' ? 'border-primary text-primary bg-primary/5' : 'border-border text-muted hover:bg-surface'}`}
-                    >
-                      Subir archivo
-                    </button>
-                    {editing && (
-                      <button
-                        type="button"
-                        onClick={() => { setUploadMode('keep'); setFile(null); }}
-                        className="px-4 py-2 font-label-caps text-[11px] uppercase tracking-widest border border-border text-muted hover:bg-surface transition-colors"
-                      >
-                        Mantener actual
-                      </button>
-                    )}
-                  </div>
+                      <ImageSourceSwitch
+                    value={uploadMode}
+                    onChange={mode => {
+                      setUploadMode(mode);
+                      if (mode === 'keep') setFile(null);
+                    }}
+                    allowKeep={Boolean(editing)}
+                  />
                   {uploadMode === 'url' ? (
                     <div>
                       <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">URL del archivo</label>
@@ -356,6 +341,7 @@ export default function AdminBiblioteca() {
                     </div>
                   ) : (
                     <ImageUploadField
+                      compact
                       label="Archivo"
                       value={file}
                       onChange={setFile}
@@ -388,35 +374,19 @@ export default function AdminBiblioteca() {
                 </div>
               ) : (
                 <>
-                  <div className="flex items-center gap-2 mb-3">
-                    <button
-                      type="button"
-                      onClick={() => setCoverMode('url')}
-                      className={`px-4 py-2 font-label-caps text-[11px] uppercase tracking-widest border transition-colors ${coverMode === 'url' ? 'border-primary text-primary bg-primary/5' : 'border-border text-muted hover:bg-surface'}`}
-                    >
-                      URL externa
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setCoverMode('file')}
-                      className={`px-4 py-2 font-label-caps text-[11px] uppercase tracking-widest border transition-colors ${coverMode === 'file' ? 'border-primary text-primary bg-primary/5' : 'border-border text-muted hover:bg-surface'}`}
-                    >
-                      Subir imagen
-                    </button>
-                    {editing?.imagen_portada?.startsWith('/uploads/') && (
-                      <button
-                        type="button"
-                        onClick={() => { setCoverMode('keep'); setCover(null); }}
-                        className="px-4 py-2 font-label-caps text-[11px] uppercase tracking-widest border border-border text-muted hover:bg-surface transition-colors"
-                      >
-                        Mantener actual
-                      </button>
-                    )}
-                  </div>
+                      <ImageSourceSwitch
+                    value={coverMode}
+                    onChange={mode => {
+                      setCoverMode(mode);
+                      if (mode === 'keep') setCover(null);
+                    }}
+                    allowKeep={Boolean(editing?.imagen_portada?.startsWith('/uploads/'))}
+                  />
                   {coverMode === 'url' ? (
                     <input type="url" value={form.imagen_portada} onChange={event => setForm(current => ({ ...current, imagen_portada: event.target.value }))} placeholder="https://..." className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
                   ) : (
                     <ImageUploadField
+                      compact
                       value={cover}
                       onChange={setCover}
                       existingUrl={undefined}
@@ -471,11 +441,11 @@ export default function AdminBiblioteca() {
               <textarea value={form.descripcion} onChange={event => setForm(current => ({ ...current, descripcion: event.target.value }))} rows={3} className="w-full bg-background border border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors resize-none" />
             </div>
             
-            <div className="md:col-span-2 flex justify-end mt-4">
-              <button disabled={saving} className="px-8 py-3 bg-primary text-primary-foreground font-label-caps text-[12px] uppercase tracking-widest hover:bg-accent transition-colors disabled:opacity-50">
-                {saving ? 'Guardando...' : editing?.estado === 'requiere_correccion' ? 'Guardar y reenviar' : 'Guardar Documento'}
-              </button>
-            </div>
+            <ModalActions
+              onCancel={resetForm}
+              submitLabel={editing?.estado === 'requiere_correccion' ? 'Guardar y reenviar' : editing ? 'Guardar cambios' : 'Guardar documento'}
+              pending={saving}
+            />
           </div>
         </form>
       </Modal>
@@ -483,7 +453,7 @@ export default function AdminBiblioteca() {
       {error && <p className="rounded border-l-4 border-red-600 bg-red-50 p-4 font-body-md text-sm text-red-700">{error}</p>}
 
       {loading ? (
-        <div className="py-12 text-center text-muted font-body-md animate-pulse">Cargando biblioteca...</div>
+        <DataLoadingState label="Cargando biblioteca..." className="py-12" />
       ) : documents.length === 0 ? (
         <div className="bg-surface/30 border border-border border-dashed p-16 flex flex-col items-center justify-center text-center">
           <AppIcon name="description" className="text-[48px] text-muted mb-4 opacity-50" />

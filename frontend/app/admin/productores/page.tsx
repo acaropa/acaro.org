@@ -1,13 +1,15 @@
 'use client';
 
+import { DataLoadingState } from "@/components/ui/TypingIndicator";
+
 import { AppIcon } from "@/components/ui/AppIcon"
 
 import { useCallback, useEffect, useState } from 'react';
 import { api, apiAssetUrl } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
-import { Modal } from '@/components/ui/Modal';
+import { Modal, ModalActions } from '@/components/ui/Modal';
 import { PERMISSIONS } from '@/lib/permissions';
-import { ImageUploadField, UploadedFile } from '@/components/admin/ImageUploadField';
+import { ImageSourceSwitch, ImageUploadField, UploadedFile } from '@/components/admin/ImageUploadField';
 import { ProductorRecord, formatExperience, formatProducerDate } from '@/lib/producers';
 
 const emptyForm = {
@@ -49,10 +51,7 @@ export default function AdminProductores() {
   }, []);
 
   useEffect(() => {
-    if (!selectedProvincia) {
-      setDistritos([]);
-      return;
-    }
+    if (!selectedProvincia) return;
     api.get<{ id: number; distrito: string }[]>(`/mapa/provincias/${encodeURIComponent(selectedProvincia)}/distritos`)
       .then(setDistritos)
       .catch(err => console.error('Error al cargar distritos:', err));
@@ -78,6 +77,7 @@ export default function AdminProductores() {
   function resetForm() {
     setForm(emptyForm);
     setSelectedProvincia('');
+    setDistritos([]);
     setImageMode('url');
     setImage(null);
     setEditing(null);
@@ -182,9 +182,9 @@ export default function AdminProductores() {
         </div>
       </section>
 
-      <Modal isOpen={showForm} onClose={resetForm} title={editing ? 'Editar Persona' : 'Nueva Persona'}>
+      <Modal isOpen={showForm} onClose={resetForm} title={editing ? 'Editar Persona' : 'Nueva Persona'} maxWidth="max-w-3xl">
         <form onSubmit={save} className="relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+          <div className="relative z-10 grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="md:col-span-2">
               <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Nombre</label>
               <input
@@ -265,22 +265,12 @@ export default function AdminProductores() {
             </div>
             <div className="md:col-span-2">
               <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Imagen / Foto (Opcional)</label>
-              <div className="flex items-center gap-2 mb-3">
-                <button
-                  type="button"
-                  onClick={() => setImageMode('url')}
-                  className={`px-4 py-2 font-label-caps text-[11px] uppercase tracking-widest border transition-colors ${imageMode === 'url' ? 'border-primary text-primary bg-primary/5' : 'border-border text-muted hover:bg-surface'}`}
-                >
-                  URL externa
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setImageMode('file')}
-                  className={`px-4 py-2 font-label-caps text-[11px] uppercase tracking-widest border transition-colors ${imageMode === 'file' ? 'border-primary text-primary bg-primary/5' : 'border-border text-muted hover:bg-surface'}`}
-                >
-                  Subir archivo
-                </button>
-              </div>
+              <ImageSourceSwitch
+                value={imageMode}
+                onChange={mode => {
+                  if (mode !== 'keep') setImageMode(mode);
+                }}
+              />
               {imageMode === 'url' ? (
                 <input
                   type="url"
@@ -291,6 +281,7 @@ export default function AdminProductores() {
                 />
               ) : (
                 <ImageUploadField
+                  compact
                   value={image}
                   onChange={setImage}
                   existingUrl={editing?.imagen_url}
@@ -324,11 +315,7 @@ export default function AdminProductores() {
               </label>
             </div>
 
-            <div className="md:col-span-2 flex justify-end mt-4">
-              <button disabled={saving} className="px-8 py-3 bg-primary text-primary-foreground font-label-caps text-[12px] uppercase tracking-widest hover:bg-accent transition-colors disabled:opacity-50">
-                {saving ? 'Guardando...' : 'Guardar productor'}
-              </button>
-            </div>
+            <ModalActions onCancel={resetForm} submitLabel={editing ? 'Guardar cambios' : 'Guardar productor'} pending={saving} />
           </div>
         </form>
       </Modal>
@@ -336,7 +323,7 @@ export default function AdminProductores() {
       {error && <p className="rounded border-l-4 border-red-600 bg-red-50 p-4 font-body-md text-sm text-red-700 mb-8">{error}</p>}
 
       {loading ? (
-        <div className="py-12 text-center text-muted font-body-md animate-pulse">Cargando productores...</div>
+        <DataLoadingState label="Cargando productores..." className="py-12" />
       ) : producers.length === 0 ? (
         <div className="bg-surface/30 border border-border border-dashed p-16 flex flex-col items-center justify-center text-center">
           <AppIcon name="groups" className="text-[48px] text-muted mb-4 opacity-50" />

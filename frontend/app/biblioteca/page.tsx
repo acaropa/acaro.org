@@ -1,5 +1,7 @@
 "use client";
 
+import { DataLoadingState } from "@/components/ui/TypingIndicator";
+
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -30,7 +32,7 @@ const themeCards = [
   {
     title: "Institucional",
     category: libraryCategories[4],
-    description: "Archivos historicos, protocolos y reportes de la organizacion.",
+    description: "Archivos historicos, protocolos y reportes de la asociacion.",
     className: "md:col-span-2 md:row-span-2",
     staticImage: "/assets/theme-institucional.jpg",
   },
@@ -377,7 +379,7 @@ export default function Biblioteca() {
               </div>
 
               {loading ? (
-                <div className="py-20 text-center text-sm text-[#827472]">Cargando biblioteca...</div>
+                <DataLoadingState label="Cargando biblioteca..." className="py-20" />
               ) : loadError ? (
                 <EmptyState icon={<Library className="h-8 w-8" />} title="No se pudo cargar la biblioteca" description={loadError} />
               ) : featured ? (

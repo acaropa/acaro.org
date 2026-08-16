@@ -1,10 +1,12 @@
 'use client';
 
+import { DataLoadingState } from "@/components/ui/TypingIndicator";
+
 import { AppIcon } from "@/components/ui/AppIcon"
 
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Modal } from '@/components/ui/Modal';
+import { Modal, ModalActions } from '@/components/ui/Modal';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/api';
 import { PERMISSIONS } from '@/lib/permissions';
@@ -183,7 +185,7 @@ export default function AdminProyectos() {
 
       {error && <p className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</p>}
       {loading ? (
-        <div className="py-20 text-center text-muted">Cargando portafolio...</div>
+        <DataLoadingState label="Cargando portafolio..." className="py-20" />
       ) : visible.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border p-16 text-center">
           <AppIcon name="folder_open" className="text-[48px] text-muted" />
@@ -240,7 +242,7 @@ export default function AdminProyectos() {
       )}
 
       <Modal isOpen={showForm} onClose={resetForm} title={editing ? 'Editar proyecto' : 'Nuevo proyecto'} maxWidth="max-w-3xl">
-        <form onSubmit={save} className="grid gap-5 md:grid-cols-2">
+        <form onSubmit={save} className="grid gap-4 md:grid-cols-2">
           <Field label="Nombre" wide><input required value={form.nombre} onChange={event => setForm({ ...form, nombre: event.target.value })} className="form-control" /></Field>
           <Field label="Descripción" wide><textarea rows={4} value={form.descripcion} onChange={event => setForm({ ...form, descripcion: event.target.value })} className="form-control resize-y" /></Field>
           <Field label="Impacto (mensaje de cierre, opcional)" wide><textarea rows={2} value={form.impacto} onChange={event => setForm({ ...form, impacto: event.target.value })} className="form-control resize-y" placeholder="Ej. Impacto directo en la sostenibilidad productiva y ambiental del sector." /></Field>
@@ -259,7 +261,17 @@ export default function AdminProyectos() {
               helperText="Formatos JPG, PNG o WEBP, máximo 4 MB. Se muestra en la portada pública del proyecto."
             />
           </div>
-          <div className="md:col-span-2 flex justify-end"><button className="bg-primary px-7 py-3 font-label-caps text-[11px] uppercase tracking-widest text-primary-foreground">{editing ? 'Guardar cambios' : 'Crear expediente'}</button></div>
+                    <div className="md:col-span-2">
+            <ImageUploadField
+              compact
+              label="Imagen de portada (Opcional)"
+              value={cover}
+              onChange={setCover}
+              existingUrl={editing?.imagen_portada}
+              helperText="Formatos JPG, PNG o WEBP, máximo 4 MB. Se muestra en la portada pública del proyecto."
+            />
+          </div>
+          <ModalActions onCancel={resetForm} submitLabel={editing ? 'Guardar cambios' : 'Crear expediente'} />
         </form>
       </Modal>
     </>

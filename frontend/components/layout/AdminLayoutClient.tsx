@@ -1,5 +1,7 @@
 'use client';
 
+import { DataLoadingState } from "@/components/ui/TypingIndicator";
+
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
@@ -52,7 +54,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <span className="text-sm text-muted">Cargando plataforma...</span>
+        <DataLoadingState label="Cargando plataforma..." />
       </div>
     );
   }

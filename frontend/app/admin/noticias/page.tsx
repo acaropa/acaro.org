@@ -1,8 +1,11 @@
 'use client';
 
+import { DataLoadingState } from "@/components/ui/TypingIndicator";
+
 import { AppIcon } from "@/components/ui/AppIcon"
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link2, Save, Upload } from 'lucide-react';
 import { api, apiAssetUrl } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { Modal } from '@/components/ui/Modal';
@@ -191,7 +194,7 @@ export default function AdminNoticias() {
               Noticias
             </h1>
             <p className="font-body-lg text-[16px] md:text-[18px] text-muted">
-              Gestiona los anuncios y noticias de la organización.
+              Gestiona los anuncios y noticias de la asociación.
             </p>
           </div>
           <div className="flex flex-wrap gap-3 shrink-0">
@@ -235,9 +238,9 @@ export default function AdminNoticias() {
         })}
       </div>
 
-      <Modal isOpen={showForm} onClose={resetForm} title={editing ? 'Editar Noticia' : 'Redactar Noticia'}>
+      <Modal isOpen={showForm} onClose={resetForm} title={editing ? 'Editar Noticia' : 'Redactar Noticia'} maxWidth="max-w-4xl">
         <form onSubmit={save} className="relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+          <div className="relative z-10 grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="md:col-span-2">
               <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Título</label>
               <input
@@ -264,7 +267,7 @@ export default function AdminNoticias() {
                 placeholder="Cuerpo de la noticia..."
                 value={form.contenido}
                 onChange={event => setForm(current => ({ ...current, contenido: event.target.value }))}
-                className="min-h-40 w-full bg-background border border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors resize-y"
+                className="min-h-32 w-full bg-background border border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors resize-y"
               />
             </div>
             <div>
@@ -290,159 +293,185 @@ export default function AdminNoticias() {
                 <option value="interna">Interna</option>
               </select>
             </div>
-            <div className="md:col-span-2">
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Imagen de portada (Opcional)</label>
-              <div className="flex items-center gap-2 mb-3">
-                <button
-                  type="button"
-                  onClick={() => setImageMode('url')}
-                  className={`px-4 py-2 font-label-caps text-[11px] uppercase tracking-widest border transition-colors ${imageMode === 'url' ? 'border-primary text-primary bg-primary/5' : 'border-border text-muted hover:bg-surface'}`}
-                >
-                  URL externa
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setImageMode('file')}
-                  className={`px-4 py-2 font-label-caps text-[11px] uppercase tracking-widest border transition-colors ${imageMode === 'file' ? 'border-primary text-primary bg-primary/5' : 'border-border text-muted hover:bg-surface'}`}
-                >
-                  Subir archivo
-                </button>
-              </div>
-              {imageMode === 'url' ? (
-                <input
-                  type="url"
-                  placeholder="https://..."
-                  value={form.imagen_portada}
-                  onChange={event => setForm(current => ({ ...current, imagen_portada: event.target.value }))}
-                  className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors"
-                />
-              ) : (
-                <ImageUploadField
-                  value={cover}
-                  onChange={setCover}
-                  existingUrl={editing?.imagen_portada}
-                  helperText="Formatos JPG, PNG o WEBP, máximo 4 MB."
-                />
-              )}
-            </div>
-
-            <div className="md:col-span-2 border-t border-border pt-4 mt-2">
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Fotos secundarias (Opcional)</label>
-              
-              {/* Fotos existentes */}
-              {form.imagenes.length > 0 && (
-                <div className="mb-4">
-                  <p className="text-xs text-muted mb-2 font-semibold">Fotos existentes:</p>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    {form.imagenes.map((url, i) => (
-                      <div key={i} className="relative h-24 bg-surface border border-border rounded overflow-hidden">
-                        <img src={apiAssetUrl(url)} alt={`Foto ${i + 1}`} className="w-full h-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => setForm(current => ({
-                            ...current,
-                            imagenes: current.imagenes.filter((_, idx) => idx !== i)
-                          }))}
-                          className="absolute top-1 right-1 bg-red-600 hover:bg-red-800 text-white rounded-full p-1 text-[10px] transition-colors shadow flex items-center justify-center w-5 h-5"
-                          title="Eliminar foto"
-                        >
-                          <AppIcon name="close" className="text-[14px]" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
+            <div className="md:col-span-2 border-t border-border pt-4">
+              <div className="mb-3 flex items-end justify-between gap-4">
+                <div>
+                  <h3 className="text-sm font-bold text-foreground">Imágenes de la noticia</h3>
+                  <p className="mt-1 text-xs text-muted">Selecciona un archivo o utiliza una dirección web.</p>
                 </div>
-              )}
-
-              {/* Nuevas fotos por subir */}
-              {secondaryFiles.length > 0 && (
-                <div className="mb-4">
-                  <p className="text-xs text-muted mb-2 font-semibold">Nuevas fotos por subir:</p>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    {secondaryFiles.map((file, i) => (
-                      <div key={i} className="relative h-24 bg-surface border border-border rounded overflow-hidden">
-                        <img src={file.base64} alt={`Nueva Foto ${i + 1}`} className="w-full h-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => setSecondaryFiles(current => current.filter((_, idx) => idx !== i))}
-                          className="absolute top-1 right-1 bg-red-600 hover:bg-red-800 text-white rounded-full p-1 text-[10px] transition-colors shadow flex items-center justify-center w-5 h-5"
-                          title="Eliminar foto"
-                        >
-                          <AppIcon name="close" className="text-[14px]" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Selector para agregar */}
-              <div className="flex items-center gap-2 mb-3">
-                <button
-                  type="button"
-                  onClick={() => setSecondaryImageMode('file')}
-                  className={`px-4 py-2 font-label-caps text-[11px] uppercase tracking-widest border transition-colors ${secondaryImageMode === 'file' ? 'border-primary text-primary bg-primary/5' : 'border-border text-muted hover:bg-surface'}`}
-                >
-                  Subir archivo
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSecondaryImageMode('url')}
-                  className={`px-4 py-2 font-label-caps text-[11px] uppercase tracking-widest border transition-colors ${secondaryImageMode === 'url' ? 'border-primary text-primary bg-primary/5' : 'border-border text-muted hover:bg-surface'}`}
-                >
-                  URL externa
-                </button>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-muted">Opcional</span>
               </div>
 
-              {secondaryImageMode === 'file' ? (
-                <div className="max-w-xs">
-                  <ImageUploadField
-                    value={null}
-                    onChange={(file) => {
-                      if (file) {
-                        setSecondaryFiles(current => [...current, file]);
-                      }
-                    }}
-                    showPreview={false}
-                    helperText="Agrega imágenes que se insertarán de forma fluida dentro del cuerpo de la noticia."
-                    label=""
-                  />
-                </div>
-              ) : (
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="url"
-                      placeholder="https://..."
-                      value={newSecondaryUrl}
-                      onChange={event => setNewSecondaryUrl(event.target.value)}
-                      className="flex-1 bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors"
-                    />
+              <div className="grid items-start gap-4 md:grid-cols-2">
+                <section className="border border-border bg-surface/25 p-4">
+                  <div className="mb-3">
+                    <h4 className="text-sm font-semibold text-foreground">Imagen de portada</h4>
+                    <p className="mt-1 text-xs text-muted">Imagen principal que identifica la noticia.</p>
+                  </div>
+
+                  <div className="mb-3 grid grid-cols-2 border border-border bg-background p-1" role="group" aria-label="Origen de la imagen de portada">
                     <button
                       type="button"
-                      onClick={() => {
-                        const url = newSecondaryUrl.trim();
-                        if (!url) return;
-                        if (!form.imagenes.includes(url)) {
-                          setForm(current => ({
-                            ...current,
-                            imagenes: [...current.imagenes, url]
-                          }));
-                        }
-                        setNewSecondaryUrl('');
-                      }}
-                      className="px-4 py-3 bg-primary text-primary-foreground font-label-caps text-[11px] uppercase tracking-widest hover:bg-accent transition-colors shrink-0"
+                      onClick={() => setImageMode('file')}
+                      aria-pressed={imageMode === 'file'}
+                      className={`flex h-9 items-center justify-center gap-2 px-3 text-xs font-semibold transition-colors ${imageMode === 'file' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted hover:bg-surface hover:text-foreground'}`}
                     >
-                      Agregar
+                      <Upload className="h-4 w-4" aria-hidden="true" />
+                      Archivo
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setImageMode('url')}
+                      aria-pressed={imageMode === 'url'}
+                      className={`flex h-9 items-center justify-center gap-2 px-3 text-xs font-semibold transition-colors ${imageMode === 'url' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted hover:bg-surface hover:text-foreground'}`}
+                    >
+                      <Link2 className="h-4 w-4" aria-hidden="true" />
+                      Enlace
                     </button>
                   </div>
-                  <p className="text-[11px] text-muted">Ingresa la URL de la imagen externa y haz clic en Agregar.</p>
-                </div>
-              )}
+
+                  {imageMode === 'url' ? (
+                    <div>
+                      <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-muted" htmlFor="cover-url">Dirección de la imagen</label>
+                      <input
+                        id="cover-url"
+                        type="url"
+                        placeholder="https://sitio.com/imagen.jpg"
+                        value={form.imagen_portada}
+                        onChange={event => setForm(current => ({ ...current, imagen_portada: event.target.value }))}
+                        className="h-11 w-full border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-primary"
+                      />
+                    </div>
+                  ) : (
+                    <ImageUploadField
+                      compact
+                      value={cover}
+                      onChange={setCover}
+                      existingUrl={editing?.imagen_portada}
+                    />
+                  )}
+                </section>
+
+                <section className="border border-border bg-surface/25 p-4">
+                  <div className="mb-3 flex items-start justify-between gap-3">
+                    <div>
+                      <h4 className="text-sm font-semibold text-foreground">Fotos secundarias</h4>
+                      <p className="mt-1 text-xs text-muted">Imágenes complementarias para el contenido.</p>
+                    </div>
+                    {(form.imagenes.length + secondaryFiles.length) > 0 && (
+                      <span className="flex h-6 min-w-6 items-center justify-center bg-primary/10 px-2 text-xs font-bold text-primary">
+                        {form.imagenes.length + secondaryFiles.length}
+                      </span>
+                    )}
+                  </div>
+
+                  {(form.imagenes.length > 0 || secondaryFiles.length > 0) && (
+                    <div className="mb-3 grid grid-cols-3 gap-2">
+                      {form.imagenes.map((url, i) => (
+                        <div key={url + i} className="relative aspect-[4/3] overflow-hidden border border-border bg-surface">
+                          <img src={apiAssetUrl(url)} alt={`Foto secundaria ${i + 1}`} className="h-full w-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => setForm(current => ({ ...current, imagenes: current.imagenes.filter((_, idx) => idx !== i) }))}
+                            className="absolute right-1 top-1 flex h-7 w-7 items-center justify-center bg-white/95 text-red-700 shadow-sm transition-colors hover:bg-red-700 hover:text-white"
+                            aria-label={`Eliminar foto secundaria ${i + 1}`}
+                            title="Eliminar foto"
+                          >
+                            <AppIcon name="close" className="text-[14px]" />
+                          </button>
+                        </div>
+                      ))}
+                      {secondaryFiles.map((file, i) => (
+                        <div key={file.fileName + i} className="relative aspect-[4/3] overflow-hidden border border-border bg-surface">
+                          <img src={file.base64} alt={`Nueva foto secundaria ${i + 1}`} className="h-full w-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => setSecondaryFiles(current => current.filter((_, idx) => idx !== i))}
+                            className="absolute right-1 top-1 flex h-7 w-7 items-center justify-center bg-white/95 text-red-700 shadow-sm transition-colors hover:bg-red-700 hover:text-white"
+                            aria-label={`Eliminar nueva foto secundaria ${i + 1}`}
+                            title="Eliminar foto"
+                          >
+                            <AppIcon name="close" className="text-[14px]" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="mb-3 grid grid-cols-2 border border-border bg-background p-1" role="group" aria-label="Origen de las fotos secundarias">
+                    <button
+                      type="button"
+                      onClick={() => setSecondaryImageMode('file')}
+                      aria-pressed={secondaryImageMode === 'file'}
+                      className={`flex h-9 items-center justify-center gap-2 px-3 text-xs font-semibold transition-colors ${secondaryImageMode === 'file' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted hover:bg-surface hover:text-foreground'}`}
+                    >
+                      <Upload className="h-4 w-4" aria-hidden="true" />
+                      Archivo
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSecondaryImageMode('url')}
+                      aria-pressed={secondaryImageMode === 'url'}
+                      className={`flex h-9 items-center justify-center gap-2 px-3 text-xs font-semibold transition-colors ${secondaryImageMode === 'url' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted hover:bg-surface hover:text-foreground'}`}
+                    >
+                      <Link2 className="h-4 w-4" aria-hidden="true" />
+                      Enlace
+                    </button>
+                  </div>
+
+                  {secondaryImageMode === 'file' ? (
+                    <ImageUploadField
+                      compact
+                      value={null}
+                      onChange={file => {
+                        if (file) setSecondaryFiles(current => [...current, file]);
+                      }}
+                      showPreview={false}
+                    />
+                  ) : (
+                    <div className="flex gap-2">
+                      <label className="sr-only" htmlFor="secondary-url">Dirección de la imagen secundaria</label>
+                      <input
+                        id="secondary-url"
+                        type="url"
+                        placeholder="https://sitio.com/imagen.jpg"
+                        value={newSecondaryUrl}
+                        onChange={event => setNewSecondaryUrl(event.target.value)}
+                        className="h-11 min-w-0 flex-1 border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-primary"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const url = newSecondaryUrl.trim();
+                          if (!url) return;
+                          if (!form.imagenes.includes(url)) {
+                            setForm(current => ({ ...current, imagenes: [...current.imagenes, url] }));
+                          }
+                          setNewSecondaryUrl('');
+                        }}
+                        className="h-11 shrink-0 bg-primary px-4 text-xs font-bold text-primary-foreground transition-colors hover:bg-accent"
+                      >
+                        Agregar
+                      </button>
+                    </div>
+                  )}
+                </section>
+              </div>
             </div>
 
-            <div className="md:col-span-2 flex justify-end mt-4">
-              <button disabled={saving} className="px-8 py-3 bg-primary text-primary-foreground font-label-caps text-[12px] uppercase tracking-widest hover:bg-accent transition-colors disabled:opacity-50">
+            <div className="sticky bottom-[-24px] z-20 -mx-6 -mb-6 mt-2 flex items-center justify-end gap-3 border-t border-border bg-card/95 px-6 py-4 backdrop-blur-sm md:col-span-2">
+              <button
+                type="button"
+                onClick={resetForm}
+                className="h-11 border border-border bg-background px-5 text-xs font-bold text-foreground transition-colors hover:bg-surface"
+              >
+                Cancelar
+              </button>
+              <button
+                disabled={saving}
+                className="flex h-11 min-w-44 items-center justify-center gap-2 bg-primary px-6 text-xs font-bold text-primary-foreground transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Save className="h-4 w-4" aria-hidden="true" />
                 {saving ? 'Guardando...' : 'Guardar noticia'}
               </button>
             </div>
@@ -453,7 +482,7 @@ export default function AdminNoticias() {
       {error && <p className="rounded border-l-4 border-red-600 bg-red-50 p-4 font-body-md text-sm text-red-700 mb-8">{error}</p>}
 
       {loading ? (
-        <div className="py-12 text-center text-muted font-body-md animate-pulse">Cargando noticias...</div>
+        <DataLoadingState label="Cargando noticias..." className="py-12" />
       ) : filtered.length === 0 ? (
         <div className="bg-surface/30 border border-border border-dashed p-16 flex flex-col items-center justify-center text-center">
           <AppIcon name="newspaper" className="text-[48px] text-muted mb-4 opacity-50" />

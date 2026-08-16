@@ -1,5 +1,7 @@
 "use client";
 
+import { DataLoadingState } from "@/components/ui/TypingIndicator";
+
 import { useState } from "react";
 import { DistrictMapSvg } from "./DistrictMapSvg";
 import { MapFilters } from "./MapFilters";
@@ -89,10 +91,7 @@ export default function PanamaValueChainMap({
           </button>
         </div>
       ) : state.loadingGeometry ? (
-        <div className={styles.loadingState} aria-live="polite">
-          <span className={styles.loadingDot} />
-          Preparando el territorio…
-        </div>
+        <DataLoadingState label="Preparando el territorio..." className="min-h-[430px]" />
       ) : (
         <DistrictMapSvg
           districts={projectedDistricts}

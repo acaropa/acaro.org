@@ -1,9 +1,11 @@
-'use client';
+"use client";
 
-import { AppIcon } from "@/components/ui/AppIcon"
+import { useEffect, useId, useRef } from "react";
+import { createPortal } from "react-dom";
 
-import { useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
+import { AppIcon } from "@/components/ui/AppIcon";
+import { cn } from "@/lib/utils";
+import { Save } from "lucide-react";
 
 interface ModalProps {
   isOpen: boolean;
@@ -13,61 +15,107 @@ interface ModalProps {
   maxWidth?: string;
 }
 
-export function Modal({ isOpen, onClose, title, children, maxWidth = 'max-w-2xl' }: ModalProps) {
+export function Modal({
+  isOpen,
+  onClose,
+  title,
+  children,
+  maxWidth = "max-w-2xl",
+}: ModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
 
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
+    if (!isOpen) return;
+
+    document.body.style.overflow = "hidden";
+    contentRef.current?.scrollTo({ top: 0 });
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") onClose();
     }
+
+    window.addEventListener("keydown", handleKeyDown);
+
     return () => {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isOpen]);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
-  const handleOverlayClick = (e: React.MouseEvent) => {
-    if (e.target === overlayRef.current) {
-      onClose();
-    }
-  };
-
   const modalContent = (
-    <div 
+    <div
       ref={overlayRef}
-      onClick={handleOverlayClick}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-sm p-4 overflow-y-auto"
+      onClick={event => {
+        if (event.target === overlayRef.current) onClose();
+      }}
+      className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-black/45 p-4 backdrop-blur-[2px]"
     >
-      <div className={`relative w-full ${maxWidth} bg-surface border border-border shadow-2xl rounded-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200`}>
-        {/* Decorative background blur inside modal */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
-        
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-border/50 px-6 py-4 relative z-10 bg-surface/50 backdrop-blur-md">
-          <h2 className="font-headline-md text-xl font-bold text-foreground">{title}</h2>
-          <button 
+      <section
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        className={cn(
+          "w-full overflow-hidden rounded-lg border border-border bg-card shadow-[0_24px_70px_rgba(43,23,16,0.22)]",
+          maxWidth,
+        )}
+      >
+        <header className="flex min-h-16 items-center justify-between border-b border-border bg-card px-6 py-4">
+          <h2 id={titleId} className="pr-6 text-lg font-bold leading-6 text-foreground">
+            {title}
+          </h2>
+          <button
+            type="button"
             onClick={onClose}
-            className="flex items-center justify-center w-8 h-8 rounded-full bg-background/50 hover:bg-accent/10 hover:text-accent text-muted transition-colors"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface hover:text-foreground"
+            aria-label="Cerrar"
+            title="Cerrar"
           >
-            <AppIcon name="close" className="text-[20px]" />
+            <AppIcon name="close" className="text-[19px]" />
           </button>
-        </div>
-        
-        {/* Content body */}
-        <div className="p-6 relative z-10 max-h-[calc(100vh-8rem)] overflow-y-auto">
+        </header>
+
+        <div ref={contentRef} className="max-h-[calc(100vh-7rem)] overflow-y-auto bg-card p-6">
           {children}
         </div>
-      </div>
+      </section>
     </div>
   );
 
-  // Use createPortal to mount it directly to body to avoid z-index stacking context issues
-  if (typeof document !== 'undefined') {
-    return createPortal(modalContent, document.body);
-  }
-  
-  return null;
+  return createPortal(modalContent, document.body);
+}
+
+interface ModalActionsProps {
+  cancelLabel?: string;
+  className?: string;
+  disabled?: boolean;
+  onCancel: () => void;
+  pending?: boolean;
+  pendingLabel?: string;
+  submitLabel: string;
+}
+
+export function ModalActions({
+  cancelLabel = "Cancelar",
+  className,
+  disabled = false,
+  onCancel,
+  pending = false,
+  pendingLabel = "Guardando...",
+  submitLabel,
+}: ModalActionsProps) {
+  return (
+    <div className={cn("sticky bottom-[-24px] z-20 -mx-6 -mb-6 mt-2 grid grid-cols-2 gap-3 border-t border-border bg-card/95 px-6 py-4 backdrop-blur-sm md:col-span-full sm:flex sm:justify-end", className)}>
+      <button type="button" onClick={onCancel} className="h-11 border border-border bg-background px-5 text-xs font-bold text-foreground transition-colors hover:bg-surface">
+        {cancelLabel}
+      </button>
+      <button type="submit" disabled={disabled || pending} className="flex h-11 min-w-44 items-center justify-center gap-2 bg-primary px-6 text-xs font-bold text-primary-foreground transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50">
+        <Save className="h-4 w-4" aria-hidden="true" />
+        {pending ? pendingLabel : submitLabel}
+      </button>
+    </div>
+  );
 }

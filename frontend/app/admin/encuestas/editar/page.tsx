@@ -1,5 +1,7 @@
 'use client'
 
+import { DataLoadingState } from "@/components/ui/TypingIndicator";
+
 import { Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { SurveyEditorWizard } from '@/components/encuestas/SurveyEditorWizard'
@@ -13,7 +15,7 @@ function EditorInner() {
 
 export default function EditarEncuesta() {
   return (
-    <Suspense fallback={<p className="py-12 text-center text-sm text-[#765e50]">Cargando...</p>}>
+    <Suspense fallback={<DataLoadingState label="Cargando..." className="py-12" />}>
       <EditorInner />
     </Suspense>
   )

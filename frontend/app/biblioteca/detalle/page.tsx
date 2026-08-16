@@ -1,5 +1,7 @@
 "use client";
 
+import { DataLoadingState } from "@/components/ui/TypingIndicator";
+
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -20,22 +22,22 @@ function DocumentDetail() {
   const [serieDocuments, setSerieDocuments] = useState<LibraryDocument[]>([]);
 
   useEffect(() => {
-    if (!slug) {
-      setNotFound(true);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    setNotFound(false);
-    api
+    if (!slug) return;
+    const frame = window.requestAnimationFrame(() => {
+      setLoading(true);
+      setNotFound(false);
+      setSerieDocuments([]);
+      api
       .get<LibraryRecord>(`/biblioteca/slug/${slug}`)
       .then(record => setDocument(toLibraryDocument(record)))
       .catch(() => setNotFound(true))
-      .finally(() => setLoading(false));
+        .finally(() => setLoading(false));
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, [slug]);
 
   useEffect(() => {
-    if (!document?.serie) { setSerieDocuments([]); return; }
+    if (!document?.serie) return;
     api
       .get<LibraryRecord[]>(`/biblioteca/serie/${encodeURIComponent(document.serie)}`)
       .then(records => setSerieDocuments(records.map(toLibraryDocument)))
@@ -57,8 +59,8 @@ function DocumentDetail() {
             Volver a la biblioteca
           </Link>
 
-          {loading ? (
-            <div className="py-24 text-center text-sm text-[#81756f]">Cargando documento...</div>
+          {loading && slug ? (
+            <DataLoadingState label="Cargando documento..." className="py-24" />
           ) : notFound || !document ? (
             <EmptyState
               icon={<FileText className="h-8 w-8" />}

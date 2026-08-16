@@ -1,5 +1,7 @@
 'use client';
 
+import { DataLoadingState } from "@/components/ui/TypingIndicator";
+
 import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -45,7 +47,7 @@ function ProductorDetalle() {
         </div>
 
         {loading ? (
-          <div className="py-24 text-center text-muted">Cargando perfil...</div>
+          <DataLoadingState label="Cargando perfil..." className="py-24" />
         ) : !hasSlug || notFound || !producer ? (
           <EmptyState
             title="Perfil no encontrado"

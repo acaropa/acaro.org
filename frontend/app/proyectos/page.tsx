@@ -1,5 +1,7 @@
 'use client';
 
+import { DataLoadingState } from "@/components/ui/TypingIndicator";
+
 import { AppIcon } from "@/components/ui/AppIcon"
 
 import { useEffect, useState } from 'react';
@@ -235,7 +237,7 @@ export default function Proyectos() {
         <div className="w-full h-[1px] bg-primary/10 mb-12"></div>
 
         {loading ? (
-          <div className="py-24 text-center text-muted">Cargando proyectos...</div>
+          <DataLoadingState label="Cargando proyectos..." className="py-24" />
         ) : projects.length === 0 ? (
           <EmptyState
             title="Sin proyectos disponibles"
