@@ -1,11 +1,15 @@
-const fs = require('fs/promises');
-const path = require('path');
-const crypto = require('crypto');
 const db = require('../config/db');
-const { uploadRoot } = require('../config/uploads');
 const cache = require('../utils/memoryCache');
+const { saveBase64Upload, IMAGE_EXTENSIONS, PDF_EXTENSIONS } = require('../utils/uploads');
 
-const UPLOAD_ROOT = path.join(uploadRoot, 'proyectos');
+const MAX_PROJECT_UPLOAD_SIZE_MB = 5;
+const MAX_PROJECT_UPLOAD_BYTES = MAX_PROJECT_UPLOAD_SIZE_MB * 1024 * 1024;
+const PDF_UPLOAD_MESSAGES = {
+  required: 'Selecciona un archivo PDF.',
+  tooLarge: `El PDF supera el límite de ${MAX_PROJECT_UPLOAD_SIZE_MB} MB.`,
+  invalidType: 'Solo se permiten archivos PDF.',
+  invalidContent: 'El archivo no parece ser un PDF válido.',
+};
 
 const ENTITY_CONFIG = {
   tareas: {
@@ -248,36 +252,20 @@ async function removeEntity(kind, projectId, entityId, user, reqMeta) {
 }
 
 async function createFile(projectId, data, user, reqMeta) {
-  const match = String(data.file_base64 || '').match(/^data:([^;]+);base64,(.+)$/);
-  if (!match || !data.file_name) {
-    const err = new Error('Archivo y nombre son requeridos');
-    err.status = 400;
-    throw err;
-  }
-  const buffer = Buffer.from(match[2], 'base64');
-  if (buffer.length > 8 * 1024 * 1024) {
-    const err = new Error('El archivo supera el limite de 8 MB');
-    err.status = 413;
-    throw err;
-  }
-  const extension = path.extname(data.file_name).slice(0, 20).toLowerCase();
-  const allowedExtensions = new Set([
-    '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.txt', '.csv',
-    '.jpg', '.jpeg', '.png', '.webp',
-  ]);
-  if (!allowedExtensions.has(extension)) {
-    const err = new Error('Tipo de archivo no permitido');
-    err.status = 400;
-    throw err;
-  }
-  const savedName = `${Date.now()}-${crypto.randomBytes(8).toString('hex')}${extension}`;
-  const projectDir = path.join(UPLOAD_ROOT, String(projectId));
-  await fs.mkdir(projectDir, { recursive: true });
-  await fs.writeFile(path.join(projectDir, savedName), buffer, { flag: 'wx' });
+  const fileType = data.tipo || 'documento';
+  const isEvidence = ['foto', 'evidencia'].includes(fileType);
+  const uploaded = await saveBase64Upload({
+    base64: data.file_base64,
+    fileName: data.file_name,
+    subdir: `proyectos/${projectId}`,
+    maxBytes: MAX_PROJECT_UPLOAD_BYTES,
+    allowedExtensions: isEvidence ? IMAGE_EXTENSIONS : PDF_EXTENSIONS,
+    messages: isEvidence ? undefined : PDF_UPLOAD_MESSAGES,
+  });
   const values = [
     projectId, data.fase_id || null, data.titulo || data.file_name, data.descripcion || null,
-    data.tipo || 'documento', `/uploads/proyectos/${projectId}/${savedName}`,
-    data.file_name, savedName, extension.slice(1), match[1], buffer.length,
+    fileType, uploaded.url,
+    data.file_name, uploaded.savedName, uploaded.extension.slice(1), uploaded.mimeType, uploaded.sizeBytes,
     data.visibilidad || 'interna', user.id,
   ];
   const [result] = await db.query(

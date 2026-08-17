@@ -12,7 +12,8 @@ import { PERMISSIONS } from '@/lib/permissions';
 import { ImageSourceSwitch, ImageUploadField, UploadedFile } from '@/components/admin/ImageUploadField';
 import { libraryCategories } from '@/lib/library';
 
-const DOCUMENT_ACCEPT = '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.jpg,.jpeg,.png,.webp';
+const PDF_ACCEPT = 'application/pdf,.pdf';
+const MAX_PDF_SIZE_MB = 5;
 
 type DocumentState =
   | 'borrador'
@@ -156,6 +157,21 @@ export default function AdminBiblioteca() {
     setSaving(true);
     setError('');
     try {
+      if (uploadMode === 'url') {
+        let pdfUrl: URL;
+        try {
+          pdfUrl = new URL(form.archivo_url);
+        } catch {
+          setError('Escribe un enlace válido al PDF.');
+          setSaving(false);
+          return;
+        }
+        if (!pdfUrl.pathname.toLowerCase().endsWith('.pdf')) {
+          setError('El enlace debe terminar en .pdf.');
+          setSaving(false);
+          return;
+        }
+      }
       const payload: Record<string, unknown> = { ...form };
       payload.etiquetas = form.etiquetas
         ? form.etiquetas.split(',').map((t: string) => t.trim()).filter(Boolean)
@@ -198,6 +214,9 @@ export default function AdminBiblioteca() {
   }
 
   async function review(document: LibraryRecord, action: string) {
+    if (action === 'archive' && !confirm(`Este documento dejará de mostrarse en la biblioteca: "${document.titulo}". ¿Quieres archivarlo?`)) {
+      return;
+    }
     let observation = '';
     if (action === 'reject' || action === 'request_changes') {
       observation = prompt('Escribe la observación para el autor:')?.trim() || '';
@@ -212,7 +231,7 @@ export default function AdminBiblioteca() {
   }
 
   async function remove(document: LibraryRecord) {
-    if (!confirm(`¿Eliminar "${document.titulo}"?`)) return;
+    if (!confirm(`Este documento se eliminará de la biblioteca: "${document.titulo}". ¿Quieres continuar?`)) return;
     try {
       await api.delete(`/biblioteca/${document.id}`);
       await load();
@@ -279,7 +298,7 @@ export default function AdminBiblioteca() {
         })}
       </div>
 
-      <Modal isOpen={showForm} onClose={resetForm} title={editing ? 'Editar Documento' : 'Subir Documento'} maxWidth="max-w-4xl">
+      <Modal isOpen={showForm} onClose={resetForm} title={editing ? 'Editar documento' : 'Subir documento'} maxWidth="max-w-4xl">
         <form onSubmit={save} className="relative z-10">
           <div className="relative z-10 grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="md:col-span-2">
@@ -306,7 +325,7 @@ export default function AdminBiblioteca() {
               {uploadMode === 'keep' ? (
                 <div className="rounded border border-border bg-surface px-4 py-3 flex items-center justify-between gap-4">
                   <div className="min-w-0">
-                    <p className="font-label-caps text-[10px] uppercase tracking-widest text-muted mb-1">Archivo actual</p>
+                    <p className="font-label-caps text-[10px] uppercase tracking-widest text-muted mb-1">PDF actual</p>
                     <a
                       href={apiAssetUrl(editing?.archivo_url || '')}
                       target="_blank"
@@ -321,7 +340,7 @@ export default function AdminBiblioteca() {
                     onClick={() => setUploadMode('file')}
                     className="shrink-0 border border-border px-3 py-1.5 font-label-caps text-[11px] uppercase tracking-widest text-foreground hover:bg-background transition-colors"
                   >
-                    Cambiar archivo
+                    Cambiar PDF
                   </button>
                 </div>
               ) : (
@@ -336,20 +355,21 @@ export default function AdminBiblioteca() {
                   />
                   {uploadMode === 'url' ? (
                     <div>
-                      <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">URL del archivo</label>
-                      <input required type="url" value={form.archivo_url} onChange={event => setForm(current => ({ ...current, archivo_url: event.target.value }))} className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
+                      <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Enlace al PDF</label>
+                      <input required type="url" pattern="https?://.*\.pdf(\?.*)?$" title="Usa un enlace directo a un archivo .pdf" value={form.archivo_url} onChange={event => setForm(current => ({ ...current, archivo_url: event.target.value }))} className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
+                      <p className="mt-1 text-[11px] text-muted">Debe ser un enlace directo a un archivo .pdf. Quedará pendiente de revisión.</p>
                     </div>
                   ) : (
                     <ImageUploadField
                       compact
-                      label="Archivo"
+                      label="Documento PDF"
                       value={file}
                       onChange={setFile}
                       existingUrl={undefined}
-                      accept={DOCUMENT_ACCEPT}
-                      maxSizeMb={8}
+                      accept={PDF_ACCEPT}
+                      maxSizeMb={MAX_PDF_SIZE_MB}
                       showPreview={false}
-                      helperText="PDF, Word, Excel, PowerPoint, texto o imagen. Máximo 8 MB."
+                      helperText={`Solo PDF. Máximo ${MAX_PDF_SIZE_MB} MB. Quedará pendiente de revisión.`}
                     />
                   )}
                 </>
@@ -443,7 +463,7 @@ export default function AdminBiblioteca() {
             
             <ModalActions
               onCancel={resetForm}
-              submitLabel={editing?.estado === 'requiere_correccion' ? 'Guardar y reenviar' : editing ? 'Guardar cambios' : 'Guardar documento'}
+              submitLabel={editing?.estado === 'requiere_correccion' ? 'Guardar y reenviar' : editing ? 'Guardar cambios' : 'Enviar a revisión'}
               pending={saving}
             />
           </div>
@@ -458,7 +478,7 @@ export default function AdminBiblioteca() {
         <div className="bg-surface/30 border border-border border-dashed p-16 flex flex-col items-center justify-center text-center">
           <AppIcon name="description" className="text-[48px] text-muted mb-4 opacity-50" />
           <h3 className="font-headline-md text-xl font-bold text-foreground mb-2">Sin documentos</h3>
-          <p className="font-body-md text-muted max-w-md">No se encontraron archivos en este estado actualmente.</p>
+          <p className="font-body-md text-muted max-w-md">No se encontraron documentos en este estado.</p>
         </div>
       ) : (
         <div className="flex flex-col gap-4">
@@ -480,7 +500,7 @@ export default function AdminBiblioteca() {
                     <span className="shrink-0 whitespace-nowrap font-label-caps text-[10px] tracking-widest uppercase text-accent bg-accent/10 px-2 py-1 rounded">
                       {document.categoria}
                     </span>
-                    <span className="shrink-0 whitespace-nowrap text-xs text-muted font-mono">{document.visibilidad}</span>
+                    <span className="shrink-0 whitespace-nowrap text-xs text-muted font-mono">{visibilityLabel(document.visibilidad)}</span>
                     {Boolean(document.destacado) && (
                       <span className="shrink-0 whitespace-nowrap text-[10px] tracking-wide text-accent bg-accent/10 border border-accent/20 px-2 py-1 rounded">
                         Destacado{document.orden_portada ? ` · Orden ${document.orden_portada}` : ''}
@@ -500,7 +520,7 @@ export default function AdminBiblioteca() {
                   <a href={apiAssetUrl(document.archivo_url)} target="_blank" rel="noreferrer" className="block font-headline-md text-lg font-bold text-foreground hover:text-primary transition-colors mb-1">
                     {document.titulo}
                   </a>
-                  <p className="text-sm text-muted font-body-md">Subido por: <span className="text-foreground">{document.creado_por_nombre || document.creado_por_email}</span></p>
+                  <p className="text-sm text-muted font-body-md">PDF · {date(document.fecha_creacion)} · Subido por: <span className="text-foreground">{document.creado_por_nombre || document.creado_por_email}</span></p>
                   
                   {document.observacion_revision && (
                     <div className="mt-3 bg-red-50/50 border-l-2 border-red-500 p-3 text-sm text-red-800 font-body-md">
@@ -558,4 +578,12 @@ export default function AdminBiblioteca() {
       )}
     </>
   );
+}
+
+function visibilityLabel(value: LibraryRecord['visibilidad']) {
+  return value === 'publica' ? 'Pública' : 'Interna';
+}
+
+function date(value: string | null) {
+  return value ? new Intl.DateTimeFormat('es-PA', { dateStyle: 'medium' }).format(new Date(value)) : 'Fecha no registrada';
 }

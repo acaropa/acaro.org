@@ -84,6 +84,10 @@
 }
 
 :root {
+  --font-sans-source: "Avenir Next", Avenir, Inter, system-ui, sans-serif;
+  --font-display: Montserrat, "Avenir Next", Avenir, Inter, system-ui, sans-serif;
+  --font-handwritten-source: "Segoe Print", "Bradley Hand ITC", cursive;
+
   --background: #faf9f5;
   --foreground: var(--color-chocolate);
   --primary: var(--color-chocolate);

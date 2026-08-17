@@ -6,6 +6,7 @@ const { uploadRoot } = require('../config/uploads');
 const UPLOAD_ROOT = uploadRoot;
 
 const IMAGE_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.webp']);
+const PDF_EXTENSIONS = new Set(['.pdf']);
 const DOCUMENT_EXTENSIONS = new Set([
   '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.txt', '.csv',
   '.jpg', '.jpeg', '.png', '.webp',
@@ -47,31 +48,38 @@ function validateMagicBytes(buffer, extension) {
   return slice.length === sig.bytes.length && slice.equals(sig.bytes);
 }
 
-async function saveBase64Upload({ base64, fileName, subdir, maxBytes, allowedExtensions }) {
+async function saveBase64Upload({ base64, fileName, subdir, maxBytes, allowedExtensions, messages = {} }) {
+  const errorMessages = {
+    required: 'Selecciona un archivo.',
+    tooLarge: `El archivo supera el límite de ${Math.round(maxBytes / (1024 * 1024))} MB.`,
+    invalidType: 'El formato del archivo no está permitido.',
+    invalidContent: 'El archivo no coincide con su tipo.',
+    ...messages,
+  };
   const match = String(base64 || '').match(/^data:([^;]+);base64,(.+)$/);
   if (!match || !fileName) {
-    const err = new Error('Archivo y nombre son requeridos');
+    const err = new Error(errorMessages.required);
     err.status = 400;
     throw err;
   }
 
   const buffer = Buffer.from(match[2], 'base64');
   if (buffer.length > maxBytes) {
-    const err = new Error(`El archivo supera el límite de ${Math.round(maxBytes / (1024 * 1024))} MB`);
+    const err = new Error(errorMessages.tooLarge);
     err.status = 413;
     throw err;
   }
 
   const extension = path.extname(fileName).slice(0, 20).toLowerCase();
   if (!allowedExtensions.has(extension)) {
-    const err = new Error('Tipo de archivo no permitido');
+    const err = new Error(errorMessages.invalidType);
     err.status = 400;
     throw err;
   }
 
   // Verificar firma binaria real del archivo para detectar archivos renombrados.
   if (!validateMagicBytes(buffer, extension)) {
-    const err = new Error('El contenido del archivo no coincide con la extensión declarada');
+    const err = new Error(errorMessages.invalidContent);
     err.status = 400;
     throw err;
   }
@@ -90,4 +98,4 @@ async function saveBase64Upload({ base64, fileName, subdir, maxBytes, allowedExt
   };
 }
 
-module.exports = { saveBase64Upload, IMAGE_EXTENSIONS, DOCUMENT_EXTENSIONS };
+module.exports = { saveBase64Upload, IMAGE_EXTENSIONS, PDF_EXTENSIONS, DOCUMENT_EXTENSIONS };

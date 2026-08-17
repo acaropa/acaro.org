@@ -1,3 +1,4 @@
+import { strToU8, zipSync } from 'fflate'
 import type { EncuestaPregunta, RespuestaEncuesta, RespuestaDetalle } from './encuestas'
 
 export interface DashboardMetrics {
@@ -250,14 +251,58 @@ export function getRespondentName(response: RespuestaEncuesta, questions: Encues
   return firstText?.respuesta_texto ?? `Respuesta #${response.id}`
 }
 
-export function exportToExcelHtml(
+function escapeXml(value: string): string {
+  return value
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;')
+}
+
+function columnName(index: number): string {
+  let name = ''
+  let value = index
+  while (value > 0) {
+    const remainder = (value - 1) % 26
+    name = String.fromCharCode(65 + remainder) + name
+    value = Math.floor((value - 1) / 26)
+  }
+  return name
+}
+
+function buildWorksheetXml(rows: string[][]): string {
+  const sheetRows = rows.map((row, rowIndex) => {
+    const cells = row.map((cell, cellIndex) => {
+      const ref = `${columnName(cellIndex + 1)}${rowIndex + 1}`
+      return `<c r="${ref}" t="inlineStr"><is><t>${escapeXml(cell)}</t></is></c>`
+    }).join('')
+    return `<row r="${rowIndex + 1}">${cells}</row>`
+  }).join('')
+
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <sheetData>${sheetRows}</sheetData>
+</worksheet>`
+}
+
+function downloadBlob(filename: string, content: BlobPart, type: string): void {
+  const blob = new Blob([content], { type })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  URL.revokeObjectURL(url)
+}
+
+export function exportSurveyResponsesXlsx(
   titulo: string, estado: string, questions: EncuestaPregunta[], responses: RespuestaEncuesta[]
 ): void {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const XLSX = require('xlsx') as typeof import('xlsx')
-
   const headers = ['Fecha de respuesta', ...questions.map(q => q.texto_pregunta)]
-
   const dataRows = responses
     .map(r => {
       const map = new Map((r.respuestas_detalle ?? []).map(d => [d.pregunta_id, d]))
@@ -270,27 +315,45 @@ export function exportToExcelHtml(
     })
     .filter((r): r is string[] => !!r)
 
-  const ws = XLSX.utils.aoa_to_sheet([headers, ...dataRows])
-
-  // Ancho de columnas: fecha fija, preguntas más anchas
-  ws['!cols'] = [
-    { wch: 20 },
-    ...questions.map(() => ({ wch: 35 })),
-  ]
-
-  const wb = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(wb, ws, 'Respuestas')
-
-  // Hoja de metadatos
-  const meta = XLSX.utils.aoa_to_sheet([
+  const infoRows = [
     ['Encuesta', titulo],
     ['Estado', estado],
     ['Exportado', new Intl.DateTimeFormat('es', { dateStyle: 'long', timeStyle: 'short' }).format(new Date())],
-    ['Total respuestas', dataRows.length],
-  ])
-  meta['!cols'] = [{ wch: 20 }, { wch: 50 }]
-  XLSX.utils.book_append_sheet(wb, meta, 'Info')
-
-  const slug = titulo.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-zA-Z0-9]+/g, '-').toLowerCase()
-  XLSX.writeFile(wb, `${slug || 'encuesta'}-respuestas.xlsx`)
+    ['Total respuestas', String(dataRows.length)],
+  ]
+  const files: Record<string, Uint8Array> = {
+    '[Content_Types].xml': strToU8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+  <Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+  <Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+</Types>`),
+    '_rels/.rels': strToU8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+</Relationships>`),
+    'xl/workbook.xml': strToU8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <sheets>
+    <sheet name="Respuestas" sheetId="1" r:id="rId1"/>
+    <sheet name="Info" sheetId="2" r:id="rId2"/>
+  </sheets>
+</workbook>`),
+    'xl/_rels/workbook.xml.rels': strToU8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
+  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet2.xml"/>
+</Relationships>`),
+    'xl/worksheets/sheet1.xml': strToU8(buildWorksheetXml([headers, ...dataRows])),
+    'xl/worksheets/sheet2.xml': strToU8(buildWorksheetXml(infoRows)),
+  }
+  const slug = titulo.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]+/g, '-').toLowerCase()
+  const archive = zipSync(files, { level: 6 })
+  downloadBlob(
+    `${slug || 'encuesta'}-respuestas.xlsx`,
+    archive,
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  )
 }

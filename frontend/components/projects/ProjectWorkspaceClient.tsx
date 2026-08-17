@@ -41,12 +41,15 @@ interface Workspace {
 
 const MAX_PHASES = 6;
 const MAX_INDICADORES = 4;
+const MAX_PROJECT_UPLOAD_SIZE_MB = 5;
+const PDF_ACCEPT = 'application/pdf,.pdf';
+const EVIDENCE_IMAGE_ACCEPT = 'image/jpeg,image/png,image/webp';
 const INDICADOR_ICONS = ['groups', 'water', 'trees', 'eco', 'sparkles', 'coffee', 'trending_up', 'star'];
 const phaseTabs: Array<[PhaseTab, string, string]> = [
   ['resumen', 'Resumen', 'dashboard'],
   ['tareas', 'Tareas', 'task_alt'],
   ['avances', 'Bitácora', 'history_edu'],
-  ['documentos', 'Archivos', 'description'],
+  ['documentos', 'Documentos', 'description'],
   ['evidencias', 'Evidencias', 'photo_library'],
   ['riesgos', 'Riesgos', 'warning'],
   ['decisiones', 'Decisiones', 'gavel'],
@@ -224,7 +227,13 @@ export default function ProjectWorkspacePage() {
     if (!fileKind || !activePhaseId) return;
     const form = new FormData(event.currentTarget);
     const file = form.get('file') as File;
-    if (!file?.size) return setError('Selecciona un archivo');
+    if (!file?.size) return setError(fileKind === 'documento' ? 'Selecciona un documento PDF' : 'Selecciona una imagen');
+    if (file.size > MAX_PROJECT_UPLOAD_SIZE_MB * 1024 * 1024) {
+      return setError(fileKind === 'documento' ? `El PDF supera el límite de ${MAX_PROJECT_UPLOAD_SIZE_MB} MB` : `La imagen supera el límite de ${MAX_PROJECT_UPLOAD_SIZE_MB} MB`);
+    }
+    if (fileKind === 'documento' && !file.name.toLowerCase().endsWith('.pdf')) {
+      return setError('Solo se permiten archivos PDF');
+    }
     const fileBase64 = await readFile(file);
     await mutate(() => api.post(`/proyectos/${id}/gestion/archivos`, {
       titulo: form.get('titulo') || file.name,
@@ -253,12 +262,13 @@ export default function ProjectWorkspacePage() {
   }
 
   async function archive(kind: string, rowId: number) {
-    if (!window.confirm('¿Confirmas que deseas archivar este registro?')) return;
+    const label = kind === 'archivos' ? 'Este documento o evidencia dejará de mostrarse en la fase.' : 'Este registro dejará de mostrarse en la fase.';
+    if (!window.confirm(`${label} ¿Quieres archivarlo?`)) return;
     await mutate(() => api.delete(`/proyectos/${id}/gestion/${kind}/${rowId}`));
   }
 
   async function review(kind: 'archivos' | 'avances', rowId: number, action: string) {
-    const observation = action === 'aprobar' ? '' : window.prompt('Observación de revisión') || '';
+    const observation = action === 'aprobar' ? '' : window.prompt('Escribe una observación para la revisión') || '';
     await mutate(() => api.post(`/proyectos/${id}/gestion/${kind}/${rowId}/revision`, { action, observation }));
   }
 
@@ -280,7 +290,7 @@ export default function ProjectWorkspacePage() {
   }
 
   async function deleteProject() {
-    if (!window.confirm('Esta acción eliminará todo el expediente. ¿Deseas continuar?')) return;
+    if (!window.confirm('Este proyecto y su expediente se eliminarán por completo. ¿Quieres continuar?')) return;
     try {
       await api.delete(`/proyectos/${id}`);
       router.push('/admin/proyectos');
@@ -310,7 +320,7 @@ export default function ProjectWorkspacePage() {
           <div className="max-w-3xl">
             <div className="flex flex-wrap gap-2">
               <Badge>{String(project.clasificacion || 'Proyecto ACARO')}</Badge>
-              <Badge>{String(project.estado).replace('_', ' ')}</Badge>
+              <Badge>{statusLabel(project.estado)}</Badge>
               <Badge>{data.fases.length}/{MAX_PHASES} fases</Badge>
             </div>
             <h1 className="mt-5 font-headline-lg text-[38px] leading-[1.02] tracking-[-0.04em] md:text-[56px]">{String(project.nombre)}</h1>
@@ -417,7 +427,7 @@ export default function ProjectWorkspacePage() {
             <div className="rounded-2xl border border-dashed border-border bg-card p-16 text-center">
               <AppIcon name="account_tree" className="text-[48px] text-muted" />
               <h2 className="mt-3 font-headline-md text-2xl">El proyecto aún no tiene fases</h2>
-              <p className="mt-2 text-sm text-muted">Las tareas, archivos y demás registros se gestionan dentro de una fase.</p>
+              <p className="mt-2 text-sm text-muted">Las tareas, documentos, evidencias y demás registros se gestionan dentro de una fase.</p>
             </div>
           )}
         </div>
@@ -449,20 +459,20 @@ export default function ProjectWorkspacePage() {
         )}
       </Modal>
 
-      <Modal isOpen={Boolean(fileKind)} onClose={() => setFileKind(null)} title={fileKind === 'foto' ? 'Subir evidencia a la fase' : 'Subir archivo a la fase'}>
+      <Modal isOpen={Boolean(fileKind)} onClose={() => setFileKind(null)} title={fileKind === 'foto' ? 'Subir evidencia a la fase' : 'Subir PDF a la fase'}>
         <form onSubmit={uploadFile} className="space-y-4">
           <DynamicField field={{ name: 'titulo', label: 'Título' }} />
           <DynamicField field={{ name: 'descripcion', label: 'Descripción', type: 'textarea' }} />
           <FileUploadDropzone
             compact
             name="file"
-            label="Archivo"
+            label={fileKind === 'foto' ? 'Imagen' : 'Documento PDF'}
             required
-            maxSizeMb={8}
-            accept={fileKind === 'foto' ? 'image/jpeg,image/png,image/webp,image/gif' : '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.webp,.zip'}
-            helperText={fileKind === 'foto' ? 'Evidencia fotográfica de la fase.' : 'Documento asociado a la fase del proyecto.'}
+            maxSizeMb={MAX_PROJECT_UPLOAD_SIZE_MB}
+            accept={fileKind === 'foto' ? EVIDENCE_IMAGE_ACCEPT : PDF_ACCEPT}
+            helperText={fileKind === 'foto' ? `Imagen JPG, PNG o WEBP. Máximo ${MAX_PROJECT_UPLOAD_SIZE_MB} MB. Quedará pendiente de revisión.` : `Solo PDF. Máximo ${MAX_PROJECT_UPLOAD_SIZE_MB} MB. Quedará pendiente de revisión.`}
           />
-          <ModalActions onCancel={() => setFileKind(null)} submitLabel="Subir a revisión" pending={busy} pendingLabel="Subiendo..." />
+          <ModalActions onCancel={() => setFileKind(null)} submitLabel="Enviar a revisión" pending={busy} pendingLabel="Subiendo..." />
         </form>
       </Modal>
 
@@ -514,7 +524,7 @@ function ProjectSummary({ data, progress, technicians, canManage, unassignedCoun
     <div className="grid gap-5 sm:grid-cols-2">
       <Metric label="Avance ponderado" value={`${progress}%`} helper={`${data.fases.length} de ${MAX_PHASES} fases`} />
       <Metric label="Tareas completadas" value={`${data.report.completedTasks}/${data.tareas.length}`} helper={`${data.report.taskProgress}% del trabajo`} />
-      <Metric label="Pendientes de revisión" value={String(data.report.pendingReviews)} helper="Bitácora y archivos" />
+      <Metric label="Pendientes de revisión" value={String(data.report.pendingReviews)} helper="Bitácora y documentos" />
       <Metric label="Riesgos abiertos" value={String(data.report.openRisks)} helper={`${data.report.overdueTasks} tareas vencidas`} />
       <section className="sm:col-span-2 rounded-2xl border border-border bg-card p-6">
         <div className="flex items-end justify-between gap-4"><SectionHeading title="Ruta de ejecución" subtitle="Las fases concentran toda la operación del proyecto." /><button onClick={onOpenPhases} className="text-[10px] font-bold uppercase tracking-widest text-primary">Gestionar fases →</button></div>
@@ -594,7 +604,7 @@ function PhaseContent({ tab, phase, rows, finance, canManage, canOperate, canRev
     return <div className="grid gap-4 md:grid-cols-3">
       <PhaseMetric label="Tareas" value={`${completed}/${rows.tareas.length}`} />
       <PhaseMetric label="Bitácora" value={String(rows.avances.length)} />
-      <PhaseMetric label="Archivos" value={String(rows.documentos.length + rows.evidencias.length)} />
+      <PhaseMetric label="Documentos y evidencias" value={String(rows.documentos.length + rows.evidencias.length)} />
       <PhaseMetric label="Riesgos abiertos" value={String(rows.riesgos.filter(item => ['abierto', 'en_mitigacion'].includes(String(item.estado))).length)} />
       <PhaseMetric label="Decisiones" value={String(rows.decisiones.length)} />
       <PhaseMetric label="Saldo estimado" value={money(finance.saldo_estimado)} />
@@ -608,23 +618,25 @@ function PhaseContent({ tab, phase, rows, finance, canManage, canOperate, canRev
     : tab === 'decisiones' ? (canManage ? () => onCreate(tab) : undefined)
     : canOperate ? () => onCreate(tab) : undefined;
 
+  const actionLabel = tab === 'documentos' ? 'Subir PDF' : tab === 'evidencias' ? 'Subir evidencia' : 'Añadir';
+
   return <div>
-    <div className="mb-5 flex items-end justify-between gap-4"><SectionHeading title={phaseTabTitle(tab)} subtitle={phaseTabSubtitle(tab)} />{action && <button onClick={action} className="bg-primary px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-primary-foreground">Añadir</button>}</div>
-    {tab === 'tareas' && <List rows={rows.tareas} empty="No hay tareas en esta fase." render={item => <RecordCard key={Number(item.id)} title={String(item.titulo)} description={`${item.descripcion || 'Sin descripción'}${item.fecha_limite ? ` · límite ${date(item.fecha_limite)}` : ''}`} badges={[String(item.prioridad), String(item.estado), `${item.porcentaje_avance || 0}%`]} actions={<>{canOperate && item.estado !== 'completada' && <MiniButton onClick={() => onUpdate('tareas', Number(item.id), { estado: 'completada', porcentaje_avance: 100 })}>Completar</MiniButton>}{canManage && <MiniButton danger onClick={() => onArchive('tareas', Number(item.id))}>Cancelar</MiniButton>}</>} />} />}
-    {tab === 'avances' && <List rows={rows.avances} empty="No hay comentarios ni avances en esta fase." render={item => <RecordCard key={Number(item.id)} title={String(item.titulo || 'Actualización de fase')} description={String(item.descripcion)} badges={[String(item.estado), `${item.porcentaje_avance ?? 0}%`]} actions={canReview ? <ReviewActions onReview={actionName => onReview('avances', Number(item.id), actionName)} /> : null} />} />}
-    {tab === 'documentos' && <FileList rows={rows.documentos} canManage={canManage} canReview={canReview} onReview={onReview} onArchive={onArchive} />}
-    {tab === 'evidencias' && (rows.evidencias.length ? <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{rows.evidencias.map(item => <article key={Number(item.id)} className="overflow-hidden rounded-xl border border-border bg-background"><a href={apiAssetUrl(String(item.archivo_url))} target="_blank"><img src={apiAssetUrl(String(item.archivo_url))} alt={String(item.titulo)} className="h-44 w-full object-cover" /></a><div className="p-4"><strong>{String(item.titulo)}</strong><p className="mt-2 text-xs text-muted">{String(item.estado)}</p><div className="mt-3 flex flex-wrap gap-2">{canReview && <ReviewActions onReview={actionName => onReview('archivos', Number(item.id), actionName)} />}{canManage && <MiniButton danger onClick={() => onArchive('archivos', Number(item.id))}>Archivar</MiniButton>}</div></div></article>)}</div> : <Empty text="No hay evidencias en esta fase." />)}
-    {tab === 'riesgos' && <List rows={rows.riesgos} empty="No hay riesgos en esta fase." render={item => <RecordCard key={Number(item.id)} title={`${item.tipo}: ${item.titulo}`} description={`${item.descripcion || 'Sin descripción'} · Plan: ${item.plan_respuesta || 'sin definir'}`} badges={[String(item.impacto), String(item.estado)]} actions={<>{canOperate && !['resuelto', 'cerrado'].includes(String(item.estado)) && <MiniButton onClick={() => onUpdate('riesgos', Number(item.id), { estado: 'resuelto' })}>Resolver</MiniButton>}{canManage && <MiniButton danger onClick={() => onArchive('riesgos', Number(item.id))}>Descartar</MiniButton>}</>} />} />}
-    {tab === 'decisiones' && <List rows={rows.decisiones} empty="No hay decisiones en esta fase." render={item => <RecordCard key={Number(item.id)} title={String(item.titulo)} description={`${item.decision_tomada} · Motivo: ${item.motivo || 'sin registrar'} · Impacto: ${money(item.impacto_costo)}`} badges={[String(item.estado)]} actions={canManage ? <MiniButton danger onClick={() => onArchive('decisiones', Number(item.id))}>Anular</MiniButton> : null} />} />}
+    <div className="mb-5 flex items-end justify-between gap-4"><SectionHeading title={phaseTabTitle(tab)} subtitle={phaseTabSubtitle(tab)} />{action && <button onClick={action} className="bg-primary px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-primary-foreground">{actionLabel}</button>}</div>
+    {tab === 'tareas' && <List rows={rows.tareas} empty="No hay tareas en esta fase." render={item => <RecordCard key={Number(item.id)} title={String(item.titulo)} description={`${item.descripcion || 'Sin descripción'}${item.fecha_limite ? ` · límite ${date(item.fecha_limite)}` : ''}`} badges={[statusLabel(item.prioridad), statusLabel(item.estado), `${item.porcentaje_avance || 0}%`]} actions={<>{canOperate && item.estado !== 'completada' && <MiniButton onClick={() => onUpdate('tareas', Number(item.id), { estado: 'completada', porcentaje_avance: 100 })}>Completar</MiniButton>}{canManage && <MiniButton danger onClick={() => onArchive('tareas', Number(item.id))}>Cancelar</MiniButton>}</>} />} />}
+    {tab === 'avances' && <List rows={rows.avances} empty="No hay comentarios ni avances en esta fase." render={item => <RecordCard key={Number(item.id)} title={String(item.titulo || 'Actualización de fase')} description={String(item.descripcion)} badges={[statusLabel(item.estado), `${item.porcentaje_avance ?? 0}%`]} actions={canReview ? <ReviewActions onReview={actionName => onReview('avances', Number(item.id), actionName)} /> : null} />} />}
+    {tab === 'documentos' && <DocumentList rows={rows.documentos} canManage={canManage} canReview={canReview} onReview={onReview} onArchive={onArchive} />}
+    {tab === 'evidencias' && (rows.evidencias.length ? <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{rows.evidencias.map(item => <article key={Number(item.id)} className="overflow-hidden rounded-xl border border-border bg-background"><a href={apiAssetUrl(String(item.archivo_url))} target="_blank"><img src={apiAssetUrl(String(item.archivo_url))} alt={String(item.titulo)} className="h-44 w-full object-cover" /></a><div className="p-4"><strong>{String(item.titulo)}</strong><p className="mt-2 text-xs text-muted">{statusLabel(item.estado)}</p><div className="mt-3 flex flex-wrap gap-2">{canReview && <ReviewActions onReview={actionName => onReview('archivos', Number(item.id), actionName)} />}{canManage && <MiniButton danger onClick={() => onArchive('archivos', Number(item.id))}>Archivar</MiniButton>}</div></div></article>)}</div> : <Empty text="No hay evidencias en esta fase." />)}
+    {tab === 'riesgos' && <List rows={rows.riesgos} empty="No hay riesgos en esta fase." render={item => <RecordCard key={Number(item.id)} title={`${statusLabel(item.tipo)}: ${item.titulo}`} description={`${item.descripcion || 'Sin descripción'} · Plan: ${item.plan_respuesta || 'sin definir'}`} badges={[statusLabel(item.impacto), statusLabel(item.estado)]} actions={<>{canOperate && !['resuelto', 'cerrado'].includes(String(item.estado)) && <MiniButton onClick={() => onUpdate('riesgos', Number(item.id), { estado: 'resuelto' })}>Resolver</MiniButton>}{canManage && <MiniButton danger onClick={() => onArchive('riesgos', Number(item.id))}>Descartar</MiniButton>}</>} />} />}
+    {tab === 'decisiones' && <List rows={rows.decisiones} empty="No hay decisiones en esta fase." render={item => <RecordCard key={Number(item.id)} title={String(item.titulo)} description={`${item.decision_tomada} · Motivo: ${item.motivo || 'sin registrar'} · Impacto: ${money(item.impacto_costo)}`} badges={[statusLabel(item.estado)]} actions={canManage ? <MiniButton danger onClick={() => onArchive('decisiones', Number(item.id))}>Anular</MiniButton> : null} />} />}
     {tab === 'reuniones' && <List rows={rows.reuniones} empty="No hay reuniones en esta fase." render={item => <RecordCard key={Number(item.id)} title={String(item.titulo)} description={`${date(item.fecha_reunion)} · ${item.lugar || 'sin lugar'} · Acuerdos: ${item.acuerdos || 'sin registrar'}`} badges={[]} actions={canManage ? <MiniButton danger onClick={() => onArchive('reuniones', Number(item.id))}>Eliminar</MiniButton> : null} />} />}
-    {tab === 'finanzas' && <><div className="mb-5 grid gap-3 sm:grid-cols-3 xl:grid-cols-6">{['presupuesto', 'compromiso', 'gasto', 'ingreso', 'ajuste', 'saldo_estimado'].map(key => <div key={key} className="rounded-xl bg-background p-3"><span className="text-[9px] font-bold uppercase tracking-wider text-muted">{key.replace('_', ' ')}</span><strong className="mt-2 block text-sm">{money(finance[key])}</strong></div>)}</div><List rows={rows.finanzas} empty="No hay movimientos en esta fase." render={item => <RecordCard key={Number(item.id)} title={String(item.concepto)} description={`${item.tipo} · ${date(item.fecha_movimiento)} · ${item.descripcion || ''}`} badges={[money(item.monto), String(item.estado)]} actions={<>{canReview && item.estado === 'pendiente' && <MiniButton onClick={() => onUpdate('finanzas', Number(item.id), { estado: 'validado' })}>Validar</MiniButton>}{canManage && <MiniButton danger onClick={() => onArchive('finanzas', Number(item.id))}>Archivar</MiniButton>}</>} />} /></>}
+    {tab === 'finanzas' && <><div className="mb-5 grid gap-3 sm:grid-cols-3 xl:grid-cols-6">{['presupuesto', 'compromiso', 'gasto', 'ingreso', 'ajuste', 'saldo_estimado'].map(key => <div key={key} className="rounded-xl bg-background p-3"><span className="text-[9px] font-bold uppercase tracking-wider text-muted">{statusLabel(key)}</span><strong className="mt-2 block text-sm">{money(finance[key])}</strong></div>)}</div><List rows={rows.finanzas} empty="No hay movimientos en esta fase." render={item => <RecordCard key={Number(item.id)} title={String(item.concepto)} description={`${statusLabel(item.tipo)} · ${date(item.fecha_movimiento)} · ${item.descripcion || ''}`} badges={[money(item.monto), statusLabel(item.estado)]} actions={<>{canReview && item.estado === 'pendiente' && <MiniButton onClick={() => onUpdate('finanzas', Number(item.id), { estado: 'validado' })}>Validar</MiniButton>}{canManage && <MiniButton danger onClick={() => onArchive('finanzas', Number(item.id))}>Archivar</MiniButton>}</>} />} /></>}
     {tab === 'auditoria' && <List rows={rows.auditoria} empty="No hay eventos de auditoría para esta fase." render={item => <RecordCard key={Number(item.id)} title={`${item.accion} · ${item.modulo}`} description={`${item.usuario_email || 'Sistema'} · ${dateTime(item.created_at)} · ${item.descripcion || ''}`} badges={[]} />} />}
   </div>;
 }
 
 function TopNav({ active, onClick, icon, children }: { active: boolean; onClick: () => void; icon: string; children: React.ReactNode }) { return <button onClick={onClick} className={`flex items-center gap-2 px-5 py-2.5 text-[11px] font-bold uppercase tracking-wider ${active ? 'bg-primary text-primary-foreground' : 'text-muted'}`}><AppIcon name={icon} className="text-[18px]" />{children}</button>; }
 function PhaseSelector({ phase, index, active, responsible, onClick }: { phase: Row; index: number; active: boolean; responsible: string; onClick: () => void }) { const progress = Number(phase.porcentaje_avance || 0); return <button onClick={onClick} className={`w-full rounded-xl border p-4 text-left transition-all ${active ? 'border-accent bg-[#2b1710] text-white shadow-lg' : 'border-border bg-background hover:border-accent/50'}`}><div className="flex items-center justify-between gap-3"><span className={`text-[9px] font-bold uppercase tracking-[0.18em] ${active ? 'text-[#d7a24a]' : 'text-accent'}`}>Fase {index + 1} · {phase.peso_porcentaje || 0}% peso</span><strong className="text-sm">{progress}%</strong></div><h3 className="mt-2 font-bold">{String(phase.nombre)}</h3><p className={`mt-1 truncate text-xs ${active ? 'text-[#d8cabb]' : 'text-muted'}`}>{responsible}</p><div className={`mt-3 h-1 overflow-hidden rounded-full ${active ? 'bg-white/15' : 'bg-border'}`}><div className="h-full bg-accent" style={{ width: `${progress}%` }} /></div></button>; }
-function PhaseHeader({ phase, responsible, canManage, onEdit }: { phase: Row; responsible: string; canManage: boolean; onEdit: () => void }) { return <header className="bg-[#f7f3ee] p-5 md:p-7"><div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between"><div><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">Fase activa</p><h2 className="mt-2 font-headline-md text-3xl tracking-tight">{String(phase.nombre)}</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-muted">{String(phase.descripcion || 'Sin descripción registrada.')}</p></div>{canManage && <button onClick={onEdit} className="border border-border bg-white px-4 py-2 text-[10px] font-bold uppercase tracking-widest">Configurar fase</button>}</div><div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><PhaseDatum label="Estado" value={String(phase.estado).replace('_', ' ')} /><PhaseDatum label="Responsable" value={responsible} /><PhaseDatum label="Periodo" value={`${date(phase.fecha_inicio)} — ${date(phase.fecha_fin)}`} /><PhaseDatum label="Peso / avance" value={`${phase.peso_porcentaje || 0}% / ${phase.porcentaje_avance || 0}%`} /></div></header>; }
+function PhaseHeader({ phase, responsible, canManage, onEdit }: { phase: Row; responsible: string; canManage: boolean; onEdit: () => void }) { return <header className="bg-[#f7f3ee] p-5 md:p-7"><div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between"><div><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">Fase activa</p><h2 className="mt-2 font-headline-md text-3xl tracking-tight">{String(phase.nombre)}</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-muted">{String(phase.descripcion || 'Sin descripción registrada.')}</p></div>{canManage && <button onClick={onEdit} className="border border-border bg-white px-4 py-2 text-[10px] font-bold uppercase tracking-widest">Configurar fase</button>}</div><div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><PhaseDatum label="Estado" value={statusLabel(phase.estado)} /><PhaseDatum label="Responsable" value={responsible} /><PhaseDatum label="Periodo" value={`${date(phase.fecha_inicio)} — ${date(phase.fecha_fin)}`} /><PhaseDatum label="Peso / avance" value={`${phase.peso_porcentaje || 0}% / ${phase.porcentaje_avance || 0}%`} /></div></header>; }
 function PhaseDatum({ label, value }: { label: string; value: string }) { return <div className="rounded-xl bg-white p-3"><span className="text-[9px] font-bold uppercase tracking-widest text-muted">{label}</span><strong className="mt-1 block truncate text-xs capitalize">{value}</strong></div>; }
 function PhaseMetric({ label, value }: { label: string; value: string }) { return <div className="rounded-xl border border-border bg-background p-5"><span className="text-[9px] font-bold uppercase tracking-widest text-muted">{label}</span><strong className="mt-2 block text-2xl">{value}</strong></div>; }
 function SectionHeading({ title, subtitle }: { title: string; subtitle: string }) { return <div><h2 className="font-headline-md text-2xl tracking-tight">{title}</h2><p className="mt-1 text-sm text-muted">{subtitle}</p></div>; }
@@ -636,13 +648,13 @@ function List({ rows, render, empty }: { rows: Row[]; render: (row: Row) => Reac
 function RecordCard({ title, description, badges, actions }: { title: string; description: string; badges: string[]; actions?: React.ReactNode }) { return <article className="flex flex-col gap-4 rounded-xl border border-border bg-background p-4 lg:flex-row lg:items-center lg:justify-between"><div><strong className="capitalize">{title}</strong><p className="mt-1 max-w-3xl text-sm leading-6 text-muted">{description}</p></div><div className="flex flex-wrap items-center gap-2">{badges.map((badge, index) => <span key={`${badge}-${index}`} className="rounded-full border border-border bg-card px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-muted">{badge}</span>)}{actions}</div></article>; }
 function MiniButton({ children, danger, onClick }: { children: React.ReactNode; danger?: boolean; onClick: () => void }) { return <button onClick={onClick} className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider ${danger ? 'bg-red-50 text-red-700' : 'bg-[#2f5d3a]/10 text-[#2f5d3a]'}`}>{children}</button>; }
 function ReviewActions({ onReview }: { onReview: (action: string) => void }) { return <div className="flex flex-wrap gap-2"><MiniButton onClick={() => onReview('aprobar')}>Aprobar</MiniButton><MiniButton danger onClick={() => onReview('rechazar')}>Rechazar</MiniButton><MiniButton onClick={() => onReview('correccion')}>Corregir</MiniButton></div>; }
-function FileList({ rows, canManage, canReview, onReview, onArchive }: { rows: Row[]; canManage: boolean; canReview: boolean; onReview: (kind: 'archivos' | 'avances', id: number, action: string) => void; onArchive: (kind: string, id: number) => void }) { return <List rows={rows} empty="No hay archivos en esta fase." render={item => <RecordCard key={Number(item.id)} title={String(item.titulo)} description={`${item.tipo} · ${item.nombre_original || ''} · ${date(item.created_at)}`} badges={[String(item.estado)]} actions={<><a href={apiAssetUrl(String(item.archivo_url))} target="_blank" className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-primary">Abrir</a>{canReview && <ReviewActions onReview={action => onReview('archivos', Number(item.id), action)} />}{canManage && <MiniButton danger onClick={() => onArchive('archivos', Number(item.id))}>Archivar</MiniButton>}</>} />} />; }
+function DocumentList({ rows, canManage, canReview, onReview, onArchive }: { rows: Row[]; canManage: boolean; canReview: boolean; onReview: (kind: 'archivos' | 'avances', id: number, action: string) => void; onArchive: (kind: string, id: number) => void }) { return <List rows={rows} empty="No hay documentos en esta fase." render={item => <RecordCard key={Number(item.id)} title={String(item.titulo)} description={`PDF · ${item.nombre_original || ''} · ${formatBytes(item.size_bytes)} · ${date(item.created_at)}`} badges={[statusLabel(item.estado)]} actions={<><a href={apiAssetUrl(String(item.archivo_url))} target="_blank" className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-primary">Ver PDF</a>{canReview && <ReviewActions onReview={action => onReview('archivos', Number(item.id), action)} />}{canManage && <MiniButton danger onClick={() => onArchive('archivos', Number(item.id))}>Archivar</MiniButton>}</>} />} />; }
 
 function DynamicField({ field, members = [] }: { field: { name: string; label: string; type?: string; options?: string[]; required?: boolean }; members?: Array<{ id: string | number | null; label: string | number | null }> }) {
   const shared = { name: field.name, required: field.required, className: 'form-control' };
   let control: React.ReactNode;
   if (field.type === 'textarea') control = <textarea {...shared} rows={3} />;
-  else if (field.type === 'select') control = <select {...shared}>{field.options?.map(option => <option key={option} value={option}>{option.replace('_', ' ')}</option>)}</select>;
+  else if (field.type === 'select') control = <select {...shared}>{field.options?.map(option => <option key={option} value={option}>{statusLabel(option)}</option>)}</select>;
   else if (field.type === 'member') control = <select {...shared}><option value="">Sin responsable</option>{members.map(member => <option key={String(member.id)} value={String(member.id)}>{String(member.label)}</option>)}</select>;
   else control = <input {...shared} type={field.type || 'text'} min={field.type === 'number' ? 0 : undefined} max={field.name.includes('porcentaje') ? 100 : undefined} step={field.name === 'monto' || field.name === 'impacto_costo' ? '0.01' : undefined} defaultValue={field.name === 'moneda' ? 'USD' : undefined} />;
   return <label className={field.type === 'textarea' ? 'md:col-span-2' : ''}><FieldLabel>{field.label}</FieldLabel>{control}</label>;
@@ -652,9 +664,55 @@ function FieldLabel({ children }: { children: React.ReactNode }) { return <span 
 function memberName(id: string | number | null, members: Array<{ id: string | number | null; label: string | number | null }>) { return String(members.find(member => Number(member.id) === Number(id))?.label || 'Sin responsable'); }
 function weightedProgress(phases: Row[]) { if (!phases.length) return 0; const totalWeight = phases.reduce((sum, phase) => sum + Number(phase.peso_porcentaje || 0), 0); if (!totalWeight) return Math.round(phases.reduce((sum, phase) => sum + Number(phase.porcentaje_avance || 0), 0) / phases.length); return Math.round(phases.reduce((sum, phase) => sum + Number(phase.porcentaje_avance || 0) * Number(phase.peso_porcentaje || 0), 0) / totalWeight); }
 function financeSummary(rows: Row[]) { const summary: Record<string, number> = { presupuesto: 0, compromiso: 0, gasto: 0, ingreso: 0, ajuste: 0, saldo_estimado: 0 }; rows.forEach(item => { if (!['rechazado', 'archivado'].includes(String(item.estado))) summary[String(item.tipo)] += Number(item.monto || 0); }); summary.saldo_estimado = summary.presupuesto + summary.ingreso + summary.ajuste - summary.compromiso - summary.gasto; return summary; }
-function phaseTabTitle(tab: PhaseTab) { return ({ tareas: 'Tareas de la fase', avances: 'Bitácora y comentarios', documentos: 'Archivos de la fase', evidencias: 'Evidencias visuales', riesgos: 'Riesgos y problemas', decisiones: 'Decisiones y cambios', reuniones: 'Reuniones y acuerdos', finanzas: 'Finanzas de la fase', auditoria: 'Auditoría de la fase', resumen: 'Resumen' })[tab]; }
-function phaseTabSubtitle(tab: PhaseTab) { return ({ tareas: 'Actividades, responsables y vencimientos.', avances: 'Actualizaciones de campo y revisión institucional.', documentos: 'Informes, actas y documentos relacionados.', evidencias: 'Registro fotográfico contextualizado.', riesgos: 'Amenazas, incidencias y planes de respuesta.', decisiones: 'Acuerdos e impactos trazables.', reuniones: 'Minutas, participantes y próximos pasos.', finanzas: 'Presupuesto y movimientos de esta etapa.', auditoria: 'Historial de acciones realizadas en esta fase.', resumen: '' })[tab]; }
+function phaseTabTitle(tab: PhaseTab) { return ({ tareas: 'Tareas de la fase', avances: 'Bitácora y comentarios', documentos: 'Documentos de la fase', evidencias: 'Evidencias visuales', riesgos: 'Riesgos y problemas', decisiones: 'Decisiones y cambios', reuniones: 'Reuniones y acuerdos', finanzas: 'Finanzas de la fase', auditoria: 'Auditoría de la fase', resumen: 'Resumen' })[tab]; }
+function phaseTabSubtitle(tab: PhaseTab) { return ({ tareas: 'Actividades, responsables y vencimientos.', avances: 'Actualizaciones de campo y revisión institucional.', documentos: 'Solo informes, actas o documentos en PDF.', evidencias: 'Registro fotográfico contextualizado.', riesgos: 'Amenazas, incidencias y planes de respuesta.', decisiones: 'Acuerdos e impactos trazables.', reuniones: 'Minutas, participantes y próximos pasos.', finanzas: 'Presupuesto y movimientos de esta etapa.', auditoria: 'Historial de acciones realizadas en esta fase.', resumen: '' })[tab]; }
 function readFile(file: File) { return new Promise<string>((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.onerror = reject; reader.readAsDataURL(file); }); }
+function statusLabel(value: unknown) {
+  const key = String(value || '').trim();
+  const labels: Record<string, string> = {
+    pendiente_revision: 'Pendiente de revisión',
+    requiere_correccion: 'Requiere corrección',
+    en_progreso: 'En progreso',
+    completada: 'Completada',
+    completado: 'Completado',
+    cancelada: 'Cancelada',
+    cancelado: 'Cancelado',
+    aprobado: 'Aprobado',
+    rechazada: 'Rechazada',
+    rechazado: 'Rechazado',
+    archivado: 'Archivado',
+    validado: 'Validado',
+    pendiente: 'Pendiente',
+    abierto: 'Abierto',
+    en_mitigacion: 'En mitigación',
+    resuelto: 'Resuelto',
+    cerrado: 'Cerrado',
+    descartado: 'Descartado',
+    baja: 'Baja',
+    media: 'Media',
+    alta: 'Alta',
+    critica: 'Crítica',
+    critico: 'Crítico',
+    bajo: 'Bajo',
+    medio: 'Medio',
+    alto: 'Alto',
+    riesgo: 'Riesgo',
+    problema: 'Problema',
+    presupuesto: 'Presupuesto',
+    compromiso: 'Compromiso',
+    gasto: 'Gasto',
+    ingreso: 'Ingreso',
+    ajuste: 'Ajuste',
+    saldo_estimado: 'Saldo estimado',
+  };
+  return labels[key] || key.replace(/_/g, ' ').replace(/^\w/, char => char.toUpperCase());
+}
+function formatBytes(value: unknown) {
+  const bytes = Number(value || 0);
+  if (!bytes) return 'Tamaño no registrado';
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 function date(value: unknown) { return value ? new Intl.DateTimeFormat('es-PA', { dateStyle: 'medium' }).format(new Date(String(value))) : 'Por definir'; }
 function dateTime(value: unknown) { return value ? new Intl.DateTimeFormat('es-PA', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(String(value))) : ''; }
 function money(value: unknown) { return new Intl.NumberFormat('es-PA', { style: 'currency', currency: 'USD' }).format(Number(value || 0)); }

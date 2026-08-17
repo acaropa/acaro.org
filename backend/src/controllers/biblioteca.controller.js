@@ -1,9 +1,16 @@
 const biblioteca = require('../services/biblioteca.service');
 const { hasPermission, PERMISSIONS } = require('../config/permissions');
-const { saveBase64Upload, DOCUMENT_EXTENSIONS, IMAGE_EXTENSIONS } = require('../utils/uploads');
+const { saveBase64Upload, PDF_EXTENSIONS, IMAGE_EXTENSIONS } = require('../utils/uploads');
 
-const MAX_DOCUMENT_BYTES = 8 * 1024 * 1024;
+const MAX_PDF_SIZE_MB = 5;
+const MAX_PDF_BYTES = MAX_PDF_SIZE_MB * 1024 * 1024;
 const MAX_COVER_BYTES = 4 * 1024 * 1024;
+const PDF_UPLOAD_MESSAGES = {
+  required: 'Selecciona un archivo PDF.',
+  tooLarge: `El PDF supera el límite de ${MAX_PDF_SIZE_MB} MB.`,
+  invalidType: 'Solo se permiten archivos PDF.',
+  invalidContent: 'El archivo no parece ser un PDF válido.',
+};
 
 async function resolveFileUpload(body) {
   if (!body.archivo_base64 || !body.archivo_nombre) return undefined;
@@ -11,8 +18,9 @@ async function resolveFileUpload(body) {
     base64: body.archivo_base64,
     fileName: body.archivo_nombre,
     subdir: 'biblioteca',
-    maxBytes: MAX_DOCUMENT_BYTES,
-    allowedExtensions: DOCUMENT_EXTENSIONS,
+    maxBytes: MAX_PDF_BYTES,
+    allowedExtensions: PDF_EXTENSIONS,
+    messages: PDF_UPLOAD_MESSAGES,
   });
   return uploaded.url;
 }
@@ -36,9 +44,15 @@ function parseId(value) {
 
 function validateDocument(data = {}, partial = false, trustedFileUrl = false) {
   const required = ['titulo', 'archivo_url', 'categoria', 'visibilidad'];
+  const requiredLabels = {
+    titulo: 'El título',
+    archivo_url: 'El PDF',
+    categoria: 'La categoría',
+    visibilidad: 'La visibilidad',
+  };
   for (const field of required) {
     if ((!partial || field in data) && (typeof data[field] !== 'string' || !data[field].trim())) {
-      return `${field} es requerido`;
+      return `${requiredLabels[field] || field} es requerido.`;
     }
   }
 
@@ -46,8 +60,9 @@ function validateDocument(data = {}, partial = false, trustedFileUrl = false) {
     try {
       const url = new URL(data.archivo_url);
       if (!['http:', 'https:'].includes(url.protocol)) throw new Error();
+      if (!url.pathname.toLowerCase().endsWith('.pdf')) return 'El enlace debe ser un PDF.';
     } catch {
-      return 'archivo_url debe ser una URL http o https válida';
+      return 'El enlace debe ser una URL válida.';
     }
   }
 

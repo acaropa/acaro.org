@@ -359,7 +359,7 @@ export default function Biblioteca() {
             </div>
           </section>
 
-          <section className="bg-[#faf2f0] px-5 py-16 sm:px-8 lg:px-10 lg:py-20">
+          <section className="bg-[#f4f4f0] px-5 py-16 sm:px-8 lg:px-10 lg:py-20">
             <div className="mx-auto max-w-7xl">
               <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                 <div>

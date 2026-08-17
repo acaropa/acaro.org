@@ -3,9 +3,10 @@ const { z } = require('../middlewares/validate');
 const VISIBILIDADES = ['publica', 'interna'];
 const CATEGORIAS_MAX = 100;
 const REVIEW_ACTIONS = ['approve', 'reject', 'request_changes', 'archive', 'unarchive'];
+const PDF_BASE64_MAX_CHARS = 7_000_000;
 
 const fileUploadShape = {
-  archivo_base64: z.string().max(12_000_000, 'Archivo demasiado grande').optional(),
+  archivo_base64: z.string().max(PDF_BASE64_MAX_CHARS, 'El PDF es demasiado grande.').optional(),
   archivo_nombre: z.string().trim().max(255, 'Nombre demasiado largo').optional(),
   archivo_url:    z.string().max(1000).optional(),
 };

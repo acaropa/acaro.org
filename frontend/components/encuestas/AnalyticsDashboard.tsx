@@ -9,7 +9,7 @@ import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer,
 import { encuestasApi, type EncuestaPregunta, type RespuestaEncuesta, type EncuestaFull } from '@/lib/encuestas'
 import {
   buildDashboardMetrics, buildDailySeries, buildWeeklySeries,
-  buildAllQuestionAnalytics, exportToExcelHtml, formatQuestionType,
+  buildAllQuestionAnalytics, exportSurveyResponsesXlsx, formatQuestionType,
   type QuestionAnalytics,
 } from '@/lib/dashboardAnalytics'
 import { useAuth } from '@/context/AuthContext'
@@ -73,7 +73,7 @@ export function AnalyticsDashboard({ encuestaId }: Props) {
   const handleExport = async () => {
     if (!encuesta) return
     setExporting(true)
-    try { exportToExcelHtml(encuesta.titulo, encuesta.estado, questions, responses) }
+    try { exportSurveyResponsesXlsx(encuesta.titulo, encuesta.estado, questions, responses) }
     finally { setExporting(false) }
   }
 
