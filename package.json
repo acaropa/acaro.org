@@ -11,7 +11,7 @@
     "concurrently": "^10.0.4"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.108.2",
+    "@supabase/supabase-js": "^2.112.3",
     "dotenv": "^17.4.2",
     "mysql2": "^3.22.5"
   }
