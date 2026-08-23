@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { PublicLayout } from '@/components/layout/PublicLayout';
 import { ScrollReveal } from '@/components/landing/LandingMotion';
+import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { api } from '@/lib/api';
 import { ProductorRecord, formatExperience, formatProducerDate, producerImage } from '@/lib/producers';
@@ -58,11 +59,11 @@ function ProductorDetalle() {
             <article className="grid grid-cols-1 lg:grid-cols-12 gap-[48px] items-start">
               <div className="lg:col-span-5">
                 <div className="sticky top-28 bg-surface overflow-hidden">
-                  <img
+                  <OptimizedImage
                     alt={producer.nombre}
-                    loading="lazy"
                     className="w-full h-[420px] md:h-[620px] object-cover"
                     src={producerImage(producer)}
+                    sizes="(max-width: 1024px) 100vw, 42vw"
                   />
                 </div>
               </div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { ScrollReveal } from '@/components/landing/LandingMotion';
+import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { api } from '@/lib/api';
 import { ProductorRecord, producerImage } from '@/lib/producers';
 
@@ -29,10 +30,11 @@ export function FeaturedProducers() {
             <div className="grid items-center gap-12 md:grid-cols-2">
 
               <div className={`relative aspect-square w-full overflow-hidden border-4 border-white shadow-xl transition-all duration-700 ${isReversed ? 'md:order-2' : ''}`}>
-                <img
+                <OptimizedImage
                   src={producerImage(producer)}
                   alt={producer.nombre}
                   className="h-full w-full object-cover"
+                  sizes="(max-width: 768px) 100vw, 50vw"
                 />
               </div>
 

@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { api } from '@/lib/api'
 import { PublicLayout } from '@/components/layout/PublicLayout'
 import { AppIcon } from '@/components/ui/AppIcon'
+import { OptimizedImage } from '@/components/ui/OptimizedImage'
 
 type PublishedSurvey = {
   id: number
@@ -57,10 +58,14 @@ export default function EncuestasPublicas() {
       <div className="flex flex-col lg:flex-row items-start w-full min-h-[calc(100vh-72px)]">
         <section className="relative lg:sticky lg:top-[72px] lg:h-[calc(100vh-72px)] w-full lg:w-1/2 h-[35vh] min-h-[300px] bg-[#120C08] flex flex-col justify-end p-6 lg:p-[64px] overflow-hidden">
           <div className="absolute inset-0 z-0">
-            <div
-              className="w-full h-full bg-cover bg-center opacity-80"
-              style={{ backgroundImage: "url('/coffee_farmers_survey.png')" }}>
-            </div>
+            <OptimizedImage
+              src="/coffee_farmers_survey.png"
+              alt=""
+              aria-hidden="true"
+              priority
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="h-full w-full object-cover object-center opacity-80"
+            />
             {/* Improved overlay for better text readability */}
             <div className="absolute inset-0 bg-gradient-to-t from-[#120C08]/95 via-[#120C08]/60 to-[#120C08]/20"></div>
           </div>

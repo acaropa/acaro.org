@@ -13,12 +13,12 @@ export function Logo({ variant = "normal", className, showText = true }: LogoPro
     <div className={cn("flex items-center gap-3", className)}>
       <div className={cn("relative flex shrink-0 items-center justify-center", variant === "white" && "brightness-0 invert")}>
         <Image
-          src="/assets/logos/logo1.png"
+          src="/assets/logos/logo-navbar.png"
           alt="Logo de Asociación Café Robusta OBC"
           width={48}
           height={48}
+          loading="eager"
           className="h-10 w-10 object-contain md:h-12 md:w-12"
-          priority
         />
       </div>
       {showText && (

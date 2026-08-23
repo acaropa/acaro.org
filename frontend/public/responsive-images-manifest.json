@@ -1,0 +1,782 @@
+{
+  "/assets/landing-hero-main.jpg": {
+    "src": "/assets/landing-hero-main.jpg",
+    "width": 3840,
+    "height": 2880,
+    "format": "jpg",
+    "variants": {
+      "avif": [
+        {
+          "src": "/assets/responsive/landing-hero-main-480.avif",
+          "width": 480,
+          "bytes": 47046
+        },
+        {
+          "src": "/assets/responsive/landing-hero-main-768.avif",
+          "width": 768,
+          "bytes": 76430
+        },
+        {
+          "src": "/assets/responsive/landing-hero-main-1200.avif",
+          "width": 1200,
+          "bytes": 121943
+        },
+        {
+          "src": "/assets/responsive/landing-hero-main-1920.avif",
+          "width": 1920,
+          "bytes": 189687
+        },
+        {
+          "src": "/assets/responsive/landing-hero-main-2560.avif",
+          "width": 2560,
+          "bytes": 248110
+        }
+      ],
+      "webp": [
+        {
+          "src": "/assets/responsive/landing-hero-main-480.webp",
+          "width": 480,
+          "bytes": 43464
+        },
+        {
+          "src": "/assets/responsive/landing-hero-main-768.webp",
+          "width": 768,
+          "bytes": 77708
+        },
+        {
+          "src": "/assets/responsive/landing-hero-main-1200.webp",
+          "width": 1200,
+          "bytes": 135348
+        },
+        {
+          "src": "/assets/responsive/landing-hero-main-1920.webp",
+          "width": 1920,
+          "bytes": 233398
+        },
+        {
+          "src": "/assets/responsive/landing-hero-main-2560.webp",
+          "width": 2560,
+          "bytes": 333084
+        }
+      ]
+    }
+  },
+  "/assets/landing-hero-v2.jpg": {
+    "src": "/assets/landing-hero-v2.jpg",
+    "width": 4080,
+    "height": 3060,
+    "format": "jpg",
+    "variants": {
+      "avif": [
+        {
+          "src": "/assets/responsive/landing-hero-v2-480.avif",
+          "width": 480,
+          "bytes": 45780
+        },
+        {
+          "src": "/assets/responsive/landing-hero-v2-768.avif",
+          "width": 768,
+          "bytes": 107641
+        },
+        {
+          "src": "/assets/responsive/landing-hero-v2-1200.avif",
+          "width": 1200,
+          "bytes": 237867
+        },
+        {
+          "src": "/assets/responsive/landing-hero-v2-1920.avif",
+          "width": 1920,
+          "bytes": 503038
+        },
+        {
+          "src": "/assets/responsive/landing-hero-v2-2560.avif",
+          "width": 2560,
+          "bytes": 715836
+        }
+      ],
+      "webp": [
+        {
+          "src": "/assets/responsive/landing-hero-v2-480.webp",
+          "width": 480,
+          "bytes": 72532
+        },
+        {
+          "src": "/assets/responsive/landing-hero-v2-768.webp",
+          "width": 768,
+          "bytes": 169682
+        },
+        {
+          "src": "/assets/responsive/landing-hero-v2-1200.webp",
+          "width": 1200,
+          "bytes": 401162
+        },
+        {
+          "src": "/assets/responsive/landing-hero-v2-1920.webp",
+          "width": 1920,
+          "bytes": 909964
+        },
+        {
+          "src": "/assets/responsive/landing-hero-v2-2560.webp",
+          "width": 2560,
+          "bytes": 1420804
+        }
+      ]
+    }
+  },
+  "/assets/login-bg-v2.jpg": {
+    "src": "/assets/login-bg-v2.jpg",
+    "width": 3000,
+    "height": 3000,
+    "format": "jpg",
+    "variants": {
+      "avif": [
+        {
+          "src": "/assets/responsive/login-bg-v2-480.avif",
+          "width": 480,
+          "bytes": 167509
+        },
+        {
+          "src": "/assets/responsive/login-bg-v2-768.avif",
+          "width": 768,
+          "bytes": 392377
+        },
+        {
+          "src": "/assets/responsive/login-bg-v2-1200.avif",
+          "width": 1200,
+          "bytes": 798798
+        },
+        {
+          "src": "/assets/responsive/login-bg-v2-1920.avif",
+          "width": 1920,
+          "bytes": 1602219
+        },
+        {
+          "src": "/assets/responsive/login-bg-v2-2560.avif",
+          "width": 2560,
+          "bytes": 2397963
+        }
+      ],
+      "webp": [
+        {
+          "src": "/assets/responsive/login-bg-v2-480.webp",
+          "width": 480,
+          "bytes": 110616
+        },
+        {
+          "src": "/assets/responsive/login-bg-v2-768.webp",
+          "width": 768,
+          "bytes": 269408
+        },
+        {
+          "src": "/assets/responsive/login-bg-v2-1200.webp",
+          "width": 1200,
+          "bytes": 587868
+        },
+        {
+          "src": "/assets/responsive/login-bg-v2-1920.webp",
+          "width": 1920,
+          "bytes": 1240342
+        },
+        {
+          "src": "/assets/responsive/login-bg-v2-2560.webp",
+          "width": 2560,
+          "bytes": 1889292
+        }
+      ]
+    }
+  },
+  "/assets/hero-bg.jpg": {
+    "src": "/assets/hero-bg.jpg",
+    "width": 3000,
+    "height": 3000,
+    "format": "jpg",
+    "variants": {
+      "avif": [
+        {
+          "src": "/assets/responsive/hero-bg-480.avif",
+          "width": 480,
+          "bytes": 71214
+        },
+        {
+          "src": "/assets/responsive/hero-bg-768.avif",
+          "width": 768,
+          "bytes": 136127
+        },
+        {
+          "src": "/assets/responsive/hero-bg-1200.avif",
+          "width": 1200,
+          "bytes": 290478
+        },
+        {
+          "src": "/assets/responsive/hero-bg-1920.avif",
+          "width": 1920,
+          "bytes": 580189
+        }
+      ],
+      "webp": [
+        {
+          "src": "/assets/responsive/hero-bg-480.webp",
+          "width": 480,
+          "bytes": 50302
+        },
+        {
+          "src": "/assets/responsive/hero-bg-768.webp",
+          "width": 768,
+          "bytes": 97714
+        },
+        {
+          "src": "/assets/responsive/hero-bg-1200.webp",
+          "width": 1200,
+          "bytes": 203124
+        },
+        {
+          "src": "/assets/responsive/hero-bg-1920.webp",
+          "width": 1920,
+          "bytes": 430830
+        }
+      ]
+    }
+  },
+  "/assets/library-hero-v2.png": {
+    "src": "/assets/library-hero-v2.png",
+    "width": 4080,
+    "height": 3060,
+    "format": "jpg",
+    "variants": {
+      "avif": [
+        {
+          "src": "/assets/responsive/library-hero-v2-480.avif",
+          "width": 480,
+          "bytes": 111081
+        },
+        {
+          "src": "/assets/responsive/library-hero-v2-768.avif",
+          "width": 768,
+          "bytes": 265101
+        },
+        {
+          "src": "/assets/responsive/library-hero-v2-1200.avif",
+          "width": 1200,
+          "bytes": 618055
+        },
+        {
+          "src": "/assets/responsive/library-hero-v2-1920.avif",
+          "width": 1920,
+          "bytes": 1442052
+        }
+      ],
+      "webp": [
+        {
+          "src": "/assets/responsive/library-hero-v2-480.webp",
+          "width": 480,
+          "bytes": 76454
+        },
+        {
+          "src": "/assets/responsive/library-hero-v2-768.webp",
+          "width": 768,
+          "bytes": 191918
+        },
+        {
+          "src": "/assets/responsive/library-hero-v2-1200.webp",
+          "width": 1200,
+          "bytes": 475784
+        },
+        {
+          "src": "/assets/responsive/library-hero-v2-1920.webp",
+          "width": 1920,
+          "bytes": 1185706
+        }
+      ]
+    }
+  },
+  "/assets/projects-fallback.jpg": {
+    "src": "/assets/projects-fallback.jpg",
+    "width": 3000,
+    "height": 3000,
+    "format": "jpg",
+    "variants": {
+      "avif": [
+        {
+          "src": "/assets/responsive/projects-fallback-480.avif",
+          "width": 480,
+          "bytes": 142837
+        },
+        {
+          "src": "/assets/responsive/projects-fallback-768.avif",
+          "width": 768,
+          "bytes": 361379
+        },
+        {
+          "src": "/assets/responsive/projects-fallback-1200.avif",
+          "width": 1200,
+          "bytes": 808859
+        },
+        {
+          "src": "/assets/responsive/projects-fallback-1920.avif",
+          "width": 1920,
+          "bytes": 1748446
+        }
+      ],
+      "webp": [
+        {
+          "src": "/assets/responsive/projects-fallback-480.webp",
+          "width": 480,
+          "bytes": 99896
+        },
+        {
+          "src": "/assets/responsive/projects-fallback-768.webp",
+          "width": 768,
+          "bytes": 261686
+        },
+        {
+          "src": "/assets/responsive/projects-fallback-1200.webp",
+          "width": 1200,
+          "bytes": 629194
+        },
+        {
+          "src": "/assets/responsive/projects-fallback-1920.webp",
+          "width": 1920,
+          "bytes": 1433734
+        }
+      ]
+    }
+  },
+  "/assets/community-bg.jpg": {
+    "src": "/assets/community-bg.jpg",
+    "width": 4080,
+    "height": 3060,
+    "format": "jpg",
+    "variants": {
+      "avif": [
+        {
+          "src": "/assets/responsive/community-bg-480.avif",
+          "width": 480,
+          "bytes": 81686
+        },
+        {
+          "src": "/assets/responsive/community-bg-768.avif",
+          "width": 768,
+          "bytes": 189478
+        },
+        {
+          "src": "/assets/responsive/community-bg-1200.avif",
+          "width": 1200,
+          "bytes": 430575
+        },
+        {
+          "src": "/assets/responsive/community-bg-1920.avif",
+          "width": 1920,
+          "bytes": 1002845
+        }
+      ],
+      "webp": [
+        {
+          "src": "/assets/responsive/community-bg-480.webp",
+          "width": 480,
+          "bytes": 55190
+        },
+        {
+          "src": "/assets/responsive/community-bg-768.webp",
+          "width": 768,
+          "bytes": 132590
+        },
+        {
+          "src": "/assets/responsive/community-bg-1200.webp",
+          "width": 1200,
+          "bytes": 325798
+        },
+        {
+          "src": "/assets/responsive/community-bg-1920.webp",
+          "width": 1920,
+          "bytes": 801770
+        }
+      ]
+    }
+  },
+  "/assets/productores-card.jpg": {
+    "src": "/assets/productores-card.jpg",
+    "width": 4080,
+    "height": 3060,
+    "format": "jpg",
+    "variants": {
+      "avif": [
+        {
+          "src": "/assets/responsive/productores-card-480.avif",
+          "width": 480,
+          "bytes": 81686
+        },
+        {
+          "src": "/assets/responsive/productores-card-768.avif",
+          "width": 768,
+          "bytes": 189478
+        },
+        {
+          "src": "/assets/responsive/productores-card-1200.avif",
+          "width": 1200,
+          "bytes": 430575
+        },
+        {
+          "src": "/assets/responsive/productores-card-1920.avif",
+          "width": 1920,
+          "bytes": 1002845
+        }
+      ],
+      "webp": [
+        {
+          "src": "/assets/responsive/productores-card-480.webp",
+          "width": 480,
+          "bytes": 55190
+        },
+        {
+          "src": "/assets/responsive/productores-card-768.webp",
+          "width": 768,
+          "bytes": 132590
+        },
+        {
+          "src": "/assets/responsive/productores-card-1200.webp",
+          "width": 1200,
+          "bytes": 325798
+        },
+        {
+          "src": "/assets/responsive/productores-card-1920.webp",
+          "width": 1920,
+          "bytes": 801770
+        }
+      ]
+    }
+  },
+  "/assets/coffee-beans-texture.png": {
+    "src": "/assets/coffee-beans-texture.png",
+    "width": 3120,
+    "height": 4160,
+    "format": "jpg",
+    "variants": {
+      "avif": [
+        {
+          "src": "/assets/responsive/coffee-beans-texture-480.avif",
+          "width": 480,
+          "bytes": 130402
+        },
+        {
+          "src": "/assets/responsive/coffee-beans-texture-768.avif",
+          "width": 768,
+          "bytes": 290051
+        },
+        {
+          "src": "/assets/responsive/coffee-beans-texture-1200.avif",
+          "width": 1200,
+          "bytes": 559255
+        },
+        {
+          "src": "/assets/responsive/coffee-beans-texture-1920.avif",
+          "width": 1920,
+          "bytes": 1037762
+        }
+      ],
+      "webp": [
+        {
+          "src": "/assets/responsive/coffee-beans-texture-480.webp",
+          "width": 480,
+          "bytes": 101050
+        },
+        {
+          "src": "/assets/responsive/coffee-beans-texture-768.webp",
+          "width": 768,
+          "bytes": 229136
+        },
+        {
+          "src": "/assets/responsive/coffee-beans-texture-1200.webp",
+          "width": 1200,
+          "bytes": 456730
+        },
+        {
+          "src": "/assets/responsive/coffee-beans-texture-1920.webp",
+          "width": 1920,
+          "bytes": 862242
+        }
+      ]
+    }
+  },
+  "/assets/biblioteca-card.jpg": {
+    "src": "/assets/biblioteca-card.jpg",
+    "width": 3120,
+    "height": 4160,
+    "format": "jpg",
+    "variants": {
+      "avif": [
+        {
+          "src": "/assets/responsive/biblioteca-card-480.avif",
+          "width": 480,
+          "bytes": 83911
+        },
+        {
+          "src": "/assets/responsive/biblioteca-card-768.avif",
+          "width": 768,
+          "bytes": 186428
+        },
+        {
+          "src": "/assets/responsive/biblioteca-card-1200.avif",
+          "width": 1200,
+          "bytes": 351791
+        },
+        {
+          "src": "/assets/responsive/biblioteca-card-1920.avif",
+          "width": 1920,
+          "bytes": 627987
+        }
+      ],
+      "webp": [
+        {
+          "src": "/assets/responsive/biblioteca-card-480.webp",
+          "width": 480,
+          "bytes": 65862
+        },
+        {
+          "src": "/assets/responsive/biblioteca-card-768.webp",
+          "width": 768,
+          "bytes": 147150
+        },
+        {
+          "src": "/assets/responsive/biblioteca-card-1200.webp",
+          "width": 1200,
+          "bytes": 288328
+        },
+        {
+          "src": "/assets/responsive/biblioteca-card-1920.webp",
+          "width": 1920,
+          "bytes": 523592
+        }
+      ]
+    }
+  },
+  "/assets/theme-proyectos.jpg": {
+    "src": "/assets/theme-proyectos.jpg",
+    "width": 2400,
+    "height": 2400,
+    "format": "jpg",
+    "variants": {
+      "avif": [
+        {
+          "src": "/assets/responsive/theme-proyectos-480.avif",
+          "width": 480,
+          "bytes": 78150
+        },
+        {
+          "src": "/assets/responsive/theme-proyectos-768.avif",
+          "width": 768,
+          "bytes": 155387
+        },
+        {
+          "src": "/assets/responsive/theme-proyectos-1200.avif",
+          "width": 1200,
+          "bytes": 348781
+        }
+      ],
+      "webp": [
+        {
+          "src": "/assets/responsive/theme-proyectos-480.webp",
+          "width": 480,
+          "bytes": 55500
+        },
+        {
+          "src": "/assets/responsive/theme-proyectos-768.webp",
+          "width": 768,
+          "bytes": 113910
+        },
+        {
+          "src": "/assets/responsive/theme-proyectos-1200.webp",
+          "width": 1200,
+          "bytes": 244392
+        }
+      ]
+    }
+  },
+  "/assets/theme-institucional.jpg": {
+    "src": "/assets/theme-institucional.jpg",
+    "width": 2400,
+    "height": 1600,
+    "format": "jpg",
+    "variants": {
+      "avif": [
+        {
+          "src": "/assets/responsive/theme-institucional-480.avif",
+          "width": 480,
+          "bytes": 2215
+        },
+        {
+          "src": "/assets/responsive/theme-institucional-768.avif",
+          "width": 768,
+          "bytes": 3087
+        },
+        {
+          "src": "/assets/responsive/theme-institucional-1200.avif",
+          "width": 1200,
+          "bytes": 4554
+        }
+      ],
+      "webp": [
+        {
+          "src": "/assets/responsive/theme-institucional-480.webp",
+          "width": 480,
+          "bytes": 1544
+        },
+        {
+          "src": "/assets/responsive/theme-institucional-768.webp",
+          "width": 768,
+          "bytes": 2962
+        },
+        {
+          "src": "/assets/responsive/theme-institucional-1200.webp",
+          "width": 1200,
+          "bytes": 5482
+        }
+      ]
+    }
+  },
+  "/assets/theme-guias.jpg": {
+    "src": "/assets/theme-guias.jpg",
+    "width": 1672,
+    "height": 941,
+    "format": "jpg",
+    "variants": {
+      "avif": [
+        {
+          "src": "/assets/responsive/theme-guias-480.avif",
+          "width": 480,
+          "bytes": 50128
+        },
+        {
+          "src": "/assets/responsive/theme-guias-768.avif",
+          "width": 768,
+          "bytes": 123806
+        },
+        {
+          "src": "/assets/responsive/theme-guias-1200.avif",
+          "width": 1200,
+          "bytes": 266711
+        }
+      ],
+      "webp": [
+        {
+          "src": "/assets/responsive/theme-guias-480.webp",
+          "width": 480,
+          "bytes": 40266
+        },
+        {
+          "src": "/assets/responsive/theme-guias-768.webp",
+          "width": 768,
+          "bytes": 102668
+        },
+        {
+          "src": "/assets/responsive/theme-guias-1200.webp",
+          "width": 1200,
+          "bytes": 230484
+        }
+      ]
+    }
+  },
+  "/assets/theme-formacion.jpg": {
+    "src": "/assets/theme-formacion.jpg",
+    "width": 1672,
+    "height": 941,
+    "format": "jpg",
+    "variants": {
+      "avif": [
+        {
+          "src": "/assets/responsive/theme-formacion-480.avif",
+          "width": 480,
+          "bytes": 52416
+        },
+        {
+          "src": "/assets/responsive/theme-formacion-768.avif",
+          "width": 768,
+          "bytes": 113849
+        },
+        {
+          "src": "/assets/responsive/theme-formacion-1200.avif",
+          "width": 1200,
+          "bytes": 201780
+        }
+      ],
+      "webp": [
+        {
+          "src": "/assets/responsive/theme-formacion-480.webp",
+          "width": 480,
+          "bytes": 42044
+        },
+        {
+          "src": "/assets/responsive/theme-formacion-768.webp",
+          "width": 768,
+          "bytes": 93374
+        },
+        {
+          "src": "/assets/responsive/theme-formacion-1200.webp",
+          "width": 1200,
+          "bytes": 167542
+        }
+      ]
+    }
+  },
+  "/coffee_farmers_survey.png": {
+    "src": "/coffee_farmers_survey.png",
+    "width": 3060,
+    "height": 4080,
+    "format": "jpg",
+    "variants": {
+      "avif": [
+        {
+          "src": "/responsive/coffee_farmers_survey-480.avif",
+          "width": 480,
+          "bytes": 48844
+        },
+        {
+          "src": "/responsive/coffee_farmers_survey-768.avif",
+          "width": 768,
+          "bytes": 109265
+        },
+        {
+          "src": "/responsive/coffee_farmers_survey-1200.avif",
+          "width": 1200,
+          "bytes": 245963
+        },
+        {
+          "src": "/responsive/coffee_farmers_survey-1920.avif",
+          "width": 1920,
+          "bytes": 527078
+        },
+        {
+          "src": "/responsive/coffee_farmers_survey-2560.avif",
+          "width": 2560,
+          "bytes": 771571
+        }
+      ],
+      "webp": [
+        {
+          "src": "/responsive/coffee_farmers_survey-480.webp",
+          "width": 480,
+          "bytes": 40524
+        },
+        {
+          "src": "/responsive/coffee_farmers_survey-768.webp",
+          "width": 768,
+          "bytes": 87868
+        },
+        {
+          "src": "/responsive/coffee_farmers_survey-1200.webp",
+          "width": 1200,
+          "bytes": 198412
+        },
+        {
+          "src": "/responsive/coffee_farmers_survey-1920.webp",
+          "width": 1920,
+          "bytes": 440134
+        },
+        {
+          "src": "/responsive/coffee_farmers_survey-2560.webp",
+          "width": 2560,
+          "bytes": 632528
+        }
+      ]
+    }
+  }
+}

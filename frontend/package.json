@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/generate-responsive-images.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint app components context lib --ignore-pattern '.next/**' --ignore-pattern 'public/**'"
@@ -31,6 +32,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.1",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

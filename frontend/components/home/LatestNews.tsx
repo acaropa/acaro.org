@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight, Newspaper } from 'lucide-react';
 import { ScrollReveal } from '@/components/landing/LandingMotion';
+import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { api, apiAssetUrl } from '@/lib/api';
 import { NoticiaRecord, formatNoticiaDate } from '@/lib/news';
 
@@ -25,10 +26,11 @@ export function LatestNews() {
       <ScrollReveal className="premium-project group relative flex min-h-[500px] flex-col justify-end overflow-hidden rounded-[10px] bg-[#2b1710]" direction="left">
         <Link href={`/noticias/detalle/?slug=${featured.slug}`} className="absolute inset-0 z-10" />
         <div className="absolute inset-0">
-          <img
+          <OptimizedImage
             src={apiAssetUrl(featured.imagen_portada) || '/assets/library-hero-v2.png'}
             alt=""
             className="scene-scale h-full w-full object-cover"
+            sizes="(max-width: 1024px) 100vw, 58vw"
           />
         </div>
         {/* Gradient overlay to ensure text contrast at the bottom */}

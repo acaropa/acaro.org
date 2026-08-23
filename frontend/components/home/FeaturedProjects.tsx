@@ -7,6 +7,7 @@ import { api } from '@/lib/api';
 import { ProyectoRecord, toProjectCard } from '@/lib/projects';
 import { Project } from '@/data/mock-projects';
 import { cn } from '@/lib/utils';
+import { OptimizedImage } from '@/components/ui/OptimizedImage';
 
 const FALLBACK_IMAGES = ['/assets/hero-bg.jpg', '/assets/coffee-beans-texture.png'];
 
@@ -42,11 +43,11 @@ export function FeaturedProjects() {
         >
           <Link href={`/proyectos/detalle/?slug=${project.slug || ''}`} className="flex h-full flex-col">
             <div className="h-56 overflow-hidden">
-              <img
+              <OptimizedImage
                 src={project.imageUrl || FALLBACK_IMAGES[index % FALLBACK_IMAGES.length]}
                 alt=""
-                loading="lazy"
                 className="h-full w-full object-cover transition-all duration-500"
+                sizes="(max-width: 768px) 100vw, 50vw"
               />
             </div>
             <div className="flex flex-1 flex-col p-7">

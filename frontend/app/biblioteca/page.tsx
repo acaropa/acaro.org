@@ -17,6 +17,7 @@ import {
 import { LibrarySearchHero } from "@/components/library/LibrarySearchHero";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
 import { api, apiAssetUrl } from "@/lib/api";
 import {
   LibraryDocument,
@@ -63,7 +64,19 @@ function documentHref(document: LibraryDocument) {
   return `/biblioteca/detalle/?slug=${document.slug || ""}`;
 }
 
-function LibraryBackdrop({ document, themeImage, staticImage, className = "" }: { document?: LibraryDocument; themeImage?: string | null; staticImage?: string; className?: string }) {
+function LibraryBackdrop({
+  document,
+  themeImage,
+  staticImage,
+  className = "",
+  sizes = "(max-width: 1023px) calc(100vw - 40px), 50vw",
+}: {
+  document?: LibraryDocument;
+  themeImage?: string | null;
+  staticImage?: string;
+  className?: string;
+  sizes?: string;
+}) {
   const resolvedUrl = themeImage
     ? apiAssetUrl(themeImage)
     : staticImage
@@ -74,9 +87,12 @@ function LibraryBackdrop({ document, themeImage, staticImage, className = "" }: 
 
   if (resolvedUrl) {
     return (
-      <div
-        className={`absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105 ${className}`}
-        style={{ backgroundImage: `url('${resolvedUrl}')` }}
+      <OptimizedImage
+        src={resolvedUrl}
+        alt=""
+        aria-hidden="true"
+        className={`absolute inset-0 h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-105 ${className}`}
+        sizes={sizes}
       />
     );
   }
@@ -107,13 +123,17 @@ function ThemeCard({
   className: string;
   onSelect: () => void;
 }) {
+  const imageSizes = className.includes("md:col-span-2")
+    ? "(max-width: 767px) calc(100vw - 40px), 616px"
+    : "(max-width: 767px) calc(100vw - 40px), 296px";
+
   return (
     <button
       type="button"
       onClick={onSelect}
       className={`group relative min-h-[260px] overflow-hidden border border-[#d3c3c0] text-left ${className}`}
     >
-      <LibraryBackdrop document={document} themeImage={themeImage} staticImage={staticImage} />
+      <LibraryBackdrop document={document} themeImage={themeImage} staticImage={staticImage} sizes={imageSizes} />
       <div className="absolute inset-0 bg-[#271310]/45 transition-colors group-hover:bg-[#271310]/55" />
       <div className="absolute inset-x-0 bottom-0 z-10 p-6 md:p-8">
         <p className="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-[#ffdea5]">{category}</p>
@@ -128,7 +148,7 @@ function FeaturedDocument({ document }: { document: LibraryDocument }) {
   return (
     <article className="grid overflow-hidden border border-[#d3c3c0] bg-white lg:grid-cols-2">
       <div className="relative min-h-[360px] overflow-hidden lg:min-h-[460px]">
-        <LibraryBackdrop document={document} />
+        <LibraryBackdrop document={document} sizes="(max-width: 1023px) calc(100vw - 40px), 50vw" />
         <div className="absolute inset-0 bg-[#271310]/10" />
       </div>
       <div className="flex flex-col justify-center p-7 sm:p-10 lg:p-14">

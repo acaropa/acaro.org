@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { PublicLayout } from '@/components/layout/PublicLayout';
 import { ScrollReveal } from '@/components/landing/LandingMotion';
+import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { api } from '@/lib/api';
 import { ProductorRecord, producerImage, formatExperience } from '@/lib/producers';
@@ -24,11 +25,11 @@ function ProducerCard({ producer, index }: { producer: ProductorRecord; index: n
         className="flex flex-col w-full h-full group"
       >
         <div className="h-80 bg-surface mb-6 overflow-hidden relative">
-          <img
+          <OptimizedImage
             alt={producer.nombre}
-            loading="lazy"
             className="w-full h-full object-cover transition-all duration-500"
             src={producerImage(producer)}
+            sizes="(max-width: 768px) 100vw, 33vw"
           />
           {producer.destacado && (
             <div className="absolute top-4 left-4 bg-accent text-primary-foreground px-3 py-1 text-[12px] font-semibold tracking-[0.1em] leading-none uppercase">
@@ -143,11 +144,13 @@ export default function Productores() {
         <section className="relative pt-32 pb-20 md:pb-28 px-[20px] md:px-[64px] overflow-hidden">
           {/* Imagen de fondo reutilizada del landing */}
           <div className="absolute inset-0 -z-10">
-            <img
+            <OptimizedImage
               src="/assets/landing-hero-main.jpg"
               alt=""
               aria-hidden="true"
               className="w-full h-full object-cover object-center"
+              priority
+              sizes="100vw"
             />
             {/* Overlay crema cálido */}
             <div className="absolute inset-0" style={{

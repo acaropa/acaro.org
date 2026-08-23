@@ -8,6 +8,7 @@ import { useSearchParams } from 'next/navigation';
 import { Download, FileText } from 'lucide-react';
 import { PublicLayout } from '@/components/layout/PublicLayout';
 import { ScrollReveal } from '@/components/landing/LandingMotion';
+import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { AppIcon } from '@/components/ui/AppIcon';
 import { api, apiAssetUrl } from '@/lib/api';
@@ -114,11 +115,11 @@ function ProyectoDetalle() {
               <div className="mx-auto max-w-[920px]">
                 {proyecto.imagen_portada && (
                   <div className="w-full aspect-[16/9] min-h-[220px] max-h-[420px] bg-white overflow-hidden border border-primary/10">
-                    <img
+                    <OptimizedImage
                       alt={proyecto.nombre}
-                      loading="lazy"
                       className="w-full h-full object-contain p-[18px] md:p-[32px]"
                       src={apiAssetUrl(proyecto.imagen_portada)}
+                      sizes="(max-width: 1024px) 100vw, 920px"
                     />
                   </div>
                 )}
@@ -194,11 +195,11 @@ function ProyectoDetalle() {
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-[12px]">
                             {fase.imagenes.map(imagen => (
                               <div key={imagen.id} className="h-[140px] bg-surface overflow-hidden">
-                                <img
+                                <OptimizedImage
                                   alt={imagen.descripcion || fase.nombre}
-                                  loading="lazy"
                                   className="w-full h-full object-cover"
                                   src={apiAssetUrl(imagen.url)}
+                                  sizes="(max-width: 768px) 50vw, 25vw"
                                 />
                               </div>
                             ))}

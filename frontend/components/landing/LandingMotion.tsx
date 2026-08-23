@@ -1,8 +1,8 @@
 "use client"
 
-import Image from "next/image"
 import * as React from "react"
 
+import { OptimizedImage } from "@/components/ui/OptimizedImage"
 import { cn } from "@/lib/utils"
 
 type ScrollRevealProps = {
@@ -154,14 +154,14 @@ export function HeroParallaxImage() {
 
   return (
     <div ref={ref} className="absolute -inset-y-8 inset-x-0 will-change-transform">
-      <Image
+      <OptimizedImage
         src="/assets/landing-hero-main.jpg"
         alt="Cultivo de café robusta al amanecer"
-        fill
-        className="object-cover object-center"
+        className="h-full w-full object-cover object-center"
         priority
         sizes="100vw"
       />
     </div>
   )
 }
+

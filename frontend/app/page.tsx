@@ -4,11 +4,16 @@ import type { Metadata } from "next"
 
 import { PublicLayout } from "@/components/layout/PublicLayout"
 import { HeroParallaxImage, ScrollReveal } from "@/components/landing/LandingMotion"
+import { OptimizedImage } from "@/components/ui/OptimizedImage"
 import { ProjectsStoryline } from "@/components/home/ProjectsStoryline"
 import { NewsGrid } from "@/components/home/NewsGrid"
 import { CommunitySection } from "@/components/home/CommunitySection"
 import { LibraryPreview } from "@/components/home/LibraryPreview"
 import { LandingMetadataBar } from "@/components/home/LandingMetadataBar"
+
+const homeHeroAvifSrcSet =
+  "/assets/responsive/landing-hero-main-480.avif 480w, /assets/responsive/landing-hero-main-768.avif 768w, /assets/responsive/landing-hero-main-1200.avif 1200w, /assets/responsive/landing-hero-main-1920.avif 1920w, /assets/responsive/landing-hero-main-2560.avif 2560w";
+
 export const metadata: Metadata = {
   title: "ACARO OBC | Cafe Robusta de Panama",
   description:
@@ -28,6 +33,15 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <PublicLayout className="landing-typography">
+      <link
+        rel="preload"
+        as="image"
+        href="/assets/responsive/landing-hero-main-1200.avif"
+        imageSrcSet={homeHeroAvifSrcSet}
+        imageSizes="100vw"
+        type="image/avif"
+        fetchPriority="high"
+      />
       <section className="relative isolate flex min-h-[100svh] items-end overflow-hidden bg-[#24130d] text-[#fffaf1]">
         <HeroParallaxImage />
         <div className="absolute inset-0 bg-[#120c08]/30" />
@@ -96,10 +110,11 @@ export default function Home() {
             <ScrollReveal className="relative lg:col-span-7" direction="right" delay={180}>
               <div className="relative">
                 <div className="aspect-[4/3] overflow-hidden sm:-mr-8 lg:-mr-10">
-                  <img
+                  <OptimizedImage
                     src="/assets/landing-hero-v2.jpg"
                     alt="Productores de café robusta en Panamá"
                     className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 92vw, 54vw"
                   />
                 </div>
                 <div className="absolute -bottom-10 left-0 hidden w-72 bg-[#120c08] p-8 text-white md:block">

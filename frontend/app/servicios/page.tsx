@@ -1,6 +1,5 @@
 'use client';
 
-import Image from "next/image";
 import {
   ArrowRight,
   ClipboardList,
@@ -16,6 +15,7 @@ import {
 
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { ScrollReveal } from "@/components/landing/LandingMotion";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
 
 function CoffeeProductIcon({ className, strokeWidth = 1.7, ...props }: React.SVGProps<SVGSVGElement> & { strokeWidth?: number }) {
   return (
@@ -125,13 +125,12 @@ export default function ServiciosPage() {
   return (
     <PublicLayout className="landing-typography">
       <section className="relative isolate min-h-[calc(100svh-72px)] overflow-hidden bg-[#120c08] text-white">
-        <Image
+        <OptimizedImage
           src="/assets/landing-hero-v2.jpg"
           alt="Productor de café robusta en una finca al atardecer"
-          fill
           priority
           sizes="100vw"
-          className="absolute inset-0 -z-20 object-cover object-center"
+          className="absolute inset-0 -z-20 h-full w-full object-cover object-center"
         />
         <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(14,18,10,0.94)_0%,rgba(14,18,10,0.78)_36%,rgba(14,18,10,0.28)_70%,rgba(14,18,10,0.1)_100%)]" />
         <div className="absolute inset-x-0 bottom-0 -z-10 h-44 bg-gradient-to-t from-[#120c08] to-transparent" />
@@ -269,12 +268,11 @@ export default function ServiciosPage() {
           <ScrollReveal className="mt-10">
             <div className="grid overflow-hidden rounded-lg border border-[#d8cabb] bg-[#fffdf9] shadow-[0_18px_60px_rgba(43,23,16,0.08)] md:grid-cols-[240px_1fr_auto]">
               <div className="relative min-h-[150px]">
-                <Image
+                <OptimizedImage
                   src="/assets/productores-card.jpg"
                   alt="Ramas de café robusta con frutos maduros"
-                  fill
                   sizes="(min-width: 768px) 240px, 100vw"
-                  className="object-cover"
+                  className="absolute inset-0 h-full w-full object-cover"
                 />
               </div>
               <div className="p-6 md:p-8">

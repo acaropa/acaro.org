@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { PublicLayout } from '@/components/layout/PublicLayout';
 import { ScrollReveal } from '@/components/landing/LandingMotion';
+import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { api, apiAssetUrl } from '@/lib/api';
 import { NoticiaRecord, formatNoticiaDate, getNoticiaAutor } from '@/lib/news';
@@ -98,11 +99,12 @@ export default function Noticias() {
                   <Link href={`/noticias/detalle/?slug=${featured.slug}`} className="group grid grid-cols-1 lg:grid-cols-12 gap-[32px]">
                     <div className="lg:col-span-7 h-[500px] bg-surface relative overflow-hidden">
                       {featured.imagen_portada && (
-                        <img
+                        <OptimizedImage
                           alt={featured.titulo}
-                          loading="lazy"
                           className="w-full h-full object-cover transition-all duration-700"
                           src={apiAssetUrl(featured.imagen_portada)}
+                          priority
+                          sizes="(max-width: 1024px) 100vw, 58vw"
                           referrerPolicy="no-referrer"
                         />
                       )}
@@ -142,11 +144,11 @@ export default function Noticias() {
                     <Link href={`/noticias/detalle/?slug=${item.slug}`} className="group flex flex-col h-full bg-background border border-primary/20">
                       <div className="h-[220px] bg-surface overflow-hidden">
                         {item.imagen_portada && (
-                          <img
+                          <OptimizedImage
                             alt={item.titulo}
-                            loading="lazy"
                             className="w-full h-full object-cover transition-all duration-500"
                             src={apiAssetUrl(item.imagen_portada)}
+                            sizes="(max-width: 768px) 100vw, 33vw"
                             referrerPolicy="no-referrer"
                           />
                         )}

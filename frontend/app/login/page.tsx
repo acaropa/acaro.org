@@ -8,6 +8,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import { TypingIndicator } from "@/components/ui/TypingIndicator";
 import { useAuth } from '@/context/AuthContext';
 import { Logo } from '@/components/Logo';
+import { OptimizedImage } from '@/components/ui/OptimizedImage';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -39,10 +40,12 @@ export default function LoginPage() {
         {/* Warm ambient overlay */}
         <div className="absolute inset-0 bg-primary/40 mix-blend-multiply z-10 transition-opacity duration-1000"></div>
         <div className="absolute inset-0 bg-gradient-to-t from-[#120c08]/80 to-transparent z-10"></div>
-        <img 
+        <OptimizedImage
           alt="Granos de café robusta en costal" 
           className="absolute inset-0 w-full h-full object-cover z-0 transform hover:scale-105 transition-transform duration-[10s] ease-out" 
           src="/assets/login-bg-v2.jpg"
+          priority
+          sizes="50vw"
         />
         
         {/* Back button top left */}

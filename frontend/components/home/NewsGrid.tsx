@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { ScrollReveal } from '@/components/landing/LandingMotion';
+import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { api, apiAssetUrl } from '@/lib/api';
 import { NoticiaRecord, formatNoticiaDate } from '@/lib/news';
 
@@ -61,10 +62,11 @@ export function NewsGrid() {
             <article className="group cursor-pointer">
               <Link href={`/noticias/detalle/?slug=${item.slug}`}>
                 <div className="relative mb-6 aspect-video overflow-hidden">
-                  <img
+                  <OptimizedImage
                     src={apiAssetUrl(item.imagen_portada) || FALLBACK}
                     alt={item.titulo}
                     className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    sizes="(max-width: 768px) 100vw, 33vw"
                     referrerPolicy="no-referrer"
                   />
                 </div>

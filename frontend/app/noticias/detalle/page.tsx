@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { PublicLayout } from '@/components/layout/PublicLayout';
 import { ScrollReveal } from '@/components/landing/LandingMotion';
+import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { api, apiAssetUrl } from '@/lib/api';
 import { NoticiaRecord, formatNoticiaDate, getNoticiaAutor } from '@/lib/news';
@@ -79,11 +80,12 @@ function NoticiaDetalle() {
 
               {noticia.imagen_portada && (
                 <div className="w-full h-[320px] md:h-[480px] bg-surface overflow-hidden mb-[48px]">
-                  <img
+                  <OptimizedImage
                     alt={noticia.titulo}
-                    loading="lazy"
                     className="w-full h-full object-cover"
                     src={apiAssetUrl(noticia.imagen_portada)}
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 960px"
                     referrerPolicy="no-referrer"
                   />
                 </div>
@@ -103,11 +105,11 @@ function NoticiaDetalle() {
                     <div key={index} className="contents">
                       {hasImage && imageUrl && (
                         <div className={`w-full md:w-[45%] lg:w-[40%] h-[240px] md:h-[300px] mb-6 rounded-lg overflow-hidden border border-[#ded6cc] bg-[#fbf9f5] dark:border-border dark:bg-surface ${floatClass}`}>
-                          <img
+                          <OptimizedImage
                             src={apiAssetUrl(imageUrl)}
                             alt={`Imagen del comunicado ${imageIndex + 1}`}
                             className="w-full h-full object-cover"
-                            loading="lazy"
+                            sizes="(max-width: 768px) 100vw, 40vw"
                             referrerPolicy="no-referrer"
                           />
                         </div>
@@ -127,11 +129,11 @@ function NoticiaDetalle() {
                     {remainingImages.map((imgUrl, i) => (
                       <div key={i} className="h-[200px] bg-surface rounded-lg overflow-hidden border border-border group relative">
                         <a href={apiAssetUrl(imgUrl)} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
-                          <img
+                          <OptimizedImage
                             src={apiAssetUrl(imgUrl)}
                             alt={`Imagen de galería ${inlineImagesCount + i + 1}`}
                             className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300"
-                            loading="lazy"
+                            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
                             referrerPolicy="no-referrer"
                           />
                         </a>

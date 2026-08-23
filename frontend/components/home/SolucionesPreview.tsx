@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { ScrollReveal } from '@/components/landing/LandingMotion';
+import { OptimizedImage } from '@/components/ui/OptimizedImage';
 
 const SERVICE_ITEMS = [
   {
@@ -26,9 +27,12 @@ const SERVICE_ITEMS = [
 export function SolucionesPreview() {
   return (
     <section className="bg-[#120c08] text-[#f4f4f0] overflow-hidden py-16 sm:py-24 lg:py-32 relative">
-      <div
-        className="absolute inset-0 opacity-40 mix-blend-overlay bg-cover bg-center pointer-events-none"
-        style={{ backgroundImage: `url('/assets/landing-hero-v2.jpg')` }}
+      <OptimizedImage
+        src="/assets/landing-hero-v2.jpg"
+        alt=""
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center opacity-40 mix-blend-overlay"
+        sizes="100vw"
       />
       <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(18,12,8,0.95),rgba(47,74,36,0.85))]" />
 

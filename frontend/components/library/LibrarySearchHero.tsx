@@ -2,6 +2,7 @@
 
 import { FocusEvent, FormEvent, ReactNode } from "react";
 import { ArrowLeft, Search, X } from "lucide-react";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
 import { TypingIndicator } from "@/components/ui/TypingIndicator";
 
 type Topic = {
@@ -40,9 +41,13 @@ export function LibrarySearchHero({
       style={{ viewTransitionName: "library-search-hero" }}
       className="relative isolate min-h-[560px] overflow-hidden bg-[#faf9f5] text-[#271310] md:min-h-[620px]"
     >
-      <div
-        className="absolute inset-0 bg-cover bg-center opacity-[0.16]"
-        style={{ backgroundImage: "url('/assets/landing-hero-main.jpg')" }}
+      <OptimizedImage
+        src="/assets/landing-hero-main.jpg"
+        alt=""
+        aria-hidden="true"
+        priority
+        sizes="100vw"
+        className="absolute inset-0 h-full w-full object-cover object-center opacity-[0.16]"
       />
       <div className="absolute inset-0 bg-gradient-to-b from-[#faf9f5]/10 via-[#faf9f5]/68 to-[#faf9f5]" />
 

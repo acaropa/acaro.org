@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { ArrowRight } from "lucide-react"
 import { PublicLayout } from '@/components/layout/PublicLayout';
 import { ScrollReveal } from '@/components/landing/LandingMotion';
+import { OptimizedImage } from '@/components/ui/OptimizedImage';
 
 export const metadata: Metadata = {
   title: "Nosotros | ACARO OBC",
@@ -26,10 +27,12 @@ export default function Nosotros() {
         {/* Hero */}
         <section className="relative flex min-h-[600px] items-end overflow-hidden bg-[#120c08] pb-16 pt-32 md:min-h-[720px] md:pb-24">
           <div className="absolute inset-0">
-            <img
+            <OptimizedImage
               alt="Productores de café robusta en campo"
               className="h-full w-full object-cover"
               src="/assets/landing-hero-v2.jpg"
+              priority
+              sizes="100vw"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#120c08] via-[#120c08]/50 to-[#120c08]/20" />
           </div>
@@ -50,10 +53,11 @@ export default function Nosotros() {
             <div className="grid grid-cols-1 items-center gap-12 md:grid-cols-12 md:gap-6">
               <ScrollReveal delay={0} distance="md" className="md:col-span-5">
                 <div className="overflow-hidden">
-                  <img
+                  <OptimizedImage
                     alt="Manos con granos de café robusta"
                     className="h-[440px] w-full object-cover md:h-[560px]"
                     src="/assets/coffee-beans-texture.png"
+                    sizes="(max-width: 767px) calc(100vw - 40px), (max-width: 1023px) 39vw, 482px"
                   />
                 </div>
               </ScrollReveal>
@@ -107,10 +111,11 @@ export default function Nosotros() {
             <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
               <ScrollReveal delay={100} distance="sm" className="md:col-span-8">
                 <Link href="/productores" className="group relative block h-[320px] overflow-hidden md:h-[500px]">
-                  <img
+                  <OptimizedImage
                     alt="Productores de café en campo"
                     className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                     src="/assets/productores-card.jpg"
+                    sizes="(max-width: 768px) 100vw, 67vw"
                   />
                   <div className="absolute inset-0 bg-[#120c08]/0 transition-colors duration-500 group-hover:bg-[#120c08]/20" />
                   <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#120c08]/90 to-transparent p-8 md:p-12">
@@ -123,10 +128,11 @@ export default function Nosotros() {
               </ScrollReveal>
               <ScrollReveal delay={250} distance="sm" className="md:col-span-4">
                 <Link href="/biblioteca" className="group relative block h-[320px] overflow-hidden md:h-[500px]">
-                  <img
+                  <OptimizedImage
                     alt="Conocimiento técnico en café robusta"
                     className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                     src="/assets/biblioteca-card.jpg"
+                    sizes="(max-width: 768px) 100vw, 33vw"
                   />
                   <div className="absolute inset-0 bg-[#120c08]/0 transition-colors duration-500 group-hover:bg-[#120c08]/20" />
                   <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#120c08]/90 to-transparent p-8 md:p-12">

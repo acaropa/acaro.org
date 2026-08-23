@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { PublicLayout } from '@/components/layout/PublicLayout';
 import { ScrollReveal } from '@/components/landing/LandingMotion';
+import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Project } from '@/data/mock-projects';
 import { api } from '@/lib/api';
@@ -35,7 +36,7 @@ function HeroRightProject({ project, index }: { project: Project, index: number 
       <div className="md:col-span-9 order-1 md:order-2">
         <div className="w-full h-[600px] bg-surface relative overflow-hidden">
           {project.imageUrl && (
-            <img alt={project.title} loading="lazy" className="w-full h-full object-cover" src={project.imageUrl} />
+            <OptimizedImage alt={project.title} className="w-full h-full object-cover" src={project.imageUrl} sizes="(max-width: 768px) 100vw, 75vw" />
           )}
         </div>
       </div>
@@ -50,7 +51,7 @@ function HeroLeftProject({ project, index }: { project: Project, index: number }
       <div className="md:col-span-9 order-1 md:order-1">
         <div className="w-full h-[600px] bg-surface relative overflow-hidden">
           {project.imageUrl && (
-            <img alt={project.title} loading="lazy" className="w-full h-full object-cover" src={project.imageUrl} />
+            <OptimizedImage alt={project.title} className="w-full h-full object-cover" src={project.imageUrl} sizes="(max-width: 768px) 100vw, 75vw" />
           )}
         </div>
       </div>
@@ -82,11 +83,11 @@ function WideProject({ project, index }: { project: Project, index: number }) {
       <Link href={`/proyectos/detalle/?slug=${project.slug || ''}`} className="flex flex-col md:flex-row w-full h-full">
       <div className="md:w-1/2 h-80 md:h-auto relative">
         {project.imageUrl && (
-          <img
+          <OptimizedImage
             alt={project.title}
-            loading="lazy"
             className="w-full h-full object-cover transition-all duration-500"
             src={project.imageUrl}
+            sizes="(max-width: 768px) 100vw, 50vw"
           />
         )}
       </div>
@@ -113,11 +114,11 @@ function HalfProject({ project, index }: { project: Project, index: number }) {
       <Link href={`/proyectos/detalle/?slug=${project.slug || ''}`} className="flex flex-col w-full h-full group">
       <div className="h-[400px] bg-surface mb-6 overflow-hidden relative">
         {project.imageUrl && (
-          <img
+          <OptimizedImage
             alt={project.title}
-            loading="lazy"
             className="w-full h-full object-cover transition-all duration-500"
             src={project.imageUrl}
+            sizes="(max-width: 768px) 100vw, 50vw"
           />
         )}
       </div>
@@ -150,11 +151,11 @@ function StandardProject({ project, index }: { project: Project, index: number }
       <Link href={`/proyectos/detalle/?slug=${project.slug || ''}`} className="flex flex-col w-full h-full group">
       <div className="h-80 bg-surface mb-6 overflow-hidden relative">
         {project.imageUrl && (
-          <img
+          <OptimizedImage
             alt={project.title}
-            loading="lazy"
             className="w-full h-full object-cover transition-all duration-500"
             src={project.imageUrl}
+            sizes="(max-width: 768px) 100vw, 33vw"
           />
         )}
       </div>

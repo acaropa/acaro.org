@@ -10,6 +10,7 @@ import { isQuestionVisible, isQuestionRequired, type AnswerValue, type Validatio
 import { SurveyQuestionRenderer } from './SurveyQuestionRenderer'
 import { AnimatedCircularProgressBar } from '@/components/ui/AnimatedCircularProgressBar'
 import { SurveySubmitMotion, type SubmitMotionPhase } from './SurveySubmitMotion'
+import { OptimizedImage } from '@/components/ui/OptimizedImage'
 
 const STYLES = `
   @keyframes slideInRight {
@@ -525,10 +526,14 @@ export function SurveyPublicContainer({ slug }: Props) {
       {/* Left Panel: Photo */}
       <section className="relative lg:sticky lg:top-0 lg:h-screen w-full lg:w-1/2 h-[30vh] min-h-[250px] bg-[#120C08] flex flex-col justify-end p-8 lg:p-[64px] overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <div
-            className="w-full h-full bg-cover bg-center opacity-80"
-            style={{backgroundImage: "url('/coffee_farmers_survey.png')"}}>
-          </div>
+          <OptimizedImage
+            src="/coffee_farmers_survey.png"
+            alt=""
+            aria-hidden="true"
+            priority
+            sizes="(max-width: 1024px) 100vw, 50vw"
+            className="h-full w-full object-cover object-center opacity-80"
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-[#120C08]/95 via-[#120C08]/50 to-[#120C08]/10"></div>
         </div>
 

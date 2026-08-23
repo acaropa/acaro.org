@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ScrollReveal } from "@/components/landing/LandingMotion";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
 import { api } from "@/lib/api";
 import { ProductorRecord, producerImage } from "@/lib/producers";
 
@@ -56,7 +57,7 @@ export function CommunitySection() {
                 >
                   <div className="flex flex-col gap-8 sm:flex-row sm:items-start">
                     <div className="mx-auto h-52 w-52 shrink-0 overflow-hidden shadow-xl sm:mx-0 sm:h-64 sm:w-64">
-                      <img src={producerImage(producer)} alt={producer.nombre} className="h-full w-full object-cover" />
+                      <OptimizedImage src={producerImage(producer)} alt={producer.nombre} className="h-full w-full object-cover" sizes="256px" />
                     </div>
                     <div className="flex flex-col justify-center">
                       {producer.descripcion && (
@@ -98,7 +99,7 @@ export function CommunitySection() {
           <ScrollReveal className="mt-16 md:col-span-6 md:col-start-7 md:mt-0" direction="right" delay={200}>
             <div className="border border-white/10 bg-white/5 p-8">
               <div className="aspect-[4/3] overflow-hidden">
-                <img src="/assets/landing-hero-v2.jpg" alt="Productores de cafe robusta en campo" className="h-full w-full object-cover" />
+                <OptimizedImage src="/assets/landing-hero-v2.jpg" alt="Productores de cafe robusta en campo" className="h-full w-full object-cover" sizes="(max-width: 767px) calc(100vw - 104px), (max-width: 1023px) 50vw, 592px" />
               </div>
               <p className="mt-6 text-lg leading-8 text-[#c9b5b0]">
                 Estamos preparando historias reales de las personas (productores, técnicos, tostadores, baristas) que forman parte de la cadena de valor de ACARO OBC.
