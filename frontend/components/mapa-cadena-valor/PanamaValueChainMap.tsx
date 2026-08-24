@@ -18,7 +18,7 @@ export default function PanamaValueChainMap({
   geoJsonUrl,
   eyebrow = "ACARO OBC · Cadena de valor",
   title = "Presencia territorial del café robusta en Panamá",
-  description = "Explora la distribución de los actores que fortalecen la cadena de valor del café robusta en el territorio nacional.",
+  description = "Consulta la distribución de actores vinculados a la cadena de valor del café robusta en el territorio nacional.",
   initialFilter = "todos",
   onDistrictClick,
 }: PanamaValueChainMapProps) {

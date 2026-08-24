@@ -4,7 +4,7 @@ export const metadata: Metadata = {
   title: "Biblioteca | ACARO OBC",
   description: "Repositorio técnico con documentos, guías y recursos para productores, técnicos e investigadores del café robusta.",
   openGraph: {
-    title: "Biblioteca de Excelencia | ACARO OBC",
+    title: "Biblioteca técnica | ACARO OBC",
     description: "Documentos técnicos, guías y recursos para el desarrollo del café robusta en Panamá.",
     url: "https://acaro.org/biblioteca",
     siteName: "ACARO OBC",

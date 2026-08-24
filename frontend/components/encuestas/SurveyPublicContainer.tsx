@@ -551,7 +551,7 @@ export function SurveyPublicContainer({ slug }: Props) {
           </h2>
           <div className="w-12 h-[2px] bg-primary/80 my-4"></div>
           <p className="font-body-lg text-lg text-[#d8c9bb] max-w-md drop-shadow-md">
-            Complete las siguientes preguntas para continuar.
+            Responde las siguientes preguntas para continuar.
           </p>
         </div>
       </section>
@@ -582,7 +582,7 @@ export function SurveyPublicContainer({ slug }: Props) {
                 {index + 1} - {q.texto_pregunta.replace(/^[\s\d.\-)]+/, '').trim()}
               </h1>
               <p className="text-[15px] text-muted mt-3 leading-relaxed">
-                {q.texto_ayuda || "Por favor, indique su respuesta a continuación."}
+                {q.texto_ayuda || "Indica tu respuesta a continuación."}
               </p>
               {!required && (
                 <div>

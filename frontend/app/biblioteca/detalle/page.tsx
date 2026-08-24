@@ -106,7 +106,7 @@ function DocumentDetail() {
                 {document.serie && serieDocuments.length > 1 && (
                   <div className="mt-8 rounded-lg border border-[#ded6cc] bg-[#faf7f3] p-6 dark:border-border dark:bg-card">
                     <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-[#705a4f] dark:text-muted">
-                      📖 Serie: {document.serie}
+                      Serie: {document.serie}
                     </h3>
                     <p className="mt-1 text-[13px] text-[#81756f] dark:text-muted">
                       Este documento {document.ordenLectura ? `es el paso ${document.ordenLectura}` : 'pertenece a esta serie'}. Sigue los pasos en orden para completar el curso.

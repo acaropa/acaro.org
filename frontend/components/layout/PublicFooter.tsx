@@ -12,10 +12,10 @@ export function PublicFooter() {
           <div>
             <Logo variant="white" />
             <p className="mt-6 max-w-md text-sm leading-7 text-[#b8a99a]">
-              asociación de productores comprometida con el desarrollo técnico, sostenible y competitivo del café robusta en Panamá.
+              Asociación de productores vinculada al desarrollo técnico, sostenible y competitivo del café robusta en Panamá.
             </p>
             <div className="mt-7">
-              <p className="text-sm font-semibold text-[#f8efe3]">Redes Sociales</p>
+              <p className="text-sm font-semibold text-[#f8efe3]">Redes sociales</p>
               <div className="mt-3 flex items-center gap-3">
                 {socialNetworks.map((network) => (
                   <a
@@ -66,10 +66,10 @@ export function PublicFooter() {
             <p>© {new Date().getFullYear()} Asociación Café Robusta OBC. Todos los derechos reservados.</p>
             <span className="hidden sm:inline text-[#3a2a20]">·</span>
             <Link href="/login" className="hover:underline hover:text-[#b8a99a] transition-colors">
-              Acceso Interno
+              Acceso interno
             </Link>
           </div>
-          <p>asociación · Conocimiento · Producción</p>
+          <p>Asociación · Conocimiento · Producción</p>
         </div>
       </div>
     </footer>

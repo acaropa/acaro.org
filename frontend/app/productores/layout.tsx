@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description: "Conoce a las personas en la cadena de valor del café robusta que forman la comunidad de la Asociación Café Robusta OBC en Panamá.",
   openGraph: {
     title: "Gente del Robusta | ACARO OBC",
-    description: "Las personas en la cadena de valor del café robusta que forman el corazón de la comunidad ACARO OBC.",
+    description: "Personas de la cadena de valor del café robusta vinculadas a la comunidad ACARO OBC.",
     url: "https://acaro.org/productores",
     siteName: "ACARO OBC",
     images: [{ url: "/assets/landing-hero-v2.jpg", width: 1200, height: 630 }],

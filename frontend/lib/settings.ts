@@ -13,15 +13,15 @@ export type LandingSettings = {
 };
 
 export const defaultLandingSettings: LandingSettings = {
-  heroTitle: "Asociacion Cafe Robusta OBC",
+  heroTitle: "Asociación Café Robusta OBC",
   heroSubtitle:
-    "Impulsamos el desarrollo del cafe robusta con organizacion, conocimiento tecnico y vision productiva.",
+    "Acompañamos el desarrollo del café robusta con organización, conocimiento técnico y visión productiva.",
   heroImage: "/assets/landing-hero-v2.jpg",
   metadata: [
-    { label: "Altitud Promedio", value: "0 - 800 msnm" },
-    { label: "Precipitacion Anual", value: "2,000 - 3,000 mm" },
+    { label: "Altitud promedio", value: "0 - 800 msnm" },
+    { label: "Precipitación anual", value: "2,000 - 3,000 mm" },
     { label: "Variedades", value: "Coffea canephora" },
-    { label: "Estandar de Calidad", value: "OBC Premium" },
+    { label: "Estándar de calidad", value: "OBC Premium" },
   ],
 };
 
@@ -39,8 +39,8 @@ export type LibraryThemes = Record<string, string | null>;
 export const defaultLibraryThemes: LibraryThemes = {
   Institucional: null,
   Proyectos: null,
-  Formacion: null,
-  "Guias tecnicas": null,
+  Formación: null,
+  "Guías técnicas": null,
 };
 
 export async function getLibraryThemes(): Promise<LibraryThemes> {

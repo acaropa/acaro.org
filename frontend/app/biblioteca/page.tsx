@@ -33,28 +33,28 @@ const themeCards = [
   {
     title: "Institucional",
     category: libraryCategories[4],
-    description: "Archivos historicos, protocolos y reportes de la asociacion.",
+    description: "Archivos históricos, protocolos y reportes de la asociación.",
     className: "md:col-span-2 md:row-span-2",
     staticImage: "/assets/theme-institucional.jpg",
   },
   {
     title: "Proyectos",
     category: libraryCategories[2],
-    description: "Documentacion de iniciativas y resultados de campo.",
+    description: "Documentación de iniciativas y resultados de campo.",
     className: "md:col-span-1",
     staticImage: "/assets/theme-proyectos.jpg",
   },
   {
-    title: "Formacion",
+    title: "Formación",
     category: libraryCategories[3],
     description: "Materiales para talleres, capacitaciones y aprendizaje continuo.",
     className: "md:col-span-1",
     staticImage: "/assets/theme-formacion.jpg",
   },
   {
-    title: "Guias tecnicas",
+    title: "Guías técnicas",
     category: libraryCategories[1],
-    description: "Manuales detallados para la excelencia tecnica.",
+    description: "Manuales y documentos para el manejo técnico del café robusta.",
     className: "md:col-span-2",
     staticImage: "/assets/theme-guias.jpg",
   },
@@ -169,7 +169,7 @@ function FeaturedDocument({ document }: { document: LibraryDocument }) {
           </span>
           <span className="inline-flex items-center gap-2">
             <Languages className="h-4 w-4" />
-            Espanol
+            Español
           </span>
         </div>
 
@@ -186,7 +186,7 @@ function FeaturedDocument({ document }: { document: LibraryDocument }) {
             className="inline-flex items-center gap-2 border border-[#271310] px-6 py-3 text-xs font-bold uppercase tracking-widest text-[#271310] transition-colors hover:bg-[#ffdad4]"
           >
             <Download className="h-4 w-4" />
-            Descargar PDF
+            Consultar recurso
           </Link>
         </div>
       </div>
@@ -215,7 +215,7 @@ function DocumentCard({ document }: { document: LibraryDocument }) {
         href={documentHref(document)}
         className="mt-7 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#231600] transition-colors hover:text-[#745853]"
       >
-        Leer mas
+        Leer más
         <ArrowRight className="h-4 w-4" />
       </Link>
     </article>
@@ -242,11 +242,11 @@ function ResultItem({ document }: { document: LibraryDocument }) {
           href={documentHref(document)}
           className="border border-[#827472] px-5 py-2 text-xs font-bold uppercase tracking-widest text-[#504442] transition-colors hover:border-[#271310] hover:bg-[#3e2723] hover:text-white"
         >
-          Ver
+          Consultar
         </Link>
         <Link
           href={documentHref(document)}
-          aria-label={`Descargar ${document.title}`}
+          aria-label={`Consultar ${document.title}`}
           className="inline-flex h-10 w-10 items-center justify-center border border-[#827472] text-[#504442] transition-colors hover:bg-[#f4eceb]"
         >
           <Download className="h-4 w-4" />
@@ -385,7 +385,7 @@ export default function Biblioteca() {
                 <div>
                   <h2 className="font-serif text-3xl font-semibold text-[#271310]">Documentos destacados</h2>
                   <p className="mt-2 max-w-xl text-sm leading-6 text-[#504442]">
-                    Seleccion de recursos esenciales para productores, tecnicos e investigadores.
+                    Selección de recursos para productores, técnicos e investigadores.
                   </p>
                 </div>
                 <button
@@ -417,7 +417,7 @@ export default function Biblioteca() {
                 <EmptyState
                   icon={<Library className="h-8 w-8" />}
                   title="No hay documentos publicados"
-                  description="Cuando se publiquen recursos, apareceran en esta portada."
+                  description="Cuando se publiquen recursos, aparecerán en esta portada."
                 />
               )}
             </div>
@@ -440,7 +440,7 @@ export default function Biblioteca() {
                   onClick={() => goToSearch()}
                   className="border-b border-[#271310] pb-1 text-xs font-bold uppercase tracking-widest text-[#271310] transition-colors hover:border-[#745853] hover:text-[#745853]"
                 >
-                  Cargar mas documentos
+                  Cargar más documentos
                 </button>
               </div>
             </section>

@@ -74,7 +74,7 @@ export default function EncuestasPublicas() {
               Nuestras <br /> <span className="italic font-normal">Encuestas</span>
             </h1>
             <p className="font-body-lg text-body-lg text-[#d8c9bb] max-w-md drop-shadow-md">
-              Su participación es fundamental para elevar los estándares de la industria y asegurar la prosperidad de nuestra comunidad cafetalera.
+              Tus respuestas ayudan a conocer mejor las necesidades de productores y comunidades cafetaleras.
             </p>
           </div>
         </section>
@@ -85,9 +85,9 @@ export default function EncuestasPublicas() {
 
             <div className="mb-12 scroll-reveal" data-direction="up" data-distance="md">
               <div className="w-16 h-[2px] bg-primary mb-6"></div>
-              <h2 className="font-headline-lg text-on-surface mb-3">Encuestas Disponibles</h2>
+              <h2 className="font-headline-lg text-on-surface mb-3">Encuestas disponibles</h2>
               <p className="font-body-lg text-on-surface-variant max-w-md">
-                Su voz moldea el futuro del café robusta. Seleccione una encuesta para participar.
+                Selecciona una encuesta abierta para compartir tu información.
               </p>
             </div>
 
@@ -99,7 +99,7 @@ export default function EncuestasPublicas() {
                 <div className="space-y-3">
                   <h3 className="font-headline-md text-on-surface">No hay encuestas en este momento</h3>
                   <p className="font-body-md text-on-surface-variant max-w-sm mx-auto">
-                    Agradecemos su interés. Pronto publicaremos nuevas consultas para nuestros productores.
+                    Gracias por tu interés. Pronto publicaremos nuevas consultas para nuestros productores.
                   </p>
                 </div>
               </div>
@@ -168,9 +168,9 @@ export default function EncuestasPublicas() {
               <div className="border-t border-outline-variant/30 pt-8 flex items-start gap-6">
                 <AppIcon name="info" className="text-primary/60 text-2xl shrink-0 mt-1" />
                 <div>
-                  <h4 className="font-label-caps text-on-surface mb-3">ASISTENCIA TÉCNICA</h4>
+                  <h4 className="font-label-caps text-on-surface mb-3">Asistencia técnica</h4>
                   <p className="font-body-md text-on-surface-variant">
-                    Si encuentra dificultades al completar su encuesta, nuestro equipo está a su disposición en su cooperativa local o contactando a soporte@acaro.org
+                    Si tienes dificultades al completar una encuesta, contacta a tu cooperativa local o escribe a soporte@acaro.org.
                   </p>
                 </div>
               </div>

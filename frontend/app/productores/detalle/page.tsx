@@ -100,7 +100,7 @@ function ProductorDetalle() {
                   </div>
                 ) : (
                   <p className="text-justify text-[18px] leading-[1.8] text-muted [hyphens:auto]">
-                    Esta persona forma parte de la cadena de valor del café robusta en la Asociación Café Robusta OBC.
+                    Esta persona forma parte de la cadena de valor del café robusta vinculada a la Asociación Café Robusta OBC.
                   </p>
                 )}
               </div>

@@ -166,7 +166,7 @@ export function SurveyQuestionRenderer({
     return (
       <div className="flex flex-col">
         <div className="mb-8">
-          <textarea className={`${inputCls} min-h-[160px] resize-y`} placeholder={required ? 'Escribe detalladamente tu respuesta' : 'Escribe detalladamente tu respuesta (opcional)'}
+          <textarea className={`${inputCls} min-h-[160px] resize-y`} placeholder={required ? 'Escribe tu respuesta' : 'Escribe tu respuesta (opcional)'}
             value={longTextValue} disabled={isSubmitting} onChange={e => setLongTextValue(e.target.value)} />
         </div>
         {renderActionBar(disabled, () => onAnswer(longTextValue.trim() || undefined))}
@@ -234,7 +234,7 @@ export function SurveyQuestionRenderer({
                 </button>
                 {sel && !!opt.permite_texto_libre && (
                   <div className="mt-3 ml-14 relative animate-fade-in">
-                    <input className={inputCls} placeholder="Por favor especifique..." autoFocus
+                    <input className={inputCls} placeholder="Especifica tu respuesta..." autoFocus
                       value={freeText[opt.id] ?? ''} disabled={isSubmitting}
                       onChange={e => setFreeText(prev => ({ ...prev, [opt.id]: e.target.value }))} />
                   </div>
@@ -278,7 +278,7 @@ export function SurveyQuestionRenderer({
                 </button>
                 {sel && !!opt.permite_texto_libre && (
                   <div className="mt-3 ml-14 relative animate-fade-in">
-                    <input className={inputCls} placeholder="Por favor especifique..." autoFocus
+                    <input className={inputCls} placeholder="Especifica tu respuesta..." autoFocus
                       value={freeText[opt.id] ?? ''} disabled={isSubmitting}
                       onChange={e => setFreeText(prev => ({ ...prev, [opt.id]: e.target.value }))} />
                   </div>

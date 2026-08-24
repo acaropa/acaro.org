@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: "Conoce la historia, misión y propósito de la Asociación Café Robusta OBC de Panamá.",
   openGraph: {
     title: "Nosotros | ACARO OBC",
-    description: "Fortalecemos la producción de café robusta mediante calidad, innovación, comunidad y sostenibilidad.",
+    description: "Conoce la misión, visión y trabajo institucional de ACARO OBC en torno al café robusta.",
     url: "https://acaro.org/nosotros",
     siteName: "ACARO OBC",
     images: [{ url: "/assets/landing-hero-v2.jpg", width: 1200, height: 630 }],
@@ -42,7 +42,7 @@ export default function Nosotros() {
               Somos Asociación<br className="hidden sm:block" /> Café Robusta OBC
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-[1.6] text-[#fdf9f4]/80">
-              Fortalecemos la producción de café robusta mediante calidad, innovación, comunidad y sostenibilidad.
+              Trabajamos con productores y aliados para fortalecer la producción de café robusta en Panamá.
             </p>
           </ScrollReveal>
         </section>
@@ -62,12 +62,12 @@ export default function Nosotros() {
                 </div>
               </ScrollReveal>
               <ScrollReveal delay={200} distance="sm" className="md:col-span-6 md:col-start-7">
-                <p className="mb-6 text-xs font-bold uppercase tracking-[0.2em] text-[#e2b86f]">Nuestro Propósito</p>
+                <p className="mb-6 text-xs font-bold uppercase tracking-[0.2em] text-[#e2b86f]">Nuestro propósito</p>
                 <h2 className="mb-8 font-serif text-3xl font-bold leading-[1.2] text-[#fdf9f4] sm:text-4xl">
-                  Elevando la cosecha, honrando las manos que la cultivan.
+                  Producción, conocimiento y organización al servicio del café robusta.
                 </h2>
                 <p className="text-lg leading-[1.7] text-[#fdf9f4]/80">
-                  Existimos para conectar nuestra herencia rural con la excelencia global. Nuestro café robusta no solo se cultiva; es curado por generaciones de conocimiento compartido y tecnificación responsable.
+                  ACARO OBC reúne experiencia productiva, asistencia técnica y trabajo asociativo para acompañar a quienes cultivan, procesan y promueven el café robusta.
                 </p>
                 <div className="mt-10 h-px w-20 bg-[#e2b86f]" />
               </ScrollReveal>
@@ -87,7 +87,7 @@ export default function Nosotros() {
                 <h3 className="mb-6 mt-2 font-serif text-2xl font-semibold text-[#271310]">Misión</h3>
                 <div className="mb-6 h-px w-16 bg-[#d8cabb]" />
                 <p className="text-lg leading-[1.7] text-[#504442]">
-                  Fortalecer el sector cafetero de la provincia de Panamá Oeste, promover su crecimiento con tecnología que sea sostenible, competitiva, y de calidad, amigable con el ambiente.
+                  Fortalecer el sector cafetero de la provincia de Panamá Oeste y promover su crecimiento con tecnología sostenible, competitiva, de calidad y amigable con el ambiente.
                 </p>
               </ScrollReveal>
               <ScrollReveal delay={250} distance="sm">
@@ -95,7 +95,7 @@ export default function Nosotros() {
                 <h3 className="mb-6 mt-2 font-serif text-2xl font-semibold text-[#271310]">Visión</h3>
                 <div className="mb-6 h-px w-16 bg-[#d8cabb]" />
                 <p className="text-lg leading-[1.7] text-[#504442]">
-                  Ser la asociación líder de productores de café robusta de la región de Panamá Oeste y del país, prestando servicios a sus socios y promoviendo el Café Robusta a nivel nacional e internacional.
+                  Ser la asociación líder de productores de café robusta de Panamá Oeste y del país, prestando servicios a sus socios y promoviendo el café robusta a nivel nacional e internacional.
                 </p>
               </ScrollReveal>
             </div>
@@ -106,7 +106,7 @@ export default function Nosotros() {
         <section className="bg-[#120c08] py-20 sm:py-28">
           <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
             <ScrollReveal distance="sm" className="mb-12">
-              <p className="text-center text-xs font-bold uppercase tracking-[0.2em] text-[#e2b86f]">Nuestra Identidad</p>
+              <p className="text-center text-xs font-bold uppercase tracking-[0.2em] text-[#e2b86f]">Nuestra identidad</p>
             </ScrollReveal>
             <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
               <ScrollReveal delay={100} distance="sm" className="md:col-span-8">
@@ -136,7 +136,7 @@ export default function Nosotros() {
                   />
                   <div className="absolute inset-0 bg-[#120c08]/0 transition-colors duration-500 group-hover:bg-[#120c08]/20" />
                   <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#120c08]/90 to-transparent p-8 md:p-12">
-                    <h4 className="mb-3 font-serif text-2xl font-semibold text-[#fdf9f4]">El Conocimiento</h4>
+                    <h4 className="mb-3 font-serif text-2xl font-semibold text-[#fdf9f4]">Conocimiento técnico</h4>
                     <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.1em] text-[#fdf9f4]/80 transition-colors duration-300 group-hover:text-[#e2b86f]">
                       Explorar biblioteca <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                     </span>

@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: "Contacto | ACARO OBC",
-  description: "Comunícate con el equipo de la Asociación Café Robusta OBC. Estamos para orientarte sobre membresía, proyectos y alianzas.",
+  description: "Comunícate con el equipo de la Asociación Café Robusta OBC para consultas sobre productores, proyectos y alianzas.",
   openGraph: {
     title: "Contacto | ACARO OBC",
     description: "Escríbenos. El equipo de ACARO OBC responde consultas sobre membresía, proyectos y alianzas.",

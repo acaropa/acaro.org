@@ -30,7 +30,7 @@ function HeroRightProject({ project, index }: { project: Project, index: number 
           <p className="text-[16px] leading-[1.6] text-muted mb-8 line-clamp-6">{project.description}</p>
         </div>
         <Link href={`/proyectos/detalle/?slug=${project.slug || ''}`} className="self-start border border-primary text-primary px-6 py-3 text-[12px] font-semibold tracking-[0.1em] leading-none hover:bg-primary hover:text-primary-foreground transition-colors duration-300 rounded-none uppercase">
-          Ver Detalles
+          Ver detalles
         </Link>
       </div>
       <div className="md:col-span-9 order-1 md:order-2">
@@ -69,7 +69,7 @@ function HeroLeftProject({ project, index }: { project: Project, index: number }
           <p className="text-[16px] leading-[1.6] text-muted mb-8 text-right line-clamp-6">{project.description}</p>
         </div>
         <Link href={`/proyectos/detalle/?slug=${project.slug || ''}`} className="self-end border border-primary text-primary px-6 py-3 text-[12px] font-semibold tracking-[0.1em] leading-none hover:bg-primary hover:text-primary-foreground transition-colors duration-300 rounded-none uppercase">
-          Ver Detalles
+          Ver detalles
         </Link>
       </div>
     </ScrollReveal>
@@ -193,7 +193,7 @@ function SolidProject({ project, index }: { project: Project, index: number }) {
           {project.description}
         </p>
         <span className="self-start border border-primary-foreground text-primary-foreground px-4 py-2 text-[12px] font-semibold tracking-[0.1em] leading-none hover:bg-primary-foreground hover:text-primary transition-colors duration-300 rounded-none relative z-10 uppercase">
-          Conocer Más
+          Ver proyecto
         </span>
       </div>
       </Link>
@@ -225,12 +225,12 @@ export default function Proyectos() {
         <header className="mb-24 grid grid-cols-1 md:grid-cols-12 gap-[24px] items-end">
           <ScrollReveal delay={0} distance="sm" className="md:col-span-8">
             <h1 className="font-serif font-semibold text-[32px] leading-[1.2] md:text-[52px] md:leading-[1.2] tracking-[-0.015em] text-primary mb-6">
-              Iniciativas de<br />Desarrollo Rural.
+              Proyectos de<br />desarrollo rural.
             </h1>
           </ScrollReveal>
           <ScrollReveal delay={200} distance="sm" className="md:col-span-4 pb-2">
             <p className="text-[18px] leading-[1.6] text-muted">
-              Proyectos enfocados en la innovación tecnológica, sostenibilidad ambiental y el empoderamiento de las comunidades productoras de café robusta en la región.
+              Iniciativas técnicas, productivas y comunitarias vinculadas al café robusta y a las comunidades productoras.
             </p>
           </ScrollReveal>
         </header>

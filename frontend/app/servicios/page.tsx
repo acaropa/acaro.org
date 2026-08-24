@@ -93,7 +93,7 @@ const SERVICE_SECTIONS = [
   {
     eyebrow: "Necesito apoyo técnico",
     description:
-      "Soluciones técnicas para mejorar la productividad, la trazabilidad y la calidad de la finca.",
+      "Asistencia para mejorar productividad, trazabilidad y calidad en la finca.",
     icon: HandHelping,
     tone: "green",
     cta: "Solicitar orientación técnica",
@@ -103,7 +103,7 @@ const SERVICE_SECTIONS = [
   {
     eyebrow: "Busco café o insumos",
     description:
-      "Productos y materiales seleccionados para una caficultura más rentable y sostenible.",
+      "Café, plantines e insumos para apoyar el manejo del cultivo.",
     icon: ShoppingBag,
     tone: "coffee",
     cta: "Consultar disponibilidad",
@@ -149,7 +149,7 @@ export default function ServiciosPage() {
               <span className="h-px flex-1 bg-current/70" />
             </div>
             <p className="mt-7 max-w-[48ch] text-base leading-7 text-[#efe9df] sm:text-lg">
-              Brindamos soluciones técnicas y comerciales para fortalecer la
+              Brindamos acompañamiento técnico y comercial para fortalecer la
               producción de café robusta con calidad, trazabilidad y
               sostenibilidad.
             </p>
@@ -280,8 +280,7 @@ export default function ServiciosPage() {
                   Hablemos sobre cómo podemos ayudarte
                 </h2>
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5f5651] sm:text-base">
-                  Nuestro equipo está listo para asesorarte y encontrar la mejor
-                  solución para tu finca, asociación o negocio.
+                  Nuestro equipo puede orientarte según las necesidades de tu finca, asociación o negocio.
                 </p>
               </div>
               <div className="flex items-center p-6 pt-0 md:p-8">

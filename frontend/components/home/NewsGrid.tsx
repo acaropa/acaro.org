@@ -26,13 +26,13 @@ export function NewsGrid() {
           <span className="mb-4 block text-xs font-bold uppercase tracking-[0.2em] text-[#1b6d24]">Actualidad Institucional</span>
           <h2 className="font-serif text-3xl font-bold text-[#271310] sm:text-4xl">Noticias y comunicados</h2>
           <p className="mt-4 text-base leading-7 text-[#504442]">
-            Aun no hay noticias publicadas. Los comunicados institucionales apareceran aqui cuando esten disponibles.
+            Aún no hay noticias publicadas. Los comunicados institucionales aparecerán aquí cuando estén disponibles.
           </p>
         </ScrollReveal>
         <div className="border border-dashed border-[#d8cabb] bg-white p-8 text-center">
-          <p className="text-sm leading-6 text-[#504442]">El equipo de ACARO OBC esta preparando nuevas actualizaciones.</p>
+          <p className="text-sm leading-6 text-[#504442]">El equipo de ACARO OBC está preparando nuevas actualizaciones.</p>
           <Link href="/noticias" className="mt-5 inline-flex border-b border-[#271310] pb-1 text-xs font-bold uppercase tracking-widest text-[#271310]">
-            Ir a noticias
+            Ver noticias
           </Link>
         </div>
       </>
@@ -47,7 +47,7 @@ export function NewsGrid() {
           <span className="mb-4 block text-xs font-bold uppercase tracking-[0.2em] text-[#1b6d24]">Actualidad Institucional</span>
           <h2 className="font-serif text-3xl font-bold text-[#271310] sm:text-4xl">Noticias y comunicados</h2>
           <p className="mt-4 text-base leading-7 text-[#504442]">
-            Mantente al día con los hitos técnicos y las alianzas estratégicas que están transformando la región.
+            Consulta avances técnicos, alianzas, eventos y comunicados de la comunidad cafetalera.
           </p>
         </div>
         <Link href="/noticias" className="group flex items-center gap-2 text-sm font-semibold text-[#271310] transition-transform hover:translate-x-2">

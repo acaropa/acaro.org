@@ -55,7 +55,7 @@ export default function Noticias() {
               Noticias y novedades de la Asociación
             </h1>
             <p className="text-[20px] leading-[1.6] text-muted max-w-3xl">
-              Explora los últimos avances, eventos y proyectos que están transformando la industria del café robusta. Una mirada profunda a nuestra comunidad y sus logros.
+              Consulta avances, eventos, alianzas y comunicados relacionados con ACARO OBC y la comunidad del café robusta.
             </p>
           </ScrollReveal>
         </header>

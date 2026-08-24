@@ -162,12 +162,12 @@ export default function Productores() {
             <header className="grid grid-cols-1 md:grid-cols-12 gap-[24px] items-end">
               <ScrollReveal delay={0} distance="sm" className="md:col-span-8">
                 <h1 className="font-serif font-semibold text-[32px] leading-[1.2] md:text-[52px] md:leading-[1.15] tracking-[-0.015em] text-primary">
-                  Gente del<br />Café Robusta.
+                  Gente del<br />café robusta.
                 </h1>
               </ScrollReveal>
               <ScrollReveal delay={200} distance="sm" className="md:col-span-4 pb-2">
                 <p className="text-[18px] leading-[1.6] text-muted">
-                  Hombres y mujeres en cada eslabón de la cadena de valor, desde el campo hasta la taza, que hacen posible el café robusta de Panamá.
+                  Personas que participan en la cadena de valor, desde la finca hasta la taza, y hacen posible el café robusta de Panamá.
                 </p>
               </ScrollReveal>
             </header>

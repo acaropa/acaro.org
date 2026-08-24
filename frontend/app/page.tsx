@@ -15,13 +15,13 @@ const homeHeroAvifSrcSet =
   "/assets/responsive/landing-hero-main-480.avif 480w, /assets/responsive/landing-hero-main-768.avif 768w, /assets/responsive/landing-hero-main-1200.avif 1200w, /assets/responsive/landing-hero-main-1920.avif 1920w, /assets/responsive/landing-hero-main-2560.avif 2560w";
 
 export const metadata: Metadata = {
-  title: "ACARO OBC | Cafe Robusta de Panama",
+  title: "ACARO OBC | Café robusta de Panamá",
   description:
-    "Asociacion Cafe Robusta OBC impulsa asociacion, conocimiento tecnico y desarrollo productivo para comunidades cafetaleras en Panama.",
+    "Asociación Café Robusta OBC acompaña a productores y comunidades vinculadas al café robusta en Panamá.",
   openGraph: {
-    title: "ACARO OBC | Cafe Robusta de Panama",
+    title: "ACARO OBC | Café robusta de Panamá",
     description:
-      "asociacion, conocimiento tecnico y desarrollo productivo para comunidades cafetaleras de robusta.",
+      "Asociación, conocimiento técnico y desarrollo productivo para comunidades cafetaleras de robusta.",
     url: "https://acaro.org",
     siteName: "ACARO OBC",
     images: [{ url: "/assets/landing-hero-v2.jpg", width: 1200, height: 630 }],
@@ -57,7 +57,7 @@ export default function Home() {
               <span className="block text-[#fffaf1]">Robusta OBC</span>
             </h1>
             <p className="hero-reveal mt-5 max-w-2xl text-base leading-7 text-[#f3e8d8]/85 sm:mt-7 sm:text-xl sm:leading-8" style={{ animationDelay: "100ms" }}>
-              Impulsamos el desarrollo del café robusta con asociación, conocimiento técnico, tecnología e innovación, y visión productiva.
+              Acompañamos a productores y aliados del café robusta con organización, conocimiento técnico y visión productiva.
             </p>
             <div className="hero-reveal mt-7 flex flex-col items-stretch gap-3 sm:mt-9 sm:flex-row sm:items-start" style={{ animationDelay: "140ms" }}>
               <Link href="/nosotros" className="group inline-flex w-full items-center justify-center gap-2 whitespace-nowrap bg-[#fffaf1] px-5 py-3.5 text-xs font-bold uppercase tracking-widest text-[#271310] transition-all hover:bg-white sm:w-auto sm:px-8 sm:py-4">
@@ -89,14 +89,14 @@ export default function Home() {
             {/* Left: editorial content */}
             <ScrollReveal className="lg:col-span-5" direction="left" distance="lg">
               <span className="mb-4 block text-xs font-bold uppercase tracking-[0.2em] text-[#1b6d24]">
-                Nuestra Identidad
+                Nuestra identidad
               </span>
               <h2 className="mb-6 font-serif text-4xl font-bold leading-tight tracking-[-0.025em] text-[#271310] sm:text-5xl">
                 Una asociación creada para crecer juntos.
               </h2>
               <div className="mb-8 h-px bg-[#E0DCD0]" />
               <p className="mb-6 text-base leading-7 text-[#504442]">
-                Desde nuestra fundación, ACARO OBC ha operado bajo la premisa de que la tecnificación no es un fin, sino una herramienta de justicia social. No solo producimos café; cultivamos comunidades resilientes que lideran el mercado de robusta con estándares internacionales.
+                ACARO OBC trabaja para que la organización y la asistencia técnica lleguen a las fincas, a las familias productoras y a la cadena de valor del café robusta.
               </p>
               <Link
                 href="/nosotros"
@@ -141,7 +141,7 @@ export default function Home() {
           <ScrollReveal className="mb-12 flex items-end justify-between border-b border-[#d3c3c0]/40 pb-6 sm:mb-20" distance="sm">
             <div>
               <span className="mb-4 block text-xs font-bold uppercase tracking-[0.2em] text-[#1b6d24]">
-                Capítulos de Progreso
+                Trabajo en marcha
               </span>
               <h2 className="font-serif text-3xl font-bold text-[#271310] sm:text-5xl lg:text-[3rem]">
                 Proyectos que abren oportunidades
@@ -177,16 +177,16 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
           <ScrollReveal className="mb-10 text-center sm:mb-16" distance="sm">
             <h2 className="font-serif text-2xl font-bold text-[#271310] sm:text-4xl">
-              Biblioteca de Excelencia
+              Biblioteca técnica
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-[#504442]">
-              Un repositorio técnico diseñado como un toolkit para el empoderamiento del productor rural.
+              Documentos, guías y recursos para productores, técnicos, estudiantes e investigadores.
             </p>
           </ScrollReveal>
           <LibraryPreview />
           <ScrollReveal className="mt-10 flex justify-center" delay={200} distance="sm">
             <Link href="/biblioteca" className="w-full max-w-xs bg-[#271310] px-8 py-3 text-center text-sm font-semibold text-white transition-all hover:bg-[#3e2723] sm:w-auto">
-              Explorar Biblioteca
+              Explorar biblioteca
             </Link>
           </ScrollReveal>
         </div>
@@ -206,7 +206,7 @@ export default function Home() {
             &ldquo;Cultivar café robusta también es cultivar futuro.&rdquo;
           </h2>
           <p className="mx-auto mb-10 max-w-2xl font-sans text-base leading-relaxed text-[#504442] sm:mb-14 sm:text-lg">
-            Únete a nuestra red de productores y profesionales para transformar la industria.
+            Súmate a la red de productores, técnicos y aliados que trabajan por el café robusta.
           </p>
           <Link
             href="/contacto"

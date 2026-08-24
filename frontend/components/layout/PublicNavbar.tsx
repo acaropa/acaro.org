@@ -20,10 +20,10 @@ const navItems: NavItem[] = [
   {
     label: "Nosotros",
     submenu: [
-      { href: "/nosotros", label: "Acerca de la Asociación", info: "Conoce nuestra historia, misión y propósito." },
+      { href: "/nosotros", label: "Acerca de ACARO", info: "Conoce nuestra historia, misión y propósito." },
       { href: "/productores", label: "Gente del Café Robusta", info: "Explora el mapa territorial y conoce a las personas de la cadena de valor." },
-      { href: "/noticias", label: "Noticias y Novedades", info: "Explora los últimos avances y eventos de la comunidad." },
-      { href: "/encuestas", label: "Encuestas", info: "Participa en las consultas y procesos de la Asociación." },
+      { href: "/noticias", label: "Noticias y novedades", info: "Consulta avances, eventos y comunicados de la comunidad." },
+      { href: "/encuestas", label: "Encuestas", info: "Participa en consultas abiertas de la Asociación." },
     ],
   },
   { href: "/proyectos", label: "Proyectos" },
@@ -117,7 +117,7 @@ export function PublicNavbar() {
 
           <div className="hidden items-center gap-3 md:flex">
             <Link href="/contacto" className="bg-white px-6 py-2 text-xs font-bold uppercase tracking-widest text-[#271310] transition-all hover:bg-[#f3ede3]">
-              Únete
+              Contacto
             </Link>
           </div>
 
@@ -170,7 +170,7 @@ export function PublicNavbar() {
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="block w-full bg-white py-3 text-center text-xs font-bold uppercase tracking-widest text-[#271310] transition-all hover:bg-[#f3ede3]"
               >
-                Únete a ACARO
+                Contactar a ACARO
               </Link>
             </div>
           </div>

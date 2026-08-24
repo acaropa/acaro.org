@@ -29,9 +29,9 @@ function getIcon(doc: LibraryDocument) {
 
 const ACTION_LABEL: Record<string, string> = {
   pdf: 'Descargar PDF',
-  doc: 'Abrir Documento',
-  video: 'Ver Recurso',
-  link: 'Leer Más',
+  doc: 'Abrir documento',
+  video: 'Ver recurso',
+  link: 'Leer más',
 };
 
 export function LibraryPreview() {
@@ -47,9 +47,9 @@ export function LibraryPreview() {
     return (
       <div className="border border-dashed border-[#d8cabb] bg-white p-8 text-center">
         <BookOpen className="mx-auto mb-4 h-9 w-9 text-[#1b6d24]" />
-        <h5 className="font-serif text-xl font-semibold text-[#271310]">Biblioteca en preparacion</h5>
+        <h5 className="font-serif text-xl font-semibold text-[#271310]">Biblioteca en preparación</h5>
         <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-[#504442]">
-          Los documentos tecnicos aprobados apareceran aqui como recursos para productores, tecnicos e investigadores.
+          Los documentos técnicos aprobados aparecerán aquí como recursos para productores, técnicos e investigadores.
         </p>
       </div>
     );
@@ -71,7 +71,7 @@ export function LibraryPreview() {
                 rel="noopener noreferrer"
                 className="text-xs font-bold uppercase tracking-widest text-[#271310] group-hover:underline"
               >
-                {ACTION_LABEL[item.resourceType] || 'Ver Recurso'}
+                {ACTION_LABEL[item.resourceType] || 'Ver recurso'}
               </a>
             </div>
           </ScrollReveal>

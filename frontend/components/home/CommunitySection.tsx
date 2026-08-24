@@ -32,7 +32,7 @@ export function CommunitySection() {
             Gente del Robusta
           </h2>
           <blockquote className="relative mb-12 border-l border-[#ae8d87]/30 pl-10 font-serif text-lg italic leading-8 text-[#c9b5b0]">
-            &ldquo;Desde la finca hasta la taza, cada persona en la cadena de valor aporta pasión, técnica y orgullo para hacer del robusta panameño una experiencia excepcional.&rdquo;
+            &ldquo;Desde la finca hasta la taza, cada persona aporta conocimiento, trabajo y orgullo al café robusta panameño.&rdquo;
             <span className="mt-4 block font-sans not-italic text-sm font-bold uppercase tracking-widest text-white">
               ACARO OBC
             </span>
@@ -99,10 +99,10 @@ export function CommunitySection() {
           <ScrollReveal className="mt-16 md:col-span-6 md:col-start-7 md:mt-0" direction="right" delay={200}>
             <div className="border border-white/10 bg-white/5 p-8">
               <div className="aspect-[4/3] overflow-hidden">
-                <OptimizedImage src="/assets/landing-hero-v2.jpg" alt="Productores de cafe robusta en campo" className="h-full w-full object-cover" sizes="(max-width: 767px) calc(100vw - 104px), (max-width: 1023px) 50vw, 592px" />
+                <OptimizedImage src="/assets/landing-hero-v2.jpg" alt="Productores de café robusta en campo" className="h-full w-full object-cover" sizes="(max-width: 767px) calc(100vw - 104px), (max-width: 1023px) 50vw, 592px" />
               </div>
               <p className="mt-6 text-lg leading-8 text-[#c9b5b0]">
-                Estamos preparando historias reales de las personas (productores, técnicos, tostadores, baristas) que forman parte de la cadena de valor de ACARO OBC.
+                Estamos preparando perfiles de productores, técnicos, tostadores y baristas que forman parte de la cadena de valor de ACARO OBC.
               </p>
               <div className="mt-6 flex flex-wrap gap-4">
                 <Link href="/productores" className="inline-flex bg-white px-6 py-3 text-sm font-semibold text-[#271310] hover:bg-[#faf9f5]">

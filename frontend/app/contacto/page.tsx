@@ -110,7 +110,7 @@ export default function Contacto() {
               Hablemos de oportunidades para crecer juntos.
             </h1>
             <p className="max-w-2xl text-lg leading-relaxed text-[#504442]">
-              Nuestra red se fortalece con cada nueva conexión. Si eres productor, institución o aliado potencial, este es el punto de inicio para transformar el futuro del café robusta.
+              Si eres productor, institución o aliado potencial, escríbenos para conversar sobre proyectos, asistencia técnica o colaboración en torno al café robusta.
             </p>
           </header>
 
@@ -169,7 +169,7 @@ export default function Contacto() {
                     type="submit"
                     className="flex items-center gap-3 bg-[#271310] px-10 py-4 text-xs font-bold uppercase tracking-widest text-[#fffaf1] transition-all hover:bg-[#120c08] disabled:cursor-wait disabled:opacity-70"
                   >
-                    {status === "sending" ? "Enviando..." : "Enviar Mensaje"}
+                    {status === "sending" ? "Enviando..." : "Enviar mensaje"}
                     <Send className="h-4 w-4" />
                   </button>
                 </form>
@@ -211,10 +211,10 @@ export default function Contacto() {
 
               {/* Alliance Card */}
               <div className="flex flex-col rounded bg-[#120c08] p-8 text-[#fffaf1] md:p-10">
-                <p className="mb-4 block text-xs font-bold uppercase tracking-[0.2em] text-[#c28a3a]">Alianzas de Alto Impacto</p>
-                <h3 className="mb-5 font-serif text-2xl font-semibold">Impulsa el desarrollo rural con nosotros.</h3>
+                <p className="mb-4 block text-xs font-bold uppercase tracking-[0.2em] text-[#c28a3a]">Alianzas institucionales</p>
+                <h3 className="mb-5 font-serif text-2xl font-semibold">Trabajemos por el desarrollo rural.</h3>
                 <p className="mb-8 text-sm leading-relaxed text-[#d8c9bb]">
-                  Buscamos socios corporativos e institucionales para expandir la infraestructura de procesamiento y programas de educación agrícola.
+                  Coordinamos con instituciones y aliados para fortalecer infraestructura, formación y acompañamiento técnico.
                 </p>
                 <a
                   href="mailto:contacto@acaro.org?subject=Propuesta%20de%20alianza%20-%20ACARO%20OBC"
@@ -228,8 +228,8 @@ export default function Contacto() {
               {/* Map */}
               <div className="flex flex-grow flex-col overflow-hidden rounded border border-[#d8cabb]/30 bg-[#e9e8e4]">
                 <div className="border-b border-[#d8cabb]/20 p-5">
-                  <h4 className="text-sm font-bold text-[#120c08]">Puntos de Conexión</h4>
-                  <p className="mt-0.5 text-xs text-[#8b6a4f]">Panamá Oeste: Nuestra presencia territorial</p>
+                  <h4 className="text-sm font-bold text-[#120c08]">Presencia territorial</h4>
+                  <p className="mt-0.5 text-xs text-[#8b6a4f]">Panamá Oeste, República de Panamá</p>
                 </div>
                 <div className="relative h-56 w-full overflow-hidden grayscale transition-all duration-700 hover:grayscale-0 md:h-64">
                   <iframe
@@ -303,7 +303,7 @@ function AlliesPathSection() {
         Aliados en el camino
       </p>
       <p className="mx-auto mb-14 max-w-2xl font-serif text-2xl font-semibold leading-snug text-[#271310] md:text-3xl">
-        Juntos fortalecemos el desarrollo, la innovación y el futuro del café robusta panameño.
+        Aliados que aportan experiencia, cooperación y respaldo al café robusta panameño.
       </p>
 
       <div className="relative mx-auto hidden min-h-[380px] max-w-6xl md:block" onMouseLeave={() => setActivePartner(null)}>

@@ -77,14 +77,14 @@ export function LibrarySearchHero({
                   onChange={event => onQueryChange(event.target.value)}
                   onFocus={onFocus}
                   className="h-12 min-w-0 flex-1 border-0 bg-transparent p-0 text-base text-[#271310] outline-none ring-0 placeholder:text-[#827472] focus:ring-0 md:text-lg"
-                  placeholder="Buscar documentos, guias tecnicas, archivos..."
+                  placeholder="Buscar documentos, guías técnicas, archivos..."
                   aria-label="Buscar en la biblioteca"
                 />
                 {query && onClear && (
                   <button
                     type="button"
                     onClick={onClear}
-                    aria-label="Limpiar busqueda"
+                    aria-label="Limpiar búsqueda"
                     className="mr-2 flex h-10 w-10 shrink-0 items-center justify-center text-[#827472] transition-colors hover:text-[#271310]"
                   >
                     <X className="h-5 w-5" />
