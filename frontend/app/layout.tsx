@@ -3,7 +3,6 @@ import Script from 'next/script';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { CookieBanner } from '@/components/ui/CookieBanner';
-import { MobileCtaBar } from '@/components/ui/MobileCtaBar';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://acaro.org'),
@@ -44,7 +43,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         <AuthProvider>{children}</AuthProvider>
         <CookieBanner />
-        <MobileCtaBar />
       </body>
     </html>
   );
