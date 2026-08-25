@@ -1,6 +1,7 @@
 'use client';
 
 import { DataLoadingState } from "@/components/ui/TypingIndicator";
+import Image from 'next/image';
 
 import { AppIcon } from "@/components/ui/AppIcon"
 
@@ -379,7 +380,7 @@ export default function AdminBiblioteca() {
               <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Imagen de portada (opcional)</label>
               {coverMode === 'keep' ? (
                 <div className="rounded border border-border bg-surface flex items-center gap-4 p-3">
-                  <img src={apiAssetUrl(editing?.imagen_portada || '')} alt="Portada actual" className="h-16 w-24 shrink-0 object-cover rounded border border-border" />
+                  <Image src={apiAssetUrl(editing?.imagen_portada || '')} alt="Portada actual" width={96} height={64} className="h-16 w-24 shrink-0 rounded border border-border object-cover" />
                   <div className="flex-1 min-w-0">
                     <p className="font-label-caps text-[10px] uppercase tracking-widest text-muted mb-1">Portada actual</p>
                     <p className="truncate text-sm text-foreground">{editing?.imagen_portada?.split('/').pop()}</p>
@@ -487,11 +488,13 @@ export default function AdminBiblioteca() {
             return (
               <div key={document.id} className="bg-card p-6 border border-border hover:border-primary/30 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-6 group">
                 {document.imagen_portada && (
-                  <div className="h-24 w-full shrink-0 overflow-hidden rounded-lg border border-border bg-surface md:w-36">
-                    <img
+                  <div className="relative h-24 w-full shrink-0 overflow-hidden rounded-lg border border-border bg-surface md:w-36">
+                    <Image
                       src={apiAssetUrl(document.imagen_portada)}
                       alt={`Portada de ${document.titulo}`}
-                      className="h-full w-full object-cover"
+                      fill
+                      sizes="(min-width: 768px) 144px, 100vw"
+                      className="object-cover"
                     />
                   </div>
                 )}

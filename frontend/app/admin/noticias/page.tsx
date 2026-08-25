@@ -1,6 +1,7 @@
 'use client';
 
 import { DataLoadingState } from "@/components/ui/TypingIndicator";
+import Image from 'next/image';
 
 import { AppIcon } from "@/components/ui/AppIcon"
 
@@ -369,7 +370,7 @@ export default function AdminNoticias() {
                     <div className="mb-3 grid grid-cols-3 gap-2">
                       {form.imagenes.map((url, i) => (
                         <div key={url + i} className="relative aspect-[4/3] overflow-hidden border border-border bg-surface">
-                          <img src={apiAssetUrl(url)} alt={`Foto secundaria ${i + 1}`} className="h-full w-full object-cover" />
+                          <Image src={apiAssetUrl(url)} alt={`Foto secundaria ${i + 1}`} fill sizes="(min-width: 768px) 33vw, 33vw" className="object-cover" />
                           <button
                             type="button"
                             onClick={() => setForm(current => ({ ...current, imagenes: current.imagenes.filter((_, idx) => idx !== i) }))}
@@ -383,7 +384,7 @@ export default function AdminNoticias() {
                       ))}
                       {secondaryFiles.map((file, i) => (
                         <div key={file.fileName + i} className="relative aspect-[4/3] overflow-hidden border border-border bg-surface">
-                          <img src={file.base64} alt={`Nueva foto secundaria ${i + 1}`} className="h-full w-full object-cover" />
+                          <Image src={file.base64} alt={`Nueva foto secundaria ${i + 1}`} fill sizes="(min-width: 768px) 33vw, 33vw" className="object-cover" />
                           <button
                             type="button"
                             onClick={() => setSecondaryFiles(current => current.filter((_, idx) => idx !== i))}
@@ -497,8 +498,8 @@ export default function AdminNoticias() {
             return (
               <article key={item.id} className="bg-card p-6 border border-border hover:border-primary/30 transition-colors flex flex-col group">
                 {item.imagen_portada && (
-                  <div className="w-full h-40 mb-4 overflow-hidden bg-surface">
-                    <img src={apiAssetUrl(item.imagen_portada)} alt={item.titulo} className="w-full h-full object-cover" />
+                  <div className="relative w-full h-40 mb-4 overflow-hidden bg-surface">
+                    <Image src={apiAssetUrl(item.imagen_portada)} alt={item.titulo} fill sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover" />
                   </div>
                 )}
                 <div className="flex items-start justify-between gap-4 mb-4">

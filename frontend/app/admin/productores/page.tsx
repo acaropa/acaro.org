@@ -1,6 +1,7 @@
 'use client';
 
 import { DataLoadingState } from "@/components/ui/TypingIndicator";
+import Image from 'next/image';
 
 import { AppIcon } from "@/components/ui/AppIcon"
 
@@ -335,8 +336,8 @@ export default function AdminProductores() {
           {producers.map(item => (
             <article key={item.id} className="bg-card p-6 border border-border hover:border-primary/30 transition-colors flex flex-col group">
               {item.imagen_url && (
-                <div className="w-full h-40 mb-4 overflow-hidden bg-surface">
-                  <img src={apiAssetUrl(item.imagen_url)} alt={item.nombre} className="w-full h-full object-cover" />
+                <div className="relative w-full h-40 mb-4 overflow-hidden bg-surface">
+                  <Image src={apiAssetUrl(item.imagen_url)} alt={item.nombre} fill sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover" />
                 </div>
               )}
               <div className="flex items-start justify-between gap-4 mb-4">
