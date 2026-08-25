@@ -4,6 +4,8 @@ import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { CookieBanner } from '@/components/ui/CookieBanner';
 
+const googleAnalyticsId = process.env.NEXT_PUBLIC_GA_ID;
+
 export const metadata: Metadata = {
   metadataBase: new URL('https://acaro.org'),
   title: 'ACARO | Asociación Café Robusta OBC',
@@ -34,13 +36,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es" className="h-full" suppressHydrationWarning>
       <body className="h-full bg-background text-foreground antialiased font-sans" suppressHydrationWarning>
-        {/* Analítica — Plausible (privacy-first, sin cookies de seguimiento) */}
-        <Script
-          defer
-          data-domain="acaro.org"
-          src="https://plausible.io/js/script.js"
-          strategy="afterInteractive"
-        />
+        {googleAnalyticsId && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}`}
+              strategy="afterInteractive"
+            />
+            <Script id="google-analytics" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${googleAnalyticsId}', { anonymize_ip: true });
+              `}
+            </Script>
+          </>
+        )}
         <AuthProvider>{children}</AuthProvider>
         <CookieBanner />
       </body>
