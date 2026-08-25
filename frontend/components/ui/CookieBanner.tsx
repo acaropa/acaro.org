@@ -1,39 +1,52 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useSyncExternalStore } from "react"
 import Link from "next/link"
 import { Cookie, X } from "lucide-react"
 
 const STORAGE_KEY = "acaro_cookie_consent"
+const CONSENT_EVENT = "acaro-cookie-consent-change"
+
+function subscribe(onStoreChange: () => void) {
+  window.addEventListener("storage", onStoreChange)
+  window.addEventListener(CONSENT_EVENT, onStoreChange)
+
+  return () => {
+    window.removeEventListener("storage", onStoreChange)
+    window.removeEventListener(CONSENT_EVENT, onStoreChange)
+  }
+}
+
+function getSnapshot() {
+  try {
+    return !localStorage.getItem(STORAGE_KEY)
+  } catch {
+    return false
+  }
+}
+
+function getServerSnapshot() {
+  return false
+}
 
 export function CookieBanner() {
-  const [visible, setVisible] = useState(false)
+  const visible = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 
-  useEffect(() => {
+  function updateConsent(value: "accepted" | "dismissed") {
     try {
-      const consent = localStorage.getItem(STORAGE_KEY)
-      if (!consent) setVisible(true)
-    } catch {
-      // Si localStorage no está disponible, no mostrar el banner
-    }
-  }, [])
-
-  function accept() {
-    try {
-      localStorage.setItem(STORAGE_KEY, "accepted")
+      localStorage.setItem(STORAGE_KEY, value)
+      window.dispatchEvent(new Event(CONSENT_EVENT))
     } catch {
       // noop
     }
-    setVisible(false)
+  }
+
+  function accept() {
+    updateConsent("accepted")
   }
 
   function dismiss() {
-    try {
-      localStorage.setItem(STORAGE_KEY, "dismissed")
-    } catch {
-      // noop
-    }
-    setVisible(false)
+    updateConsent("dismissed")
   }
 
   if (!visible) return null
