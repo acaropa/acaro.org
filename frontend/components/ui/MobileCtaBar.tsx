@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useEffect } from "react"
 import { ArrowRight } from "lucide-react"
 
 /**
@@ -14,8 +15,17 @@ export function MobileCtaBar() {
 
   const hidden =
     pathname === "/contacto" ||
+    pathname === "/encuestas" ||
     pathname.startsWith("/admin") ||
     pathname.startsWith("/login")
+
+  useEffect(() => {
+    document.body.classList.toggle("mobile-cta-offset", !hidden)
+
+    return () => {
+      document.body.classList.remove("mobile-cta-offset")
+    }
+  }, [hidden])
 
   if (hidden) return null
 

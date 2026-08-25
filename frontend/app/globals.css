@@ -228,6 +228,12 @@
   }
 }
 
+@media (max-width: 767px) {
+  body.mobile-cta-offset {
+    padding-bottom: calc(5.25rem + env(safe-area-inset-bottom));
+  }
+}
+
 header,
 button,
 a,
