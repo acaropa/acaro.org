@@ -43,4 +43,13 @@
   <url>
     <loc>https://acaro.org/mapa</loc>
     <priority>0.7</priority>
-  </url></urlset>
+  </url>
+  <url>
+    <loc>https://acaro.org/privacidad</loc>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://acaro.org/terminos</loc>
+    <priority>0.3</priority>
+  </url>
+</urlset>

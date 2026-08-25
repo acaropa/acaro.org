@@ -69,7 +69,17 @@ export function PublicFooter() {
               Acceso interno
             </Link>
           </div>
-          <p>Asociación · Conocimiento · Producción</p>
+          <div className="flex items-center gap-4">
+            <Link href="/privacidad" className="hover:underline hover:text-[#b8a99a] transition-colors">
+              Privacidad
+            </Link>
+            <span className="text-[#3a2a20]">·</span>
+            <Link href="/terminos" className="hover:underline hover:text-[#b8a99a] transition-colors">
+              Términos
+            </Link>
+            <span className="hidden sm:inline text-[#3a2a20]">·</span>
+            <p className="hidden sm:block">Asociación · Conocimiento · Producción</p>
+          </div>
         </div>
       </div>
     </footer>

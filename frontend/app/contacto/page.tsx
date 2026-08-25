@@ -64,10 +64,13 @@ const partners = [
   },
 ] as const;
 
+type FieldErrors = { nombre?: string; correo?: string; mensaje?: string }
+
 export default function Contacto() {
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [mensaje, setMensaje] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const formRef = useRef<HTMLFormElement>(null);
 
   function onMotivoChange(e: React.ChangeEvent<HTMLSelectElement>) {
@@ -76,15 +79,37 @@ export default function Contacto() {
     else setMensaje("");
   }
 
+  function validateFields(nombre: string, correo: string, mensajeVal: string): FieldErrors {
+    const errors: FieldErrors = {};
+    if (!nombre.trim()) errors.nombre = "El nombre es obligatorio.";
+    if (!correo.trim()) {
+      errors.correo = "El correo es obligatorio.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo.trim())) {
+      errors.correo = "Ingresa un correo electrónico válido.";
+    }
+    if (!mensajeVal.trim()) errors.mensaje = "El mensaje es obligatorio.";
+    else if (mensajeVal.trim().length < 15) errors.mensaje = "El mensaje debe tener al menos 15 caracteres.";
+    return errors;
+  }
+
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
+    const nombre = String(form.get("nombre") || "");
+    const correo = String(form.get("correo") || "");
+
+    const errors = validateFields(nombre, correo, mensaje);
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      return;
+    }
+    setFieldErrors({});
     setStatus("sending");
     setErrorMsg("");
     try {
       await api.post("/contacto", {
-        nombre: String(form.get("nombre") || ""),
-        correo: String(form.get("correo") || ""),
+        nombre,
+        correo,
         asunto: String(form.get("motivo") || ""),
         mensaje,
       });
@@ -127,8 +152,8 @@ export default function Contacto() {
                 <h2 className="mb-8 font-serif text-2xl font-semibold text-[#120c08]">Consulta institucional</h2>
                 <form ref={formRef} onSubmit={submit} className="space-y-8">
                   <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-                    <UnderlineField name="nombre" label="Nombre completo" placeholder="Juan Pérez" />
-                    <UnderlineField name="correo" label="Correo electrónico" placeholder="juan@ejemplo.com" type="email" />
+                    <UnderlineField name="nombre" label="Nombre completo" placeholder="Juan Pérez" error={fieldErrors.nombre} />
+                    <UnderlineField name="correo" label="Correo electrónico" placeholder="juan@ejemplo.com" type="email" error={fieldErrors.correo} />
                   </div>
                   <div>
                     <label className="mb-2 block text-xs font-bold uppercase tracking-[0.2em] text-[#8b6a4f]">Motivo de contacto</label>
@@ -145,17 +170,19 @@ export default function Contacto() {
                     </select>
                   </div>
                   <div>
-                    <label className="mb-2 block text-xs font-bold uppercase tracking-[0.2em] text-[#8b6a4f]">Mensaje</label>
-                    <textarea
-                      required
-                      name="mensaje"
-                      rows={4}
-                      value={mensaje}
-                      onChange={e => setMensaje(e.target.value)}
-                      placeholder="Cuéntanos cómo podemos colaborar..."
-                      className="w-full resize-none border-b border-[#d8cabb] bg-transparent px-0 py-2 text-sm text-[#271310] outline-none transition-colors focus:border-[#271310]"
-                    />
-                  </div>
+                     <label className="mb-2 block text-xs font-bold uppercase tracking-[0.2em] text-[#8b6a4f]">Mensaje</label>
+                     <textarea
+                       name="mensaje"
+                       rows={4}
+                       value={mensaje}
+                       onChange={e => { setMensaje(e.target.value); if (fieldErrors.mensaje) setFieldErrors(prev => ({ ...prev, mensaje: undefined })); }}
+                       placeholder="Cuéntanos cómo podemos colaborar..."
+                       className={`w-full resize-none border-b bg-transparent px-0 py-2 text-sm text-[#271310] outline-none transition-colors focus:border-[#271310] ${fieldErrors.mensaje ? "border-red-500" : "border-[#d8cabb]"}`}
+                     />
+                     {fieldErrors.mensaje && (
+                       <p className="mt-1.5 text-xs font-medium text-red-600">{fieldErrors.mensaje}</p>
+                     )}
+                   </div>
 
                   {status === "sent" && (
                     <p className="text-sm font-semibold text-[#2f5d3a]">Mensaje enviado a contacto@acaro.org.</p>
@@ -554,19 +581,21 @@ function AlliesPathSection() {
   );
 }
 
-function UnderlineField({ name, label, placeholder, type = "text" }: {
-  name: string; label: string; placeholder: string; type?: string;
+function UnderlineField({ name, label, placeholder, type = "text", error }: {
+  name: string; label: string; placeholder: string; type?: string; error?: string;
 }) {
   return (
     <div>
       <label className="mb-2 block text-xs font-bold uppercase tracking-[0.2em] text-[#8b6a4f]">{label}</label>
       <input
-        required
         name={name}
         type={type}
         placeholder={placeholder}
-        className="w-full border-b border-[#d8cabb] bg-transparent px-0 py-2 text-sm text-[#271310] outline-none transition-colors focus:border-[#271310]"
+        className={`w-full border-b bg-transparent px-0 py-2 text-sm text-[#271310] outline-none transition-colors focus:border-[#271310] ${error ? "border-red-500" : "border-[#d8cabb]"}`}
       />
+      {error && (
+        <p className="mt-1.5 text-xs font-medium text-red-600">{error}</p>
+      )}
     </div>
   );
 }
