@@ -164,15 +164,6 @@ export function PublicNavbar() {
                 </Link>
               )
             )}
-            <div className="pt-5 pb-2">
-              <Link
-                href="/contacto"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="block w-full bg-white py-3 text-center text-xs font-bold uppercase tracking-widest text-[#271310] transition-all hover:bg-[#f3ede3]"
-              >
-                Contactar a ACARO
-              </Link>
-            </div>
           </div>
         </div>
       </div>
