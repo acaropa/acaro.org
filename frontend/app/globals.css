@@ -307,6 +307,32 @@ a,
   position: relative;
 }
 
+.service-journey { --journey-progress: 0; transition: background-color 700ms ease, color 700ms ease; }
+.service-tone-earth { background: #e8ddce; color: #35231a; }
+.service-tone-forest { background: #dce6d6; color: #203625; }
+.service-tone-cream { background: #f1e8d9; color: #382319; }
+.service-tone-coffee { background: #e7d4c1; color: #412a20; }
+.service-journey-image { opacity: 0; transform: scale(1.1); transform-origin: center; will-change: transform, opacity; }
+.service-journey-copy { animation: service-journey-copy-in 620ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.service-journey-word { animation: service-journey-word-in 800ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.service-journey-frame { transition: clip-path 900ms cubic-bezier(0.16, 1, 0.3, 1), border-radius 900ms cubic-bezier(0.16, 1, 0.3, 1); }
+.service-journey-frame-0 { clip-path: inset(5% 0 0 8% round 42% 3px 3px 3px); }
+.service-journey-frame-1 { clip-path: inset(0 8% 7% 0 round 3px 46% 3px 3px); }
+.service-journey-frame-2 { clip-path: circle(46% at 50% 50%); }
+.service-journey-frame-3 { clip-path: inset(3% 0 3% 0 round 2px); }
+.service-journey-progress { transform: scaleX(var(--journey-progress)); transform-origin: left; }
+@keyframes service-journey-copy-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes service-journey-word-in { from { opacity: 0; transform: translate(-48%, -50%) scale(0.96); } to { opacity: 0.055; transform: translate(-50%, -50%) scale(1); } }
+
+.services-intro-arrow {
+  animation: services-intro-arrow 1.8s ease-in-out infinite;
+}
+
+@keyframes services-intro-arrow {
+  0%, 100% { transform: translateY(0); opacity: 0.55; }
+  50% { transform: translateY(7px); opacity: 1; }
+}
+
 .scene-line {
   transform: scaleX(var(--scene-progress));
   transform-origin: left;
@@ -643,6 +669,20 @@ a,
     clip-path: none;
     transition: none;
   }
+
+  .service-journey-copy,
+  .service-journey-word,
+  .service-journey-progress {
+    opacity: 1;
+    transform: none;
+    will-change: auto;
+    animation: none;
+  }
+
+  .service-journey-image { will-change: auto; }
+  .service-journey-frame { clip-path: none; transition: none; }
+
+  .services-intro-arrow { animation: none; }
 
   .cta-sheen::after {
     display: none;

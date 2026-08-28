@@ -11,7 +11,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Modal, ModalActions } from '@/components/ui/Modal';
 import { PERMISSIONS } from '@/lib/permissions';
 import { ImageSourceSwitch, ImageUploadField, UploadedFile } from '@/components/admin/ImageUploadField';
-import { ProductorRecord, formatExperience, formatProducerDate } from '@/lib/producers';
+import { ProductorRecord, formatExperience, formatProducerDate, producerGallery } from '@/lib/producers';
 
 const emptyForm = {
   nombre: '',
@@ -20,7 +20,9 @@ const emptyForm = {
   anios_experiencia: '',
   distrito_id: '',
   descripcion: '',
+  frase_corta: '',
   imagen_url: '',
+  imagenes: [] as string[],
   activo: true,
   destacado: false,
 };
@@ -35,6 +37,7 @@ export default function AdminProductores() {
   const [form, setForm] = useState(emptyForm);
   const [imageMode, setImageMode] = useState<'url' | 'file'>('url');
   const [image, setImage] = useState<UploadedFile | null>(null);
+  const [galleryFiles, setGalleryFiles] = useState<UploadedFile[]>([]);
   const [editing, setEditing] = useState<ProductorRecord | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -81,6 +84,7 @@ export default function AdminProductores() {
     setDistritos([]);
     setImageMode('url');
     setImage(null);
+    setGalleryFiles([]);
     setEditing(null);
     setShowForm(false);
   }
@@ -95,12 +99,15 @@ export default function AdminProductores() {
       anios_experiencia: item.anios_experiencia != null ? String(item.anios_experiencia) : '',
       distrito_id: item.distrito_id != null ? String(item.distrito_id) : '',
       descripcion: item.descripcion || '',
+      frase_corta: item.frase_corta || '',
       imagen_url: item.imagen_url || '',
+      imagenes: producerGallery(item),
       activo: item.activo,
       destacado: item.destacado,
     });
     setImageMode('url');
     setImage(null);
+    setGalleryFiles([]);
     setShowForm(true);
   }
 
@@ -116,6 +123,7 @@ export default function AdminProductores() {
         anios_experiencia: form.anios_experiencia,
         distrito_id: form.distrito_id ? Number(form.distrito_id) : null,
         descripcion: form.descripcion,
+        frase_corta: form.frase_corta,
         activo: form.activo,
         destacado: form.destacado,
       };
@@ -124,6 +132,10 @@ export default function AdminProductores() {
         payload.imagen_nombre = image.fileName;
       } else {
         payload.imagen_url = form.imagen_url.trim() || null;
+      }
+      payload.imagenes = form.imagenes;
+      if (galleryFiles.length > 0) {
+        payload.imagenes_base64 = galleryFiles.map(file => ({ base64: file.base64, fileName: file.fileName }));
       }
       if (editing) {
         await api.put(`/productores/${editing.id}`, payload);
@@ -265,6 +277,17 @@ export default function AdminProductores() {
               />
             </div>
             <div className="md:col-span-2">
+              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Frase corta para el landing (Opcional)</label>
+              <input
+                maxLength={180}
+                placeholder="Ej. El café es el legado que quiero dejar a mi comunidad."
+                value={form.frase_corta}
+                onChange={event => setForm(current => ({ ...current, frase_corta: event.target.value }))}
+                className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors"
+              />
+              <p className="mt-2 text-xs text-muted">Esta frase aparece en “La gente del Robusta”. {form.frase_corta.length}/180</p>
+            </div>
+            <div className="md:col-span-2">
               <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Imagen / Foto (Opcional)</label>
               <ImageSourceSwitch
                 value={imageMode}
@@ -288,6 +311,37 @@ export default function AdminProductores() {
                   existingUrl={editing?.imagen_url}
                   helperText="Formatos JPG, PNG o WEBP, máximo 4 MB."
                 />
+              )}
+            </div>
+
+            <div className="md:col-span-2 border border-border bg-surface/25 p-4">
+              <div className="mb-4 flex items-start justify-between gap-4">
+                <div>
+                  <h4 className="text-sm font-semibold text-foreground">Galería del perfil</h4>
+                  <p className="mt-1 text-xs text-muted">Hasta 8 fotografías adicionales. La foto anterior seguirá siendo la imagen principal.</p>
+                </div>
+                <span className="bg-primary/10 px-2 py-1 text-xs font-bold text-primary">{form.imagenes.length + galleryFiles.length}/8</span>
+              </div>
+
+              {(form.imagenes.length > 0 || galleryFiles.length > 0) && (
+                <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {form.imagenes.map((url, index) => (
+                    <div key={`${url}-${index}`} className="relative aspect-[4/3] overflow-hidden border border-border bg-surface">
+                      <Image src={apiAssetUrl(url)} alt={`Imagen guardada ${index + 1}`} fill sizes="25vw" className="object-cover" />
+                      <button type="button" onClick={() => setForm(current => ({ ...current, imagenes: current.imagenes.filter((_, itemIndex) => itemIndex !== index) }))} className="absolute right-1 top-1 flex h-7 w-7 items-center justify-center bg-white/95 text-red-700 shadow hover:bg-red-700 hover:text-white" aria-label={`Eliminar imagen ${index + 1}`}><AppIcon name="close" className="text-[14px]" /></button>
+                    </div>
+                  ))}
+                  {galleryFiles.map((file, index) => (
+                    <div key={`${file.fileName}-${index}`} className="relative aspect-[4/3] overflow-hidden border border-border bg-surface">
+                      <Image src={file.base64} alt={`Nueva imagen ${index + 1}`} fill sizes="25vw" className="object-cover" />
+                      <button type="button" onClick={() => setGalleryFiles(current => current.filter((_, itemIndex) => itemIndex !== index))} className="absolute right-1 top-1 flex h-7 w-7 items-center justify-center bg-white/95 text-red-700 shadow hover:bg-red-700 hover:text-white" aria-label={`Eliminar nueva imagen ${index + 1}`}><AppIcon name="close" className="text-[14px]" /></button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {form.imagenes.length + galleryFiles.length < 8 && (
+                <ImageUploadField key={galleryFiles.length} compact showPreview={false} value={null} onChange={file => { if (file) setGalleryFiles(current => [...current, file].slice(0, 8 - form.imagenes.length)); }} helperText="Selecciona una imagen a la vez. JPG, PNG o WEBP, máximo 4 MB." />
               )}
             </div>
 
@@ -365,6 +419,9 @@ export default function AdminProductores() {
               </div>
               {item.descripcion && (
                 <p className="mt-1 text-sm text-muted font-body-md flex-1 mb-6 line-clamp-3">{item.descripcion}</p>
+              )}
+              {item.frase_corta && (
+                <p className="mb-4 border-l-2 border-accent pl-3 text-sm italic text-foreground">“{item.frase_corta}”</p>
               )}
 
               <div className="flex flex-wrap gap-4 justify-end mt-auto pt-4 border-t border-border/50">

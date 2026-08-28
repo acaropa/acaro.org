@@ -5,7 +5,9 @@ export interface ProductorRecord {
   nombre: string;
   slug: string;
   descripcion: string | null;
+  frase_corta: string | null;
   imagen_url: string | null;
+  imagenes: string[] | string | null;
   comunidad: string | null;
   rol: string | null;
   anios_experiencia: number | null;
@@ -19,6 +21,19 @@ export interface ProductorRecord {
   updated_at?: string;
   creado_por_email?: string;
   creado_por_nombre?: string | null;
+}
+
+export function producerGallery(record: Pick<ProductorRecord, "imagenes">) {
+  if (Array.isArray(record.imagenes)) return record.imagenes;
+  if (typeof record.imagenes === "string") {
+    try {
+      const parsed: unknown = JSON.parse(record.imagenes);
+      return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === "string") : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
 }
 
 export function producerImage(record: Pick<ProductorRecord, "imagen_url">) {

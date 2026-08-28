@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     description: "Acompañamiento técnico, café, plantines e insumos vinculados al café robusta.",
     url: "https://acaro.org/servicios",
     siteName: "ACARO OBC",
-    images: [{ url: "/assets/landing-hero-v2.jpg", width: 1200, height: 630 }],
+    images: [{ url: "/assets/servicios-hero.jpg", width: 1200, height: 630 }],
     locale: "es_PA",
     type: "website",
   },

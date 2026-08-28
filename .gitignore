@@ -5,4 +5,5 @@ node_modules/
 dist/
 build/
 *.log
+.mysql-data/
 .env.migration

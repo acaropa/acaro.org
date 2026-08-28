@@ -60,12 +60,12 @@ export function CommunitySection() {
                       <OptimizedImage src={producerImage(producer)} alt={producer.nombre} className="h-full w-full object-cover" sizes="256px" />
                     </div>
                     <div className="flex flex-col justify-center">
-                      {producer.descripcion && (
+                      {producer.frase_corta && (
                         <p
                           className="mb-6 text-lg leading-relaxed text-[#c9b5b0] sm:text-xl"
                           style={{ fontFamily: "var(--font-handwritten)" }}
                         >
-                          &ldquo;{producer.descripcion}&rdquo;
+                          &ldquo;{producer.frase_corta}&rdquo;
                         </p>
                       )}
                       <h4 className="font-serif text-xl font-semibold text-white">{producer.nombre}</h4>

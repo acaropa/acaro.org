@@ -10,7 +10,7 @@ function invalidateProducerCache() {
 }
 
 const BASE_SELECT = `
-  SELECT p.id, p.nombre, p.slug, p.descripcion, p.imagen_url, p.comunidad, p.rol,
+  SELECT p.id, p.nombre, p.slug, p.descripcion, p.frase_corta, p.imagen_url, p.imagenes, p.comunidad, p.rol,
          p.anios_experiencia, p.distrito_id, p.activo, p.destacado, p.creado_por, p.created_at, p.updated_at,
          d.provincia AS provincia, d.distrito AS distrito,
          creator.email AS creado_por_email, creator.full_name AS creado_por_nombre
@@ -67,13 +67,15 @@ async function create(data, actor) {
   const slug = await generateUniqueSlug('productores', data.nombre);
   const [result] = await db.query(
     `INSERT INTO productores
-      (nombre, slug, descripcion, imagen_url, comunidad, rol, anios_experiencia, distrito_id, activo, destacado, creado_por)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      (nombre, slug, descripcion, frase_corta, imagen_url, imagenes, comunidad, rol, anios_experiencia, distrito_id, activo, destacado, creado_por)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       data.nombre,
       slug,
       data.descripcion || null,
+      data.frase_corta || null,
       data.imagen_url || null,
+      data.imagenes?.length ? JSON.stringify(data.imagenes) : null,
       data.comunidad || null,
       data.rol || null,
       data.anios_experiencia ?? null,
@@ -89,7 +91,7 @@ async function create(data, actor) {
 
 async function update(id, data) {
   const allowed = [
-    'nombre', 'descripcion', 'imagen_url', 'comunidad', 'rol',
+    'nombre', 'descripcion', 'frase_corta', 'imagen_url', 'imagenes', 'comunidad', 'rol',
     'anios_experiencia', 'distrito_id', 'activo', 'destacado',
   ];
   const fields = Object.keys(data).filter(field => allowed.includes(field));
@@ -100,6 +102,11 @@ async function update(id, data) {
   }
 
   const values = { ...data };
+  if (fields.includes('imagenes')) {
+    values.imagenes = Array.isArray(data.imagenes) && data.imagenes.length
+      ? JSON.stringify(data.imagenes)
+      : null;
+  }
   if (fields.includes('nombre')) {
     values.slug = await generateUniqueSlug('productores', data.nombre, id);
     fields.push('slug');

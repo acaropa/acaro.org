@@ -27,6 +27,31 @@ async function uploadImage(data) {
   return uploaded.url;
 }
 
+async function uploadGalleryImages(data) {
+  if (!Array.isArray(data.imagenes_base64)) return [];
+  const urls = [];
+  for (const file of data.imagenes_base64) {
+    if (!file?.base64 || !file?.fileName) continue;
+    const uploaded = await saveBase64Upload({
+      base64: file.base64,
+      fileName: file.fileName,
+      subdir: 'productores',
+      maxBytes: MAX_IMAGE_BYTES,
+      allowedExtensions: IMAGE_EXTENSIONS,
+    });
+    urls.push(uploaded.url);
+  }
+  return urls;
+}
+
+function parseGallery(value) {
+  if (Array.isArray(value)) return value.filter(item => typeof item === 'string').slice(0, 8);
+  if (typeof value === 'string') {
+    try { return parseGallery(JSON.parse(value)); } catch { return []; }
+  }
+  return [];
+}
+
 function canViewInternal(user) {
   return Boolean(user && user.role !== 'visitante');
 }
@@ -71,14 +96,19 @@ async function create(req, res, next) {
     const body = { ...req.body };
     const uploaded = await uploadImage(body);
     const imagen_url = uploaded || body.imagen_url || null;
+    const galleryUploads = await uploadGalleryImages(body);
+    const imagenes = [...parseGallery(body.imagenes), ...galleryUploads].slice(0, 8);
 
     res.status(201).json(await productores.create({
       nombre: body.nombre.trim(),
       descripcion: body.descripcion?.trim() || null,
+      frase_corta: body.frase_corta?.trim() || null,
       imagen_url: imagen_url?.trim() || null,
+      imagenes,
       comunidad: body.comunidad?.trim() || null,
       rol: body.rol?.trim() || null,
       anios_experiencia: parseYears(body.anios_experiencia) ?? null,
+      distrito_id: body.distrito_id ?? null,
       activo: body.activo ?? true,
       destacado: body.destacado ?? false,
     }, req.user));
@@ -95,14 +125,21 @@ async function update(req, res, next) {
     const body = { ...req.body };
     const uploaded = await uploadImage(body);
     if (uploaded) body.imagen_url = uploaded;
+    const galleryUploads = await uploadGalleryImages(body);
+    if ('imagenes' in body || galleryUploads.length) {
+      body.imagenes = [...parseGallery(body.imagenes), ...galleryUploads].slice(0, 8);
+    }
 
     const payload = {};
     if (typeof body.nombre === 'string') payload.nombre = body.nombre.trim();
     if ('descripcion' in body) payload.descripcion = body.descripcion?.trim() || null;
+    if ('frase_corta' in body) payload.frase_corta = body.frase_corta?.trim() || null;
     if ('imagen_url' in body) payload.imagen_url = body.imagen_url?.trim() || null;
+    if ('imagenes' in body) payload.imagenes = parseGallery(body.imagenes);
     if ('comunidad' in body) payload.comunidad = body.comunidad?.trim() || null;
     if ('rol' in body) payload.rol = body.rol?.trim() || null;
     if ('anios_experiencia' in body) payload.anios_experiencia = parseYears(body.anios_experiencia);
+    if ('distrito_id' in body) payload.distrito_id = body.distrito_id ?? null;
     if ('activo' in body) payload.activo = Boolean(body.activo);
     if ('destacado' in body) payload.destacado = Boolean(body.destacado);
 
