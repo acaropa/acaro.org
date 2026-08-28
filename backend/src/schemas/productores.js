@@ -1,5 +1,11 @@
 const { z } = require('../middlewares/validate');
 
+const booleanInput = z.preprocess(value => {
+  if (value === 0 || value === '0') return false;
+  if (value === 1 || value === '1') return true;
+  return value;
+}, z.boolean());
+
 const imageUploadShape = {
   imagen_base64: z.string().max(7_000_000, 'Imagen demasiado grande').optional(),
   imagen_nombre: z.string().trim().max(255).optional(),
@@ -20,13 +26,13 @@ const galleryUploadShape = {
 const createProductorSchema = z.object({
   nombre:            z.string({ required_error: 'nombre es requerido' }).trim().min(1, 'nombre es requerido').max(200, 'Nombre demasiado largo'),
   descripcion:       z.string().max(2000, 'Descripción máximo 2000 caracteres').optional().nullable(),
-  frase_corta:       z.string().trim().max(180, 'Frase corta máximo 180 caracteres').optional().nullable(),
+  frase_corta:       z.string().trim().optional().nullable(),
   comunidad:         z.string().trim().max(200).optional().nullable(),
   rol:               z.string().trim().max(100).optional().nullable(),
   anios_experiencia: z.coerce.number().int().min(0, 'Años de experiencia no puede ser negativo').max(100).optional().nullable(),
   distrito_id:       z.coerce.number().int().positive().optional().nullable(),
-  activo:            z.boolean().optional(),
-  destacado:         z.boolean().optional(),
+  activo:            booleanInput.optional(),
+  destacado:         booleanInput.optional(),
   ...imageUploadShape,
   ...galleryUploadShape,
 });
@@ -34,13 +40,13 @@ const createProductorSchema = z.object({
 const updateProductorSchema = z.object({
   nombre:            z.string().trim().min(1).max(200).optional(),
   descripcion:       z.string().max(2000).optional().nullable(),
-  frase_corta:       z.string().trim().max(180).optional().nullable(),
+  frase_corta:       z.string().trim().optional().nullable(),
   comunidad:         z.string().trim().max(200).optional().nullable(),
   rol:               z.string().trim().max(100).optional().nullable(),
   anios_experiencia: z.coerce.number().int().min(0).max(100).optional().nullable(),
   distrito_id:       z.coerce.number().int().positive().optional().nullable(),
-  activo:            z.boolean().optional(),
-  destacado:         z.boolean().optional(),
+  activo:            booleanInput.optional(),
+  destacado:         booleanInput.optional(),
   ...imageUploadShape,
   ...galleryUploadShape,
 });

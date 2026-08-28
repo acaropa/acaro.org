@@ -102,8 +102,8 @@ export default function AdminProductores() {
       frase_corta: item.frase_corta || '',
       imagen_url: item.imagen_url || '',
       imagenes: producerGallery(item),
-      activo: item.activo,
-      destacado: item.destacado,
+      activo: Boolean(item.activo),
+      destacado: Boolean(item.destacado),
     });
     setImageMode('url');
     setImage(null);
@@ -279,13 +279,12 @@ export default function AdminProductores() {
             <div className="md:col-span-2">
               <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Frase corta para el landing (Opcional)</label>
               <input
-                maxLength={180}
                 placeholder="Ej. El café es el legado que quiero dejar a mi comunidad."
                 value={form.frase_corta}
                 onChange={event => setForm(current => ({ ...current, frase_corta: event.target.value }))}
                 className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors"
               />
-              <p className="mt-2 text-xs text-muted">Esta frase aparece en “La gente del Robusta”. {form.frase_corta.length}/180</p>
+              <p className="mt-2 text-xs text-muted">Esta frase aparece en “La gente del Robusta”. Puedes escribir una frase de cualquier extensión.</p>
             </div>
             <div className="md:col-span-2">
               <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Imagen / Foto (Opcional)</label>

@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS productores (
   nombre            VARCHAR(150)    NOT NULL,
   slug              VARCHAR(220)             DEFAULT NULL,
   descripcion       TEXT                     DEFAULT NULL,
-  frase_corta       VARCHAR(180)             DEFAULT NULL,
+  frase_corta       TEXT                    DEFAULT NULL,
   imagen_url        VARCHAR(500)             DEFAULT NULL,
   imagenes          JSON                     DEFAULT NULL,
   comunidad         VARCHAR(150)             DEFAULT NULL,
