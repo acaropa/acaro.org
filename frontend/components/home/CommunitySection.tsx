@@ -47,11 +47,11 @@ export function CommunitySection() {
 
         {producers.length > 0 ? (
           <ScrollReveal className="mt-12 md:col-span-6 md:col-start-7 md:mt-0" direction="right" delay={200}>
-            <div className="relative min-h-[380px] sm:min-h-[460px]">
+            <div className="relative grid min-h-[380px] sm:min-h-[460px]">
               {producers.map((producer, index) => (
                 <div
                   key={producer.id}
-                  className={`absolute inset-0 flex flex-col justify-center transition-opacity duration-700 ${
+                  className={`col-start-1 row-start-1 flex min-w-0 flex-col justify-center transition-opacity duration-700 ${
                     index === current ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
                   }`}
                 >
