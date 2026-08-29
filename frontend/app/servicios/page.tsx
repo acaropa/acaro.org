@@ -89,7 +89,7 @@ function ServiceJourney({ id, section, description, kind, services, cta }: Journ
             <div className="flex items-center gap-4"><span className="font-serif text-5xl font-semibold text-current/35 sm:text-6xl">{current.number}</span><span className="h-px w-10 bg-current/30" /><p className="text-[10px] font-bold uppercase tracking-[0.28em] sm:text-xs">{kind}</p></div>
             <h2 className="mt-6 max-w-[12ch] font-serif text-[clamp(2.5rem,5.2vw,4.8rem)] font-bold leading-[0.96] tracking-[-0.035em]">{current.title}</h2>
             <p className="mt-6 max-w-[48ch] text-base leading-7 opacity-80 sm:text-lg sm:leading-8">{current.text}</p>
-            {cta && <a href={wa(cta.message)} target="_blank" rel="noopener noreferrer" className="mt-8 inline-flex min-h-11 items-center gap-3 border border-current/30 px-5 py-3 text-[10px] font-bold uppercase tracking-[0.16em] transition hover:bg-current hover:text-[#f4e7d0]"><MessageCircle className="h-4 w-4" />{cta.label}</a>}
+            {cta && <a href={wa(cta.message)} target="_blank" rel="noopener noreferrer" className="mt-8 inline-flex min-h-11 items-center gap-3 border border-[#b87931] bg-[#c99645] px-5 py-3 text-center text-[10px] font-bold uppercase tracking-[0.16em] text-[#21150d] shadow-[0_10px_24px_rgba(83,48,20,.14)] transition-[background-color,box-shadow,transform] hover:bg-[#b77f38] hover:text-[#21150d] hover:shadow-[0_14px_30px_rgba(83,48,20,.2)] hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8b5e2e]"><MessageCircle className="h-4 w-4" />{cta.label}</a>}
           </div>
 
           <div className="relative z-10 hidden aspect-[4/5] max-h-[70vh] lg:block">
