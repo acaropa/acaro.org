@@ -65,7 +65,9 @@ export default function AdminProductores() {
     setLoading(true);
     setError('');
     try {
-      setProducers(await api.get<ProductorRecord[]>('/productores'));
+      // Evita que el navegador reutilice un GET condicional después de guardar.
+      // El endpoint ignora este parámetro, pero fuerza a leer el registro actualizado.
+      setProducers(await api.get<ProductorRecord[]>(`/productores?admin_refresh=${Date.now()}`));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudieron cargar los productores');
     } finally {
