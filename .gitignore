@@ -7,3 +7,6 @@ build/
 *.log
 .mysql-data/
 .env.migration
+.tools/
+strix_runs/
+backend/.jest-cache/

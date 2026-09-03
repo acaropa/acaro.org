@@ -252,24 +252,48 @@ export default function Contacto() {
                 </a>
               </div>
 
-              {/* Map */}
+              {/* Territorial presence */}
               <div className="flex flex-grow flex-col overflow-hidden rounded border border-[#d8cabb]/30 bg-[#e9e8e4]">
                 <div className="border-b border-[#d8cabb]/20 p-5">
                   <h4 className="text-sm font-bold text-[#120c08]">Presencia territorial</h4>
                   <p className="mt-0.5 text-xs text-[#8b6a4f]">Panamá Oeste, República de Panamá</p>
                 </div>
-                <div className="relative h-56 w-full overflow-hidden grayscale transition-all duration-700 hover:grayscale-0 md:h-64">
-                  <iframe
-                    src="https://maps.google.com/maps?q=Panama+Oeste,+Panama&t=&z=10&ie=UTF8&iwloc=&output=embed"
-                    width="100%"
-                    height="100%"
-                    style={{ border: 0 }}
-                    allowFullScreen
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                    title="Panamá Oeste"
-                    className="h-full w-full"
-                  />
+                <div className="relative min-h-64 overflow-hidden bg-[#d9ddd1] p-6">
+                  <div className="absolute inset-0 opacity-70" aria-hidden="true">
+                    <div className="absolute left-[8%] top-[20%] h-28 w-40 rounded-[48%] border border-[#8b6a4f]/25 bg-[#f5f2ea]/55" />
+                    <div className="absolute right-[10%] top-[14%] h-36 w-48 rounded-[46%] border border-[#2f5d3a]/20 bg-[#e7ecd8]/70" />
+                    <div className="absolute bottom-[8%] left-[22%] h-24 w-56 rounded-[50%] border border-[#c28a3a]/25 bg-[#fffaf1]/45" />
+                    <div className="absolute inset-x-[-12%] top-[52%] h-px rotate-[-10deg] bg-[#8b6a4f]/30" />
+                    <div className="absolute inset-y-[-12%] left-[48%] w-px rotate-[18deg] bg-[#8b6a4f]/20" />
+                  </div>
+
+                  <div className="relative z-10 flex min-h-52 flex-col justify-between">
+                    <div>
+                      <span className="inline-flex items-center gap-2 rounded-full border border-[#2f5d3a]/20 bg-[#faf9f5]/85 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#2f5d3a]">
+                        <MapPin className="h-3.5 w-3.5" />
+                        Panama Oeste
+                      </span>
+                      <p className="mt-5 max-w-xs font-serif text-2xl font-semibold leading-tight text-[#120c08]">
+                        Productores, aliados y proyectos conectados al territorio.
+                      </p>
+                    </div>
+
+                    <div className="mt-8 grid gap-3 text-xs font-semibold text-[#271310] sm:grid-cols-3">
+                      {["Capira", "La Chorrera", "Arraijan"].map((place) => (
+                        <span key={place} className="border border-[#8b6a4f]/20 bg-[#faf9f5]/80 px-3 py-2">
+                          {place}
+                        </span>
+                      ))}
+                    </div>
+
+                    <a
+                      href="/mapa"
+                      className="group mt-6 inline-flex w-fit items-center gap-2 border border-[#271310]/20 bg-[#271310] px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-[#fffaf1] transition-all hover:bg-[#120c08]"
+                    >
+                      Ver mapa territorial
+                      <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
