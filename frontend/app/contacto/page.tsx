@@ -258,29 +258,29 @@ export default function Contacto() {
                   <h4 className="text-sm font-bold text-[#120c08]">Presencia territorial</h4>
                   <p className="mt-0.5 text-xs text-[#8b6a4f]">Panamá Oeste, República de Panamá</p>
                 </div>
-                <div className="relative min-h-64 overflow-hidden bg-[#d9ddd1] p-6">
-                  <div className="absolute inset-0 opacity-70" aria-hidden="true">
-                    <div className="absolute left-[8%] top-[20%] h-28 w-40 rounded-[48%] border border-[#8b6a4f]/25 bg-[#f5f2ea]/55" />
-                    <div className="absolute right-[10%] top-[14%] h-36 w-48 rounded-[46%] border border-[#2f5d3a]/20 bg-[#e7ecd8]/70" />
-                    <div className="absolute bottom-[8%] left-[22%] h-24 w-56 rounded-[50%] border border-[#c28a3a]/25 bg-[#fffaf1]/45" />
-                    <div className="absolute inset-x-[-12%] top-[52%] h-px rotate-[-10deg] bg-[#8b6a4f]/30" />
-                    <div className="absolute inset-y-[-12%] left-[48%] w-px rotate-[18deg] bg-[#8b6a4f]/20" />
+                <div className="relative overflow-hidden">
+                  {/* Google Maps embed – Panama Oeste (Capira, La Chorrera, Arraiján) */}
+                  <div className="relative h-72 w-full sm:h-80">
+                    <iframe
+                      title="Presencia territorial de ACARO OBC – Panamá Oeste"
+                      src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d126000!2d-79.88!3d8.68!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1ses!2spa!4v1700000000000!5m2!1ses!2spa"
+                      className="absolute inset-0 h-full w-full border-0"
+                      allowFullScreen
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                    />
+                    {/* Badge flotante sobre el mapa */}
+                    <span className="absolute left-4 top-4 z-10 inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/90 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#2f5d3a] shadow-sm backdrop-blur-sm">
+                      <MapPin className="h-3.5 w-3.5" />
+                      Panamá Oeste
+                    </span>
                   </div>
 
-                  <div className="relative z-10 flex min-h-52 flex-col justify-between">
-                    <div>
-                      <span className="inline-flex items-center gap-2 rounded-full border border-[#2f5d3a]/20 bg-[#faf9f5]/85 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#2f5d3a]">
-                        <MapPin className="h-3.5 w-3.5" />
-                        Panama Oeste
-                      </span>
-                      <p className="mt-5 max-w-xs font-serif text-2xl font-semibold leading-tight text-[#120c08]">
-                        Productores, aliados y proyectos conectados al territorio.
-                      </p>
-                    </div>
-
-                    <div className="mt-8 grid gap-3 text-xs font-semibold text-[#271310] sm:grid-cols-3">
-                      {["Capira", "La Chorrera", "Arraijan"].map((place) => (
-                        <span key={place} className="border border-[#8b6a4f]/20 bg-[#faf9f5]/80 px-3 py-2">
+                  {/* Distritos + CTA debajo del mapa */}
+                  <div className="flex flex-col gap-4 bg-[#faf9f5] p-5">
+                    <div className="grid gap-3 text-xs font-semibold text-[#271310] sm:grid-cols-3">
+                      {["Capira", "La Chorrera", "Arraiján"].map((place) => (
+                        <span key={place} className="border border-[#8b6a4f]/20 bg-white px-3 py-2 text-center">
                           {place}
                         </span>
                       ))}
@@ -288,7 +288,7 @@ export default function Contacto() {
 
                     <a
                       href="/mapa"
-                      className="group mt-6 inline-flex w-fit items-center gap-2 border border-[#271310]/20 bg-[#271310] px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-[#fffaf1] transition-all hover:bg-[#120c08]"
+                      className="group inline-flex w-fit items-center gap-2 border border-[#271310]/20 bg-[#271310] px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-[#fffaf1] transition-all hover:bg-[#120c08]"
                     >
                       Ver mapa territorial
                       <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
