@@ -33,7 +33,7 @@ export function SurveyQuestionRenderer({
   canGoBack = false,
   submitButtonRef,
   submitMotionPhase = 'idle'
-}: Props) {
+}: Readonly<Props>) {
   const [textValue, setTextValue] = useState('')
   const [longTextValue, setLongTextValue] = useState('')
   const [numberValue, setNumberValue] = useState('')
@@ -45,6 +45,17 @@ export function SurveyQuestionRenderer({
 
   useEffect(() => {
     let cancelled = false
+
+    function restoreChoiceAnswer() {
+      if (question.tipo_pregunta === 'opcion_unica' && initialValue && typeof initialValue === 'object' && 'type' in initialValue && initialValue.type === 'single_choice') {
+        setSelectedSingleId(initialValue.optionId)
+        if (initialValue.textFree) setFreeText({ [initialValue.optionId]: initialValue.textFree })
+      }
+      if (question.tipo_pregunta === 'opcion_multiple' && initialValue && typeof initialValue === 'object' && 'type' in initialValue && initialValue.type === 'multiple_choice') {
+        setSelectedMultiIds(initialValue.selections.map(s => s.optionId))
+        setFreeText(Object.fromEntries(initialValue.selections.filter(s => s.textFree).map(s => [s.optionId, s.textFree!])))
+      }
+    }
 
     queueMicrotask(() => {
       if (cancelled) return
@@ -58,14 +69,7 @@ export function SurveyQuestionRenderer({
       if (question.tipo_pregunta === 'fecha' && typeof initialValue === 'string') setDateValue(initialValue)
       if (question.tipo_pregunta === 'booleano' && typeof initialValue === 'boolean') setSelectedBoolean(initialValue)
 
-      if (question.tipo_pregunta === 'opcion_unica' && initialValue && typeof initialValue === 'object' && 'type' in initialValue && initialValue.type === 'single_choice') {
-        setSelectedSingleId(initialValue.optionId)
-        if (initialValue.textFree) setFreeText({ [initialValue.optionId]: initialValue.textFree })
-      }
-      if (question.tipo_pregunta === 'opcion_multiple' && initialValue && typeof initialValue === 'object' && 'type' in initialValue && initialValue.type === 'multiple_choice') {
-        setSelectedMultiIds(initialValue.selections.map(s => s.optionId))
-        setFreeText(Object.fromEntries(initialValue.selections.filter(s => s.textFree).map(s => [s.optionId, s.textFree!])))
-      }
+      restoreChoiceAnswer();
     })
 
     return () => {
@@ -118,7 +122,7 @@ export function SurveyQuestionRenderer({
   )
 
   // ─── BOOLEANO ─────────────────────────────────────────
-  if (question.tipo_pregunta === 'booleano') {
+  function renderBooleano() {
     return (
       <div className="flex flex-col">
         <div className="grid grid-cols-1 gap-4 mb-8">
@@ -133,20 +137,22 @@ export function SurveyQuestionRenderer({
                 <span className={`w-8 h-8 shrink-0 flex items-center justify-center border font-bold text-xs tracking-wider mr-6 transition-colors ${
                   sel ? 'border-primary bg-primary text-white' : 'border-outline-variant/50 text-muted group-hover:border-primary/50 group-hover:text-primary'
                 }`}>
-                  {String.fromCharCode(65 + idx)}
+                  {String.fromCodePoint(65 + idx)}
                 </span>
                 <span className="font-serif text-lg">{opt.label}</span>
               </button>
             )
           })}
         </div>
-        {renderActionBar(isSubmitting || (required && selectedBoolean === null), () => onAnswer(selectedBoolean === null ? undefined : selectedBoolean))}
+        {renderActionBar(isSubmitting || (required && selectedBoolean === null), () => onAnswer(selectedBoolean ?? undefined))}
       </div>
     )
   }
 
+  if (question.tipo_pregunta === 'booleano') return renderBooleano();
+
   // ─── TEXTO CORTO ──────────────────────────────────────
-  if (question.tipo_pregunta === 'texto_corto') {
+  function renderTextoCorto() {
     const disabled = isSubmitting || (required && !textValue.trim())
     return (
       <div className="flex flex-col">
@@ -160,8 +166,10 @@ export function SurveyQuestionRenderer({
     )
   }
 
+  if (question.tipo_pregunta === 'texto_corto') return renderTextoCorto();
+
   // ─── TEXTO LARGO ──────────────────────────────────────
-  if (question.tipo_pregunta === 'texto_largo') {
+  function renderTextoLargo() {
     const disabled = isSubmitting || (required && !longTextValue.trim())
     return (
       <div className="flex flex-col">
@@ -174,8 +182,10 @@ export function SurveyQuestionRenderer({
     )
   }
 
+  if (question.tipo_pregunta === 'texto_largo') return renderTextoLargo();
+
   // ─── NÚMERO ───────────────────────────────────────────
-  if (question.tipo_pregunta === 'numero') {
+  function renderNumero() {
     const disabled = isSubmitting || (required && !numberValue.trim())
     return (
       <div className="flex flex-col">
@@ -189,8 +199,10 @@ export function SurveyQuestionRenderer({
     )
   }
 
+  if (question.tipo_pregunta === 'numero') return renderNumero();
+
   // ─── FECHA ────────────────────────────────────────────
-  if (question.tipo_pregunta === 'fecha') {
+  function renderFecha() {
     const disabled = isSubmitting || (required && !dateValue)
     return (
       <div className="flex flex-col">
@@ -203,8 +215,10 @@ export function SurveyQuestionRenderer({
     )
   }
 
+  if (question.tipo_pregunta === 'fecha') return renderFecha();
+
   // ─── OPCIÓN ÚNICA ─────────────────────────────────────
-  if (question.tipo_pregunta === 'opcion_unica') {
+  function renderOpcionUnica() {
     const selOpt = sortedOptions.find(o => o.id === selectedSingleId)
     const needsFree = selOpt?.permite_texto_libre && !(freeText[selOpt.id] ?? '').trim()
     const disabled = isSubmitting || (required && !selOpt) || !!(selOpt && needsFree)
@@ -225,7 +239,7 @@ export function SurveyQuestionRenderer({
                   <span className={`w-8 h-8 shrink-0 flex items-center justify-center border font-bold text-xs tracking-wider mr-6 transition-colors ${
                     sel ? 'border-primary bg-primary text-white' : 'border-outline-variant/50 text-muted group-hover:border-primary/50 group-hover:text-primary'
                   }`}>
-                    {String.fromCharCode(65 + idx)}
+                    {String.fromCodePoint(65 + idx)}
                   </span>
                   <div className="flex-1">
                     <span className="font-serif text-[17px] block leading-snug">{opt.etiqueta_opcion}</span>
@@ -248,8 +262,16 @@ export function SurveyQuestionRenderer({
     )
   }
 
+  if (question.tipo_pregunta === 'opcion_unica') return renderOpcionUnica();
+
   // ─── OPCIÓN MÚLTIPLE ──────────────────────────────────
-  if (question.tipo_pregunta === 'opcion_multiple') {
+  function toggleMultipleOption(optionId: number) {
+    setSelectedMultiIds(previous => previous.includes(optionId)
+      ? previous.filter(id => id !== optionId)
+      : [...previous, optionId]);
+  }
+
+  function renderOpcionMultiple() {
     const missingFree = sortedOptions.some(o => selectedMultiIds.includes(o.id) && o.permite_texto_libre && !(freeText[o.id] ?? '').trim())
     const disabled = isSubmitting || missingFree || (required && selectedMultiIds.length === 0)
 
@@ -264,12 +286,12 @@ export function SurveyQuestionRenderer({
                   className={`group w-full flex items-center text-left px-6 py-5 border transition-all duration-300 ${
                     sel ? 'border-primary bg-primary/5 text-primary' : 'border-outline-variant/40 hover:border-primary/50 bg-white/50'
                   }`}
-                  onClick={() => setSelectedMultiIds(prev => prev.includes(opt.id) ? prev.filter(id => id !== opt.id) : [...prev, opt.id])}>
+                  onClick={() => toggleMultipleOption(opt.id)}>
 
                   <span className={`w-8 h-8 shrink-0 flex items-center justify-center border font-bold text-xs tracking-wider mr-6 transition-colors ${
                     sel ? 'border-primary bg-primary text-white' : 'border-outline-variant/50 text-muted group-hover:border-primary/50 group-hover:text-primary'
                   }`}>
-                    {sel ? <AppIcon name="check" className="text-[14px]" /> : String.fromCharCode(65 + idx)}
+                    {sel ? <AppIcon name="check" className="text-[14px]" /> : String.fromCodePoint(65 + idx)}
                   </span>
                   <div className="flex-1">
                     <span className="font-serif text-[17px] block leading-snug">{opt.etiqueta_opcion}</span>
@@ -293,6 +315,8 @@ export function SurveyQuestionRenderer({
       </div>
     )
   }
+
+  if (question.tipo_pregunta === 'opcion_multiple') return renderOpcionMultiple();
 
   return (
     <div className="text-sm text-red-600 bg-red-50 border border-red-200 px-4 py-3 rounded-xl">

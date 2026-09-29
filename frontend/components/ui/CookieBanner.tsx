@@ -29,31 +29,30 @@ function getServerSnapshot() {
   return false
 }
 
-export function CookieBanner() {
-  const visible = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
-
-  function updateConsent(value: "accepted" | "dismissed") {
+function updateConsent(value: "accepted" | "dismissed") {
     try {
       localStorage.setItem(STORAGE_KEY, value)
       window.dispatchEvent(new Event(CONSENT_EVENT))
     } catch {
       // noop
     }
-  }
+}
 
-  function accept() {
-    updateConsent("accepted")
-  }
+function accept() {
+  updateConsent("accepted")
+}
 
-  function dismiss() {
-    updateConsent("dismissed")
-  }
+function dismiss() {
+  updateConsent("dismissed")
+}
+
+export function CookieBanner() {
+  const visible = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 
   if (!visible) return null
 
   return (
-    <div
-      role="dialog"
+    <aside
       aria-live="polite"
       aria-label="Aviso de cookies"
       className="fixed bottom-0 left-0 right-0 z-[60] border-t border-[#3a2a20]/60 bg-[#120c08]/95 px-5 py-4 backdrop-blur-md sm:bottom-6 sm:left-1/2 sm:-translate-x-1/2 sm:w-full sm:max-w-lg sm:rounded-2xl sm:border sm:border-[#3a2a20] sm:shadow-[0_8px_40px_rgba(0,0,0,0.5)]"
@@ -106,6 +105,6 @@ export function CookieBanner() {
           <X className="h-4 w-4" />
         </button>
       </div>
-    </div>
+    </aside>
   )
 }

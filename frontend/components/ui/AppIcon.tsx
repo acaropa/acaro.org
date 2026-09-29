@@ -153,7 +153,7 @@ type AppIconProps = {
   decorative?: boolean
 }
 
-export function AppIcon({ name, className, decorative = true }: AppIconProps) {
+export function AppIcon({ name, className, decorative = true }: Readonly<AppIconProps>) {
   const Icon = icons[name] ?? AlertCircle
 
   return (

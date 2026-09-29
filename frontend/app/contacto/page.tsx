@@ -1,10 +1,16 @@
 "use client";
 
 import Image from "next/image";
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { useId, SubmitEvent, useEffect, useRef, useState } from "react";
 import { ArrowRight, Mail, MapPin, Send } from "lucide-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { api } from "@/lib/api";
+import { isContactEmail } from "@/lib/email";
+
+function formText(form: FormData, name: string): string {
+  const value = form.get(name);
+  return typeof value === 'string' ? value : '';
+}
 
 const motivoTemplates: Record<string, string> = {
   "Soy un productor interesado": "Hola, soy productor de café y me gustaría conocer más sobre la Asociación Café Robusta OBC y los beneficios que ofrece a sus miembros. ¿Cómo puedo unirme o participar?",
@@ -67,6 +73,7 @@ const partners = [
 type FieldErrors = { nombre?: string; correo?: string; mensaje?: string }
 
 export default function Contacto() {
+  const fieldId = useId();
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [mensaje, setMensaje] = useState("");
@@ -84,7 +91,7 @@ export default function Contacto() {
     if (!nombre.trim()) errors.nombre = "El nombre es obligatorio.";
     if (!correo.trim()) {
       errors.correo = "El correo es obligatorio.";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo.trim())) {
+    } else if (!isContactEmail(correo.trim())) {
       errors.correo = "Ingresa un correo electrónico válido.";
     }
     if (!mensajeVal.trim()) errors.mensaje = "El mensaje es obligatorio.";
@@ -92,11 +99,11 @@ export default function Contacto() {
     return errors;
   }
 
-  async function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    const nombre = String(form.get("nombre") || "");
-    const correo = String(form.get("correo") || "");
+    const nombre = formText(form, "nombre");
+    const correo = formText(form, "correo");
 
     const errors = validateFields(nombre, correo, mensaje);
     if (Object.keys(errors).length > 0) {
@@ -110,7 +117,7 @@ export default function Contacto() {
       await api.post("/contacto", {
         nombre,
         correo,
-        asunto: String(form.get("motivo") || ""),
+        asunto: formText(form, "motivo"),
         mensaje,
       });
       formRef.current?.reset();
@@ -156,8 +163,8 @@ export default function Contacto() {
                     <UnderlineField name="correo" label="Correo electrónico" placeholder="juan@ejemplo.com" type="email" error={fieldErrors.correo} />
                   </div>
                   <div>
-                    <label className="mb-2 block text-xs font-bold uppercase tracking-[0.2em] text-[#8b6a4f]">Motivo de contacto</label>
-                    <select
+                    <label htmlFor={`${fieldId}-1`} className="mb-2 block text-xs font-bold uppercase tracking-[0.2em] text-[#8b6a4f]">Motivo de contacto</label>
+                    <select id={`${fieldId}-1`}
                       name="motivo"
                       onChange={onMotivoChange}
                       className="w-full cursor-pointer appearance-none border-b border-[#d8cabb] bg-transparent px-0 py-2 text-sm text-[#271310] outline-none transition-colors focus:border-[#271310]"
@@ -170,8 +177,8 @@ export default function Contacto() {
                     </select>
                   </div>
                   <div>
-                     <label className="mb-2 block text-xs font-bold uppercase tracking-[0.2em] text-[#8b6a4f]">Mensaje</label>
-                     <textarea
+                     <label htmlFor={`${fieldId}-2`} className="mb-2 block text-xs font-bold uppercase tracking-[0.2em] text-[#8b6a4f]">Mensaje</label>
+                     <textarea id={`${fieldId}-2`}
                        name="mensaje"
                        rows={4}
                        value={mensaje}
@@ -603,9 +610,9 @@ function AlliesPathSection() {
   );
 }
 
-function UnderlineField({ name, label, placeholder, type = "text", error }: {
+function UnderlineField({ name, label, placeholder, type = "text", error }: Readonly<{
   name: string; label: string; placeholder: string; type?: string; error?: string;
-}) {
+}>) {
   return (
     <div>
       <label className="mb-2 block text-xs font-bold uppercase tracking-[0.2em] text-[#8b6a4f]">{label}</label>

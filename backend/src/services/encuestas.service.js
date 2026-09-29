@@ -1,7 +1,7 @@
 const db = require('../config/db');
 const cache = require('../utils/memoryCache');
 const { generateUniqueSlug } = require('../utils/slug');
-const crypto = require('crypto');
+const crypto = require('node:crypto');
 
 function invalidateCache() {
   cache.invalidatePrefix('enc:');
@@ -161,12 +161,12 @@ async function create(data, actor) {
 }
 
 async function update(id, data) {
-  const allowed = [
+  const allowed = new Set([
     'titulo', 'descripcion', 'visibilidad', 'logo_url',
     'fecha_inicio', 'fecha_cierre', 'requiere_login',
     'permitir_multiples_respuestas', 'mensaje_confirmacion', 'configuracion_json',
-  ];
-  const fields = Object.keys(data).filter(f => allowed.includes(f));
+  ]);
+  const fields = Object.keys(data).filter(f => allowed.has(f));
   if (!fields.length) {
     const err = new Error('Sin campos válidos para actualizar');
     err.status = 400;
@@ -183,7 +183,7 @@ async function update(id, data) {
   }
 
   await db.query(
-    `UPDATE encuestas SET ${fields.map(f => `${f} = ?`).join(', ')} WHERE id = ?`,
+    `UPDATE encuestas SET ${fields.map(f => f + ' = ?').join(', ')} WHERE id = ?`,
     [...fields.map(f => values[f] ?? null), id]
   );
   invalidateCache();
@@ -332,6 +332,20 @@ async function saveSecciones(encuestaId, secciones) {
   return seccionMap;
 }
 
+function serializeValidationRules(rules) {
+  if (!rules) return null;
+  return typeof rules === 'string' ? rules : JSON.stringify(rules);
+}
+
+async function deleteRemovedQuestions(existingIds, submittedIds) {
+  for (const oldId of existingIds) {
+    if (!submittedIds.has(oldId)) {
+      await db.query('DELETE FROM encuesta_opciones WHERE pregunta_id = ?', [oldId]);
+      await db.query('DELETE FROM encuesta_preguntas WHERE id = ?', [oldId]);
+    }
+  }
+}
+
 async function savePreguntas(encuestaId, preguntas, seccionMap) {
   const [existing] = await db.query(
     'SELECT id FROM encuesta_preguntas WHERE encuesta_id = ?', [encuestaId]
@@ -339,20 +353,13 @@ async function savePreguntas(encuestaId, preguntas, seccionMap) {
   const existingIds = new Set(existing.map(p => p.id));
   const submittedIds = new Set(preguntas.filter(p => p.id && typeof p.id === 'number').map(p => p.id));
 
-  for (const oldId of existingIds) {
-    if (!submittedIds.has(oldId)) {
-      await db.query('DELETE FROM encuesta_opciones WHERE pregunta_id = ?', [oldId]);
-      await db.query('DELETE FROM encuesta_preguntas WHERE id = ?', [oldId]);
-    }
-  }
+  await deleteRemovedQuestions(existingIds, submittedIds);
 
   for (let i = 0; i < preguntas.length; i++) {
     const preg = preguntas[i];
     const secId = preg.seccion_id ? (seccionMap[preg.seccion_id] || preg.seccion_id) : null;
     const codigo = preg.codigo_pregunta || `P${String(i + 1).padStart(2, '0')}`;
-    const reglas = preg.reglas_validacion
-      ? (typeof preg.reglas_validacion === 'string' ? preg.reglas_validacion : JSON.stringify(preg.reglas_validacion))
-      : null;
+    const reglas = serializeValidationRules(preg.reglas_validacion);
 
     let pregId;
     if (preg.id && existingIds.has(preg.id)) {
@@ -427,7 +434,7 @@ async function submitResponse(encuestaId, respuestas, { userId, ip, origen, toke
          VALUES (?, ?, ?, ?, ?, ?)`,
         [respuestaId, r.pregunta_id, r.respuesta_texto ?? null, r.respuesta_numero ?? null, r.respuesta_booleano ?? null, r.respuesta_fecha ?? null]
       );
-      if (r.opciones_seleccionadas && r.opciones_seleccionadas.length) {
+      if (r.opciones_seleccionadas?.length) {
         for (const opc of r.opciones_seleccionadas) {
           opcionRows.push([det.insertId, opc.opcion_id, opc.texto_libre || null]);
         }

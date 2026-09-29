@@ -39,7 +39,7 @@ async function getSetting(key) {
 
 async function getLanding() {
   const value = await getSetting('landing');
-  return { ...DEFAULT_LANDING_SETTINGS, ...(value || {}) };
+  return { ...DEFAULT_LANDING_SETTINGS, ...value };
 }
 
 async function updateLanding(data, user) {
@@ -77,7 +77,7 @@ const DEFAULT_LIBRARY_THEMES = {
 
 async function getLibraryThemes() {
   const value = await getSetting('library_themes');
-  return { ...DEFAULT_LIBRARY_THEMES, ...(value || {}) };
+  return { ...DEFAULT_LIBRARY_THEMES, ...value };
 }
 
 async function updateLibraryThemes(data, user) {

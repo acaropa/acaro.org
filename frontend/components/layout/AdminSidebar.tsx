@@ -129,7 +129,7 @@ interface AdminSidebarProps {
   onClose: () => void
 }
 
-export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
+export function AdminSidebar({ isOpen, onClose }: Readonly<AdminSidebarProps>) {
   const pathname = usePathname()
   const { user, logout } = useAuth()
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({})

@@ -6,7 +6,7 @@ interface StatCardProps {
   icon?: React.ReactNode;
 }
 
-export function StatCard({ title, value, icon }: StatCardProps) {
+export function StatCard({ title, value, icon }: Readonly<StatCardProps>) {
   return (
     <Card className="flex flex-col justify-center items-center text-center p-6 bg-surface/50 border-border/50">
       {icon && <div className="mb-4 text-accent">{icon}</div>}

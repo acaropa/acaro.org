@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer');
 const pool = require('../config/db');
+const { isContactEmail } = require('../utils/email');
 
 const CONTACT_TO = process.env.CONTACT_TO_EMAIL || 'contacto@acaro.org';
 
@@ -55,7 +56,7 @@ async function sendContactMessage(data = {}) {
   const asunto = required(data.asunto, 'asunto');
   const mensaje = required(data.mensaje, 'mensaje');
 
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+  if (!isContactEmail(correo)) {
     const err = new Error('correo debe ser valido');
     err.status = 400;
     throw err;
@@ -83,7 +84,7 @@ async function sendContactMessage(data = {}) {
           <p><strong>Correo:</strong> ${escapeHtml(correo)}</p>
           <p><strong>Asunto:</strong> ${escapeHtml(asunto)}</p>
           <hr />
-          <p>${escapeHtml(mensaje).replace(/\n/g, '<br />')}</p>
+          <p>${escapeHtml(mensaje).replaceAll("\n", '<br />')}</p>
         </div>
       `,
     });
@@ -119,7 +120,7 @@ async function getMessage(id) {
 }
 
 async function replyMessage(id, { respuesta }) {
-  if (!respuesta || !respuesta.trim()) {
+  if (!respuesta?.trim()) {
     const err = new Error('La respuesta no puede estar vacía');
     err.status = 400;
     throw err;
@@ -143,7 +144,7 @@ async function replyMessage(id, { respuesta }) {
     text: respuesta.trim(),
     html: `
       <div style="font-family:Arial,sans-serif;line-height:1.6;color:#271310">
-        <p>${escapeHtml(respuesta.trim()).replace(/\n/g, '<br />')}</p>
+        <p>${escapeHtml(respuesta.trim()).replaceAll("\n", '<br />')}</p>
         <hr style="margin-top:24px"/>
         <p style="color:#888;font-size:12px">Respuesta de ACARO OBC a tu mensaje: "${escapeHtml(row.asunto)}"</p>
       </div>
@@ -166,11 +167,11 @@ async function deleteMessage(id) {
 
 function escapeHtml(value) {
   return String(value)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+    .replaceAll("&", '&amp;')
+    .replaceAll("<", '&lt;')
+    .replaceAll(">", '&gt;')
+    .replaceAll("\"", '&quot;')
+    .replaceAll("'", '&#039;');
 }
 
 module.exports = { sendContactMessage, listMessages, getMessage, replyMessage, deleteMessage };

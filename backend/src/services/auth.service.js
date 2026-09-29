@@ -1,11 +1,13 @@
 const bcrypt = require('bcryptjs');
+const { randomBytes } = require('node:crypto');
 const jwt = require('jsonwebtoken');
 const db = require('../config/db');
 const { permissionsForRole } = require('../config/permissions');
 
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCK_MINUTES = 15;
-const DUMMY_PASSWORD_HASH = '$2b$10$9QJ9pEKwklKJMvVm2C6uyez1L7eWUJrVnLJyKBUHHwZ4XEZ1Pb9tW';
+// Generate before accepting requests so every login performs one comparison.
+const dummyPasswordHash = bcrypt.hashSync(randomBytes(32).toString('hex'), 10);
 
 async function findUserByEmail(email) {
   const [rows] = await db.query(
@@ -49,7 +51,7 @@ async function verifyPassword(plain, hash) {
 }
 
 async function verifyUnknownUserPassword(password) {
-  await bcrypt.compare(password, DUMMY_PASSWORD_HASH);
+  await bcrypt.compare(password, dummyPasswordHash);
 }
 
 function isLoginLocked(user) {

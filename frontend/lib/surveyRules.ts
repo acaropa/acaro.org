@@ -81,7 +81,7 @@ export function isQuestionRequired(
   const rules = question.reglas_validacion
   if (!rules) return !!question.es_obligatoria
   if (rules.obligatoria_si && evaluateCondition(rules.obligatoria_si, answersByCode)) return true
-  if (rules.obligatoria_si_todas && rules.obligatoria_si_todas.every(r => evaluateCondition(r, answersByCode))) return true
-  if (rules.obligatoria_si_cualquiera && rules.obligatoria_si_cualquiera.some(r => evaluateCondition(r, answersByCode))) return true
+  if (rules.obligatoria_si_todas?.every(r => evaluateCondition(r, answersByCode))) return true
+  if (rules.obligatoria_si_cualquiera?.some(r => evaluateCondition(r, answersByCode))) return true
   return !!question.es_obligatoria
 }

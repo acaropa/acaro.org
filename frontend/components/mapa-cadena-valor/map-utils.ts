@@ -24,7 +24,7 @@ export interface Point {
 }
 
 export function normalizeDistrictCode(value: unknown): string {
-  const raw = String(value ?? "").trim();
+  const raw = typeof value === 'string' || typeof value === 'number' ? String(value).trim() : '';
   if (!raw) return "";
   return raw.padStart(4, "0");
 }
@@ -101,7 +101,7 @@ export function createProjector(
     !Number.isFinite(maxLongitude) ||
     !Number.isFinite(maxLatitude)
   ) {
-    throw new Error("El GeoJSON no contiene coordenadas válidas.");
+    throw new TypeError("El GeoJSON no contiene coordenadas válidas.");
   }
 
   const geographicWidth = maxLongitude - minLongitude;

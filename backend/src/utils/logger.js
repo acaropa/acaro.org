@@ -1,5 +1,5 @@
 const { createLogger, format, transports } = require('winston');
-const path = require('path');
+const path = require('node:path');
 
 const isProd = process.env.NODE_ENV === 'production';
 
@@ -7,9 +7,9 @@ const baseFormat = format.combine(
   format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
   format.errors({ stack: true }),
   format.printf(({ timestamp, level, message, stack, requestId, ...meta }) => {
-    const rid = requestId ? ` [${requestId}]` : '';
+    const rid = typeof requestId === 'string' ? ` [${requestId}]` : '';
     const metaStr = Object.keys(meta).length ? ` ${JSON.stringify(meta)}` : '';
-    return stack
+    return typeof stack === 'string' && stack
       ? `${timestamp} [${level.toUpperCase()}]${rid} ${message}\n${stack}${metaStr}`
       : `${timestamp} [${level.toUpperCase()}]${rid} ${message}${metaStr}`;
   })

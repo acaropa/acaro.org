@@ -53,7 +53,7 @@ async function getActores(req, res, next) {
 async function createActor(req, res, next) {
   try {
     const { nombre, tipo_entidad, distrito_id } = req.body || {};
-    if (!nombre || !nombre.trim()) {
+    if (!nombre?.trim()) {
       return res.status(400).json({ error: 'nombre es requerido' });
     }
     if (!tipo_entidad) {
@@ -65,7 +65,7 @@ async function createActor(req, res, next) {
 
     const userId = req.user?.id || null;
     const actorId = await mapaService.createActor(req.body, userId);
-    
+
     res.status(201).json({ id: actorId, message: 'Actor de cadena de valor registrado con éxito' });
   } catch (err) {
     next(err);

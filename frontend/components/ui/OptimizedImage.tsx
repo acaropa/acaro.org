@@ -22,7 +22,9 @@ function fallbackFor(src: string) {
   const entry = responsiveImages[src];
   if (!entry) return src;
 
-  const fallbackFormat = entry.variants.jpg ? "jpg" : entry.variants.png ? "png" : null;
+  let fallbackFormat: 'jpg' | 'png' | null = null;
+  if (entry.variants.jpg) fallbackFormat = 'jpg';
+  else if (entry.variants.png) fallbackFormat = 'png';
   if (!fallbackFormat) return src;
 
   const variants = entry.variants[fallbackFormat];
@@ -33,13 +35,13 @@ const uploadWidths = [480, 768, 1200, 1920, 2560];
 const optimizedUploadPattern = /^((?:https?:\/\/[^/]+)?\/(?:api\/)?uploads\/.+\/)([^/]+)-(\d+)\.webp$/;
 
 function uploadVariant(src: string, width: number, format: "avif" | "webp") {
-  const match = src.match(optimizedUploadPattern);
+  const match = optimizedUploadPattern.exec(src);
   if (!match) return null;
   return `${match[1]}responsive/${match[2]}-${width}.${format}`;
 }
 
 function uploadSrcSetFor(src: string, format: "avif" | "webp") {
-  const match = src.match(optimizedUploadPattern);
+  const match = optimizedUploadPattern.exec(src);
   if (!match) return null;
 
   const maxWidth = Number(match[3]);
@@ -120,7 +122,17 @@ export function OptimizedImage({
 
   const renderedWidth = width || entry.width;
   const renderedHeight = height || entry.height;
-  const fallbackFormat = entry.variants.jpg ? "jpg" : entry.variants.png ? "png" : null;
+  function resolveFallbackFormat() {
+    if (entry.variants.jpg) {
+      return 'jpg' as const;
+    }
+    if (entry.variants.png) {
+      return 'png' as const;
+    }
+    return null;
+  }
+
+  const fallbackFormat = resolveFallbackFormat();
   const fallbackSrcSet = fallbackFormat ? srcSetFor(src, fallbackFormat) : undefined;
 
   return (

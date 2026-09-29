@@ -82,26 +82,21 @@ async function getAll({ user = null, status = null, scope = null, q = '', catego
   );
 }
 
-async function queryAll({ user = null, status = null, scope = null, q = '', categoria = '', tipo = '', anio = '', orden = 'recent', limit = null, offset = null }) {
-  const conditions = [];
-  const values = [];
-
+function addAudienceConditions(conditions, values, user, scope) {
   if (!user || user.role === 'visitante') {
     conditions.push("b.estado = 'aprobado'", "b.visibilidad = 'publica'");
-  } else if (user.role === 'tecnico') {
-    if (scope === 'mine') {
-      conditions.push('b.creado_por = ?');
-      values.push(user.id);
-    } else {
-      conditions.push("((b.estado = 'aprobado') OR b.creado_por = ?)");
-      values.push(user.id);
-    }
+    return;
+  }
+  if (scope === 'mine') {
+    conditions.push('b.creado_por = ?');
+    values.push(user.id);
+    return;
+  }
+  if (user.role === 'tecnico') {
+    conditions.push("((b.estado = 'aprobado') OR b.creado_por = ?)");
+    values.push(user.id);
   } else if (user.role === 'supervisor') {
-    if (scope === 'mine') {
-      conditions.push('b.creado_por = ?');
-      values.push(user.id);
-    } else {
-      conditions.push(`(
+    conditions.push(`(
         b.creado_por = ?
         OR EXISTS (
           SELECT 1
@@ -110,12 +105,14 @@ async function queryAll({ user = null, status = null, scope = null, q = '', cate
           WHERE st.supervisor_id = ? AND t.user_id = b.creado_por
         )
       )`);
-      values.push(user.id, user.id);
-    }
-  } else if (scope === 'mine') {
-    conditions.push('b.creado_por = ?');
-    values.push(user.id);
+    values.push(user.id, user.id);
   }
+}
+
+async function queryAll({ user = null, status = null, scope = null, q = '', categoria = '', tipo = '', anio = '', orden = 'recent', limit = null, offset = null }) {
+  const conditions = [];
+  const values = [];
+  addAudienceConditions(conditions, values, user, scope);
 
   if (status) {
     conditions.push('b.estado = ?');
@@ -148,8 +145,9 @@ async function queryAll({ user = null, status = null, scope = null, q = '', cate
   }
 
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+  const offsetClause = Number.isInteger(offset) && offset > 0 ? ` OFFSET ${offset}` : '';
   const limitClause = Number.isInteger(limit) && limit > 0
-    ? ` LIMIT ${limit}${Number.isInteger(offset) && offset > 0 ? ` OFFSET ${offset}` : ''}`
+    ? ` LIMIT ${limit}${offsetClause}`
     : '';
   const [rows] = await db.query(
     `${BASE_SELECT} ${where} ORDER BY ${getOrderBy(orden)}${limitClause}`,
@@ -221,12 +219,18 @@ async function queryBySlug(slug) {
 }
 
 async function create(data, actor) {
+  function resolveInitialState() {
+    if (actor.role === 'tecnico') {
+      return 'pendiente_revision';
+    }
+    if (data.estado && STATES.includes(data.estado)) {
+      return data.estado;
+    }
+    return 'aprobado';
+  }
+
   const initialState =
-    actor.role === 'tecnico'
-      ? 'pendiente_revision'
-      : data.estado && STATES.includes(data.estado)
-        ? data.estado
-        : 'aprobado';
+    resolveInitialState();
 
   const reviewer = initialState === 'aprobado' ? actor.id : null;
   const reviewDate = initialState === 'aprobado' ? new Date() : null;
@@ -263,8 +267,8 @@ async function create(data, actor) {
 }
 
 async function update(id, data) {
-  const allowed = ['titulo', 'descripcion', 'archivo_url', 'categoria', 'imagen_portada', 'visibilidad', 'etiquetas', 'serie', 'orden_lectura', 'destacado', 'orden_portada'];
-  const fields = Object.keys(data).filter(field => allowed.includes(field));
+  const allowed = new Set(['titulo', 'descripcion', 'archivo_url', 'categoria', 'imagen_portada', 'visibilidad', 'etiquetas', 'serie', 'orden_lectura', 'destacado', 'orden_portada']);
+  const fields = Object.keys(data).filter(field => allowed.has(field));
   if (fields.length === 0) {
     const err = new Error('Sin campos válidos para actualizar');
     err.status = 400;
@@ -290,7 +294,7 @@ async function update(id, data) {
   }
 
   await db.query(
-    `UPDATE biblioteca SET ${fields.map(field => `${field} = ?`).join(', ')} WHERE id = ?`,
+    `UPDATE biblioteca SET ${fields.map(field => field + ' = ?').join(', ')} WHERE id = ?`,
     [...fields.map(field => values[field]), id]
   );
   invalidateLibraryCache();

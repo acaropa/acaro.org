@@ -9,27 +9,27 @@
         {
           "src": "/assets/responsive/landing-hero-main-480.avif",
           "width": 480,
-          "bytes": 36117
+          "bytes": 36119
         },
         {
           "src": "/assets/responsive/landing-hero-main-768.avif",
           "width": 768,
-          "bytes": 66114
+          "bytes": 66116
         },
         {
           "src": "/assets/responsive/landing-hero-main-1200.avif",
           "width": 1200,
-          "bytes": 117898
+          "bytes": 117900
         },
         {
           "src": "/assets/responsive/landing-hero-main-1920.avif",
           "width": 1920,
-          "bytes": 209074
+          "bytes": 209076
         },
         {
           "src": "/assets/responsive/landing-hero-main-2560.avif",
           "width": 2560,
-          "bytes": 291310
+          "bytes": 291312
         }
       ],
       "webp": [
@@ -71,27 +71,27 @@
         {
           "src": "/assets/responsive/landing-hero-v2-480.avif",
           "width": 480,
-          "bytes": 25531
+          "bytes": 25533
         },
         {
           "src": "/assets/responsive/landing-hero-v2-768.avif",
           "width": 768,
-          "bytes": 59766
+          "bytes": 59768
         },
         {
           "src": "/assets/responsive/landing-hero-v2-1200.avif",
           "width": 1200,
-          "bytes": 141263
+          "bytes": 141265
         },
         {
           "src": "/assets/responsive/landing-hero-v2-1920.avif",
           "width": 1920,
-          "bytes": 316698
+          "bytes": 316700
         },
         {
           "src": "/assets/responsive/landing-hero-v2-2560.avif",
           "width": 2560,
-          "bytes": 483023
+          "bytes": 483025
         }
       ],
       "webp": [
@@ -133,27 +133,27 @@
         {
           "src": "/assets/responsive/login-bg-v2-480.avif",
           "width": 480,
-          "bytes": 117321
+          "bytes": 117323
         },
         {
           "src": "/assets/responsive/login-bg-v2-768.avif",
           "width": 768,
-          "bytes": 279935
+          "bytes": 279937
         },
         {
           "src": "/assets/responsive/login-bg-v2-1200.avif",
           "width": 1200,
-          "bytes": 599338
+          "bytes": 599340
         },
         {
           "src": "/assets/responsive/login-bg-v2-1920.avif",
           "width": 1920,
-          "bytes": 1231212
+          "bytes": 1231214
         },
         {
           "src": "/assets/responsive/login-bg-v2-2560.avif",
           "width": 2560,
-          "bytes": 1849280
+          "bytes": 1849282
         }
       ],
       "webp": [
@@ -195,22 +195,22 @@
         {
           "src": "/assets/responsive/hero-bg-480.avif",
           "width": 480,
-          "bytes": 55241
+          "bytes": 55243
         },
         {
           "src": "/assets/responsive/hero-bg-768.avif",
           "width": 768,
-          "bytes": 112520
+          "bytes": 112522
         },
         {
           "src": "/assets/responsive/hero-bg-1200.avif",
           "width": 1200,
-          "bytes": 258195
+          "bytes": 258197
         },
         {
           "src": "/assets/responsive/hero-bg-1920.avif",
           "width": 1920,
-          "bytes": 574222
+          "bytes": 574224
         }
       ],
       "webp": [
@@ -247,22 +247,22 @@
         {
           "src": "/assets/responsive/library-hero-v2-480.avif",
           "width": 480,
-          "bytes": 81307
+          "bytes": 81309
         },
         {
           "src": "/assets/responsive/library-hero-v2-768.avif",
           "width": 768,
-          "bytes": 199516
+          "bytes": 199518
         },
         {
           "src": "/assets/responsive/library-hero-v2-1200.avif",
           "width": 1200,
-          "bytes": 483831
+          "bytes": 483833
         },
         {
           "src": "/assets/responsive/library-hero-v2-1920.avif",
           "width": 1920,
-          "bytes": 1163994
+          "bytes": 1163996
         }
       ],
       "webp": [
@@ -299,22 +299,22 @@
         {
           "src": "/assets/responsive/projects-fallback-480.avif",
           "width": 480,
-          "bytes": 105054
+          "bytes": 105056
         },
         {
           "src": "/assets/responsive/projects-fallback-768.avif",
           "width": 768,
-          "bytes": 267902
+          "bytes": 267904
         },
         {
           "src": "/assets/responsive/projects-fallback-1200.avif",
           "width": 1200,
-          "bytes": 630300
+          "bytes": 630302
         },
         {
           "src": "/assets/responsive/projects-fallback-1920.avif",
           "width": 1920,
-          "bytes": 1384510
+          "bytes": 1384512
         }
       ],
       "webp": [
@@ -351,22 +351,22 @@
         {
           "src": "/assets/responsive/community-bg-480.avif",
           "width": 480,
-          "bytes": 62449
+          "bytes": 62451
         },
         {
           "src": "/assets/responsive/community-bg-768.avif",
           "width": 768,
-          "bytes": 149602
+          "bytes": 149604
         },
         {
           "src": "/assets/responsive/community-bg-1200.avif",
           "width": 1200,
-          "bytes": 350383
+          "bytes": 350385
         },
         {
           "src": "/assets/responsive/community-bg-1920.avif",
           "width": 1920,
-          "bytes": 837026
+          "bytes": 837028
         }
       ],
       "webp": [
@@ -403,22 +403,22 @@
         {
           "src": "/assets/responsive/productores-card-480.avif",
           "width": 480,
-          "bytes": 62449
+          "bytes": 62451
         },
         {
           "src": "/assets/responsive/productores-card-768.avif",
           "width": 768,
-          "bytes": 149602
+          "bytes": 149604
         },
         {
           "src": "/assets/responsive/productores-card-1200.avif",
           "width": 1200,
-          "bytes": 350383
+          "bytes": 350385
         },
         {
           "src": "/assets/responsive/productores-card-1920.avif",
           "width": 1920,
-          "bytes": 837026
+          "bytes": 837028
         }
       ],
       "webp": [
@@ -455,22 +455,22 @@
         {
           "src": "/assets/responsive/coffee-beans-texture-480.avif",
           "width": 480,
-          "bytes": 102883
+          "bytes": 102885
         },
         {
           "src": "/assets/responsive/coffee-beans-texture-768.avif",
           "width": 768,
-          "bytes": 232023
+          "bytes": 232025
         },
         {
           "src": "/assets/responsive/coffee-beans-texture-1200.avif",
           "width": 1200,
-          "bytes": 465446
+          "bytes": 465448
         },
         {
           "src": "/assets/responsive/coffee-beans-texture-1920.avif",
           "width": 1920,
-          "bytes": 910058
+          "bytes": 910060
         }
       ],
       "webp": [
@@ -507,22 +507,22 @@
         {
           "src": "/assets/responsive/biblioteca-card-480.avif",
           "width": 480,
-          "bytes": 75901
+          "bytes": 75903
         },
         {
           "src": "/assets/responsive/biblioteca-card-768.avif",
           "width": 768,
-          "bytes": 168664
+          "bytes": 168666
         },
         {
           "src": "/assets/responsive/biblioteca-card-1200.avif",
           "width": 1200,
-          "bytes": 334842
+          "bytes": 334844
         },
         {
           "src": "/assets/responsive/biblioteca-card-1920.avif",
           "width": 1920,
-          "bytes": 650268
+          "bytes": 650270
         }
       ],
       "webp": [
@@ -559,17 +559,17 @@
         {
           "src": "/assets/responsive/theme-proyectos-480.avif",
           "width": 480,
-          "bytes": 62659
+          "bytes": 62661
         },
         {
           "src": "/assets/responsive/theme-proyectos-768.avif",
           "width": 768,
-          "bytes": 131046
+          "bytes": 131048
         },
         {
           "src": "/assets/responsive/theme-proyectos-1200.avif",
           "width": 1200,
-          "bytes": 301675
+          "bytes": 301677
         }
       ],
       "webp": [
@@ -601,17 +601,17 @@
         {
           "src": "/assets/responsive/theme-institucional-480.avif",
           "width": 480,
-          "bytes": 2528
+          "bytes": 2530
         },
         {
           "src": "/assets/responsive/theme-institucional-768.avif",
           "width": 768,
-          "bytes": 3770
+          "bytes": 3772
         },
         {
           "src": "/assets/responsive/theme-institucional-1200.avif",
           "width": 1200,
-          "bytes": 5888
+          "bytes": 5890
         }
       ],
       "webp": [
@@ -643,17 +643,17 @@
         {
           "src": "/assets/responsive/theme-guias-480.avif",
           "width": 480,
-          "bytes": 41379
+          "bytes": 41381
         },
         {
           "src": "/assets/responsive/theme-guias-768.avif",
           "width": 768,
-          "bytes": 104216
+          "bytes": 104218
         },
         {
           "src": "/assets/responsive/theme-guias-1200.avif",
           "width": 1200,
-          "bytes": 226147
+          "bytes": 226149
         }
       ],
       "webp": [
@@ -685,17 +685,17 @@
         {
           "src": "/assets/responsive/theme-formacion-480.avif",
           "width": 480,
-          "bytes": 44261
+          "bytes": 44263
         },
         {
           "src": "/assets/responsive/theme-formacion-768.avif",
           "width": 768,
-          "bytes": 97675
+          "bytes": 97677
         },
         {
           "src": "/assets/responsive/theme-formacion-1200.avif",
           "width": 1200,
-          "bytes": 178337
+          "bytes": 178339
         }
       ],
       "webp": [
@@ -727,27 +727,27 @@
         {
           "src": "/responsive/coffee_farmers_survey-480.avif",
           "width": 480,
-          "bytes": 46903
+          "bytes": 46905
         },
         {
           "src": "/responsive/coffee_farmers_survey-768.avif",
           "width": 768,
-          "bytes": 108882
+          "bytes": 108884
         },
         {
           "src": "/responsive/coffee_farmers_survey-1200.avif",
           "width": 1200,
-          "bytes": 254482
+          "bytes": 254484
         },
         {
           "src": "/responsive/coffee_farmers_survey-1920.avif",
           "width": 1920,
-          "bytes": 568385
+          "bytes": 568387
         },
         {
           "src": "/responsive/coffee_farmers_survey-2560.avif",
           "width": 2560,
-          "bytes": 855605
+          "bytes": 855607
         }
       ],
       "webp": [

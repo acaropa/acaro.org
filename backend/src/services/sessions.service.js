@@ -1,4 +1,4 @@
-const crypto = require('crypto');
+const crypto = require('node:crypto');
 const db = require('../config/db');
 
 const REFRESH_COOKIE = 'acaro_refresh';

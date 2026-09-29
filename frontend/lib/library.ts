@@ -81,22 +81,36 @@ export function toLibraryDocument(record: LibraryRecord): LibraryDocument {
     }
   })();
 
-  const resourceType: ResourceType = pathname.endsWith(".pdf")
-    ? "pdf"
-    : /\.(mp4|webm|mov)$/.test(pathname)
-      ? "video"
-      : /\.(doc|docx|odt|xlsx|xls)$/.test(pathname)
-        ? "doc"
-        : "link";
+  function resolveResourceType() {
+    if (pathname.endsWith('.pdf')) {
+      return 'pdf' as const;
+    }
+    if (/\.(mp4|webm|mov)$/.test(pathname)) {
+      return 'video' as const;
+    }
+    if (/\.(doc|docx|odt|xlsx|xls)$/.test(pathname)) {
+      return 'doc' as const;
+    }
+    return 'link' as const;
+  }
+
+  const resourceType: ResourceType = resolveResourceType();
+
+  function resolveType() {
+    if (resourceType === 'pdf') {
+      return 'Documento PDF' as const;
+    }
+    if (resourceType === 'video') {
+      return 'Recurso audiovisual' as const;
+    }
+    if (resourceType === 'doc') {
+      return 'Documento técnico' as const;
+    }
+    return 'Recurso externo' as const;
+  }
 
   const type =
-    resourceType === "pdf"
-      ? "Documento PDF"
-      : resourceType === "video"
-        ? "Recurso audiovisual"
-        : resourceType === "doc"
-          ? "Documento técnico"
-          : "Recurso externo";
+    resolveType();
   const description =
     record.descripcion || "Recurso disponible en la biblioteca técnica de ACARO.";
   const dateValue = (record.fecha_creacion || record.fecha || new Date().toISOString()).slice(0, 10);

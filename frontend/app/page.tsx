@@ -53,8 +53,9 @@ export default function Home() {
               Café Robusta · Panamá
             </div>
             <h1 className="font-serif font-bold hero-reveal max-w-4xl text-4xl leading-[1.0] tracking-[-0.02em] sm:text-6xl lg:text-[5rem]" style={{ animationDelay: "60ms" }}>
-              Asociación Café
-              <span className="block text-[#fffaf1]">Robusta OBC</span>
+
+              Asociación Café{" "}
+<span className="block text-[#fffaf1]">Robusta OBC</span>
             </h1>
             <p className="hero-reveal mt-5 max-w-2xl text-base leading-7 text-[#f3e8d8]/85 sm:mt-7 sm:text-xl sm:leading-8" style={{ animationDelay: "100ms" }}>
               Acompañamos a productores y aliados del café robusta con organización, conocimiento técnico y visión productiva.

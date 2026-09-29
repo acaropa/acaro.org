@@ -9,7 +9,17 @@ function invalidateNewsCache() {
 }
 
 async function getAll(includeInternal = false, user = null) {
-  const audience = includeInternal ? 'internal' : user ? `own:${user.id}` : 'public';
+  function resolveAudience() {
+    if (includeInternal) {
+      return 'internal';
+    }
+    if (user) {
+      return `own:${user.id}`;
+    }
+    return 'public';
+  }
+
+  const audience = resolveAudience();
   return cache.getOrSet(
     `news:list:${audience}`,
     () => queryAll(includeInternal, user),
@@ -105,8 +115,8 @@ async function create(data, actor) {
 }
 
 async function update(id, data) {
-  const allowed = ['titulo', 'resumen', 'contenido', 'categoria', 'visibilidad', 'imagen_portada', 'imagenes', 'estado'];
-  const fields = Object.keys(data).filter(field => allowed.includes(field));
+  const allowed = new Set(['titulo', 'resumen', 'contenido', 'categoria', 'visibilidad', 'imagen_portada', 'imagenes', 'estado']);
+  const fields = Object.keys(data).filter(field => allowed.has(field));
   if (!fields.length) {
     const err = new Error('Sin campos válidos para actualizar');
     err.status = 400;
@@ -129,7 +139,7 @@ async function update(id, data) {
   }
 
   await db.query(
-    `UPDATE noticias SET ${fields.map(field => `${field} = ?`).join(', ')} WHERE id = ?`,
+    `UPDATE noticias SET ${fields.map(field => field + ' = ?').join(', ')} WHERE id = ?`,
     [...fields.map(field => values[field]), id]
   );
   invalidateNewsCache();

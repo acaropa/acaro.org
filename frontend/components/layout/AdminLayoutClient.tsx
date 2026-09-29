@@ -3,8 +3,7 @@
 import { DataLoadingState } from "@/components/ui/TypingIndicator";
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { usePathname } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { AdminSidebar } from '@/components/layout/AdminSidebar';
 import { AdminTopbar } from '@/components/layout/AdminTopbar';
@@ -41,7 +40,7 @@ const routePermissions: Array<{ prefix: string; permissions: string[] }> = [
   },
 ];
 
-export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
+export function AdminLayoutClient({ children }: Readonly<{ children: React.ReactNode }>) {
   const { user, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();

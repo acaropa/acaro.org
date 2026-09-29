@@ -40,7 +40,7 @@ export default function EncuestasPublicas() {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            entry.target.setAttribute('data-visible', 'true');
+            if (entry.target instanceof HTMLElement) entry.target.dataset.visible = 'true';
           }
         });
       },
@@ -52,6 +52,89 @@ export default function EncuestasPublicas() {
 
     return () => observer.disconnect();
   }, [surveys, loading]);
+
+  function renderSurveyList() {
+    if (loading) {
+      return <DataLoadingState label="Cargando encuestas..." className="py-24" />;
+    }
+    if (surveys.length === 0) {
+      return (
+        <div
+          className="py-24 flex flex-col items-center justify-center text-center space-y-6 scroll-reveal"
+          data-direction="up"
+          data-distance="lg"
+        >
+          <AppIcon name="inbox" className="text-5xl text-outline-variant" />
+          <div className="space-y-3">
+            <h3 className="font-headline-md text-on-surface">No hay encuestas en este momento</h3>
+            <p className="font-body-md text-on-surface-variant max-w-sm mx-auto">
+              Gracias por tu interés. Pronto publicaremos nuevas consultas para nuestros productores.
+            </p>
+          </div>
+        </div>
+      );
+    }
+    return (
+      <div className="space-y-8">
+        {surveys.map((survey, index) => {
+          const watermarks = ['coffee', 'eco', 'groups'];
+          const watermark = watermarks[index % watermarks.length];
+          // Stagger delay for elements appearing together
+          const delayStyle = { transitionDelay: `${(index % 4) * 150}ms` } as React.CSSProperties;
+
+          return (
+            <Link
+              href={`/encuestas/responder?slug=${survey.slug}`}
+              key={survey.id}
+              className="block group bg-white dark:bg-surface-container-low p-7 lg:p-10 border-l-[3px] border-l-transparent hover:border-l-primary border-y border-r border-outline-variant/30 hover:border-outline-variant/60 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_-10px_rgba(0,0,0,0.1)] transition-all duration-700 relative overflow-hidden scroll-reveal"
+              data-direction="up"
+              data-distance="lg"
+              style={delayStyle}
+            >
+              {/* Subtle background motif to differentiate surveys */}
+              <div className="absolute -right-8 -bottom-8 opacity-0 group-hover:opacity-[0.03] transition-opacity duration-700 pointer-events-none transform group-hover:-translate-y-4 group-hover:-translate-x-4">
+                <AppIcon name={watermark} className="text-[160px] lg:text-[180px] text-primary" />
+              </div>
+
+              <div className="relative z-10">
+                <div className="flex flex-wrap items-center gap-4 mb-5">
+                  <span className="font-label-caps text-on-surface-variant/70 flex items-center gap-1.5">
+                    <AppIcon name="clock" className="w-3.5 h-3.5" />
+                    {Math.max(5, (survey.question_count || 0) * 0.5)} MIN ESTIMADOS
+                  </span>
+                </div>
+
+                <h3 className="font-headline-md text-on-surface group-hover:text-primary transition-colors duration-500 mb-4 lg:pr-12">
+                  {survey.titulo}
+                </h3>
+
+                {survey.descripcion && (
+                  <p className="font-body-md text-on-surface-variant/90 mb-8 max-w-xl">
+                    {survey.descripcion}
+                  </p>
+                )}
+
+                <div className="flex items-center justify-between pt-6 border-t border-outline-variant/20">
+                  <div className="flex items-center gap-2 text-on-surface-variant font-label-caps">
+                    <AppIcon name="list_checks" className="w-4 h-4" />
+                    <span>{survey.question_count || 0} PREGUNTAS</span>
+                  </div>
+
+                  <span className="inline-flex items-center gap-3 px-5 py-2.5 lg:px-6 lg:py-3 bg-transparent border border-primary/30 text-primary font-label-caps group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all duration-500">
+                    RESPONDER
+                    <AppIcon
+                      name="arrow_forward"
+                      className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300"
+                    />
+                  </span>
+                </div>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+    );
+  }
 
   return (
     <PublicLayout className="theme-public-surveys bg-surface">
@@ -91,77 +174,7 @@ export default function EncuestasPublicas() {
               </p>
             </div>
 
-            {loading ? (
-              <DataLoadingState label="Cargando encuestas..." className="py-24" />
-            ) : surveys.length === 0 ? (
-              <div className="py-24 flex flex-col items-center justify-center text-center space-y-6 scroll-reveal" data-direction="up" data-distance="lg">
-                <AppIcon name="inbox" className="text-5xl text-outline-variant" />
-                <div className="space-y-3">
-                  <h3 className="font-headline-md text-on-surface">No hay encuestas en este momento</h3>
-                  <p className="font-body-md text-on-surface-variant max-w-sm mx-auto">
-                    Gracias por tu interés. Pronto publicaremos nuevas consultas para nuestros productores.
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-8">
-                {surveys.map((survey, index) => {
-                  const watermarks = ['coffee', 'eco', 'groups'];
-                  const watermark = watermarks[index % watermarks.length];
-                  // Stagger delay for elements appearing together
-                  const delayStyle = { transitionDelay: `${(index % 4) * 150}ms` } as React.CSSProperties;
-
-                  return (
-                    <Link
-                      href={`/encuestas/responder?slug=${survey.slug}`}
-                      key={survey.id}
-                      className="block group bg-white dark:bg-surface-container-low p-7 lg:p-10 border-l-[3px] border-l-transparent hover:border-l-primary border-y border-r border-outline-variant/30 hover:border-outline-variant/60 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_-10px_rgba(0,0,0,0.1)] transition-all duration-700 relative overflow-hidden scroll-reveal"
-                      data-direction="up"
-                      data-distance="lg"
-                      style={delayStyle}
-                    >
-                      {/* Subtle background motif to differentiate surveys */}
-                      <div className="absolute -right-8 -bottom-8 opacity-0 group-hover:opacity-[0.03] transition-opacity duration-700 pointer-events-none transform group-hover:-translate-y-4 group-hover:-translate-x-4">
-                        <AppIcon name={watermark} className="text-[160px] lg:text-[180px] text-primary" />
-                      </div>
-
-                      <div className="relative z-10">
-                        <div className="flex flex-wrap items-center gap-4 mb-5">
-                          <span className="font-label-caps text-on-surface-variant/70 flex items-center gap-1.5">
-                            <AppIcon name="clock" className="w-3.5 h-3.5" />
-                            {Math.max(5, (survey.question_count || 0) * 0.5)} MIN ESTIMADOS
-                          </span>
-                        </div>
-
-                        <h3 className="font-headline-md text-on-surface group-hover:text-primary transition-colors duration-500 mb-4 lg:pr-12">
-                          {survey.titulo}
-                        </h3>
-
-                        {survey.descripcion && (
-                          <p className="font-body-md text-on-surface-variant/90 mb-8 max-w-xl">
-                            {survey.descripcion}
-                          </p>
-                        )}
-
-                        <div className="flex items-center justify-between pt-6 border-t border-outline-variant/20">
-                          <div className="flex items-center gap-2 text-on-surface-variant font-label-caps">
-                            <AppIcon name="list_checks" className="w-4 h-4" />
-                            <span>{survey.question_count || 0} PREGUNTAS</span>
-                          </div>
-
-                          <span
-                            className="inline-flex items-center gap-3 px-5 py-2.5 lg:px-6 lg:py-3 bg-transparent border border-primary/30 text-primary font-label-caps group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all duration-500"
-                          >
-                            RESPONDER
-                            <AppIcon name="arrow_forward" className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            )}
+            {renderSurveyList()}
 
             {/* Support Section */}
             <div className="pt-16 mt-8 scroll-reveal" data-direction="up" data-distance="sm">

@@ -54,7 +54,7 @@ export function DistrictMapSvg({
   selectedDistrictId,
   loadingData = false,
   onSelect,
-}: DistrictMapSvgProps) {
+}: Readonly<DistrictMapSvgProps>) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [tooltip, setTooltip] = useState<TooltipModel | null>(null);
 

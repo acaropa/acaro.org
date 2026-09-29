@@ -103,7 +103,7 @@ export default function AdminProyectos() {
     return can(PERMISSIONS.PROYECTOS_UPDATE_ASSIGNED) && project.supervisor_id === user?.id;
   }
 
-  async function save(event: React.FormEvent) {
+  async function save(event: React.SubmitEvent) {
     event.preventDefault();
     try {
       const payload: Record<string, unknown> = {
@@ -152,6 +152,109 @@ export default function AdminProyectos() {
     }
   }
 
+  function renderProjectList() {
+    if (loading) {
+      return <DataLoadingState label="Cargando portafolio..." className="py-20" />;
+    }
+    if (visible.length === 0) {
+      return (
+        <div className="rounded-2xl border border-dashed border-border p-16 text-center">
+          <AppIcon name="folder_open" className="text-[48px] text-muted" />
+          <h2 className="mt-3 font-headline-md text-xl">No hay proyectos para mostrar</h2>
+        </div>
+      );
+    }
+    return (
+      <div className="grid gap-5 lg:grid-cols-2">
+        {visible.map((project) => (
+          <article
+            key={project.id}
+            className="group flex min-h-[280px] flex-col rounded-2xl border border-border bg-card p-6 transition-all hover:-translate-y-1 hover:border-accent/50 hover:shadow-[0_24px_60px_rgba(43,23,16,0.09)]"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <span className="font-label-caps text-[10px] uppercase tracking-[0.18em] text-accent">
+                  {project.clasificacion || 'Proyecto ACARO'}
+                </span>
+                <h2 className="mt-2 font-headline-md text-2xl tracking-tight text-foreground">
+                  {project.nombre}
+                </h2>
+              </div>
+              <span className="rounded-full border border-border px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-muted">
+                {project.tipo}
+              </span>
+            </div>
+            <p className="mt-4 line-clamp-3 flex-1 text-sm leading-6 text-muted">
+              {project.descripcion || 'Sin descripción registrada.'}
+            </p>
+            <div className="mt-6 grid grid-cols-2 gap-3 border-y border-border/70 py-4 text-xs">
+              <div>
+                <span className="block uppercase tracking-wider text-muted">Estado</span>
+                <strong className="mt-1 block capitalize text-foreground">
+                  {project.estado.replace('_', ' ')}
+                </strong>
+              </div>
+              <div>
+                <span className="block uppercase tracking-wider text-muted">Periodo</span>
+                <strong className="mt-1 block text-foreground">
+                  {project.fecha_inicio?.slice(0, 10) || 'Por definir'}
+                  {project.fecha_fin ? ` — ${project.fecha_fin.slice(0, 10)}` : ''}
+                </strong>
+              </div>
+            </div>
+            <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              {user?.role === 'admin' ? (
+                <select
+                  value={project.supervisor_id || ''}
+                  onChange={(event) => void assignSupervisor(project.id, event.target.value)}
+                  className="max-w-[230px] border border-border bg-background px-3 py-2 text-xs"
+                >
+                  <option value="">Sin supervisor</option>
+                  {supervisors.map((supervisor) => (
+                    <option key={supervisor.id} value={supervisor.id}>
+                      {supervisor.email}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <span className="text-xs text-muted">
+                  {project.supervisor_email || 'Sin supervisor asignado'}
+                </span>
+              )}
+              <div className="flex items-center gap-4">
+                {canEditProject(project) && (
+                  <button
+                    onClick={() => startEdit(project)}
+                    className="inline-flex items-center gap-1 font-label-caps text-[11px] uppercase tracking-[0.16em] text-foreground transition-colors hover:text-primary"
+                  >
+                    <AppIcon name="edit" className="text-[16px]" /> Editar
+                  </button>
+                )}
+                {can(PERMISSIONS.PROYECTOS_DELETE) && (
+                  <button
+                    type="button"
+                    onClick={() => void remove(project)}
+                    disabled={deletingId === project.id}
+                    className="inline-flex items-center gap-1 font-label-caps text-[11px] uppercase tracking-[0.16em] text-red-700 transition-colors hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <AppIcon name="delete" className="text-[16px]" />
+                    {deletingId === project.id ? 'Eliminando...' : 'Eliminar'}
+                  </button>
+                )}
+                <Link
+                  href={`/admin/proyectos/gestion?id=${project.id}`}
+                  className="inline-flex items-center gap-2 font-label-caps text-[11px] uppercase tracking-[0.16em] text-primary transition-all group-hover:gap-3"
+                >
+                  Abrir expediente <AppIcon name="arrow_forward" className="text-[18px]" />
+                </Link>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <>
       <section className="mb-8 border-b border-border pb-7">
@@ -184,62 +287,7 @@ export default function AdminProyectos() {
       </div>
 
       {error && <p className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</p>}
-      {loading ? (
-        <DataLoadingState label="Cargando portafolio..." className="py-20" />
-      ) : visible.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border p-16 text-center">
-          <AppIcon name="folder_open" className="text-[48px] text-muted" />
-          <h2 className="mt-3 font-headline-md text-xl">No hay proyectos para mostrar</h2>
-        </div>
-      ) : (
-        <div className="grid gap-5 lg:grid-cols-2">
-          {visible.map(project => (
-            <article key={project.id} className="group flex min-h-[280px] flex-col rounded-2xl border border-border bg-card p-6 transition-all hover:-translate-y-1 hover:border-accent/50 hover:shadow-[0_24px_60px_rgba(43,23,16,0.09)]">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <span className="font-label-caps text-[10px] uppercase tracking-[0.18em] text-accent">{project.clasificacion || 'Proyecto ACARO'}</span>
-                  <h2 className="mt-2 font-headline-md text-2xl tracking-tight text-foreground">{project.nombre}</h2>
-                </div>
-                <span className="rounded-full border border-border px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-muted">{project.tipo}</span>
-              </div>
-              <p className="mt-4 line-clamp-3 flex-1 text-sm leading-6 text-muted">{project.descripcion || 'Sin descripción registrada.'}</p>
-              <div className="mt-6 grid grid-cols-2 gap-3 border-y border-border/70 py-4 text-xs">
-                <div><span className="block uppercase tracking-wider text-muted">Estado</span><strong className="mt-1 block capitalize text-foreground">{project.estado.replace('_', ' ')}</strong></div>
-                <div><span className="block uppercase tracking-wider text-muted">Periodo</span><strong className="mt-1 block text-foreground">{project.fecha_inicio?.slice(0, 10) || 'Por definir'}{project.fecha_fin ? ` — ${project.fecha_fin.slice(0, 10)}` : ''}</strong></div>
-              </div>
-              <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                {user?.role === 'admin' ? (
-                  <select value={project.supervisor_id || ''} onChange={event => void assignSupervisor(project.id, event.target.value)} className="max-w-[230px] border border-border bg-background px-3 py-2 text-xs">
-                    <option value="">Sin supervisor</option>
-                    {supervisors.map(supervisor => <option key={supervisor.id} value={supervisor.id}>{supervisor.email}</option>)}
-                  </select>
-                ) : <span className="text-xs text-muted">{project.supervisor_email || 'Sin supervisor asignado'}</span>}
-                <div className="flex items-center gap-4">
-                  {canEditProject(project) && (
-                    <button onClick={() => startEdit(project)} className="inline-flex items-center gap-1 font-label-caps text-[11px] uppercase tracking-[0.16em] text-foreground transition-colors hover:text-primary">
-                      <AppIcon name="edit" className="text-[16px]" /> Editar
-                    </button>
-                  )}
-                  {can(PERMISSIONS.PROYECTOS_DELETE) && (
-                    <button
-                      type="button"
-                      onClick={() => void remove(project)}
-                      disabled={deletingId === project.id}
-                      className="inline-flex items-center gap-1 font-label-caps text-[11px] uppercase tracking-[0.16em] text-red-700 transition-colors hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      <AppIcon name="delete" className="text-[16px]" />
-                      {deletingId === project.id ? 'Eliminando...' : 'Eliminar'}
-                    </button>
-                  )}
-                  <Link href={`/admin/proyectos/gestion?id=${project.id}`} className="inline-flex items-center gap-2 font-label-caps text-[11px] uppercase tracking-[0.16em] text-primary transition-all group-hover:gap-3">
-                    Abrir expediente <AppIcon name="arrow_forward" className="text-[18px]" />
-                  </Link>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-      )}
+      {renderProjectList()}
 
       <Modal isOpen={showForm} onClose={resetForm} title={editing ? 'Editar proyecto' : 'Nuevo proyecto'} maxWidth="max-w-3xl">
         <form onSubmit={save} className="grid gap-4 md:grid-cols-2">
@@ -278,6 +326,6 @@ export default function AdminProyectos() {
   );
 }
 
-function Field({ label, wide, children }: { label: string; wide?: boolean; children: React.ReactNode }) {
+function Field({ label, wide, children }: Readonly<{ label: string; wide?: boolean; children: React.ReactNode }>) {
   return <label className={wide ? 'md:col-span-2' : ''}><span className="mb-2 block font-label-caps text-[10px] uppercase tracking-widest text-muted">{label}</span>{children}</label>;
 }

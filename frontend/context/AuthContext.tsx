@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 
@@ -22,7 +22,7 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({ children }: Readonly<{ children: React.ReactNode }>) {
   const [user, setUser]       = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -56,13 +56,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, [router]);
 
-  async function login(email: string, password: string) {
+  const login = useCallback(async (email: string, password: string) => {
     const data = await api.login<AuthUser>(email, password);
     setUser(data.user);
     router.push(data.user.role === 'visitante' ? '/' : '/admin');
-  }
+  }, [router]);
 
-  async function logout(allSessions = false) {
+  const logout = useCallback(async (allSessions = false) => {
     try {
       await api.logout(allSessions);
     } finally {
@@ -74,14 +74,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       router.push('/login');
     }
-  }
+  }, [router]);
 
-  function can(...permissions: string[]) {
+  const can = useCallback((...permissions: string[]) => {
     return permissions.some(permission => user?.permissions.includes(permission));
-  }
+  }, [user]);
+
+  const contextValue = useMemo(() => ({ user, loading, login, logout, can }), [user, loading, login, logout, can]);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, can }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );

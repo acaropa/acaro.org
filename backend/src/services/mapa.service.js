@@ -170,7 +170,7 @@ async function getActores(statusFilter = 'todos') {
   `;
 
   const [rows] = await db.query(query, params);
-  
+
   return rows.map(row => ({
     id: row.id,
     nombre: row.nombre,
@@ -239,12 +239,12 @@ async function updateActor(id, data) {
     await connection.beginTransaction();
 
     // 1. Update basic fields if present
-    const allowed = ['nombre', 'tipo_entidad', 'distrito_id', 'comunidad', 'activo'];
-    const fields = Object.keys(data).filter(field => allowed.includes(field));
+    const allowed = new Set(['nombre', 'tipo_entidad', 'distrito_id', 'comunidad', 'activo']);
+    const fields = Object.keys(data).filter(field => allowed.has(field));
 
     if (fields.length > 0) {
       await connection.query(
-        `UPDATE actores_cadena_valor SET ${fields.map(field => `${field} = ?`).join(', ')} WHERE id = ?`,
+        `UPDATE actores_cadena_valor SET ${fields.map(field => field + ' = ?').join(', ')} WHERE id = ?`,
         [...fields.map(field => data[field]), id]
       );
     }

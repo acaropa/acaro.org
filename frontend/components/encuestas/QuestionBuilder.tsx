@@ -1,10 +1,13 @@
 'use client'
 
 
+import { useId } from 'react';
 import { AppIcon } from "@/components/ui/AppIcon"
 import type { TipoPregunta } from '@/lib/encuestas'
+import { createIdempotencyKey } from '@/lib/random'
 
 export interface OptionFormData {
+  clientId: string
   id?: number
   valor_opcion: string
   etiqueta_opcion: string
@@ -12,6 +15,7 @@ export interface OptionFormData {
 }
 
 export interface QuestionFormData {
+  clientId: string
   id?: number
   seccion_id?: number | null
   codigo_pregunta: string
@@ -43,14 +47,15 @@ interface Props {
   onMoveDown?: () => void
 }
 
-export function QuestionBuilder({ index, data, onChange, onRemove, onMoveUp, onMoveDown }: Props) {
+export function QuestionBuilder({ index, data, onChange, onRemove, onMoveUp, onMoveDown }: Readonly<Props>) {
+  const fieldId = useId();
   const set = <K extends keyof QuestionFormData>(key: K, value: QuestionFormData[K]) =>
     onChange({ ...data, [key]: value })
 
   const addOption = () =>
     set('opciones', [
       ...data.opciones,
-      { valor_opcion: '', etiqueta_opcion: '', permite_texto_libre: false },
+      { clientId: createIdempotencyKey(), valor_opcion: '', etiqueta_opcion: '', permite_texto_libre: false },
     ])
 
   const updateOption = (i: number, field: keyof OptionFormData, value: string | boolean) => {
@@ -98,8 +103,8 @@ export function QuestionBuilder({ index, data, onChange, onRemove, onMoveUp, onM
       <div className="space-y-3 p-4">
         <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
           <div>
-            <label className="mb-1 block text-xs font-semibold text-[#765e50]">Texto de la pregunta *</label>
-            <input
+            <label htmlFor={`${fieldId}-1`} className="mb-1 block text-xs font-semibold text-[#765e50]">Texto de la pregunta *</label>
+            <input id={`${fieldId}-1`}
               value={data.texto_pregunta}
               onChange={e => set('texto_pregunta', e.target.value)}
               className="w-full rounded-lg border border-[#d8cabb] px-3 py-2 text-sm text-[#2b1710] focus:outline-none focus:ring-2 focus:ring-[#c28a3a]/30"
@@ -107,8 +112,8 @@ export function QuestionBuilder({ index, data, onChange, onRemove, onMoveUp, onM
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-semibold text-[#765e50]">Tipo</label>
-            <select
+            <label htmlFor={`${fieldId}-2`} className="mb-1 block text-xs font-semibold text-[#765e50]">Tipo</label>
+            <select id={`${fieldId}-2`}
               value={data.tipo_pregunta}
               onChange={e => {
                 const tipo = e.target.value as TipoPregunta
@@ -125,8 +130,8 @@ export function QuestionBuilder({ index, data, onChange, onRemove, onMoveUp, onM
 
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <label className="mb-1 block text-xs font-semibold text-[#765e50]">Código</label>
-            <input
+            <label htmlFor={`${fieldId}-3`} className="mb-1 block text-xs font-semibold text-[#765e50]">Código</label>
+            <input id={`${fieldId}-3`}
               value={data.codigo_pregunta}
               onChange={e => set('codigo_pregunta', e.target.value)}
               className="w-full rounded-lg border border-[#d8cabb] px-3 py-2 text-sm text-[#2b1710]"
@@ -134,8 +139,8 @@ export function QuestionBuilder({ index, data, onChange, onRemove, onMoveUp, onM
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-semibold text-[#765e50]">Texto de ayuda</label>
-            <input
+            <label htmlFor={`${fieldId}-4`} className="mb-1 block text-xs font-semibold text-[#765e50]">Texto de ayuda</label>
+            <input id={`${fieldId}-4`}
               value={data.texto_ayuda}
               onChange={e => set('texto_ayuda', e.target.value)}
               className="w-full rounded-lg border border-[#d8cabb] px-3 py-2 text-sm text-[#2b1710]"
@@ -151,14 +156,15 @@ export function QuestionBuilder({ index, data, onChange, onRemove, onMoveUp, onM
             onChange={e => set('es_obligatoria', e.target.checked)}
             className="h-4 w-4 rounded border-[#d8cabb] text-[#2b1710]"
           />
-          Obligatoria
-        </label>
+
+          <span>Obligatoria</span>
+</label>
 
         {hasOptions(data.tipo_pregunta) && (
           <div className="space-y-2 rounded-lg border border-dashed border-[#d8cabb] bg-white p-3">
             <p className="text-xs font-semibold text-[#765e50]">Opciones de respuesta</p>
             {data.opciones.map((opc, i) => (
-              <div key={i} className="flex items-center gap-2">
+              <div key={opc.clientId} className="flex items-center gap-2">
                 <span className="text-xs text-[#a08c7a]">{i + 1}.</span>
                 <input
                   value={opc.etiqueta_opcion}
@@ -173,8 +179,9 @@ export function QuestionBuilder({ index, data, onChange, onRemove, onMoveUp, onM
                     onChange={e => updateOption(i, 'permite_texto_libre', e.target.checked)}
                     className="h-3.5 w-3.5"
                   />
-                  Otro
-                </label>
+
+                  <span>Otro</span>
+</label>
                 <button
                   onClick={() => removeOption(i)}
                   className="rounded p-0.5 text-red-400 hover:text-red-600"

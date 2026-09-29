@@ -4,7 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./card"
 import { Badge } from "./badge"
 import { Project } from "@/data/mock-projects"
 
-export function ProjectCard({ project }: { project: Project }) {
+export function ProjectCard({ project }: Readonly<{ project: Project }>) {
   const statusColor: Record<Project["status"], "default" | "secondary" | "danger" | "outline" | "success" | "warning"> = {
     'Planificación': 'secondary',
     'Fase 1 - Piloto': 'secondary',
@@ -18,8 +18,8 @@ export function ProjectCard({ project }: { project: Project }) {
     <Card className="h-full flex flex-col hover:border-accent hover:shadow-md transition-all group overflow-hidden">
       <div className="h-48 bg-muted w-full relative">
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-        <Badge 
-          className="absolute top-4 right-4" 
+        <Badge
+          className="absolute top-4 right-4"
           variant={statusColor[project.status]}
         >
           {project.status}
@@ -45,8 +45,8 @@ export function ProjectCard({ project }: { project: Project }) {
         </div>
       </CardContent>
       <CardFooter className="pt-0">
-        <Link 
-          href={`/proyectos/${project.id}`} 
+        <Link
+          href={`/proyectos/${project.id}`}
           className="text-sm font-semibold text-accent hover:text-accent-hover transition-colors"
         >
           Ver proyecto &rarr;

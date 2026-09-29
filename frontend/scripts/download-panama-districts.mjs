@@ -93,7 +93,9 @@ async function main() {
   );
 }
 
-main().catch((error) => {
+try {
+  await main();
+} catch (error) {
   console.error("No se pudo generar el GeoJSON:", error);
   process.exitCode = 1;
-});
+}

@@ -5,13 +5,12 @@ interface MapTooltipProps {
   tooltip: TooltipModel | null;
 }
 
-export function MapTooltip({ tooltip }: MapTooltipProps) {
+export function MapTooltip({ tooltip }: Readonly<MapTooltipProps>) {
   if (!tooltip) return null;
 
   return (
-    <div
+    <output
       className={styles.tooltip}
-      role="status"
       style={{ left: tooltip.x, top: tooltip.y }}
     >
       <strong>{tooltip.district}</strong>
@@ -20,6 +19,6 @@ export function MapTooltip({ tooltip }: MapTooltipProps) {
         {tooltip.count}{" "}
         {tooltip.count === 1 ? "actor registrado" : "actores registrados"}
       </b>
-    </div>
+    </output>
   );
 }

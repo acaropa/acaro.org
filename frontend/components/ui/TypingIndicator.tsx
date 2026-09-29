@@ -14,7 +14,7 @@ export function TypingIndicator({
   compact = false,
   label = "Cargando contenido",
   tone = "coffee",
-}: TypingIndicatorProps) {
+}: Readonly<TypingIndicatorProps>) {
   return (
     <span
       className={cn(
@@ -40,10 +40,10 @@ export function TypingIndicator({
 export function DataLoadingState({
   label = "Cargando contenido...",
   className,
-}: {
+}: Readonly<{
   label?: string;
   className?: string;
-}) {
+}>) {
   return (
     <div className={cn(styles.state, "py-16", className)}>
       <TypingIndicator label={label} />

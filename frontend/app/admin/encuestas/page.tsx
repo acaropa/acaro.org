@@ -64,14 +64,8 @@ export default function AdminEncuestas() {
     try {
       await navigator.clipboard.writeText(url)
     } catch {
-      const input = document.createElement('textarea')
-      input.value = url
-      input.style.position = 'fixed'
-      input.style.opacity = '0'
-      document.body.appendChild(input)
-      input.select()
-      document.execCommand('copy')
-      input.remove()
+      setStatusError('No se pudo copiar el enlace. Abre Compartir y copia la dirección manualmente.')
+      return
     }
 
     setCopiedId(enc.id)
@@ -187,6 +181,162 @@ export default function AdminEncuestas() {
     }
   }
 
+  function renderShareQr() {
+    if (!shareTarget) return null;
+    if (qrDataUrl) {
+      return (
+        <Image
+          src={qrDataUrl}
+          alt={'Código QR de ' + shareTarget.titulo}
+          width={220}
+          height={220}
+          unoptimized
+          className="h-auto w-full"
+        />
+      );
+    }
+    if (shareError) {
+      return <p className="px-4 text-center text-sm text-red-700">{shareError}</p>;
+    }
+    return <DataLoadingState label="Generando QR..." className="py-8" />;
+  }
+
+  function renderSurveyTable() {
+    if (loading) {
+      return <DataLoadingState label="Cargando encuestas..." className="py-16" />;
+    }
+    if (!filtered.length) {
+      return (
+        <p className="py-16 text-center text-sm text-[#765e50]">No hay encuestas para mostrar.</p>
+      );
+    }
+    return (
+      <div className="overflow-hidden rounded-xl border border-[#d8cabb]">
+        <table className="w-full text-sm">
+          <thead className="bg-[#faf9f5] text-left text-[11px] font-semibold uppercase tracking-wider text-[#765e50]">
+            <tr>
+              <th className="px-6 py-4">Título</th>
+              <th className="hidden px-6 py-4 md:table-cell">Estado</th>
+              <th className="hidden px-6 py-4 lg:table-cell">Preguntas</th>
+              <th className="hidden px-6 py-4 lg:table-cell">Respuestas</th>
+              <th className="hidden px-6 py-4 xl:table-cell">Creador</th>
+              <th className="px-6 py-4 text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-[#ede6db]">
+            {filtered.map((enc) => (
+              <tr key={enc.id} className="bg-white transition-colors hover:bg-[#faf9f5]">
+                <td className="px-6 py-5 font-medium text-[#2b1710]">
+                  <Link
+                    href={`/admin/encuestas/editar?id=${enc.id}`}
+                    className="text-[15px] font-semibold hover:underline"
+                  >
+                    {enc.titulo}
+                  </Link>
+                  <p className="mt-1 text-xs text-[#a08c7a]">/{enc.slug}</p>
+                </td>
+                <td className="hidden px-6 py-5 md:table-cell">
+                  <span
+                    className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${stateColors[enc.estado] ?? ''}`}
+                  >
+                    {stateLabels[enc.estado] ?? enc.estado}
+                  </span>
+                </td>
+                <td className="hidden px-6 py-5 text-[#765e50] lg:table-cell">
+                  {enc.question_count ?? 0}
+                </td>
+                <td className="hidden px-6 py-5 text-[#765e50] lg:table-cell">
+                  {enc.response_count ?? 0}
+                </td>
+                <td className="hidden px-6 py-5 text-xs text-[#765e50] xl:table-cell">
+                  {enc.creado_por_nombre ?? enc.creado_por_email}
+                </td>
+                <td className="px-6 py-5">
+                  <div className="flex items-center justify-end gap-1.5">
+                    <Link
+                      href={`/admin/encuestas/editar?id=${enc.id}`}
+                      className="rounded-lg p-2 text-[#5a3424] hover:bg-[#f0e8dd]"
+                      title="Editar"
+                    >
+                      <AppIcon name="edit" className="text-[20px]" />
+                    </Link>
+                    <Link
+                      href={`/admin/encuestas/resultados?id=${enc.id}`}
+                      className="rounded-lg p-2 text-[#5a3424] hover:bg-[#f0e8dd]"
+                      title="Resultados"
+                    >
+                      <AppIcon name="bar_chart" className="text-[20px]" />
+                    </Link>
+                    {enc.estado === 'publicada' && (
+                      <button
+                        type="button"
+                        onClick={() => openShare(enc)}
+                        className="rounded-lg p-2 text-[#5a3424] hover:bg-[#f0e8dd]"
+                        title="Ver QR y enlace"
+                        aria-label={'Compartir ' + enc.titulo}
+                      >
+                        <AppIcon name="qr_code" className="text-[20px]" />
+                      </button>
+                    )}
+                    {canPublish && enc.estado === 'borrador' && (
+                      <button
+                        onClick={() => handleChangeEstado(enc, 'publicada')}
+                        disabled={changingId === enc.id}
+                        className="rounded-lg p-2 text-green-700 hover:bg-green-50 disabled:cursor-wait disabled:opacity-50"
+                        title="Publicar"
+                      >
+                        <AppIcon name="publish" className="text-[20px]" />
+                      </button>
+                    )}
+                    {canPublish && enc.estado === 'publicada' && (
+                      <button
+                        onClick={() => handleChangeEstado(enc, 'cerrada')}
+                        disabled={changingId === enc.id}
+                        className="rounded-lg p-2 text-orange-700 hover:bg-orange-50 disabled:cursor-wait disabled:opacity-50"
+                        title="Cerrar"
+                      >
+                        <AppIcon name="lock" className="text-[20px]" />
+                      </button>
+                    )}
+                    {canPublish && enc.estado === 'cerrada' && (
+                      <button
+                        onClick={() => handleChangeEstado(enc, 'publicada')}
+                        disabled={changingId === enc.id}
+                        className="rounded-lg p-2 text-green-700 hover:bg-green-50 disabled:cursor-wait disabled:opacity-50"
+                        title="Volver a publicar"
+                        aria-label={`Volver a publicar ${enc.titulo}`}
+                      >
+                        <AppIcon name="publish" className="text-[20px]" />
+                      </button>
+                    )}
+                    {canDuplicate && (
+                      <button
+                        onClick={() => handleDuplicate(enc)}
+                        className="rounded-lg p-2 text-[#5a3424] hover:bg-[#f0e8dd]"
+                        title="Duplicar"
+                      >
+                        <AppIcon name="content_copy" className="text-[20px]" />
+                      </button>
+                    )}
+                    {canDelete && (
+                      <button
+                        onClick={() => setDeleteTarget(enc)}
+                        className="rounded-lg p-2 text-red-600 hover:bg-red-50"
+                        title="Eliminar"
+                      >
+                        <AppIcon name="delete" className="text-[20px]" />
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -226,8 +376,8 @@ export default function AdminEncuestas() {
           { label: 'Publicadas', value: stats.publicadas, icon: 'send' },
           { label: 'Borradores', value: stats.borradores, icon: 'draft' },
           { label: 'Respuestas totales', value: stats.respuestas, icon: 'message_square' },
-        ].map((kpi, i) => (
-          <div key={i} className="flex items-center gap-4 rounded-xl border border-[#d8cabb] bg-white p-4 shadow-sm">
+        ].map(kpi => (
+          <div key={kpi.label} className="flex items-center gap-4 rounded-xl border border-[#d8cabb] bg-white p-4 shadow-sm">
             <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#eef5f0] text-[#2f6542]">
               <AppIcon name={kpi.icon} className="text-2xl" />
             </div>
@@ -275,124 +425,7 @@ export default function AdminEncuestas() {
         </p>
       )}
 
-      {loading ? (
-        <DataLoadingState label="Cargando encuestas..." className="py-16" />
-      ) : !filtered.length ? (
-        <p className="py-16 text-center text-sm text-[#765e50]">No hay encuestas para mostrar.</p>
-      ) : (
-        <div className="overflow-hidden rounded-xl border border-[#d8cabb]">
-          <table className="w-full text-sm">
-            <thead className="bg-[#faf9f5] text-left text-[11px] font-semibold uppercase tracking-wider text-[#765e50]">
-              <tr>
-                <th className="px-6 py-4">Título</th>
-                <th className="hidden px-6 py-4 md:table-cell">Estado</th>
-                <th className="hidden px-6 py-4 lg:table-cell">Preguntas</th>
-                <th className="hidden px-6 py-4 lg:table-cell">Respuestas</th>
-                <th className="hidden px-6 py-4 xl:table-cell">Creador</th>
-                <th className="px-6 py-4 text-right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#ede6db]">
-              {filtered.map(enc => (
-                <tr key={enc.id} className="bg-white transition-colors hover:bg-[#faf9f5]">
-                  <td className="px-6 py-5 font-medium text-[#2b1710]">
-                    <Link href={`/admin/encuestas/editar?id=${enc.id}`} className="text-[15px] font-semibold hover:underline">
-                      {enc.titulo}
-                    </Link>
-                    <p className="mt-1 text-xs text-[#a08c7a]">/{enc.slug}</p>
-                  </td>
-                  <td className="hidden px-6 py-5 md:table-cell">
-                    <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${stateColors[enc.estado] ?? ''}`}>
-                      {stateLabels[enc.estado] ?? enc.estado}
-                    </span>
-                  </td>
-                  <td className="hidden px-6 py-5 text-[#765e50] lg:table-cell">{enc.question_count ?? 0}</td>
-                  <td className="hidden px-6 py-5 text-[#765e50] lg:table-cell">{enc.response_count ?? 0}</td>
-                  <td className="hidden px-6 py-5 text-xs text-[#765e50] xl:table-cell">{enc.creado_por_nombre ?? enc.creado_por_email}</td>
-                  <td className="px-6 py-5">
-                    <div className="flex items-center justify-end gap-1.5">
-                      <Link
-                        href={`/admin/encuestas/editar?id=${enc.id}`}
-                        className="rounded-lg p-2 text-[#5a3424] hover:bg-[#f0e8dd]"
-                        title="Editar"
-                      >
-                        <AppIcon name="edit" className="text-[20px]" />
-                      </Link>
-                      <Link
-                        href={`/admin/encuestas/resultados?id=${enc.id}`}
-                        className="rounded-lg p-2 text-[#5a3424] hover:bg-[#f0e8dd]"
-                        title="Resultados"
-                      >
-                        <AppIcon name="bar_chart" className="text-[20px]" />
-                      </Link>
-                      {enc.estado === 'publicada' && (
-                        <button
-                          type="button"
-                          onClick={() => openShare(enc)}
-                          className="rounded-lg p-2 text-[#5a3424] hover:bg-[#f0e8dd]"
-                          title="Ver QR y enlace"
-                          aria-label={'Compartir ' + enc.titulo}
-                        >
-                          <AppIcon name="qr_code" className="text-[20px]" />
-                        </button>
-                      )}
-                      {canPublish && enc.estado === 'borrador' && (
-                        <button
-                          onClick={() => handleChangeEstado(enc, 'publicada')}
-                          disabled={changingId === enc.id}
-                          className="rounded-lg p-2 text-green-700 hover:bg-green-50 disabled:cursor-wait disabled:opacity-50"
-                          title="Publicar"
-                        >
-                          <AppIcon name="publish" className="text-[20px]" />
-                        </button>
-                      )}
-                      {canPublish && enc.estado === 'publicada' && (
-                        <button
-                          onClick={() => handleChangeEstado(enc, 'cerrada')}
-                          disabled={changingId === enc.id}
-                          className="rounded-lg p-2 text-orange-700 hover:bg-orange-50 disabled:cursor-wait disabled:opacity-50"
-                          title="Cerrar"
-                        >
-                          <AppIcon name="lock" className="text-[20px]" />
-                        </button>
-                      )}
-                      {canPublish && enc.estado === 'cerrada' && (
-                        <button
-                          onClick={() => handleChangeEstado(enc, 'publicada')}
-                          disabled={changingId === enc.id}
-                          className="rounded-lg p-2 text-green-700 hover:bg-green-50 disabled:cursor-wait disabled:opacity-50"
-                          title="Volver a publicar"
-                          aria-label={`Volver a publicar ${enc.titulo}`}
-                        >
-                          <AppIcon name="publish" className="text-[20px]" />
-                        </button>
-                      )}
-                      {canDuplicate && (
-                        <button
-                          onClick={() => handleDuplicate(enc)}
-                          className="rounded-lg p-2 text-[#5a3424] hover:bg-[#f0e8dd]"
-                          title="Duplicar"
-                        >
-                          <AppIcon name="content_copy" className="text-[20px]" />
-                        </button>
-                      )}
-                      {canDelete && (
-                        <button
-                          onClick={() => setDeleteTarget(enc)}
-                          className="rounded-lg p-2 text-red-600 hover:bg-red-50"
-                          title="Eliminar"
-                        >
-                          <AppIcon name="delete" className="text-[20px]" />
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      {renderSurveyTable()}
 
       <Modal
         isOpen={!!shareTarget}
@@ -416,20 +449,7 @@ export default function AdminEncuestas() {
             </p>
 
             <div className="mx-auto my-6 flex min-h-56 w-56 items-center justify-center rounded-lg border border-[#d8cabb] bg-white p-3">
-              {qrDataUrl ? (
-                <Image
-                  src={qrDataUrl}
-                  alt={'Código QR de ' + shareTarget.titulo}
-                  width={220}
-                  height={220}
-                  unoptimized
-                  className="h-auto w-full"
-                />
-              ) : shareError ? (
-                <p className="px-4 text-center text-sm text-red-700">{shareError}</p>
-              ) : (
-                <DataLoadingState label="Generando QR..." className="py-8" />
-              )}
+              {renderShareQr()}
             </div>
 
             <label htmlFor="survey-public-url" className="mb-2 block text-xs font-semibold uppercase tracking-wider text-[#765e50]">

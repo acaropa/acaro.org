@@ -12,7 +12,6 @@ import {
   validateDistrictCollection,
 } from "./map-utils";
 import type {
-  ActorTypeCode,
   ActorTypeOption,
   DistrictFeatureCollection,
   DistrictMapDatum,
@@ -22,7 +21,7 @@ import type {
 interface UseValueChainMapOptions {
   apiBaseUrl?: string;
   geoJsonUrl?: string;
-  initialFilter?: ActorTypeCode;
+  initialFilter?: string;
 }
 
 interface MapState {
@@ -38,7 +37,7 @@ export function useValueChainMap({
   geoJsonUrl = DEFAULT_GEOJSON_URL,
   initialFilter = "todos",
 }: UseValueChainMapOptions = {}) {
-  const [filter, setFilter] = useState<ActorTypeCode>(initialFilter);
+  const [filter, setFilter] = useState<string>(initialFilter);
   const [state, setState] = useState<MapState>({
     geoJson: null,
     data: null,
@@ -93,7 +92,7 @@ export function useValueChainMap({
   );
 
   const loadData = useCallback(
-    async (activeFilter: ActorTypeCode, signal?: AbortSignal) => {
+    async (activeFilter: string, signal?: AbortSignal) => {
       setState((current) => ({
         ...current,
         loadingData: true,

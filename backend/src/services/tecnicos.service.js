@@ -83,8 +83,8 @@ async function create(data) {
 }
 
 async function update(id, data) {
-  const allowed = ['nombre', 'apellido', 'especialidad', 'telefono', 'disponible'];
-  const fields = Object.keys(data).filter(k => allowed.includes(k));
+  const allowed = new Set(['nombre', 'apellido', 'especialidad', 'telefono', 'disponible']);
+  const fields = Object.keys(data).filter(k => allowed.has(k));
 
   if (fields.length === 0) {
     const err = new Error('Sin campos válidos para actualizar');

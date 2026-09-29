@@ -15,7 +15,7 @@ import { api } from '@/lib/api';
 import { ProyectoRecord, toProjectCard } from '@/lib/projects';
 
 // 1. Hero Right (Texto Izquierda, Imagen Derecha, 12 columnas)
-function HeroRightProject({ project, index }: { project: Project, index: number }) {
+function HeroRightProject({ project, index }: Readonly<{ project: Project, index: number }>) {
   return (
     <ScrollReveal delay={0} distance="md" className="md:col-span-12 grid grid-cols-1 md:grid-cols-12 gap-[24px] mb-8">
       <div className="md:col-span-3 flex flex-col justify-between order-2 md:order-1 pt-8 md:pt-0">
@@ -45,7 +45,7 @@ function HeroRightProject({ project, index }: { project: Project, index: number 
 }
 
 // 2. Hero Left (Imagen Izquierda, Texto Derecha, 12 columnas)
-function HeroLeftProject({ project, index }: { project: Project, index: number }) {
+function HeroLeftProject({ project, index }: Readonly<{ project: Project, index: number }>) {
   return (
     <ScrollReveal delay={0} distance="md" className="md:col-span-12 grid grid-cols-1 md:grid-cols-12 gap-[24px] mb-8">
       <div className="md:col-span-9 order-1 md:order-1">
@@ -77,7 +77,7 @@ function HeroLeftProject({ project, index }: { project: Project, index: number }
 }
 
 // 3. Wide Card (Tarjeta ancha horizontal, 8 columnas)
-function WideProject({ project, index }: { project: Project, index: number }) {
+function WideProject({ project, index }: Readonly<{ project: Project, index: number }>) {
   return (
     <ScrollReveal delay={100} distance="sm" className="md:col-span-8 flex flex-col md:flex-row bg-surface overflow-hidden mb-8 group">
       <Link href={`/proyectos/detalle/?slug=${project.slug || ''}`} className="flex flex-col md:flex-row w-full h-full">
@@ -108,7 +108,7 @@ function WideProject({ project, index }: { project: Project, index: number }) {
 }
 
 // 4. Half Card (Tarjeta cuadrada/ancha, 6 columnas)
-function HalfProject({ project, index }: { project: Project, index: number }) {
+function HalfProject({ project, index }: Readonly<{ project: Project, index: number }>) {
   return (
     <ScrollReveal delay={150} distance="sm" className="md:col-span-6 flex flex-col mb-8">
       <Link href={`/proyectos/detalle/?slug=${project.slug || ''}`} className="flex flex-col w-full h-full group">
@@ -145,7 +145,7 @@ function HalfProject({ project, index }: { project: Project, index: number }) {
 }
 
 // 5. Standard Card (Tarjeta vertical de un tercio, 4 columnas)
-function StandardProject({ project, index }: { project: Project, index: number }) {
+function StandardProject({ project, index }: Readonly<{ project: Project, index: number }>) {
   return (
     <ScrollReveal delay={200} distance="sm" className="md:col-span-4 flex flex-col mb-8">
       <Link href={`/proyectos/detalle/?slug=${project.slug || ''}`} className="flex flex-col w-full h-full group">
@@ -175,7 +175,7 @@ function StandardProject({ project, index }: { project: Project, index: number }
 }
 
 // 6. Solid Block (Bloque sólido con icono, 4 columnas)
-function SolidProject({ project, index }: { project: Project, index: number }) {
+function SolidProject({ project, index }: Readonly<{ project: Project, index: number }>) {
   return (
     <ScrollReveal delay={250} distance="sm" className="md:col-span-4 flex flex-col mb-8">
       <Link href={`/proyectos/detalle/?slug=${project.slug || ''}`} className="flex flex-col w-full h-full">
@@ -210,13 +210,64 @@ export default function Proyectos() {
 
   useEffect(() => {
     api.get<ProyectoRecord[]>('/proyectos')
-      .then(data => setProjects(data.map(toProjectCard)))
+      .then(data => setProjects(data.map((project, index) => toProjectCard(project, index))))
       .catch(() => setProjects([]))
       .finally(() => setLoading(false));
   }, []);
 
   const visibleProjects = projects.slice(0, visibleCount);
   const hasMore = projects.length > visibleCount;
+
+  function renderProjectList() {
+    if (loading) {
+      return <DataLoadingState label="Cargando proyectos..." className="py-24" />;
+    }
+    if (projects.length === 0) {
+      return (
+        <EmptyState
+          title="Sin proyectos disponibles"
+          description="Aún no se han publicado proyectos públicos. Vuelve a consultar más adelante."
+        />
+      );
+    }
+    return (
+      <section>
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-x-[24px] gap-y-16 items-stretch">
+          {visibleProjects.map((project, i) => {
+            const style = project.layoutStyle || 'standard';
+
+            switch (style) {
+              case 'hero-right':
+                return <HeroRightProject key={project.id} project={project} index={i} />;
+              case 'hero-left':
+                return <HeroLeftProject key={project.id} project={project} index={i} />;
+              case 'wide':
+                return <WideProject key={project.id} project={project} index={i} />;
+              case 'half':
+                return <HalfProject key={project.id} project={project} index={i} />;
+              case 'solid':
+                return <SolidProject key={project.id} project={project} index={i} />;
+              case 'standard':
+              default:
+                return <StandardProject key={project.id} project={project} index={i} />;
+            }
+          })}
+        </div>
+
+        {hasMore && (
+          <div className="mt-16 flex justify-center">
+            <button
+              type="button"
+              onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
+              className="px-8 py-3 border border-primary text-primary text-xs font-bold tracking-widest uppercase hover:bg-primary hover:text-primary-foreground transition-colors"
+            >
+              Cargar más
+            </button>
+          </div>
+        )}
+      </section>
+    );
+  }
 
   return (
     <PublicLayout className="landing-typography">
@@ -237,50 +288,7 @@ export default function Proyectos() {
 
         <div className="w-full h-[1px] bg-primary/10 mb-12"></div>
 
-        {loading ? (
-          <DataLoadingState label="Cargando proyectos..." className="py-24" />
-        ) : projects.length === 0 ? (
-          <EmptyState
-            title="Sin proyectos disponibles"
-            description="Aún no se han publicado proyectos públicos. Vuelve a consultar más adelante."
-          />
-        ) : (
-          <section>
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-x-[24px] gap-y-16 items-stretch">
-              {visibleProjects.map((project, i) => {
-                const style = project.layoutStyle || 'standard';
-
-                switch (style) {
-                  case 'hero-right':
-                    return <HeroRightProject key={project.id} project={project} index={i} />;
-                  case 'hero-left':
-                    return <HeroLeftProject key={project.id} project={project} index={i} />;
-                  case 'wide':
-                    return <WideProject key={project.id} project={project} index={i} />;
-                  case 'half':
-                    return <HalfProject key={project.id} project={project} index={i} />;
-                  case 'solid':
-                    return <SolidProject key={project.id} project={project} index={i} />;
-                  case 'standard':
-                  default:
-                    return <StandardProject key={project.id} project={project} index={i} />;
-                }
-              })}
-            </div>
-
-            {hasMore && (
-              <div className="mt-16 flex justify-center">
-                <button
-                  type="button"
-                  onClick={() => setVisibleCount(count => count + PAGE_SIZE)}
-                  className="px-8 py-3 border border-primary text-primary text-xs font-bold tracking-widest uppercase hover:bg-primary hover:text-primary-foreground transition-colors"
-                >
-                  Cargar más
-                </button>
-              </div>
-            )}
-          </section>
-        )}
+        {renderProjectList()}
       </main>
     </PublicLayout>
   );

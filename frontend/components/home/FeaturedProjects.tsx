@@ -27,7 +27,7 @@ export function FeaturedProjects() {
 
   useEffect(() => {
     api.get<ProyectoRecord[]>('/proyectos')
-      .then(data => setProjects(data.slice(0, 2).map(toProjectCard)))
+      .then(data => setProjects(data.slice(0, 2).map((project, index) => toProjectCard(project, index))))
       .catch(() => setProjects([]));
   }, []);
 

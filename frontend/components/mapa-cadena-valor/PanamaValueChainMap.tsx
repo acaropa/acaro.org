@@ -21,7 +21,7 @@ export default function PanamaValueChainMap({
   description = "Consulta la distribución de actores vinculados a la cadena de valor del café robusta en el territorio nacional.",
   initialFilter = "todos",
   onDistrictClick,
-}: PanamaValueChainMapProps) {
+}: Readonly<PanamaValueChainMapProps>) {
   const {
     filter,
     setFilter,
@@ -51,6 +51,32 @@ export default function PanamaValueChainMap({
     !state.dataError &&
     state.data !== null &&
     total === 0;
+
+  function renderDistrictMap() {
+    if (state.geometryError) {
+      return (
+        <div className={styles.errorState} role="alert">
+          <strong>No se pudo cargar el mapa de distritos.</strong>
+          <p>{state.geometryError}</p>
+          <button type="button" onClick={retryGeometry}>
+            Reintentar mapa
+          </button>
+        </div>
+      );
+    }
+    if (state.loadingGeometry) {
+      return <DataLoadingState label="Preparando el territorio..." className="min-h-[430px]" />;
+    }
+    return (
+      <DistrictMapSvg
+        districts={projectedDistricts}
+        dataByCode={districtDataByCode}
+        selectedDistrictId={selectedDistrict?.districtId ?? null}
+        loadingData={state.loadingData}
+        onSelect={handleDistrictSelect}
+      />
+    );
+  }
 
   return (
     <section className={styles.shell}>
@@ -82,27 +108,7 @@ export default function PanamaValueChainMap({
         }}
       />
 
-      {state.geometryError ? (
-        <div className={styles.errorState} role="alert">
-          <strong>No se pudo cargar el mapa de distritos.</strong>
-          <p>{state.geometryError}</p>
-          <button type="button" onClick={retryGeometry}>
-            Reintentar mapa
-          </button>
-        </div>
-      ) : state.loadingGeometry ? (
-        <DataLoadingState label="Preparando el territorio..." className="min-h-[430px]" />
-      ) : (
-        <DistrictMapSvg
-          districts={projectedDistricts}
-          dataByCode={districtDataByCode}
-          selectedDistrictId={
-            selectedDistrict?.districtId ?? null
-          }
-          loadingData={state.loadingData}
-          onSelect={handleDistrictSelect}
-        />
-      )}
+      {renderDistrictMap()}
 
       {state.dataError && (
         <div className={styles.inlineError} role="alert">

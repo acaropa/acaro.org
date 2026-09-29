@@ -2,7 +2,7 @@
 
 import { AppIcon } from "@/components/ui/AppIcon"
 
-import { useCallback, useEffect, useState } from 'react';
+import { useId, useCallback, useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { Modal, ModalActions } from '@/components/ui/Modal';
@@ -20,6 +20,7 @@ interface UserRecord {
 const empty = { email: '', password: '', role: 'visitante', full_name: '' };
 
 export default function AdminUsuarios() {
+  const fieldId = useId();
   const { user, can } = useAuth();
   const canCreate = can(PERMISSIONS.USUARIOS_CREATE);
   const canUpdate = can(PERMISSIONS.USUARIOS_UPDATE);
@@ -44,7 +45,7 @@ export default function AdminUsuarios() {
     void load();
   }, [load]);
 
-  async function create(event: React.FormEvent) {
+  async function create(event: React.SubmitEvent) {
     event.preventDefault();
     try {
       await api.post('/usuarios', form);
@@ -113,26 +114,26 @@ export default function AdminUsuarios() {
         <form onSubmit={create} className="relative z-10">
           <div className="relative z-10 grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Correo Electrónico *</label>
-              <input required type="email" placeholder="usuario@ejemplo.com" value={form.email}
+              <label htmlFor={`${fieldId}-1`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Correo Electrónico *</label>
+              <input id={`${fieldId}-1`} required type="email" placeholder="usuario@ejemplo.com" value={form.email}
                 onChange={event => setForm(current => ({ ...current, email: event.target.value }))}
                 className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
             </div>
             <div>
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Nombre visible</label>
-              <input type="text" placeholder="Nombre que verá el público" value={form.full_name}
+              <label htmlFor={`${fieldId}-2`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Nombre visible</label>
+              <input id={`${fieldId}-2`} type="text" placeholder="Nombre que verá el público" value={form.full_name}
                 onChange={event => setForm(current => ({ ...current, full_name: event.target.value }))}
                 className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
             </div>
             <div>
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Contraseña *</label>
-              <input required minLength={12} type="password" placeholder="Mínimo 12 caracteres" value={form.password}
+              <label htmlFor={`${fieldId}-3`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Contraseña *</label>
+              <input id={`${fieldId}-3`} required minLength={12} type="password" placeholder="Mínimo 12 caracteres" value={form.password}
                 onChange={event => setForm(current => ({ ...current, password: event.target.value }))}
                 className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
             </div>
             <div>
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Rol asignado</label>
-              <select value={form.role} onChange={event => setForm(current => ({ ...current, role: event.target.value }))}
+              <label htmlFor={`${fieldId}-4`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Rol asignado</label>
+              <select id={`${fieldId}-4`} value={form.role} onChange={event => setForm(current => ({ ...current, role: event.target.value }))}
                 className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors">
                 <option value="visitante">Visitante</option>
                 <option value="tecnico">Técnico</option>
@@ -140,7 +141,7 @@ export default function AdminUsuarios() {
                 <option value="admin">Admin</option>
               </select>
             </div>
-            
+
             <ModalActions onCancel={() => setShowForm(false)} submitLabel="Crear usuario" />
           </div>
         </form>
@@ -149,19 +150,31 @@ export default function AdminUsuarios() {
       {error && <p className="rounded border-l-4 border-red-600 bg-red-50 p-4 font-body-md text-sm text-red-700 mb-8">{error}</p>}
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {users.map(record => (
+        {users.map(record => {
+  function resolveName() {
+    if (record.role === 'admin') {
+      return 'admin_panel_settings' as const;
+    }
+    if (record.role === 'supervisor') {
+      return 'manage_accounts' as const;
+    }
+    if (record.role === 'tecnico') {
+      return 'engineering' as const;
+    }
+    return 'person' as const;
+  }
+
+  return ((
           <article key={record.id} className="bg-card p-6 border border-border hover:border-primary/30 transition-colors flex flex-col group relative overflow-hidden">
             <div className="flex justify-between items-start mb-6">
               <div className="flex items-center justify-center w-12 h-12 rounded bg-surface text-muted">
-                <AppIcon name={record.role === 'admin' ? 'admin_panel_settings' :
-                   record.role === 'supervisor' ? 'manage_accounts' :
-                   record.role === 'tecnico' ? 'engineering' : 'person'} className="text-[24px]" />
+                <AppIcon name={resolveName()} className="text-[24px]" />
               </div>
-              <span className={`font-label-caps text-[10px] tracking-widest uppercase px-2 py-1 rounded shrink-0 ${Boolean(record.activo) ? 'bg-brand-green/10 text-brand-green' : 'bg-red-500/10 text-red-600'}`}>
-                {Boolean(record.activo) ? 'Activo' : 'Desactivado'}
+              <span className={`font-label-caps text-[10px] tracking-widest uppercase px-2 py-1 rounded shrink-0 ${record.activo ? 'bg-brand-green/10 text-brand-green' : 'bg-red-500/10 text-red-600'}`}>
+                {record.activo ? 'Activo' : 'Desactivado'}
               </span>
             </div>
-            
+
             <h2 className="font-headline-md text-lg font-bold text-foreground mb-1 truncate" title={record.email}>
               {record.full_name || record.email}
             </h2>
@@ -210,10 +223,10 @@ export default function AdminUsuarios() {
                 )}
               </div>
             </div>
-            
+
             {canDisable && record.id !== user?.id && (
               <div className="flex justify-end pt-4 border-t border-border/50">
-                {Boolean(record.activo) ? (
+                {record.activo ? (
                   <button onClick={() => void disable(record.id)} className="flex items-center gap-1 text-sm font-medium text-red-600 hover:text-red-800 transition-colors">
                     <AppIcon name="block" className="text-[16px]" /> Desactivar cuenta
                   </button>
@@ -223,7 +236,8 @@ export default function AdminUsuarios() {
               </div>
             )}
           </article>
-        ))}
+        ));
+})}
       </div>
     </>
   );

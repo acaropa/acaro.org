@@ -5,7 +5,7 @@ import Image from 'next/image';
 
 import { AppIcon } from "@/components/ui/AppIcon"
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useId, useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Modal, ModalActions } from '@/components/ui/Modal';
 import { api, apiAssetUrl } from '@/lib/api';
@@ -79,6 +79,7 @@ const reviewTabs: Array<{ state: DocumentState; label: string }> = [
 ];
 
 export default function AdminBiblioteca() {
+  const fieldId = useId();
   const { user, can } = useAuth();
   const canReview = can(PERMISSIONS.BIBLIOTECA_REVIEW);
   const canDelete = can(PERMISSIONS.BIBLIOTECA_DELETE);
@@ -117,7 +118,7 @@ export default function AdminBiblioteca() {
   }, [load]);
 
   const title = canReview && !mineOnly ? 'Revisión de biblioteca' : 'Mis documentos';
-  const editableStates: DocumentState[] = ['borrador', 'pendiente_revision', 'requiere_correccion'];
+  const editableStates: Set<DocumentState> = new Set(['borrador', 'pendiente_revision', 'requiere_correccion']);
 
   function resetForm() {
     setForm(emptyForm);
@@ -153,7 +154,38 @@ export default function AdminBiblioteca() {
     setShowForm(true);
   }
 
-  async function save(event: React.FormEvent) {
+  function buildDocumentPayload() {
+    const payload: Record<string, unknown> = { ...form };
+    payload.etiquetas = form.etiquetas
+      ? form.etiquetas
+          .split(',')
+          .map((t: string) => t.trim())
+          .filter(Boolean)
+      : null;
+    payload.serie = form.serie.trim() || null;
+    payload.orden_lectura = form.orden_lectura ? Number(form.orden_lectura) : null;
+    payload.destacado = Boolean(form.destacado);
+    payload.orden_portada = form.orden_portada ? Number(form.orden_portada) : null;
+    if (uploadMode === 'file' && file) {
+      delete payload.archivo_url;
+      payload.archivo_base64 = file.base64;
+      payload.archivo_nombre = file.fileName;
+    } else if (uploadMode === 'keep') {
+      delete payload.archivo_url; // el backend mantiene el archivo existente
+    }
+    if (coverMode === 'file' && cover) {
+      delete payload.imagen_portada;
+      payload.portada_base64 = cover.base64;
+      payload.portada_nombre = cover.fileName;
+    } else if (coverMode === 'keep') {
+      delete payload.imagen_portada; // el backend mantiene la portada existente
+    } else {
+      payload.imagen_portada = form.imagen_portada.trim() || null;
+    }
+    return payload;
+  }
+
+  async function save(event: React.SubmitEvent) {
     event.preventDefault();
     setSaving(true);
     setError('');
@@ -173,30 +205,7 @@ export default function AdminBiblioteca() {
           return;
         }
       }
-      const payload: Record<string, unknown> = { ...form };
-      payload.etiquetas = form.etiquetas
-        ? form.etiquetas.split(',').map((t: string) => t.trim()).filter(Boolean)
-        : null;
-      payload.serie = form.serie.trim() || null;
-      payload.orden_lectura = form.orden_lectura ? Number(form.orden_lectura) : null;
-      payload.destacado = Boolean(form.destacado);
-      payload.orden_portada = form.orden_portada ? Number(form.orden_portada) : null;
-      if (uploadMode === 'file' && file) {
-        delete payload.archivo_url;
-        payload.archivo_base64 = file.base64;
-        payload.archivo_nombre = file.fileName;
-      } else if (uploadMode === 'keep') {
-        delete payload.archivo_url; // el backend mantiene el archivo existente
-      }
-      if (coverMode === 'file' && cover) {
-        delete payload.imagen_portada;
-        payload.portada_base64 = cover.base64;
-        payload.portada_nombre = cover.fileName;
-      } else if (coverMode === 'keep') {
-        delete payload.imagen_portada; // el backend mantiene la portada existente
-      } else {
-        payload.imagen_portada = form.imagen_portada.trim() || null;
-      }
+      const payload = buildDocumentPayload();
       if (editing) {
         await api.put(`/biblioteca/${editing.id}`, payload);
         if (editing.estado === 'requiere_correccion' && editing.creado_por === user?.id) {
@@ -242,6 +251,173 @@ export default function AdminBiblioteca() {
   }
 
   const tabs = useMemo(() => reviewTabs, []);
+
+  function renderDocumentList() {
+    if (loading) {
+      return <DataLoadingState label="Cargando biblioteca..." className="py-12" />;
+    }
+    if (documents.length === 0) {
+      return (
+        <div className="bg-surface/30 border border-border border-dashed p-16 flex flex-col items-center justify-center text-center">
+          <AppIcon name="description" className="text-[48px] text-muted mb-4 opacity-50" />
+          <h3 className="font-headline-md text-xl font-bold text-foreground mb-2">Sin documentos</h3>
+          <p className="font-body-md text-muted max-w-md">
+            No se encontraron documentos en este estado.
+          </p>
+        </div>
+      );
+    }
+    return (
+      <div className="flex flex-col gap-4">
+        {documents.map((document) => {
+          const isOwner = document.creado_por === user?.id;
+          return (
+            <div
+              key={document.id}
+              className="bg-card p-6 border border-border hover:border-primary/30 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-6 group"
+            >
+              {document.imagen_portada && (
+                <div className="relative h-24 w-full shrink-0 overflow-hidden rounded-lg border border-border bg-surface md:w-36">
+                  <Image
+                    src={apiAssetUrl(document.imagen_portada)}
+                    alt={`Portada de ${document.titulo}`}
+                    fill
+                    sizes="(min-width: 768px) 144px, 100vw"
+                    className="object-cover"
+                  />
+                </div>
+              )}
+              <div className="flex-1">
+                <div className="flex flex-wrap items-center gap-2 mb-2">
+                  <span className="shrink-0 whitespace-nowrap font-label-caps text-[10px] tracking-widest uppercase text-accent bg-accent/10 px-2 py-1 rounded">
+                    {document.categoria}
+                  </span>
+                  <span className="shrink-0 whitespace-nowrap text-xs text-muted font-mono">
+                    {visibilityLabel(document.visibilidad)}
+                  </span>
+                  {Boolean(document.destacado) && (
+                    <span className="shrink-0 whitespace-nowrap text-[10px] tracking-wide text-accent bg-accent/10 border border-accent/20 px-2 py-1 rounded">
+                      Destacado{document.orden_portada ? ` · Orden ${document.orden_portada}` : ''}
+                    </span>
+                  )}
+                  {document.serie && (
+                    <span className="shrink-0 whitespace-nowrap text-[10px] tracking-wide text-primary/80 bg-primary/5 border border-primary/15 px-2 py-1 rounded">
+                      📖 {document.serie}
+                      {document.orden_lectura ? ` · Paso ${document.orden_lectura}` : ''}
+                    </span>
+                  )}
+                  {document.etiquetas?.map((tag) => (
+                    <span
+                      key={tag}
+                      className="shrink-0 whitespace-nowrap text-[10px] tracking-wide text-muted bg-surface px-2 py-0.5 rounded border border-border"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+                <a
+                  href={apiAssetUrl(document.archivo_url)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block font-headline-md text-lg font-bold text-foreground hover:text-primary transition-colors mb-1"
+                >
+                  {document.titulo}
+                </a>
+                <p className="text-sm text-muted font-body-md">
+                  PDF · {date(document.fecha_creacion)} · Subido por:{' '}
+                  <span className="text-foreground">
+                    {document.creado_por_nombre || document.creado_por_email}
+                  </span>
+                </p>
+
+                {document.observacion_revision && (
+                  <div className="mt-3 bg-red-50/50 border-l-2 border-red-500 p-3 text-sm text-red-800 font-body-md">
+                    <strong className="block text-xs uppercase tracking-widest mb-1 opacity-70">
+                      Observación
+                    </strong>
+                    {document.observacion_revision}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-col items-start md:items-end gap-4 shrink-0">
+                <span className="font-label-caps text-[11px] uppercase tracking-wider text-muted border border-border px-3 py-1">
+                  {stateLabels[document.estado]}
+                </span>
+
+                <div className="flex flex-wrap gap-4 md:gap-3">
+                  {(canReview || (isOwner && editableStates.has(document.estado))) && (
+                    <button
+                      onClick={() => startEdit(document)}
+                      className="flex items-center gap-1 text-sm font-medium text-foreground hover:text-primary transition-colors"
+                    >
+                      <AppIcon name="edit" className="text-[16px]" /> Editar
+                    </button>
+                  )}
+                  {canReview && document.estado === 'pendiente_revision' && (
+                    <>
+                      <button
+                        onClick={() => void review(document, 'approve')}
+                        className="flex items-center gap-1 text-sm font-medium text-brand-green hover:underline"
+                      >
+                        <AppIcon name="check_circle" className="text-[16px]" /> Aprobar
+                      </button>
+                      <button
+                        onClick={() => void review(document, 'request_changes')}
+                        className="flex items-center gap-1 text-sm font-medium text-accent hover:underline"
+                      >
+                        <AppIcon name="assignment_return" className="text-[16px]" /> Pedir corrección
+                      </button>
+                      <button
+                        onClick={() => void review(document, 'reject')}
+                        className="flex items-center gap-1 text-sm font-medium text-red-600 hover:underline"
+                      >
+                        <AppIcon name="cancel" className="text-[16px]" /> Rechazar
+                      </button>
+                    </>
+                  )}
+                  {canReview && document.estado === 'aprobado' && (
+                    <button
+                      onClick={() => void review(document, 'archive')}
+                      className="flex items-center gap-1 text-sm font-medium text-muted hover:text-foreground"
+                    >
+                      <AppIcon name="inventory_2" className="text-[16px]" /> Archivar
+                    </button>
+                  )}
+                  {canReview && document.estado === 'archivado' && (
+                    <button
+                      onClick={() => void review(document, 'unarchive')}
+                      className="flex items-center gap-1 text-sm font-medium text-brand-green hover:underline"
+                    >
+                      <AppIcon name="unarchive" className="text-[16px]" /> Desarchivar
+                    </button>
+                  )}
+                  {canDelete && (
+                    <button
+                      onClick={() => void remove(document)}
+                      className="flex items-center gap-1 text-sm font-medium text-red-600 hover:text-red-800"
+                    >
+                      <AppIcon name="delete" className="text-[16px]" /> Eliminar
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  function resolveSubmitLabel() {
+    if (editing?.estado === 'requiere_correccion') {
+      return 'Guardar y reenviar' as const;
+    }
+    if (editing) {
+      return 'Guardar cambios' as const;
+    }
+    return 'Enviar a revisión' as const;
+  }
 
   return (
     <>
@@ -303,12 +479,12 @@ export default function AdminBiblioteca() {
         <form onSubmit={save} className="relative z-10">
           <div className="relative z-10 grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="md:col-span-2">
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Título</label>
-              <input required value={form.titulo} onChange={event => setForm(current => ({ ...current, titulo: event.target.value }))} className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
+              <label htmlFor={`${fieldId}-1`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Título</label>
+              <input id={`${fieldId}-1`} required value={form.titulo} onChange={event => setForm(current => ({ ...current, titulo: event.target.value }))} className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
             </div>
             <div>
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Categoría</label>
-              <select required value={form.categoria} onChange={event => setForm(current => ({ ...current, categoria: event.target.value }))} className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors">
+              <label htmlFor={`${fieldId}-2`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Categoría</label>
+              <select id={`${fieldId}-2`} required value={form.categoria} onChange={event => setForm(current => ({ ...current, categoria: event.target.value }))} className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors">
                 <option value="" disabled>Selecciona una categoría</option>
                 {libraryCategories.map(item => (
                   <option key={item} value={item}>{item}</option>
@@ -316,8 +492,8 @@ export default function AdminBiblioteca() {
               </select>
             </div>
             <div>
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Visibilidad</label>
-              <select value={form.visibilidad} onChange={event => setForm(current => ({ ...current, visibilidad: event.target.value as 'publica' | 'interna' }))} className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors">
+              <label htmlFor={`${fieldId}-3`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Visibilidad</label>
+              <select id={`${fieldId}-3`} value={form.visibilidad} onChange={event => setForm(current => ({ ...current, visibilidad: event.target.value as 'publica' | 'interna' }))} className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors">
                 <option value="interna">Interna</option>
                 <option value="publica">Pública al aprobarse</option>
               </select>
@@ -356,8 +532,8 @@ export default function AdminBiblioteca() {
                   />
                   {uploadMode === 'url' ? (
                     <div>
-                      <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Enlace al PDF</label>
-                      <input required type="url" pattern="https?://.*\.pdf(\?.*)?$" title="Usa un enlace directo a un archivo .pdf" value={form.archivo_url} onChange={event => setForm(current => ({ ...current, archivo_url: event.target.value }))} className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
+                      <label htmlFor={`${fieldId}-4`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Enlace al PDF</label>
+                      <input id={`${fieldId}-4`} required type="url" pattern="https?://.*\.pdf(\?.*)?$" title="Usa un enlace directo a un archivo .pdf" value={form.archivo_url} onChange={event => setForm(current => ({ ...current, archivo_url: event.target.value }))} className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
                       <p className="mt-1 text-[11px] text-muted">Debe ser un enlace directo a un archivo .pdf. Quedará pendiente de revisión.</p>
                     </div>
                   ) : (
@@ -376,8 +552,8 @@ export default function AdminBiblioteca() {
                 </>
               )}
             </div>
-            <div className="md:col-span-2">
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Imagen de portada (opcional)</label>
+            <fieldset className="md:col-span-2">
+              <legend className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Imagen de portada (opcional)</legend>
               {coverMode === 'keep' ? (
                 <div className="rounded border border-border bg-surface flex items-center gap-4 p-3">
                   <Image src={apiAssetUrl(editing?.imagen_portada || '')} alt="Portada actual" width={96} height={64} className="h-16 w-24 shrink-0 rounded border border-border object-cover" />
@@ -416,24 +592,24 @@ export default function AdminBiblioteca() {
                   )}
                 </>
               )}
-            </div>
+            </fieldset>
             <div className="md:col-span-2">
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Etiquetas</label>
-              <input value={form.etiquetas} onChange={event => setForm(current => ({ ...current, etiquetas: event.target.value }))} placeholder="Ej: Permisología, Legal, Productores (separadas por coma)" className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
+              <label htmlFor={`${fieldId}-5`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Etiquetas</label>
+              <input id={`${fieldId}-5`} value={form.etiquetas} onChange={event => setForm(current => ({ ...current, etiquetas: event.target.value }))} placeholder="Ej: Permisología, Legal, Productores (separadas por coma)" className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
               <p className="mt-1 text-[11px] text-muted">Separa las etiquetas con comas. Estas ayudan a los usuarios a encontrar documentos relacionados.</p>
             </div>
             <div>
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Serie / Curso (opcional)</label>
-              <input value={form.serie} onChange={event => setForm(current => ({ ...current, serie: event.target.value }))} placeholder="Ej: Permisología del Café" className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
+              <label htmlFor={`${fieldId}-6`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Serie / Curso (opcional)</label>
+              <input id={`${fieldId}-6`} value={form.serie} onChange={event => setForm(current => ({ ...current, serie: event.target.value }))} placeholder="Ej: Permisología del Café" className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
               <p className="mt-1 text-[11px] text-muted">Agrupa documentos en un curso o serie paso a paso.</p>
             </div>
             <div>
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">N° de paso en la serie (opcional)</label>
-              <input type="number" min="1" value={form.orden_lectura} onChange={event => setForm(current => ({ ...current, orden_lectura: event.target.value }))} placeholder="Ej: 1" className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
+              <label htmlFor={`${fieldId}-7`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">N° de paso en la serie (opcional)</label>
+              <input id={`${fieldId}-7`} type="number" min="1" value={form.orden_lectura} onChange={event => setForm(current => ({ ...current, orden_lectura: event.target.value }))} placeholder="Ej: 1" className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors" />
               <p className="mt-1 text-[11px] text-muted">El orden en que se debe leer este documento dentro de la serie.</p>
             </div>
-            <div>
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Portada editorial</label>
+            <fieldset>
+              <legend className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Portada editorial</legend>
               <label className="flex items-center gap-3 border border-border bg-background px-4 py-3 text-sm text-foreground">
                 <input
                   type="checkbox"
@@ -441,13 +617,14 @@ export default function AdminBiblioteca() {
                   onChange={event => setForm(current => ({ ...current, destacado: event.target.checked }))}
                   className="h-4 w-4 accent-primary"
                 />
-                Destacar en la portada de biblioteca
-              </label>
+
+                <span>Destacar en la portada de biblioteca</span>
+</label>
               <p className="mt-1 text-[11px] text-muted">Los destacados aparecen primero en /biblioteca.</p>
-            </div>
+            </fieldset>
             <div>
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Orden en portada (opcional)</label>
-              <input
+              <label htmlFor={`${fieldId}-8`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Orden en portada (opcional)</label>
+              <input id={`${fieldId}-8`}
                 type="number"
                 min="1"
                 value={form.orden_portada}
@@ -458,13 +635,13 @@ export default function AdminBiblioteca() {
               <p className="mt-1 text-[11px] text-muted">Menor numero aparece antes entre los destacados.</p>
             </div>
             <div className="md:col-span-2">
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Descripción</label>
-              <textarea value={form.descripcion} onChange={event => setForm(current => ({ ...current, descripcion: event.target.value }))} rows={3} className="w-full bg-background border border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors resize-none" />
+              <label htmlFor={`${fieldId}-9`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Descripción</label>
+              <textarea id={`${fieldId}-9`} value={form.descripcion} onChange={event => setForm(current => ({ ...current, descripcion: event.target.value }))} rows={3} className="w-full bg-background border border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors resize-none" />
             </div>
-            
+
             <ModalActions
               onCancel={resetForm}
-              submitLabel={editing?.estado === 'requiere_correccion' ? 'Guardar y reenviar' : editing ? 'Guardar cambios' : 'Enviar a revisión'}
+              submitLabel={resolveSubmitLabel()}
               pending={saving}
             />
           </div>
@@ -473,112 +650,7 @@ export default function AdminBiblioteca() {
 
       {error && <p className="rounded border-l-4 border-red-600 bg-red-50 p-4 font-body-md text-sm text-red-700">{error}</p>}
 
-      {loading ? (
-        <DataLoadingState label="Cargando biblioteca..." className="py-12" />
-      ) : documents.length === 0 ? (
-        <div className="bg-surface/30 border border-border border-dashed p-16 flex flex-col items-center justify-center text-center">
-          <AppIcon name="description" className="text-[48px] text-muted mb-4 opacity-50" />
-          <h3 className="font-headline-md text-xl font-bold text-foreground mb-2">Sin documentos</h3>
-          <p className="font-body-md text-muted max-w-md">No se encontraron documentos en este estado.</p>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-4">
-          {documents.map(document => {
-            const isOwner = document.creado_por === user?.id;
-            return (
-              <div key={document.id} className="bg-card p-6 border border-border hover:border-primary/30 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-6 group">
-                {document.imagen_portada && (
-                  <div className="relative h-24 w-full shrink-0 overflow-hidden rounded-lg border border-border bg-surface md:w-36">
-                    <Image
-                      src={apiAssetUrl(document.imagen_portada)}
-                      alt={`Portada de ${document.titulo}`}
-                      fill
-                      sizes="(min-width: 768px) 144px, 100vw"
-                      className="object-cover"
-                    />
-                  </div>
-                )}
-                <div className="flex-1">
-                  <div className="flex flex-wrap items-center gap-2 mb-2">
-                    <span className="shrink-0 whitespace-nowrap font-label-caps text-[10px] tracking-widest uppercase text-accent bg-accent/10 px-2 py-1 rounded">
-                      {document.categoria}
-                    </span>
-                    <span className="shrink-0 whitespace-nowrap text-xs text-muted font-mono">{visibilityLabel(document.visibilidad)}</span>
-                    {Boolean(document.destacado) && (
-                      <span className="shrink-0 whitespace-nowrap text-[10px] tracking-wide text-accent bg-accent/10 border border-accent/20 px-2 py-1 rounded">
-                        Destacado{document.orden_portada ? ` · Orden ${document.orden_portada}` : ''}
-                      </span>
-                    )}
-                    {document.serie && (
-                      <span className="shrink-0 whitespace-nowrap text-[10px] tracking-wide text-primary/80 bg-primary/5 border border-primary/15 px-2 py-1 rounded">
-                        📖 {document.serie}{document.orden_lectura ? ` · Paso ${document.orden_lectura}` : ''}
-                      </span>
-                    )}
-                    {document.etiquetas?.map(tag => (
-                      <span key={tag} className="shrink-0 whitespace-nowrap text-[10px] tracking-wide text-muted bg-surface px-2 py-0.5 rounded border border-border">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                  <a href={apiAssetUrl(document.archivo_url)} target="_blank" rel="noreferrer" className="block font-headline-md text-lg font-bold text-foreground hover:text-primary transition-colors mb-1">
-                    {document.titulo}
-                  </a>
-                  <p className="text-sm text-muted font-body-md">PDF · {date(document.fecha_creacion)} · Subido por: <span className="text-foreground">{document.creado_por_nombre || document.creado_por_email}</span></p>
-                  
-                  {document.observacion_revision && (
-                    <div className="mt-3 bg-red-50/50 border-l-2 border-red-500 p-3 text-sm text-red-800 font-body-md">
-                      <strong className="block text-xs uppercase tracking-widest mb-1 opacity-70">Observación</strong> 
-                      {document.observacion_revision}
-                    </div>
-                  )}
-                </div>
-                
-                <div className="flex flex-col items-start md:items-end gap-4 shrink-0">
-                  <span className="font-label-caps text-[11px] uppercase tracking-wider text-muted border border-border px-3 py-1">
-                    {stateLabels[document.estado]}
-                  </span>
-                  
-                  <div className="flex flex-wrap gap-4 md:gap-3">
-                    {(canReview || (isOwner && editableStates.includes(document.estado))) && (
-                      <button onClick={() => startEdit(document)} className="flex items-center gap-1 text-sm font-medium text-foreground hover:text-primary transition-colors">
-                        <AppIcon name="edit" className="text-[16px]" /> Editar
-                      </button>
-                    )}
-                    {canReview && document.estado === 'pendiente_revision' && (
-                      <>
-                        <button onClick={() => void review(document, 'approve')} className="flex items-center gap-1 text-sm font-medium text-brand-green hover:underline">
-                          <AppIcon name="check_circle" className="text-[16px]" /> Aprobar
-                        </button>
-                        <button onClick={() => void review(document, 'request_changes')} className="flex items-center gap-1 text-sm font-medium text-accent hover:underline">
-                          <AppIcon name="assignment_return" className="text-[16px]" /> Pedir corrección
-                        </button>
-                        <button onClick={() => void review(document, 'reject')} className="flex items-center gap-1 text-sm font-medium text-red-600 hover:underline">
-                          <AppIcon name="cancel" className="text-[16px]" /> Rechazar
-                        </button>
-                      </>
-                    )}
-                    {canReview && document.estado === 'aprobado' && (
-                      <button onClick={() => void review(document, 'archive')} className="flex items-center gap-1 text-sm font-medium text-muted hover:text-foreground">
-                        <AppIcon name="inventory_2" className="text-[16px]" /> Archivar
-                      </button>
-                    )}
-                    {canReview && document.estado === 'archivado' && (
-                      <button onClick={() => void review(document, 'unarchive')} className="flex items-center gap-1 text-sm font-medium text-brand-green hover:underline">
-                        <AppIcon name="unarchive" className="text-[16px]" /> Desarchivar
-                      </button>
-                    )}
-                    {canDelete && (
-                      <button onClick={() => void remove(document)} className="flex items-center gap-1 text-sm font-medium text-red-600 hover:text-red-800">
-                        <AppIcon name="delete" className="text-[16px]" /> Eliminar
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      {renderDocumentList()}
     </>
   );
 }

@@ -104,6 +104,63 @@ export default function ContactoAdminPage() {
 
   const noLeidos = mensajes.filter(m => !m.leido).length;
 
+  function renderMessageList() {
+    if (loading) {
+      return <DataLoadingState label="Cargando mensajes..." className="py-16" />;
+    }
+    if (mensajes.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-16 text-center px-6">
+          <Mail className="mb-3 h-10 w-10 text-muted" />
+          <p className="text-sm text-muted">No hay mensajes recibidos.</p>
+        </div>
+      );
+    }
+    return (
+      <ul className="divide-y divide-border">
+        {mensajes.map((msg) => (
+          <li key={msg.id}>
+            <button
+              type="button"
+              onClick={() => void openMensaje(msg)}
+              className={`w-full text-left px-4 py-4 transition-colors hover:bg-surface ${selected?.id === msg.id ? 'bg-surface' : ''}`}
+            >
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 shrink-0">
+                  {msg.leido ? (
+                    <MailOpen className="h-4 w-4 text-muted" />
+                  ) : (
+                    <Mail className="h-4 w-4 text-primary" />
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <span
+                      className={`truncate text-sm ${msg.leido ? 'font-medium text-foreground' : 'font-bold text-foreground'}`}
+                    >
+                      {msg.nombre}
+                    </span>
+                    {msg.respondido === 1 && (
+                      <span className="shrink-0 rounded-full bg-green-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-green-700">
+                        Respondido
+                      </span>
+                    )}
+                  </div>
+                  <p
+                    className={`mt-0.5 truncate text-xs ${msg.leido ? 'text-muted' : 'font-semibold text-foreground'}`}
+                  >
+                    {msg.asunto}
+                  </p>
+                  <p className="mt-1 text-[10px] text-muted">{formatDate(msg.created_at)}</p>
+                </div>
+              </div>
+            </button>
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
   return (
     <>
       <section className="mb-8">
@@ -136,53 +193,7 @@ export default function ContactoAdminPage() {
       <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
         {/* Lista de mensajes */}
         <div className="md:col-span-4 rounded-xl border border-border bg-card overflow-hidden">
-          {loading ? (
-            <DataLoadingState label="Cargando mensajes..." className="py-16" />
-          ) : mensajes.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center px-6">
-              <Mail className="mb-3 h-10 w-10 text-muted" />
-              <p className="text-sm text-muted">No hay mensajes recibidos.</p>
-            </div>
-          ) : (
-            <ul className="divide-y divide-border">
-              {mensajes.map(msg => (
-                <li key={msg.id}>
-                  <button
-                    type="button"
-                    onClick={() => void openMensaje(msg)}
-                    className={`w-full text-left px-4 py-4 transition-colors hover:bg-surface ${selected?.id === msg.id ? 'bg-surface' : ''}`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="mt-0.5 shrink-0">
-                        {msg.leido
-                          ? <MailOpen className="h-4 w-4 text-muted" />
-                          : <Mail className="h-4 w-4 text-primary" />
-                        }
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center justify-between gap-2">
-                          <span className={`truncate text-sm ${msg.leido ? 'font-medium text-foreground' : 'font-bold text-foreground'}`}>
-                            {msg.nombre}
-                          </span>
-                          {msg.respondido === 1 && (
-                            <span className="shrink-0 rounded-full bg-green-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-green-700">
-                              Respondido
-                            </span>
-                          )}
-                        </div>
-                        <p className={`mt-0.5 truncate text-xs ${msg.leido ? 'text-muted' : 'font-semibold text-foreground'}`}>
-                          {msg.asunto}
-                        </p>
-                        <p className="mt-1 text-[10px] text-muted">
-                          {formatDate(msg.created_at)}
-                        </p>
-                      </div>
-                    </div>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+          {renderMessageList()}
         </div>
 
         {/* Panel de mensaje */}

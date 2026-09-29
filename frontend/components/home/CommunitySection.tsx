@@ -32,8 +32,9 @@ export function CommunitySection() {
             Gente del Robusta
           </h2>
           <blockquote className="relative mb-12 border-l border-[#ae8d87]/30 pl-10 font-serif text-lg italic leading-8 text-[#c9b5b0]">
-            &ldquo;Desde la finca hasta la taza, cada persona aporta conocimiento, trabajo y orgullo al café robusta panameño.&rdquo;
-            <span className="mt-4 block font-sans not-italic text-sm font-bold uppercase tracking-widest text-white">
+
+            &ldquo;Desde la finca hasta la taza, cada persona aporta conocimiento, trabajo y orgullo al café robusta panameño.&rdquo;{" "}
+<span className="mt-4 block font-sans not-italic text-sm font-bold uppercase tracking-widest text-white">
               ACARO OBC
             </span>
           </blockquote>
@@ -82,9 +83,9 @@ export function CommunitySection() {
 
             {producers.length > 1 && (
               <div className="mt-6 flex justify-start gap-2">
-                {producers.map((_, i) => (
+                {producers.map((producer, i) => (
                   <button
-                    key={i}
+                    key={producer.id}
                     onClick={() => setCurrent(i)}
                     aria-label={`Productor ${i + 1}`}
                     className={`h-1.5 rounded-full transition-all duration-300 ${

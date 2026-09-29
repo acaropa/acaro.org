@@ -9,7 +9,7 @@ interface AdminTopbarProps {
   onToggleSidebar: () => void
 }
 
-export function AdminTopbar({ sidebarOpen, onToggleSidebar }: AdminTopbarProps) {
+export function AdminTopbar({ sidebarOpen, onToggleSidebar }: Readonly<AdminTopbarProps>) {
   const { user } = useAuth()
 
   return (
@@ -31,7 +31,7 @@ export function AdminTopbar({ sidebarOpen, onToggleSidebar }: AdminTopbarProps) 
           <Search className="mr-2 h-5 w-5 text-[#5a3424]" aria-hidden="true" />
           <input className="bg-transparent border-none focus:outline-none focus:ring-0 text-[15px] text-[#2b1710] placeholder:text-[#765e50] w-48" placeholder="Buscar..." type="text" />
         </div>
-        
+
         <div className="flex items-center gap-4">
           <button className="text-[#765e50] hover:text-[#2b1710] transition-colors duration-200">
             <Bell className="h-5 w-5" aria-hidden="true" />
@@ -39,7 +39,7 @@ export function AdminTopbar({ sidebarOpen, onToggleSidebar }: AdminTopbarProps) 
           <button className="text-[#765e50] hover:text-[#2b1710] transition-colors duration-200">
             <Settings className="h-5 w-5" aria-hidden="true" />
           </button>
-          
+
           <div className="h-8 w-8 rounded-full border border-[#d8cabb] bg-[#faf9f5] flex items-center justify-center text-[#2b1710] font-bold shrink-0">
             {user?.email?.charAt(0).toUpperCase() || 'A'}
           </div>

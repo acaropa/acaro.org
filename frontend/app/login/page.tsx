@@ -19,7 +19,7 @@ export default function LoginPage() {
   const [error, setError]       = useState('');
   const [loading, setLoading]   = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.SubmitEvent) {
     e.preventDefault();
     setError('');
     setLoading(true);
@@ -41,13 +41,13 @@ export default function LoginPage() {
         <div className="absolute inset-0 bg-primary/40 mix-blend-multiply z-10 transition-opacity duration-1000"></div>
         <div className="absolute inset-0 bg-gradient-to-t from-[#120c08]/80 to-transparent z-10"></div>
         <OptimizedImage
-          alt="Granos de café robusta en costal" 
-          className="absolute inset-0 w-full h-full object-cover z-0 transform hover:scale-105 transition-transform duration-[10s] ease-out" 
+          alt="Granos de café robusta en costal"
+          className="absolute inset-0 w-full h-full object-cover z-0 transform hover:scale-105 transition-transform duration-[10s] ease-out"
           src="/assets/login-bg-v2.jpg"
           priority
           sizes="50vw"
         />
-        
+
         {/* Back button top left */}
         <div className="absolute top-10 left-12 z-30">
           <Link href="/" className="inline-flex items-center gap-2 text-xs font-bold tracking-[0.2em] uppercase text-white hover:text-white transition-all bg-black/40 backdrop-blur-md px-5 py-2.5 rounded-full border border-white/20 hover:bg-black/60 shadow-lg">
@@ -60,23 +60,23 @@ export default function LoginPage() {
           <p className="text-lg text-[#fdf9f4]/90 drop-shadow">Plataforma interna para la gestión integral de nuestra cadena productiva.</p>
         </div>
       </div>
-      
+
       {/* Right Panel: Login Form */}
       <div className="w-full md:w-1/2 flex items-center justify-center p-6 md:p-12 relative overflow-hidden bg-[#fdf9f4]">
         {/* Logo */}
         <div className="absolute top-6 left-6 md:top-10 md:left-10 z-30">
           <Logo className="scale-90 origin-left" />
         </div>
-        
+
         {/* Mobile back button */}
         <Link href="/" className="md:hidden absolute top-6 right-6 z-30 flex items-center justify-center bg-white shadow-sm border border-outline-variant/20 rounded-full p-2 text-muted hover:text-primary transition-colors">
           <AppIcon name="close" className="text-[18px]" />
         </Link>
-        
+
         {/* Subtle decorative element (Glassmorphism blur blob) */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-[#d7a24a]/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#26170c]/5 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/3 pointer-events-none"></div>
-        
+
         <div className="w-full max-w-md flex flex-col relative z-20">
           {/* Header Identity */}
           <div className="flex flex-col items-center text-center gap-6 mb-12 mt-4">
@@ -89,17 +89,17 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-4">
               <div className="relative group">
-                <input 
-                  type="email" 
+                <input
+                  type="email"
                   id="email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  className="block px-4 pb-2.5 pt-6 w-full text-sm text-[#120c08] bg-[#efeeeb] hover:bg-[#e9e8e5] rounded-t-md border-0 border-b border-[#81756f] appearance-none focus:outline-none focus:ring-0 focus:border-[#26170c] focus:bg-[#e9e8e5] peer transition-colors" 
-                  placeholder=" " 
+                  className="block px-4 pb-2.5 pt-6 w-full text-sm text-[#120c08] bg-[#efeeeb] hover:bg-[#e9e8e5] rounded-t-md border-0 border-b border-[#81756f] appearance-none focus:outline-none focus:ring-0 focus:border-[#26170c] focus:bg-[#e9e8e5] peer transition-colors"
+                  placeholder=" "
                   required
                 />
-                <label 
-                  htmlFor="email" 
+                <label
+                  htmlFor="email"
                   className="absolute text-[15px] text-[#504442] duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] left-4 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 cursor-text font-medium"
                 >
                   Correo electrónico
@@ -107,17 +107,17 @@ export default function LoginPage() {
               </div>
 
               <div className="relative group">
-                <input 
-                  type={showPassword ? "text" : "password"} 
+                <input
+                  type={showPassword ? "text" : "password"}
                   id="password"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  className="block px-4 pb-2.5 pt-6 w-full text-sm text-[#120c08] bg-[#efeeeb] hover:bg-[#e9e8e5] rounded-t-md border-0 border-b border-[#81756f] appearance-none focus:outline-none focus:ring-0 focus:border-[#26170c] focus:bg-[#e9e8e5] peer transition-colors pr-12" 
-                  placeholder=" " 
+                  className="block px-4 pb-2.5 pt-6 w-full text-sm text-[#120c08] bg-[#efeeeb] hover:bg-[#e9e8e5] rounded-t-md border-0 border-b border-[#81756f] appearance-none focus:outline-none focus:ring-0 focus:border-[#26170c] focus:bg-[#e9e8e5] peer transition-colors pr-12"
+                  placeholder=" "
                   required
                 />
-                <label 
-                  htmlFor="password" 
+                <label
+                  htmlFor="password"
                   className="absolute text-[15px] text-[#504442] duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] left-4 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 cursor-text font-medium"
                 >
                   Contraseña
@@ -154,9 +154,9 @@ export default function LoginPage() {
               </div>
             )}
 
-            <button 
-              type="submit" 
-              disabled={loading} 
+            <button
+              type="submit"
+              disabled={loading}
               className="w-full h-12 mt-6 bg-[#26170c] hover:bg-[#120c08] text-[#fdf9f4] font-semibold rounded-md text-base shadow-lg transition-all flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {loading ? (

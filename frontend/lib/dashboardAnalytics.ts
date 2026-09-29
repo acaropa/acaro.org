@@ -97,7 +97,7 @@ export function buildDashboardMetrics(
 
 export function buildWeeklySeries(responses: RespuestaEncuesta[]): WeeklySeries[] {
   const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
-  
+
   let maxDateStr = ''
   for (const r of responses) {
     const dStr = (r.fecha_respuesta ?? '').slice(0, 10)
@@ -149,22 +149,25 @@ export function buildEventSuggestions(responses: RespuestaEncuesta[]): EventSugg
     }))
 }
 
-function resolveDetailValue(detail: RespuestaDetalle | undefined, question: EncuestaPregunta): string {
-  if (!detail) return ''
+function resolveDetailValue(
+  detail: RespuestaDetalle | undefined,
+  question: EncuestaPregunta,
+): string {
+  if (!detail) return '';
   if (question.tipo_pregunta === 'opcion_unica' || question.tipo_pregunta === 'opcion_multiple') {
-    const optionMap = new Map((question.opciones ?? []).map(o => [o.id, o.etiqueta_opcion]))
+    const optionMap = new Map((question.opciones ?? []).map((o) => [o.id, o.etiqueta_opcion]));
     return (detail.respuestas_opciones_seleccionadas ?? [])
-      .map(s => {
-        const label = optionMap.get(s.opcion_id) ?? String(s.opcion_id)
-        return s.texto_libre ? `${label}: ${s.texto_libre}` : label
+      .map((s) => {
+        const label = optionMap.get(s.opcion_id) ?? String(s.opcion_id);
+        return s.texto_libre ? `${label}: ${s.texto_libre}` : label;
       })
-      .join(' | ')
+      .join(' | ');
   }
-  if (detail.respuesta_texto != null) return String(detail.respuesta_texto)
-  if (detail.respuesta_numero != null) return String(detail.respuesta_numero)
-  if (detail.respuesta_booleano != null) return detail.respuesta_booleano ? 'Sí' : 'No'
-  if (detail.respuesta_fecha != null) return String(detail.respuesta_fecha)
-  return ''
+  if (detail.respuesta_texto != null) return String(detail.respuesta_texto);
+  if (detail.respuesta_numero != null) return String(detail.respuesta_numero);
+  if (detail.respuesta_booleano != null) return detail.respuesta_booleano ? 'Sí' : 'No';
+  if (detail.respuesta_fecha != null) return String(detail.respuesta_fecha);
+  return '';
 }
 
 export function buildQuestionAnalytics(
@@ -197,8 +200,6 @@ export function buildQuestionAnalytics(
         const label = question.opciones?.find(o => o.id === sel.opcion_id)?.etiqueta_opcion ?? String(sel.opcion_id)
         counts.set(label, (counts.get(label) ?? 0) + 1)
       }
-    } else if (question.tipo_pregunta === 'booleano') {
-      counts.set(val, (counts.get(val) ?? 0) + 1)
     } else {
       counts.set(val, (counts.get(val) ?? 0) + 1)
     }
@@ -266,7 +267,7 @@ function columnName(index: number): string {
   let value = index
   while (value > 0) {
     const remainder = (value - 1) % 26
-    name = String.fromCharCode(65 + remainder) + name
+    name = String.fromCodePoint(65 + remainder) + name
     value = Math.floor((value - 1) / 26)
   }
   return name

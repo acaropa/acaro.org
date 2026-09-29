@@ -6,7 +6,7 @@ interface EmptyStateProps {
   icon?: React.ReactNode;
 }
 
-export function EmptyState({ title, description, icon }: EmptyStateProps) {
+export function EmptyState({ title, description, icon }: Readonly<EmptyStateProps>) {
   return (
     <div className="flex flex-col items-center justify-center py-16 px-4 text-center rounded-2xl border-2 border-dashed border-border bg-surface/30">
       <div className="bg-surface p-4 rounded-full mb-4 text-muted">

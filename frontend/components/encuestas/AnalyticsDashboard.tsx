@@ -5,7 +5,7 @@ import { DataLoadingState } from "@/components/ui/TypingIndicator";
 
 import { AppIcon } from "@/components/ui/AppIcon"
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { Bar, BarChart, CartesianGrid, LineChart, Line, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { encuestasApi, type EncuestaPregunta, type RespuestaEncuesta, type EncuestaFull } from '@/lib/encuestas'
 import {
   buildDashboardMetrics, buildDailySeries, buildWeeklySeries,
@@ -14,7 +14,6 @@ import {
 } from '@/lib/dashboardAnalytics'
 import { useAuth } from '@/context/AuthContext'
 import { PERMISSIONS } from '@/lib/permissions'
-import { LineChart, Line } from 'recharts'
 // Modal removed — responses shown inline at bottom
 
 type ChartType = 'barras' | 'pastel' | 'dona'
@@ -22,7 +21,7 @@ const chartPalette = ['#2b1710', '#c28a3a', '#2f5d3a', '#8b6a4f', '#d7a24a', '#5
 
 interface Props { encuestaId: number }
 
-export function AnalyticsDashboard({ encuestaId }: Props) {
+export function AnalyticsDashboard({ encuestaId }: Readonly<Props>) {
   const { can } = useAuth()
   const canExport = can(PERMISSIONS.ENCUESTAS_RESULTS_EXPORT)
   const canDeleteResp = can(PERMISSIONS.ENCUESTAS_RESULTS_DELETE)
@@ -131,7 +130,7 @@ export function AnalyticsDashboard({ encuestaId }: Props) {
                 <p className="text-[10px] text-[#a08c7a] mt-0.5">Histórico completo</p>
               </div>
             </div>
-            
+
             <div className="rounded-xl border border-[#ede6db] bg-white p-6 shadow-sm flex items-start gap-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#eaf1ec] text-[#2f5d3a]">
                 <AppIcon name="check_circle" className="text-[24px]" />
@@ -142,7 +141,7 @@ export function AnalyticsDashboard({ encuestaId }: Props) {
                 <p className="text-[10px] text-[#a08c7a] mt-0.5">Revisar fricción</p>
               </div>
             </div>
-            
+
             <div className="rounded-xl border border-[#ede6db] bg-white p-6 shadow-sm flex items-start gap-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#f9f4ee] text-[#c28a3a]">
                 <AppIcon name="clock" className="text-[24px]" />
@@ -219,7 +218,7 @@ export function AnalyticsDashboard({ encuestaId }: Props) {
               <p className="text-sm text-[#765e50] mt-2 mb-6 max-w-md mx-auto">
                 Seleccione las preguntas específicas que desea evaluar para generar los gráficos y métricas correspondientes de los resultados obtenidos.
               </p>
-              <button 
+              <button
                 onClick={() => setShowAnalysisModal(true)}
                 className="rounded-lg bg-[#2b1710] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#3d2318] transition-colors"
               >
@@ -230,14 +229,14 @@ export function AnalyticsDashboard({ encuestaId }: Props) {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-bold text-[#2b1710]">Análisis de preguntas</h3>
-                <button 
+                <button
                   onClick={() => setShowAnalysisModal(true)}
                   className="text-sm font-medium text-[#c28a3a] hover:text-[#2b1710]"
                 >
                   Cambiar selección
                 </button>
               </div>
-              
+
               <div className="grid gap-6">
                 {selectedCards.map(card => (
                   <QuestionInsightsCard
@@ -311,7 +310,7 @@ export function AnalyticsDashboard({ encuestaId }: Props) {
                 <AppIcon name="close" className="text-[20px]" />
               </button>
             </div>
-            
+
             <div className="p-6 max-h-[60vh] overflow-y-auto bg-[#fdfcfb]">
               <div className="grid gap-4">
                 <label className={`flex cursor-pointer items-start gap-4 rounded-xl border p-4 transition-colors ${selectedQIds === 'all' ? 'border-[#2b1710] bg-[#f0e8dd]' : 'border-[#ede6db] bg-white hover:border-[#d8cabb]'}`}>
@@ -319,15 +318,15 @@ export function AnalyticsDashboard({ encuestaId }: Props) {
                      <AppIcon name="list_checks" className="text-[20px]" />
                    </div>
                    <div className="flex-1">
-                     <p className={`font-semibold ${selectedQIds === 'all' ? 'text-[#2b1710]' : 'text-[#2b1710]'}`}>Cuestionario completo</p>
+                     <p className="font-semibold text-[#2b1710]">Cuestionario completo</p>
                      <p className="text-xs text-[#765e50] mt-1">Generar métricas de todas las preguntas</p>
                    </div>
-                   <input 
-                     type="radio" 
-                     name="q-select" 
-                     checked={selectedQIds === 'all'} 
+                   <input
+                     type="radio"
+                     name="q-select"
+                     checked={selectedQIds === 'all'}
                      onChange={() => setSelectedQIds('all')}
-                     className="mt-1 h-5 w-5 accent-[#2b1710]" 
+                     className="mt-1 h-5 w-5 accent-[#2b1710]"
                    />
                 </label>
 
@@ -343,8 +342,8 @@ export function AnalyticsDashboard({ encuestaId }: Props) {
                            <p className="text-sm font-semibold text-[#2b1710] line-clamp-2">{i + 1}. {q.texto_pregunta}</p>
                            <p className="text-[11px] text-[#765e50] mt-1">{formatQuestionType(q.tipo_pregunta)}</p>
                          </div>
-                         <input 
-                           type="checkbox" 
+                         <input
+                           type="checkbox"
                            checked={isSelected}
                            onChange={() => {
                              if (selectedQIds === 'all') {
@@ -358,7 +357,7 @@ export function AnalyticsDashboard({ encuestaId }: Props) {
                                }
                              }
                            }}
-                           className="mt-1 h-4 w-4 rounded accent-[#2b1710]" 
+                           className="mt-1 h-4 w-4 rounded accent-[#2b1710]"
                          />
                       </label>
                     )
@@ -368,13 +367,13 @@ export function AnalyticsDashboard({ encuestaId }: Props) {
             </div>
 
             <div className="flex items-center justify-end gap-3 border-t border-[#ede6db] px-6 py-4 bg-white">
-              <button 
+              <button
                 onClick={() => setShowAnalysisModal(false)}
                 className="rounded-lg border border-[#d8cabb] px-4 py-2 text-sm font-semibold text-[#5a3424] hover:bg-[#f0e8dd]"
               >
                 Cancelar
               </button>
-              <button 
+              <button
                 onClick={() => setShowAnalysisModal(false)}
                 disabled={!selectedQIds || (Array.isArray(selectedQIds) && selectedQIds.length === 0)}
                 className="rounded-lg bg-[#2b1710] px-4 py-2 text-sm font-semibold text-white hover:bg-[#3d2318] disabled:opacity-50"
@@ -394,13 +393,72 @@ export function AnalyticsDashboard({ encuestaId }: Props) {
 
 function QuestionInsightsCard({
   data, chartType, onChartTypeChange,
-}: {
+}: Readonly<{
   data: QuestionAnalytics
   chartType: ChartType
   onChartTypeChange: (t: ChartType) => void
   onDeleteResponse?: (id: number) => void
-}) {
+}>) {
+  const chartData = data.distribution.map((item, index) => ({ ...item, fill: chartPalette[index % chartPalette.length] }));
   const isChartable = ['opcion_unica', 'opcion_multiple', 'booleano'].includes(data.question.tipo_pregunta)
+
+  function renderQuestionInsights() {
+    if (data.distribution.length) {
+      if (chartType === 'barras') {
+        return (
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData} layout="vertical" margin={{ left: 8, right: 8 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#ede6db" horizontal={false} />
+              <XAxis
+                type="number"
+                tick={{ fill: '#765e50', fontSize: 11 }}
+                axisLine={false}
+                tickLine={false}
+                allowDecimals={false}
+              />
+              <YAxis
+                type="category"
+                dataKey="etiquetaCorta"
+                width={140}
+                tick={{ fill: '#765e50', fontSize: 11 }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <Tooltip
+                formatter={(v) => [v, 'Registros']}
+                labelFormatter={(_, p) => p?.[0]?.payload?.etiqueta ?? ''}
+                contentStyle={{ backgroundColor: '#fff', borderColor: '#d8cabb', color: '#2b1710' }}
+              />
+              <Bar dataKey="valor" radius={[0, 6, 6, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        );
+      }
+      return (
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={chartData}
+              dataKey="valor"
+              nameKey="etiqueta"
+              innerRadius={chartType === 'dona' ? 52 : 0}
+              outerRadius={78}
+              paddingAngle={2}
+            />
+            <Tooltip
+              formatter={(v) => [v, 'Registros']}
+              contentStyle={{ backgroundColor: '#fff', borderColor: '#d8cabb', color: '#2b1710' }}
+            />
+          </PieChart>
+        </ResponsiveContainer>
+      );
+    }
+    return (
+      <div className="flex h-full items-center justify-center text-sm text-[#a08c7a] border border-dashed border-[#d8cabb] rounded-lg">
+        Sin respuestas.
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-xl border border-[#d8cabb] bg-white overflow-hidden">
@@ -445,35 +503,7 @@ function QuestionInsightsCard({
           {isChartable ? (
             <>
               <div className="h-[220px]">
-                {data.distribution.length ? (
-                  chartType === 'barras' ? (
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={data.distribution} layout="vertical" margin={{ left: 8, right: 8 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#ede6db" horizontal={false} />
-                        <XAxis type="number" tick={{ fill: '#765e50', fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} />
-                        <YAxis type="category" dataKey="etiquetaCorta" width={140} tick={{ fill: '#765e50', fontSize: 11 }} axisLine={false} tickLine={false} />
-                        <Tooltip formatter={v => [v, 'Registros']} labelFormatter={(_, p) => p?.[0]?.payload?.etiqueta ?? ''} contentStyle={{ backgroundColor: '#fff', borderColor: '#d8cabb', color: '#2b1710' }} />
-                        <Bar dataKey="valor" radius={[0, 6, 6, 0]}>
-                          {data.distribution.map((_, i) => <Cell key={i} fill={chartPalette[i % chartPalette.length]} />)}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie data={data.distribution} dataKey="valor" nameKey="etiqueta"
-                          innerRadius={chartType === 'dona' ? 52 : 0} outerRadius={78} paddingAngle={2}>
-                          {data.distribution.map((_, i) => <Cell key={i} fill={chartPalette[i % chartPalette.length]} />)}
-                        </Pie>
-                        <Tooltip formatter={v => [v, 'Registros']} contentStyle={{ backgroundColor: '#fff', borderColor: '#d8cabb', color: '#2b1710' }} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  )
-                ) : (
-                  <div className="flex h-full items-center justify-center text-sm text-[#a08c7a] border border-dashed border-[#d8cabb] rounded-lg">
-                    Sin respuestas.
-                  </div>
-                )}
+                {renderQuestionInsights()}
               </div>
 
               {data.distribution.length > 0 && (
@@ -526,7 +556,7 @@ function QuestionInsightsCard({
   )
 }
 
-function MiniStat({ label, value }: { label: string; value: string | number }) {
+function MiniStat({ label, value }: Readonly<{ label: string; value: string | number }>) {
   return (
     <div className="rounded-lg border border-[#d8cabb] bg-white px-4 py-3">
       <p className="text-lg font-bold text-[#2b1710]">{value}</p>
@@ -539,12 +569,12 @@ const RESP_PAGE_SIZE = 15
 
 function ResponseList({
   responses, questions, canDelete, onDelete,
-}: {
+}: Readonly<{
   responses: RespuestaEncuesta[]
   questions: EncuestaPregunta[]
   canDelete: boolean
   onDelete: (id: number) => void
-}) {
+}>) {
   const [page, setPage] = useState(0)
   const [search, setSearch] = useState('')
 

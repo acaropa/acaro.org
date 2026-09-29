@@ -6,9 +6,7 @@ import { ScrollReveal } from '@/components/landing/LandingMotion';
 import { api, apiAssetUrl } from '@/lib/api';
 import { LibraryRecord, toLibraryDocument, LibraryDocument } from '@/lib/library';
 
-type IconKey = 'pdf' | 'video' | 'doc' | 'link' | string;
-
-const RESOURCE_ICONS: Record<IconKey, React.ComponentType<{ className?: string }>> = {
+const RESOURCE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   pdf: FileText,
   doc: FileText,
   video: TrendingUp,

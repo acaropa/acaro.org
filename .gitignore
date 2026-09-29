@@ -10,3 +10,6 @@ build/
 .tools/
 strix_runs/
 backend/.jest-cache/
+.scannerwork/
+.sonar/
+coverage/

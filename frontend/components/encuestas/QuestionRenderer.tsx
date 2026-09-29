@@ -10,7 +10,7 @@ interface Props {
   required: boolean
 }
 
-export function QuestionRenderer({ question, value, onChange, required }: Props) {
+export function QuestionRenderer({ question, value, onChange, required }: Readonly<Props>) {
   return (
     <div className="rounded-xl border border-[#d8cabb] bg-white p-5">
       <label className="mb-1 block text-sm font-semibold text-[#2b1710]">

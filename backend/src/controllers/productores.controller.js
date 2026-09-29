@@ -89,7 +89,7 @@ async function getBySlug(req, res, next) {
 async function create(req, res, next) {
   try {
     const { nombre } = req.body || {};
-    if (!nombre || !nombre.trim()) {
+    if (!nombre?.trim()) {
       return res.status(400).json({ error: 'nombre es requerido' });
     }
 
@@ -115,6 +115,23 @@ async function create(req, res, next) {
   } catch (err) { next(err); }
 }
 
+function buildUpdatePayload(body) {
+  const payload = {};
+  if (typeof body.nombre === 'string') payload.nombre = body.nombre.trim();
+  if ('descripcion' in body) payload.descripcion = body.descripcion?.trim() || null;
+  if ('frase_corta' in body) payload.frase_corta = body.frase_corta?.trim() || null;
+  if ('imagen_url' in body) payload.imagen_url = body.imagen_url?.trim() || null;
+  if ('imagenes' in body) payload.imagenes = parseGallery(body.imagenes);
+  if ('comunidad' in body) payload.comunidad = body.comunidad?.trim() || null;
+  if ('rol' in body) payload.rol = body.rol?.trim() || null;
+  if ('anios_experiencia' in body) payload.anios_experiencia = parseYears(body.anios_experiencia);
+  if ('distrito_id' in body) payload.distrito_id = body.distrito_id ?? null;
+  if ('activo' in body) payload.activo = Boolean(body.activo);
+  if ('destacado' in body) payload.destacado = Boolean(body.destacado);
+
+  return payload;
+}
+
 async function update(req, res, next) {
   try {
     const id = parseId(req.params.id);
@@ -130,18 +147,7 @@ async function update(req, res, next) {
       body.imagenes = [...parseGallery(body.imagenes), ...galleryUploads].slice(0, 8);
     }
 
-    const payload = {};
-    if (typeof body.nombre === 'string') payload.nombre = body.nombre.trim();
-    if ('descripcion' in body) payload.descripcion = body.descripcion?.trim() || null;
-    if ('frase_corta' in body) payload.frase_corta = body.frase_corta?.trim() || null;
-    if ('imagen_url' in body) payload.imagen_url = body.imagen_url?.trim() || null;
-    if ('imagenes' in body) payload.imagenes = parseGallery(body.imagenes);
-    if ('comunidad' in body) payload.comunidad = body.comunidad?.trim() || null;
-    if ('rol' in body) payload.rol = body.rol?.trim() || null;
-    if ('anios_experiencia' in body) payload.anios_experiencia = parseYears(body.anios_experiencia);
-    if ('distrito_id' in body) payload.distrito_id = body.distrito_id ?? null;
-    if ('activo' in body) payload.activo = Boolean(body.activo);
-    if ('destacado' in body) payload.destacado = Boolean(body.destacado);
+    const payload = buildUpdatePayload(body);
 
     res.json(await productores.update(id, payload));
   } catch (err) { next(err); }

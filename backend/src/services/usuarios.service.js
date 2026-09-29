@@ -46,8 +46,8 @@ async function create({ email, password, role, full_name }) {
 }
 
 async function update(id, data) {
-  const allowed = ['email', 'activo', 'full_name'];
-  const fields = Object.keys(data).filter(field => allowed.includes(field));
+  const allowed = new Set(['email', 'activo', 'full_name']);
+  const fields = Object.keys(data).filter(field => allowed.has(field));
   if (fields.length === 0) {
     const err = new Error('Sin campos válidos para actualizar');
     err.status = 400;
@@ -55,7 +55,7 @@ async function update(id, data) {
   }
 
   await db.query(
-    `UPDATE users SET ${fields.map(field => `${field} = ?`).join(', ')} WHERE id = ?`,
+    `UPDATE users SET ${fields.map(field => field + ' = ?').join(', ')} WHERE id = ?`,
     [...fields.map(field => data[field]), id]
   );
   invalidateContentCaches();

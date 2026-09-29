@@ -41,5 +41,8 @@
     "testMatch": [
       "**/__tests__/**/*.test.js"
     ]
+  },
+  "engines": {
+    "node": ">=22.12.0"
   }
 }

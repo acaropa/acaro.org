@@ -21,45 +21,41 @@ export function Modal({
   title,
   children,
   maxWidth = "max-w-2xl",
-}: ModalProps) {
-  const overlayRef = useRef<HTMLDivElement>(null);
+}: Readonly<ModalProps>) {
+  const overlayRef = useRef<HTMLDialogElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
 
   useEffect(() => {
     if (!isOpen) return;
 
+    const dialog = overlayRef.current;
+    const previousFocus = document.activeElement;
+    dialog?.showModal();
+    const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     contentRef.current?.scrollTo({ top: 0 });
 
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") onClose();
-    }
-
-    window.addEventListener("keydown", handleKeyDown);
-
     return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", handleKeyDown);
+      dialog?.close();
+      document.body.style.overflow = previousOverflow;
+      if (previousFocus instanceof HTMLElement) previousFocus.focus();
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
   const modalContent = (
-    <div
+    <dialog
       ref={overlayRef}
-      onClick={event => {
-        if (event.target === overlayRef.current) onClose();
-      }}
-      className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-black/45 p-4 backdrop-blur-[2px]"
+      aria-labelledby={titleId}
+      onCancel={event => { event.preventDefault(); onClose(); }}
+      className="fixed inset-0 z-[100] m-0 h-full max-h-none w-full max-w-none items-center justify-center overflow-y-auto bg-transparent p-4 open:flex backdrop:bg-black/45 backdrop:backdrop-blur-[2px]"
     >
+      <button type="button" tabIndex={-1} aria-label="Cerrar ventana" onClick={onClose} className="absolute inset-0 cursor-default" />
       <section
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
         className={cn(
-          "w-full overflow-hidden rounded-lg border border-border bg-card shadow-[0_24px_70px_rgba(43,23,16,0.22)]",
+          "relative w-full overflow-hidden rounded-lg border border-border bg-card shadow-[0_24px_70px_rgba(43,23,16,0.22)]",
           maxWidth,
         )}
       >
@@ -82,7 +78,7 @@ export function Modal({
           {children}
         </div>
       </section>
-    </div>
+    </dialog>
   );
 
   return createPortal(modalContent, document.body);
@@ -106,7 +102,7 @@ export function ModalActions({
   pending = false,
   pendingLabel = "Guardando...",
   submitLabel,
-}: ModalActionsProps) {
+}: Readonly<ModalActionsProps>) {
   return (
     <div className={cn("sticky bottom-[-24px] z-20 -mx-6 -mb-6 mt-2 grid grid-cols-2 gap-3 border-t border-border bg-card/95 px-6 py-4 backdrop-blur-sm md:col-span-full sm:flex sm:justify-end", className)}>
       <button type="button" onClick={onCancel} className="h-11 border border-border bg-background px-5 text-xs font-bold text-foreground transition-colors hover:bg-surface">

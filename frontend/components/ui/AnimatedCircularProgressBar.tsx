@@ -24,7 +24,7 @@ export function AnimatedCircularProgressBar({
   className,
   size = 56,
   strokeWidth = 2,
-}: AnimatedCircularProgressBarProps) {
+}: Readonly<AnimatedCircularProgressBarProps>) {
   const range = Math.max(1, max - min);
   const clamped = Math.min(max, Math.max(min, value));
   const percentage = ((clamped - min) / range) * 100;
@@ -34,13 +34,9 @@ export function AnimatedCircularProgressBar({
   return (
     <div
       className={cn(styles.root, className)}
-      role="progressbar"
-      aria-label="Progreso de la encuesta"
-      aria-valuemin={min}
-      aria-valuemax={max}
-      aria-valuenow={roundedValue}
       style={{ width: size, height: size }}
     >
+      <progress className="sr-only" aria-label="Progreso de la encuesta" max={range} value={clamped - min} />
       <svg className={styles.svg} viewBox={"0 0 " + size + " " + size} aria-hidden="true">
         <circle
           className={styles.track}

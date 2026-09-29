@@ -8,7 +8,7 @@ interface LogoProps {
   showText?: boolean
 }
 
-export function Logo({ variant = "normal", className, showText = true }: LogoProps) {
+export function Logo({ variant = "normal", className, showText = true }: Readonly<LogoProps>) {
   return (
     <div className={cn("flex items-center gap-3", className)}>
       <div className={cn("relative flex shrink-0 items-center justify-center", variant === "white" && "brightness-0 invert")}>

@@ -1,8 +1,8 @@
 export function LibraryPageTransition({
   active,
-}: {
+}: Readonly<{
   active: boolean;
-}) {
+}>) {
   return (
     <div
       aria-hidden={!active}

@@ -1,8 +1,9 @@
 "use client";
 
 import { DataLoadingState } from "@/components/ui/TypingIndicator";
+import { keyedText } from '@/lib/keyed-text';
 
-import { FormEvent, ReactNode, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { SubmitEvent, ReactNode, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -43,18 +44,18 @@ const resourceOptions = [
 ] as const;
 
 /* ─── Resaltado de texto ─── */
-function HighlightText({ text, query }: { text: string; query: string }) {
+function HighlightText({ text, query }: Readonly<{ text: string; query: string }>) {
   const words = query.trim().split(/\s+/).filter(Boolean);
   if (!words.length) return <>{text}</>;
-  const escaped = words.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  const escaped = words.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`));
   const pattern = new RegExp(`(${escaped.join("|")})`, "gi");
   return (
     <>
-      {text.split(pattern).map((part, i) =>
+      {keyedText(text.split(pattern)).map(({ text: part, key }) =>
         words.some(w => part.localeCompare(w, "es", { sensitivity: "accent" }) === 0) ? (
-          <mark key={i} className="rounded-none bg-[#c28a3a]/20 px-0.5 text-inherit">{part}</mark>
+          <mark key={key} className="rounded-none bg-[#c28a3a]/20 px-0.5 text-inherit">{part}</mark>
         ) : (
-          <span key={i}>{part}</span>
+          <span key={key}>{part}</span>
         ),
       )}
     </>
@@ -62,7 +63,7 @@ function HighlightText({ text, query }: { text: string; query: string }) {
 }
 
 /* ─── Área de imagen con las 6 variantes del mockup ─── */
-function CardImageArea({ document, variant }: { document: LibraryDocument; variant: number }) {
+function CardImageArea({ document, variant }: Readonly<{ document: LibraryDocument; variant: number }>) {
   const gradient = categoryGradient(document.category);
   const imgUrl = document.coverImage ? apiAssetUrl(document.coverImage) : null;
 
@@ -122,7 +123,7 @@ function CardImageArea({ document, variant }: { document: LibraryDocument; varia
 }
 
 /* ─── Card editorial con 6 variantes ─── */
-function CatalogCard({ document, index, query }: { document: LibraryDocument; index: number; query: string }) {
+function CatalogCard({ document, index, query }: Readonly<{ document: LibraryDocument; index: number; query: string }>) {
   return (
     <article className="group bg-white border border-[#c3c8c1]/30 flex flex-col hover:border-[#271310]/40 transition-all duration-300">
       <div className="aspect-[3/4] relative overflow-hidden bg-[#efeeeb]" style={{ boxShadow: "inset 0 0 40px rgba(0,0,0,0.03)" }}>
@@ -151,7 +152,7 @@ function CatalogCard({ document, index, query }: { document: LibraryDocument; in
 }
 
 /* ─── Chip de filtro activo ─── */
-function FilterChip({ children, onRemove }: { children: ReactNode; onRemove: () => void }) {
+function FilterChip({ children, onRemove }: Readonly<{ children: ReactNode; onRemove: () => void }>) {
   return (
     <button
       type="button"
@@ -165,7 +166,7 @@ function FilterChip({ children, onRemove }: { children: ReactNode; onRemove: () 
 }
 
 /* ─── Vista de lista compacta ─── */
-function ResultRow({ document, query }: { document: LibraryDocument; query: string }) {
+function ResultRow({ document, query }: Readonly<{ document: LibraryDocument; query: string }>) {
   return (
     <Link
       href={`/biblioteca/detalle/?slug=${document.slug || ""}`}
@@ -244,7 +245,7 @@ function SearchCatalog() {
     if (sort !== "recent") params.set("orden", sort);
 
     api
-      .get<LibraryRecord[]>(`/biblioteca${params.size ? `?${params}` : ""}`)
+      .get<LibraryRecord[]>(`/biblioteca${params.size ? ("?" + (params)) : ""}`)
       .then(data => setDocuments(data.map(toLibraryDocument)))
       .catch(err => setLoadError(err instanceof Error ? err.message : "No se pudo cargar la biblioteca"))
       .finally(() => setLoading(false));
@@ -296,7 +297,7 @@ function SearchCatalog() {
     if (next.sort !== "recent") params.set("orden", next.sort);
     if (next.view !== "grid") params.set("vista", next.view);
     if (next.page > 1) params.set("pagina", String(next.page));
-    router.replace(`/biblioteca/buscar${params.size ? `?${params}` : ""}`, { scroll: false });
+    router.replace(`/biblioteca/buscar${params.size ? ("?" + (params)) : ""}`, { scroll: false });
   }
 
   function clearFilters() {
@@ -319,7 +320,7 @@ function SearchCatalog() {
     }, 150);
   }
 
-  function submitSearch(e: FormEvent<HTMLFormElement>) {
+  function submitSearch(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     if (searchTimer.current) clearTimeout(searchTimer.current);
     const nextQuery = query.trim();
@@ -338,6 +339,46 @@ function SearchCatalog() {
   function selectPage(next: number) { setPage(next); syncUrl({ page: next }); }
   function returnToLibrary() {
     router.push("/biblioteca", { scroll: false });
+  }
+
+  function renderSearchResults() {
+    if (loading) {
+      return <DataLoadingState label="Cargando catálogo..." className="py-24" />;
+    }
+    if (loadError) {
+      return (
+        <EmptyState
+          icon={<Library className="h-8 w-8" />}
+          title="No se pudo cargar la biblioteca"
+          description={loadError}
+        />
+      );
+    }
+    if (visible.length === 0) {
+      return (
+        <EmptyState
+          icon={<Search className="h-8 w-8" />}
+          title="No encontramos resultados"
+          description="Prueba con otras palabras o limpia los filtros."
+        />
+      );
+    }
+    if (view === 'grid') {
+      return (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {visible.map((doc, i) => (
+            <CatalogCard key={doc.id} document={doc} index={i} query={appliedQuery} />
+          ))}
+        </div>
+      );
+    }
+    return (
+      <div className="border border-[#c3c8c1]/30 overflow-hidden bg-white">
+        {visible.map((doc) => (
+          <ResultRow key={doc.id} document={doc} query={appliedQuery} />
+        ))}
+      </div>
+    );
   }
 
   return (
@@ -479,21 +520,7 @@ function SearchCatalog() {
             aria-busy={isSearching}
             className={`transition-all duration-300 motion-reduce:transform-none motion-reduce:transition-none ${showResults ? "opacity-100 translate-y-0" : "opacity-30 translate-y-2"}`}
           >
-            {loading ? (
-              <DataLoadingState label="Cargando catálogo..." className="py-24" />
-            ) : loadError ? (
-              <EmptyState icon={<Library className="h-8 w-8" />} title="No se pudo cargar la biblioteca" description={loadError} />
-            ) : visible.length === 0 ? (
-              <EmptyState icon={<Search className="h-8 w-8" />} title="No encontramos resultados" description="Prueba con otras palabras o limpia los filtros." />
-            ) : view === "grid" ? (
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {visible.map((doc, i) => <CatalogCard key={doc.id} document={doc} index={i} query={appliedQuery} />)}
-              </div>
-            ) : (
-              <div className="border border-[#c3c8c1]/30 overflow-hidden bg-white">
-                {visible.map(doc => <ResultRow key={doc.id} document={doc} query={appliedQuery} />)}
-              </div>
-            )}
+            {renderSearchResults()}
 
             {/* Paginación */}
             {!loading && !loadError && filtered.length > PAGE_SIZE && (
@@ -509,14 +536,14 @@ function SearchCatalog() {
                 <div className="flex gap-1">
                   {Array.from({ length: totalPages }, (_, i) => i + 1)
                     .filter(p => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
-                    .reduce<(number | "…")[]>((acc, p, idx, arr) => {
-                      if (idx > 0 && p - (arr[idx - 1] as number) > 1) acc.push("…");
+                    .reduce<(number | string)[]>((acc, p, idx, arr) => {
+                      if (idx > 0 && p - (arr[idx - 1] as number) > 1) acc.push(`gap-before-${p}`);
                       acc.push(p);
                       return acc;
                     }, [])
-                    .map((item, idx) =>
-                      item === "…" ? (
-                        <span key={`e-${idx}`} className="flex h-12 w-8 items-center justify-center text-[#737973]">…</span>
+                    .map(item =>
+                      typeof item === "string" ? (
+                        <span key={item} className="flex h-12 w-8 items-center justify-center text-[#737973]">…</span>
                       ) : (
                         <button
                           key={item}

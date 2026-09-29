@@ -1,3 +1,5 @@
+import { createIdempotencyKey } from './random';
+
 const BASE =
   process.env.NEXT_PUBLIC_API_URL ||
   (process.env.NODE_ENV === 'production'
@@ -32,17 +34,10 @@ function setAccessToken(token: string | null) {
   accessToken = token;
 }
 
-function idempotencyKey() {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    return crypto.randomUUID();
-  }
-  return `${Date.now()}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`;
-}
-
 function mutationOptions(method: string, body?: unknown): RequestInit {
   return {
     method,
-    headers: { 'Idempotency-Key': idempotencyKey() },
+    headers: { 'Idempotency-Key': createIdempotencyKey() },
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
   };
 }

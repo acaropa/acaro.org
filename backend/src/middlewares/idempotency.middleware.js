@@ -1,4 +1,4 @@
-const crypto = require('crypto');
+const crypto = require('node:crypto');
 
 const IDEMPOTENCY_TTL_MS = 10 * 60 * 1000;
 const MAX_ENTRIES = 1000;

@@ -44,6 +44,128 @@ export default function Noticias() {
     setVisibleCount(PAGE_SIZE);
   }
 
+  function renderNewsList() {
+    if (loading) {
+      return <DataLoadingState label="Cargando noticias..." className="py-24" />;
+    }
+    if (filtered.length === 0) {
+      return (
+        <EmptyState
+          title="Sin noticias disponibles"
+          description="Aún no se han publicado noticias en esta categoría. Vuelve a consultar más adelante."
+        />
+      );
+    }
+    return (
+      <>
+        {/* Hero Editorial Story */}
+        {featured && (
+          <section className="mb-[120px]">
+            <ScrollReveal delay={200} distance="md">
+              <Link
+                href={`/noticias/detalle/?slug=${featured.slug}`}
+                className="group grid grid-cols-1 lg:grid-cols-12 gap-[32px]"
+              >
+                <div className="lg:col-span-7 h-[500px] bg-surface relative overflow-hidden">
+                  {featured.imagen_portada && (
+                    <OptimizedImage
+                      alt={featured.titulo}
+                      className="w-full h-full object-cover transition-all duration-700"
+                      src={apiAssetUrl(featured.imagen_portada)}
+                      priority
+                      sizes="(max-width: 1024px) 100vw, 58vw"
+                      referrerPolicy="no-referrer"
+                    />
+                  )}
+                </div>
+
+                <div className="lg:col-span-5 flex flex-col justify-center bg-background p-[24px] md:p-[40px] relative border border-primary/20">
+                  <div className="flex items-center gap-[16px] mb-[16px]">
+                    <span className="text-xs font-bold tracking-widest uppercase text-accent">
+                      {featured.categoria}
+                    </span>
+                    <span className="w-1 h-1 rounded-full bg-primary/30"></span>
+                    <span className="text-xs font-bold tracking-widest uppercase text-muted">
+                      {formatNoticiaDate(featured)}
+                    </span>
+                  </div>
+                  <h2 className="font-serif font-semibold text-[26px] md:text-[34px] leading-[1.25] tracking-[-0.015em] text-primary mb-[20px]">
+                    {featured.titulo}
+                  </h2>
+                  {featured.resumen && (
+                    <p className="text-[15px] leading-[1.6] text-muted mb-[24px]">
+                      {featured.resumen}
+                    </p>
+                  )}
+                  <p className="text-xs font-semibold tracking-wider text-muted mb-[16px]">
+                    Publicado por <span className="text-primary">{getNoticiaAutor(featured)}</span>
+                  </p>
+                  <span className="mt-auto text-xs font-bold tracking-widest uppercase text-primary border-b border-accent w-max pb-1 group-hover:border-b-2 transition-all">
+                    Leer noticia
+                  </span>
+                </div>
+              </Link>
+            </ScrollReveal>
+          </section>
+        )}
+
+        {/* Grid of remaining news */}
+        {visibleRest.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[32px]">
+            {visibleRest.map((item, index) => (
+              <ScrollReveal key={item.id} delay={100 * (index % 3)} distance="sm">
+                <Link
+                  href={`/noticias/detalle/?slug=${item.slug}`}
+                  className="group flex flex-col h-full bg-background border border-primary/20"
+                >
+                  <div className="h-[220px] bg-surface overflow-hidden">
+                    {item.imagen_portada && (
+                      <OptimizedImage
+                        alt={item.titulo}
+                        className="w-full h-full object-cover transition-all duration-500"
+                        src={apiAssetUrl(item.imagen_portada)}
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        referrerPolicy="no-referrer"
+                      />
+                    )}
+                  </div>
+                  <div className="flex flex-col flex-grow p-[24px]">
+                    <span className="text-xs font-semibold tracking-wider uppercase text-accent block mb-[12px]">
+                      {item.categoria} · {formatNoticiaDate(item)}
+                    </span>
+                    <h3 className="font-serif font-semibold text-[20px] md:text-[22px] leading-[1.3] tracking-[-0.01em] text-primary mb-[12px]">
+                      {item.titulo}
+                    </h3>
+                    {item.resumen && (
+                      <p className="text-[15px] leading-[1.6] text-muted flex-grow line-clamp-3">
+                        {item.resumen}
+                      </p>
+                    )}
+                    <p className="mt-[16px] text-xs font-semibold tracking-wider text-muted">
+                      Publicado por <span className="text-primary">{getNoticiaAutor(item)}</span>
+                    </p>
+                  </div>
+                </Link>
+              </ScrollReveal>
+            ))}
+          </div>
+        )}
+
+        {hasMore && (
+          <div className="mt-[48px] flex justify-center">
+            <button
+              type="button"
+              onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
+              className="px-8 py-3 border border-primary text-primary text-xs font-bold tracking-widest uppercase hover:bg-primary hover:text-primary-foreground transition-colors"
+            >
+              Cargar más
+            </button>
+          </div>
+        )}
+      </>
+    );
+  }
+
   return (
     <PublicLayout className="landing-typography">
       <main className="flex-grow max-w-[1280px] mx-auto w-full px-[20px] md:px-[64px] py-[80px]">
@@ -83,107 +205,7 @@ export default function Noticias() {
           </section>
         )}
 
-        {loading ? (
-          <DataLoadingState label="Cargando noticias..." className="py-24" />
-        ) : filtered.length === 0 ? (
-          <EmptyState
-            title="Sin noticias disponibles"
-            description="Aún no se han publicado noticias en esta categoría. Vuelve a consultar más adelante."
-          />
-        ) : (
-          <>
-            {/* Hero Editorial Story */}
-            {featured && (
-              <section className="mb-[120px]">
-                <ScrollReveal delay={200} distance="md">
-                  <Link href={`/noticias/detalle/?slug=${featured.slug}`} className="group grid grid-cols-1 lg:grid-cols-12 gap-[32px]">
-                    <div className="lg:col-span-7 h-[500px] bg-surface relative overflow-hidden">
-                      {featured.imagen_portada && (
-                        <OptimizedImage
-                          alt={featured.titulo}
-                          className="w-full h-full object-cover transition-all duration-700"
-                          src={apiAssetUrl(featured.imagen_portada)}
-                          priority
-                          sizes="(max-width: 1024px) 100vw, 58vw"
-                          referrerPolicy="no-referrer"
-                        />
-                      )}
-                    </div>
-
-                    <div className="lg:col-span-5 flex flex-col justify-center bg-background p-[24px] md:p-[40px] relative border border-primary/20">
-                      <div className="flex items-center gap-[16px] mb-[16px]">
-                        <span className="text-xs font-bold tracking-widest uppercase text-accent">{featured.categoria}</span>
-                        <span className="w-1 h-1 rounded-full bg-primary/30"></span>
-                        <span className="text-xs font-bold tracking-widest uppercase text-muted">{formatNoticiaDate(featured)}</span>
-                      </div>
-                      <h2 className="font-serif font-semibold text-[26px] md:text-[34px] leading-[1.25] tracking-[-0.015em] text-primary mb-[20px]">
-                        {featured.titulo}
-                      </h2>
-                      {featured.resumen && (
-                        <p className="text-[15px] leading-[1.6] text-muted mb-[24px]">
-                          {featured.resumen}
-                        </p>
-                      )}
-                      <p className="text-xs font-semibold tracking-wider text-muted mb-[16px]">
-                        Publicado por <span className="text-primary">{getNoticiaAutor(featured)}</span>
-                      </p>
-                      <span className="mt-auto text-xs font-bold tracking-widest uppercase text-primary border-b border-accent w-max pb-1 group-hover:border-b-2 transition-all">
-                        Leer noticia
-                      </span>
-                    </div>
-                  </Link>
-                </ScrollReveal>
-              </section>
-            )}
-
-            {/* Grid of remaining news */}
-            {visibleRest.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[32px]">
-                {visibleRest.map((item, index) => (
-                  <ScrollReveal key={item.id} delay={100 * (index % 3)} distance="sm">
-                    <Link href={`/noticias/detalle/?slug=${item.slug}`} className="group flex flex-col h-full bg-background border border-primary/20">
-                      <div className="h-[220px] bg-surface overflow-hidden">
-                        {item.imagen_portada && (
-                          <OptimizedImage
-                            alt={item.titulo}
-                            className="w-full h-full object-cover transition-all duration-500"
-                            src={apiAssetUrl(item.imagen_portada)}
-                            sizes="(max-width: 768px) 100vw, 33vw"
-                            referrerPolicy="no-referrer"
-                          />
-                        )}
-                      </div>
-                      <div className="flex flex-col flex-grow p-[24px]">
-                        <span className="text-xs font-semibold tracking-wider uppercase text-accent block mb-[12px]">
-                          {item.categoria} · {formatNoticiaDate(item)}
-                        </span>
-                        <h3 className="font-serif font-semibold text-[20px] md:text-[22px] leading-[1.3] tracking-[-0.01em] text-primary mb-[12px]">{item.titulo}</h3>
-                        {item.resumen && (
-                          <p className="text-[15px] leading-[1.6] text-muted flex-grow line-clamp-3">{item.resumen}</p>
-                        )}
-                        <p className="mt-[16px] text-xs font-semibold tracking-wider text-muted">
-                          Publicado por <span className="text-primary">{getNoticiaAutor(item)}</span>
-                        </p>
-                      </div>
-                    </Link>
-                  </ScrollReveal>
-                ))}
-              </div>
-            )}
-
-            {hasMore && (
-              <div className="mt-[48px] flex justify-center">
-                <button
-                  type="button"
-                  onClick={() => setVisibleCount(count => count + PAGE_SIZE)}
-                  className="px-8 py-3 border border-primary text-primary text-xs font-bold tracking-widest uppercase hover:bg-primary hover:text-primary-foreground transition-colors"
-                >
-                  Cargar más
-                </button>
-              </div>
-            )}
-          </>
-        )}
+        {renderNewsList()}
       </main>
     </PublicLayout>
   );

@@ -5,7 +5,7 @@ const { getActiveSession } = require('../services/sessions.service');
 async function loadActiveUser(payload) {
   if (payload.type !== 'access' || !payload.sid) return null;
   const session = await getActiveSession(payload.sid, payload.id);
-  if (!session || !session.activo) return null;
+  if (!session?.activo) return null;
 
   return {
     id: session.user_id,
@@ -18,7 +18,7 @@ async function loadActiveUser(payload) {
 
 async function verifyToken(req, res, next) {
   const header = req.headers['authorization'];
-  if (!header || !header.startsWith('Bearer ')) {
+  if (!header?.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'Autenticación requerida' });
   }
 
@@ -55,7 +55,7 @@ function requirePermission(...permissions) {
 
 async function optionalAuth(req, res, next) {
   const header = req.headers['authorization'];
-  if (header && header.startsWith('Bearer ')) {
+  if (header?.startsWith('Bearer ')) {
     let payload;
     try {
       payload = jwt.verify(header.slice(7), process.env.JWT_SECRET, {

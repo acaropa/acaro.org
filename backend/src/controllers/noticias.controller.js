@@ -3,7 +3,7 @@ const { hasPermission, PERMISSIONS } = require('../config/permissions');
 const { saveBase64Upload, IMAGE_EXTENSIONS } = require('../utils/uploads');
 
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
-const TECNICO_EDITABLE_STATES = ['borrador', 'pendiente'];
+const TECNICO_EDITABLE_STATES = new Set(['borrador', 'pendiente']);
 
 async function uploadCoverImage(data) {
   if (!data.imagen_base64 || !data.imagen_nombre) return undefined;
@@ -84,7 +84,7 @@ async function update(req, res, next) {
     const canUpdateAny = hasPermission(req.user, PERMISSIONS.NOTICIAS_UPDATE);
     if (!canUpdateAny) {
       const isOwner = current.creado_por === req.user.id;
-      if (!isOwner || !TECNICO_EDITABLE_STATES.includes(current.estado)) {
+      if (!isOwner || !TECNICO_EDITABLE_STATES.has(current.estado)) {
         return res.status(403).json({ error: 'No puedes editar esta noticia en su estado actual' });
       }
     }

@@ -5,7 +5,7 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: 'default' | 'secondary' | 'outline' | 'success' | 'warning' | 'danger';
 }
 
-function Badge({ className, variant = "default", ...props }: BadgeProps) {
+function Badge({ className, variant = "default", ...props }: Readonly<BadgeProps>) {
   const variants = {
     default: "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
     secondary: "border-transparent bg-surface text-foreground hover:bg-surface/80",

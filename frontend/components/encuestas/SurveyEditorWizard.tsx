@@ -4,10 +4,11 @@ import { DataLoadingState } from "@/components/ui/TypingIndicator";
 
 
 import { AppIcon } from "@/components/ui/AppIcon"
-import { useCallback, useEffect, useState } from 'react'
+import { useId, useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { encuestasApi, type EncuestaFull, type TipoPregunta } from '@/lib/encuestas'
 import { QuestionBuilder, type QuestionFormData } from './QuestionBuilder'
+import { createIdempotencyKey } from '@/lib/random'
 
 const questionTypeLabels: Record<TipoPregunta, string> = {
   texto_corto: 'Texto corto',
@@ -23,6 +24,7 @@ const steps = ['Datos generales', 'Preguntas', 'Revisión'] as const
 
 function emptyQuestion(index: number): QuestionFormData {
   return {
+    clientId: createIdempotencyKey(),
     codigo_pregunta: `P${String(index + 1).padStart(2, '0')}`,
     texto_pregunta: '',
     tipo_pregunta: 'texto_corto',
@@ -36,7 +38,8 @@ interface Props {
   encuestaId?: number
 }
 
-export function SurveyEditorWizard({ encuestaId }: Props) {
+export function SurveyEditorWizard({ encuestaId }: Readonly<Props>) {
+  const fieldId = useId();
   const router = useRouter()
   const isNew = !encuestaId
   const [step, setStep] = useState(0)
@@ -52,7 +55,7 @@ export function SurveyEditorWizard({ encuestaId }: Props) {
   const [mensajeConfirmacion, setMensajeConfirmacion] = useState('')
   const [logoUrl, setLogoUrl] = useState('')
 
-  const [questions, setQuestions] = useState<QuestionFormData[]>([emptyQuestion(0)])
+  const [questions, setQuestions] = useState<QuestionFormData[]>(() => [emptyQuestion(0)])
   const [savedId, setSavedId] = useState<number | undefined>(encuestaId)
 
   const loadEncuesta = useCallback(async () => {
@@ -72,6 +75,7 @@ export function SurveyEditorWizard({ encuestaId }: Props) {
       if (data.preguntas?.length) {
         setQuestions(
           data.preguntas.map(p => ({
+            clientId: createIdempotencyKey(),
             id: p.id,
             seccion_id: p.seccion_id,
             codigo_pregunta: p.codigo_pregunta ?? '',
@@ -80,6 +84,7 @@ export function SurveyEditorWizard({ encuestaId }: Props) {
             es_obligatoria: !!p.es_obligatoria,
             texto_ayuda: p.texto_ayuda ?? '',
             opciones: (p.opciones ?? []).map(o => ({
+              clientId: createIdempotencyKey(),
               id: o.id,
               valor_opcion: o.valor_opcion,
               etiqueta_opcion: o.etiqueta_opcion,
@@ -124,7 +129,13 @@ export function SurveyEditorWizard({ encuestaId }: Props) {
       await encuestasApi.saveStructure(id!, {
         secciones,
         preguntas: questions.map((q, i) => ({
-          ...q,
+          id: q.id,
+          seccion_id: q.seccion_id,
+          texto_pregunta: q.texto_pregunta,
+          tipo_pregunta: q.tipo_pregunta,
+          es_obligatoria: q.es_obligatoria,
+          texto_ayuda: q.texto_ayuda,
+          opciones: q.opciones.map(o => ({ id: o.id, valor_opcion: o.valor_opcion, etiqueta_opcion: o.etiqueta_opcion, permite_texto_libre: o.permite_texto_libre })),
           posicion: i + 1,
           codigo_pregunta: q.codigo_pregunta || `P${String(i + 1).padStart(2, '0')}`,
         })),
@@ -152,7 +163,7 @@ export function SurveyEditorWizard({ encuestaId }: Props) {
     setQuestions(prev => {
       const next = [...prev]
       const target = idx + dir
-      if (target < 0 || target >= next.length) return prev
+      if (target < 0 || target >= next.length) { return prev }
       ;[next[idx], next[target]] = [next[target], next[idx]]
       return next
     })
@@ -160,6 +171,22 @@ export function SurveyEditorWizard({ encuestaId }: Props) {
 
   if (loading) {
     return <DataLoadingState label="Cargando encuesta..." className="py-12" />
+  }
+
+  function saveButtonLabel() {
+    if (saving) {
+      return 'Guardando...' as const;
+    }
+    if (isNew) {
+      return 'Crear encuesta' as const;
+    }
+    return 'Guardar cambios' as const;
+  }
+
+  function stepButtonClass(index: number) {
+    if (index === step) return 'border-[#2b1710] bg-[#2b1710] text-white';
+    if (index < step) return 'border-green-300 bg-green-50 text-green-700';
+    return 'border-[#d8cabb] bg-white text-[#765e50]';
   }
 
   return (
@@ -185,11 +212,7 @@ export function SurveyEditorWizard({ encuestaId }: Props) {
             key={s}
             onClick={() => setStep(i)}
             className={`flex-1 rounded-lg border px-3 py-2.5 text-center text-xs font-semibold transition-colors ${
-              i === step
-                ? 'border-[#2b1710] bg-[#2b1710] text-white'
-                : i < step
-                  ? 'border-green-300 bg-green-50 text-green-700'
-                  : 'border-[#d8cabb] bg-white text-[#765e50]'
+              stepButtonClass(i)
             }`}
           >
             {s}
@@ -200,8 +223,8 @@ export function SurveyEditorWizard({ encuestaId }: Props) {
       {step === 0 && (
         <div className="space-y-4 rounded-xl border border-[#d8cabb] bg-white p-6">
           <div>
-            <label className="mb-1 block text-sm font-semibold text-[#2b1710]">Título *</label>
-            <input
+            <label htmlFor={`${fieldId}-1`} className="mb-1 block text-sm font-semibold text-[#2b1710]">Título *</label>
+            <input id={`${fieldId}-1`}
               value={titulo}
               onChange={e => setTitulo(e.target.value)}
               className="w-full rounded-lg border border-[#d8cabb] px-3 py-2.5 text-sm text-[#2b1710] focus:outline-none focus:ring-2 focus:ring-[#c28a3a]/30"
@@ -209,8 +232,8 @@ export function SurveyEditorWizard({ encuestaId }: Props) {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-semibold text-[#2b1710]">Descripción</label>
-            <textarea
+            <label htmlFor={`${fieldId}-2`} className="mb-1 block text-sm font-semibold text-[#2b1710]">Descripción</label>
+            <textarea id={`${fieldId}-2`}
               value={descripcion}
               onChange={e => setDescripcion(e.target.value)}
               rows={3}
@@ -220,8 +243,8 @@ export function SurveyEditorWizard({ encuestaId }: Props) {
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm font-semibold text-[#2b1710]">Visibilidad</label>
-              <select
+              <label htmlFor={`${fieldId}-3`} className="mb-1 block text-sm font-semibold text-[#2b1710]">Visibilidad</label>
+              <select id={`${fieldId}-3`}
                 value={visibilidad}
                 onChange={e => setVisibilidad(e.target.value)}
                 className="w-full rounded-lg border border-[#d8cabb] px-3 py-2.5 text-sm text-[#2b1710]"
@@ -232,8 +255,8 @@ export function SurveyEditorWizard({ encuestaId }: Props) {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-semibold text-[#2b1710]">Logo URL</label>
-              <input
+              <label htmlFor={`${fieldId}-4`} className="mb-1 block text-sm font-semibold text-[#2b1710]">Logo URL</label>
+              <input id={`${fieldId}-4`}
                 value={logoUrl}
                 onChange={e => setLogoUrl(e.target.value)}
                 className="w-full rounded-lg border border-[#d8cabb] px-3 py-2.5 text-sm text-[#2b1710]"
@@ -249,8 +272,9 @@ export function SurveyEditorWizard({ encuestaId }: Props) {
                 onChange={e => setRequiereLogin(e.target.checked)}
                 className="h-4 w-4 rounded border-[#d8cabb] text-[#2b1710]"
               />
-              Requiere login
-            </label>
+
+              <span>Requiere login</span>
+</label>
             <label className="flex items-center gap-2 text-sm text-[#2b1710]">
               <input
                 type="checkbox"
@@ -258,12 +282,13 @@ export function SurveyEditorWizard({ encuestaId }: Props) {
                 onChange={e => setPermitirMultiples(e.target.checked)}
                 className="h-4 w-4 rounded border-[#d8cabb] text-[#2b1710]"
               />
-              Permitir múltiples respuestas
-            </label>
+
+              <span>Permitir múltiples respuestas</span>
+</label>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-semibold text-[#2b1710]">Mensaje de confirmación</label>
-            <textarea
+            <label htmlFor={`${fieldId}-5`} className="mb-1 block text-sm font-semibold text-[#2b1710]">Mensaje de confirmación</label>
+            <textarea id={`${fieldId}-5`}
               value={mensajeConfirmacion}
               onChange={e => setMensajeConfirmacion(e.target.value)}
               rows={2}
@@ -287,7 +312,7 @@ export function SurveyEditorWizard({ encuestaId }: Props) {
         <div className="space-y-4">
           {questions.map((q, i) => (
             <QuestionBuilder
-              key={i}
+              key={q.clientId}
               index={i}
               data={q}
               onChange={data => updateQuestion(i, data)}
@@ -336,8 +361,8 @@ export function SurveyEditorWizard({ encuestaId }: Props) {
               {questions.length} pregunta{questions.length !== 1 ? 's' : ''}
             </h3>
             <ol className="list-inside list-decimal space-y-1 text-sm text-[#5a3424]">
-              {questions.filter(q => q.texto_pregunta.trim()).map((q, i) => (
-                <li key={i}>
+              {questions.filter(q => q.texto_pregunta.trim()).map(q => (
+                <li key={q.clientId}>
                   {q.texto_pregunta}
                   <span className="ml-2 text-xs text-[#a08c7a]">
                     ({questionTypeLabels[q.tipo_pregunta]}{q.es_obligatoria ? ', obligatoria' : ''})
@@ -361,7 +386,7 @@ export function SurveyEditorWizard({ encuestaId }: Props) {
               disabled={saving || !titulo.trim()}
               className="rounded-lg bg-[#2b1710] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#3d2318] disabled:opacity-50"
             >
-              {saving ? 'Guardando...' : isNew ? 'Crear encuesta' : 'Guardar cambios'}
+              {saveButtonLabel()}
             </button>
           </div>
         </div>

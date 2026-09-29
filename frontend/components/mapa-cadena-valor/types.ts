@@ -1,7 +1,5 @@
-export type ActorTypeCode = string;
-
 export interface ActorTypeOption {
-  code: ActorTypeCode;
+  code: string;
   label: string;
 }
 
@@ -13,7 +11,7 @@ export interface DistrictMapDatum {
 }
 
 export interface ValueChainMapResponse {
-  tipo: ActorTypeCode;
+  tipo: string;
   totalActores: number;
   distritos: DistrictMapDatum[];
   filtros?: ActorTypeOption[];
@@ -71,6 +69,6 @@ export interface PanamaValueChainMapProps {
   title?: string;
   description?: string;
   eyebrow?: string;
-  initialFilter?: ActorTypeCode;
+  initialFilter?: string;
   onDistrictClick?: (district: SelectedDistrict) => void;
 }

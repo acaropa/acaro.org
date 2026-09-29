@@ -186,8 +186,8 @@ async function create(data) {
 }
 
 async function update(id, data) {
-  const allowed = ['nombre', 'descripcion', 'impacto', 'tipo', 'clasificacion', 'estado', 'fecha_inicio', 'fecha_fin', 'responsable_id', 'supervisor_id', 'imagen_portada'];
-  const fields = Object.keys(data).filter(k => allowed.includes(k));
+  const allowed = new Set(['nombre', 'descripcion', 'impacto', 'tipo', 'clasificacion', 'estado', 'fecha_inicio', 'fecha_fin', 'responsable_id', 'supervisor_id', 'imagen_portada']);
+  const fields = Object.keys(data).filter(k => allowed.has(k));
 
   if (fields.length === 0) {
     const err = new Error('Sin campos válidos para actualizar');
@@ -329,11 +329,11 @@ async function createFase(proyectoId, data) {
 }
 
 async function updateFase(faseId, data) {
-  const allowed = [
+  const allowed = new Set([
     'nombre', 'descripcion', 'orden', 'estado', 'porcentaje_avance',
     'peso_porcentaje', 'responsable_id', 'fecha_inicio', 'fecha_fin',
-  ];
-  const fields = Object.keys(data).filter(k => allowed.includes(k));
+  ]);
+  const fields = Object.keys(data).filter(k => allowed.has(k));
 
   if (fields.length === 0) {
     const err = new Error('Sin campos válidos para actualizar');
@@ -395,8 +395,8 @@ async function createIndicador(proyectoId, data) {
 }
 
 async function updateIndicador(indicadorId, data) {
-  const allowed = ['icono', 'valor', 'etiqueta', 'orden'];
-  const fields = Object.keys(data).filter(k => allowed.includes(k));
+  const allowed = new Set(['icono', 'valor', 'etiqueta', 'orden']);
+  const fields = Object.keys(data).filter(k => allowed.has(k));
 
   if (fields.length === 0) {
     const err = new Error('Sin campos válidos para actualizar');

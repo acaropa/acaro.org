@@ -300,7 +300,7 @@ function toRuleQuestion(question: EncuestaPregunta): RuleQuestion {
   }
 }
 function isEmptyAnswer(value?: AnswerValue) {
-  if (typeof value === 'undefined') return true
+  if (value === undefined) return true
   if (typeof value === 'string') return !value.trim()
   if (typeof value === 'number') return Number.isNaN(value)
   if (typeof value === 'boolean') return false
@@ -313,7 +313,7 @@ function isEmptyAnswer(value?: AnswerValue) {
 
 interface Props { slug: string }
 
-export function SurveyPublicContainer({ slug }: Props) {
+export function SurveyPublicContainer({ slug }: Readonly<Props>) {
   const [survey, setSurvey] = useState<EncuestaFull | null>(null)
   const [questions, setQuestions] = useState<VisibleEncuestaPregunta[]>([])
   const [loading, setLoading] = useState(true)
@@ -442,7 +442,7 @@ export function SurveyPublicContainer({ slug }: Props) {
       setSaveError('Esta pregunta es obligatoria.'); return
     }
     const draft = { ...answersByCode, [q.codigo_pregunta ?? q.id]: value }
-    if (typeof value === 'undefined') delete draft[q.codigo_pregunta ?? q.id]
+    if (value === undefined) delete draft[q.codigo_pregunta ?? q.id]
     setSaveError(''); setAnswersByCode(draft)
     const nextVisible = questions.filter(qq => isQuestionVisible(toRuleQuestion(qq), draft))
     const nextIdx = nextVisible.findIndex(qq => qq.id === q.id) + 1

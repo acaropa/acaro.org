@@ -1,6 +1,6 @@
-const fs = require('fs/promises');
-const path = require('path');
-const crypto = require('crypto');
+const fs = require('node:fs/promises');
+const path = require('node:path');
+const crypto = require('node:crypto');
 const sharp = require('sharp');
 const { uploadRoot } = require('../config/uploads');
 
@@ -60,7 +60,7 @@ function validateMimeType(mimeType, extension) {
 }
 
 function optimizedWidths(originalWidth) {
-  const maxWidth = Math.min(originalWidth, RESPONSIVE_WIDTHS[RESPONSIVE_WIDTHS.length - 1]);
+  const maxWidth = Math.min(originalWidth, RESPONSIVE_WIDTHS.at(-1));
   const widths = RESPONSIVE_WIDTHS.filter(width => width <= maxWidth);
   if (!widths.includes(maxWidth)) widths.push(maxWidth);
   return widths;
@@ -80,7 +80,7 @@ async function saveOptimizedImageUpload({ buffer, subdir }) {
   }
 
   const widths = optimizedWidths(metadata.width);
-  const maxWidth = widths[widths.length - 1];
+  const maxWidth = widths.at(-1);
   const baseName = `${Date.now()}-${crypto.randomBytes(8).toString('hex')}`;
   const variants = [];
 
@@ -137,7 +137,7 @@ async function saveBase64Upload({ base64, fileName, subdir, maxBytes, allowedExt
     ...messages,
   };
 
-  const match = String(base64 || '').match(/^data:([^;]+);base64,(.+)$/);
+  const match = /^data:([^;]+);base64,(.+)$/.exec(String(base64 || ''));
   if (!match || !fileName) {
     const err = new Error(errorMessages.required);
     err.status = 400;

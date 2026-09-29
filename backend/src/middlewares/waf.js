@@ -25,7 +25,7 @@ const SQLI_PATTERNS = [
 // Patrones de path traversal
 const TRAVERSAL_PATTERNS = [
   /\.\.[/\\]/,          // ../  ..\
-  /%2e%2e[%2f%5c]/i,   // URL-encoded ../
+  /%2e%2e(?:%2f|%5c)/i, // URL-encoded ../ or ..\
   /\0/,                  // null byte
 ];
 
@@ -62,7 +62,7 @@ module.exports = function waf(req, res, next) {
   }
 
   // 2. Path traversal en la URL → bloquear
-  if (matches(path, TRAVERSAL_PATTERNS)) {
+  if (matches(path, TRAVERSAL_PATTERNS) || matches(query, TRAVERSAL_PATTERNS)) {
     logger.warn(`WAF [traversal] ${req.method} ${path} ip=${ip}`);
     return res.status(400).json({ error: 'Solicitud inválida' });
   }

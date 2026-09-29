@@ -2,7 +2,7 @@ const rateLimit = require('express-rate-limit');
 
 // Helper para leer límites configurables por env, con fallback a un valor por defecto.
 function envInt(name, fallback) {
-  const v = parseInt(process.env[name], 10);
+  const v = Number.parseInt(process.env[name], 10);
   return Number.isFinite(v) && v > 0 ? v : fallback;
 }
 

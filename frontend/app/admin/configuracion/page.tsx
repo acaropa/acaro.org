@@ -329,13 +329,13 @@ function Field({
   onChange,
   placeholder,
   type = 'text',
-}: {
+}: Readonly<{
   label: string;
   value: string | number;
   onChange: (value: string) => void;
   placeholder?: string;
   type?: string;
-}) {
+}>) {
   return (
     <label className="block">
       <span className="mb-2 block font-label-caps text-[10px] uppercase tracking-widest text-muted">{label}</span>
@@ -355,12 +355,12 @@ function TextArea({
   value,
   onChange,
   rows = 4,
-}: {
+}: Readonly<{
   label: string;
   value: string;
   onChange: (value: string) => void;
   rows?: number;
-}) {
+}>) {
   return (
     <label className="block">
       <span className="mb-2 block font-label-caps text-[10px] uppercase tracking-widest text-muted">{label}</span>
@@ -369,7 +369,7 @@ function TextArea({
   );
 }
 
-function Toggle({ label, description, checked, onChange }: { label: string; description: string; checked: boolean; onChange: (value: boolean) => void }) {
+function Toggle({ label, description, checked, onChange }: Readonly<{ label: string; description: string; checked: boolean; onChange: (value: boolean) => void }>) {
   return (
     <button
       type="button"
@@ -387,7 +387,7 @@ function Toggle({ label, description, checked, onChange }: { label: string; desc
   );
 }
 
-function InstitutionSettings({ settings, update }: SettingsProps) {
+function InstitutionSettings({ settings, update }: Readonly<SettingsProps>) {
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
       <Field label="Nombre oficial" value={settings.institutionName} onChange={value => update('institutionName', value)} />
@@ -410,7 +410,7 @@ function InstitutionSettings({ settings, update }: SettingsProps) {
   );
 }
 
-function DocumentSettings({ settings, update }: SettingsProps) {
+function DocumentSettings({ settings, update }: Readonly<SettingsProps>) {
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
       <Field label="Logo para documentos" value={settings.defaultDocumentLogo} onChange={value => update('defaultDocumentLogo', value)} />
@@ -438,7 +438,7 @@ function DocumentSettings({ settings, update }: SettingsProps) {
   );
 }
 
-function ContentSettings({ settings, update }: SettingsProps) {
+function ContentSettings({ settings, update }: Readonly<SettingsProps>) {
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
       <Field label="Titulo del hero" value={settings.heroTitle} onChange={value => update('heroTitle', value)} />
@@ -463,8 +463,11 @@ function ContentSettings({ settings, update }: SettingsProps) {
         <h3 className="font-headline-md text-xl text-foreground">Barra institucional del landing</h3>
         <p className="mt-1 text-sm text-muted">Estos datos aparecen debajo del hero principal.</p>
         <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
-          {settings.landingMetadata.slice(0, 4).map((item, index) => (
-            <div key={index} className="grid grid-cols-1 gap-3 rounded-lg border border-border p-4 md:grid-cols-2">
+          {['first', 'second', 'third', 'fourth'].map((slot, index) => {
+            const item = settings.landingMetadata[index];
+            if (!item) return null;
+            return (
+            <div key={slot} className="grid grid-cols-1 gap-3 rounded-lg border border-border p-4 md:grid-cols-2">
               <Field
                 label={`Etiqueta ${index + 1}`}
                 value={item.label}
@@ -484,14 +487,14 @@ function ContentSettings({ settings, update }: SettingsProps) {
                 }}
               />
             </div>
-          ))}
+          ); })}
         </div>
       </div>
     </div>
   );
 }
 
-function SecuritySettings({ settings, update }: SettingsProps) {
+function SecuritySettings({ settings, update }: Readonly<SettingsProps>) {
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
       <Field
@@ -548,13 +551,13 @@ function LibraryThemesSettings({
   saved,
   onSave,
   onClear,
-}: {
+}: Readonly<{
   themes: LibraryThemes;
   saving: boolean;
   saved: boolean;
-  onSave: (title: string, file: { base64: string; fileName: string }) => void;
+  onSave: (title: string, file: { base64: string; fileName: string }) => Promise<void>;
   onClear: (title: string) => void;
-}) {
+}>) {
   return (
     <div className="space-y-8">
       <div>
@@ -590,20 +593,22 @@ function ThemeImageCard({
   saving,
   onSave,
   onClear,
-}: {
+}: Readonly<{
   title: string;
   label: string;
   currentUrl: string | null;
   saving: boolean;
-  onSave: (title: string, file: { base64: string; fileName: string }) => void;
+  onSave: (title: string, file: { base64: string; fileName: string }) => Promise<void>;
   onClear: (title: string) => void;
-}) {
+}>) {
   const [pending, setPending] = useState<{ base64: string; fileName: string } | null>(null);
 
   function handleFile(file: File) {
     const reader = new FileReader();
     reader.onload = () => {
-      setPending({ base64: String(reader.result), fileName: file.name });
+      if (typeof reader.result === 'string') {
+        setPending({ base64: reader.result, fileName: file.name });
+      }
     };
     reader.readAsDataURL(file);
   }
@@ -620,6 +625,16 @@ function ThemeImageCard({
 
   const displayUrl = pending?.base64 || (currentUrl ? apiAssetUrl(currentUrl) : null);
 
+  function resolveOnClear() {
+    if (pending) {
+      return discard;
+    }
+    if (currentUrl) {
+      return () => onClear(title);
+    }
+    return undefined;
+  }
+
   return (
     <div className="space-y-4 rounded-lg border border-border bg-surface p-5">
       <FileUploadDropzone
@@ -629,7 +644,7 @@ function ThemeImageCard({
         existingUrl={displayUrl}
         fileName={pending?.fileName || currentUrl?.split("/").pop()}
         onFileSelect={handleFile}
-        onClear={pending ? discard : currentUrl ? () => onClear(title) : undefined}
+        onClear={resolveOnClear()}
         disabled={saving}
         helperText={pending ? "Imagen seleccionada. Guarda los cambios para publicarla." : "Imagen utilizada en la portada pública correspondiente."}
       />

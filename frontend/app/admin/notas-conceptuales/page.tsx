@@ -4,11 +4,13 @@ import { DataLoadingState } from "@/components/ui/TypingIndicator";
 
 import { AppIcon } from "@/components/ui/AppIcon"
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useId, useCallback, useEffect, useMemo, useState } from 'react';
 import { Modal, ModalActions } from '@/components/ui/Modal';
 import { api } from '@/lib/api';
+import { createIdempotencyKey } from '@/lib/random';
 
 type AgendaRow = {
+  clientId?: string;
   hora: string;
   actividad: string;
   responsable: string;
@@ -81,7 +83,7 @@ const defaultForm: ConceptNoteForm = {
   participantesContraparte: '',
   temas: '',
   metodologia: '',
-  agenda: [{ hora: '', actividad: '', responsable: '' }],
+  agenda: [{ clientId: 'initial-row', hora: '', actividad: '', responsable: '' }],
   resultados: '',
   productos: '',
   aprobacion: '',
@@ -110,7 +112,7 @@ function recordToForm(r: NotaConceptualRecord): ConceptNoteForm {
     participantesContraparte: r.participantes_contraparte,
     temas: r.temas,
     metodologia: r.metodologia,
-    agenda: r.agenda.map(row => ({ ...row })),
+    agenda: r.agenda.map(row => ({ ...row, clientId: createIdempotencyKey() })),
     resultados: r.resultados,
     productos: r.productos,
     aprobacion: r.aprobacion,
@@ -137,7 +139,7 @@ function formToPayload(form: ConceptNoteForm) {
     participantes_contraparte: form.participantesContraparte,
     temas: form.temas,
     metodologia: form.metodologia,
-    agenda: form.agenda,
+    agenda: form.agenda.map(({ hora, actividad, responsable }) => ({ hora, actividad, responsable })),
     resultados: form.resultados,
     productos: form.productos,
     aprobacion: form.aprobacion,
@@ -175,7 +177,8 @@ function slugify(value: string) {
       .normalize('NFD')
       .replace(/[̀-ͯ]/g, '')
       .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '')
+      .replace(/^-/, '')
+      .replace(/-$/, '')
       .slice(0, 70) || 'nota-conceptual'
   );
 }
@@ -219,7 +222,7 @@ function buildDocumentHtml(form: ConceptNoteForm, logoUrl = '', autoPrint = fals
   const p = (text: string) =>
     paragraphsFromText(text).map(item => `<p>${escapeHtml(item)}</p>`).join('');
   const ul = (text: string) =>
-    `<ul>${listFromText(text).map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`;
+    `<ul>${listFromText(text).map(item => ("<li>" + (escapeHtml(item)) + "</li>")).join('')}</ul>`;
   const agendaRows = form.agenda
     .filter(row => row.hora.trim() || row.actividad.trim() || row.responsable.trim())
     .map(
@@ -233,7 +236,7 @@ function buildDocumentHtml(form: ConceptNoteForm, logoUrl = '', autoPrint = fals
 <head>
   <meta charset="utf-8" />
   <title>${escapeHtml(form.titulo)} - ${escapeHtml(form.fechaDocumento)}</title>
-  ${autoPrint ? '<script>window.addEventListener("load",function(){setTimeout(function(){window.print();},600);});<\/script>' : ''}
+  ${autoPrint ? '<script>window.addEventListener("load",function(){setTimeout(function(){window.print();},600);});</script>' : ''}
   <style>
     @page { size: letter; margin: 15mm 18mm 15mm 18mm; }
     * { box-sizing: border-box; }
@@ -271,7 +274,7 @@ function buildDocumentHtml(form: ConceptNoteForm, logoUrl = '', autoPrint = fals
   <main class="page">
     <div class="top-bar"></div>
     <header>
-      ${logoUrl ? `<img src="${logoUrl}" alt="Logo ACARO" class="logo" />` : ''}
+      ${logoUrl ? ("<img src=\"" + (logoUrl) + "\" alt=\"Logo ACARO\" class=\"logo\" />") : ''}
       <div class="association">${escapeHtml(form.asociacion)}</div>
       <div class="doc-title">${escapeHtml(form.titulo)}</div>
       <div class="subtitle-box">${escapeHtml(form.subtitulo)}</div>
@@ -328,9 +331,10 @@ function buildDocumentHtml(form: ConceptNoteForm, logoUrl = '', autoPrint = fals
 }
 
 export default function AdminNotasConceptualesPage() {
+  const fieldId = useId();
   const [notes, setNotes] = useState<NotaConceptualRecord[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [draftForm, setDraftForm] = useState<ConceptNoteForm>({ ...defaultForm, agenda: [{ hora: '', actividad: '', responsable: '' }] });
+  const [draftForm, setDraftForm] = useState<ConceptNoteForm>({ ...defaultForm, agenda: [{ clientId: 'initial-row', hora: '', actividad: '', responsable: '' }] });
   const [editingId, setEditingId] = useState<number | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -368,7 +372,7 @@ export default function AdminNotasConceptualesPage() {
       setLoading(true);
       const data = await api.get<NotaConceptualRecord[]>('/notas-conceptuales');
       setNotes(data);
-      setSelectedId(prev => (prev ? prev : data[0]?.id ?? null));
+      setSelectedId(prev => (prev || data[0]?.id || null));
     } catch {
       setError('No se pudieron cargar las notas. Verifica tu conexión.');
     } finally {
@@ -395,7 +399,7 @@ export default function AdminNotasConceptualesPage() {
   function addAgendaRow() {
     setDraftForm(current => ({
       ...current,
-      agenda: [...current.agenda, { hora: '', actividad: '', responsable: '' }],
+      agenda: [...current.agenda, { clientId: createIdempotencyKey(), hora: '', actividad: '', responsable: '' }],
     }));
   }
 
@@ -408,7 +412,7 @@ export default function AdminNotasConceptualesPage() {
 
   function startCreate() {
     setEditingId(null);
-    setDraftForm({ ...defaultForm, agenda: [{ hora: '', actividad: '', responsable: '' }] });
+    setDraftForm({ ...defaultForm, agenda: [{ clientId: createIdempotencyKey(), hora: '', actividad: '', responsable: '' }] });
     setShowForm(true);
   }
 
@@ -469,6 +473,66 @@ export default function AdminNotasConceptualesPage() {
   }
 
 
+  function renderConceptNoteList() {
+    if (loading) {
+      return <DataLoadingState label="Cargando..." className="py-8" />;
+    }
+    if (notes.length === 0) {
+      return (
+        <div className="border border-dashed border-border rounded-lg p-6 text-center">
+          <AppIcon name="contract_edit" className="text-[36px] text-muted mb-3" />
+          <h2 className="font-headline-md text-lg text-foreground">Sin notas</h2>
+          <p className="mt-2 text-sm text-muted leading-6">
+            Crea la primera nota conceptual para verla aquí.
+          </p>
+        </div>
+      );
+    }
+    if (filteredNotes.length === 0) {
+      return (
+        <div className="border border-dashed border-border rounded-lg p-6 text-center">
+          <AppIcon name="search_off" className="text-[36px] text-muted mb-3" />
+          <h2 className="font-headline-md text-lg text-foreground">Sin resultados</h2>
+          <p className="mt-2 text-sm text-muted leading-6">No encontramos notas con ese termino.</p>
+        </div>
+      );
+    }
+    return (
+      <div className="-mx-6 border-y border-border">
+        {filteredNotes.map((note) => {
+          const isSelected = note.id === selectedId;
+          const status = getNoteStatus(note);
+          return (
+            <button
+              key={note.id}
+              type="button"
+              onClick={() => setSelectedId(note.id)}
+              className={`w-full border-b border-border px-6 py-4 text-left transition-colors last:border-b-0 ${
+                isSelected ? 'bg-primary/5' : 'hover:bg-surface-container-low'
+              }`}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <h3 className="text-[15px] font-bold leading-5 text-foreground line-clamp-2">
+                  {note.subtitulo || note.titulo}
+                </h3>
+                <span
+                  className={`shrink-0 rounded-full px-2 py-1 text-[8px] font-bold uppercase tracking-widest ${status.className}`}
+                >
+                  {status.label}
+                </span>
+              </div>
+              <p className="mt-2 line-clamp-2 text-xs leading-5 text-muted">{getNoteSummary(note)}</p>
+              <div className="mt-3 flex items-center gap-1 text-[11px] font-medium text-foreground">
+                <AppIcon name="calendar_month" className="text-[14px]" />
+                {formatNoteDate(note.fecha)}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
   return (
     <>
       <section className="mb-8">
@@ -523,54 +587,7 @@ export default function AdminNotasConceptualesPage() {
               className="w-full border border-border bg-surface-container-lowest py-3 pl-10 pr-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted focus:border-primary"
             />
           </div>
-          {loading ? (
-            <DataLoadingState label="Cargando..." className="py-8" />
-          ) : notes.length === 0 ? (
-            <div className="border border-dashed border-border rounded-lg p-6 text-center">
-              <AppIcon name="contract_edit" className="text-[36px] text-muted mb-3" />
-              <h2 className="font-headline-md text-lg text-foreground">Sin notas</h2>
-              <p className="mt-2 text-sm text-muted leading-6">Crea la primera nota conceptual para verla aquí.</p>
-            </div>
-          ) : filteredNotes.length === 0 ? (
-            <div className="border border-dashed border-border rounded-lg p-6 text-center">
-              <AppIcon name="search_off" className="text-[36px] text-muted mb-3" />
-              <h2 className="font-headline-md text-lg text-foreground">Sin resultados</h2>
-              <p className="mt-2 text-sm text-muted leading-6">No encontramos notas con ese termino.</p>
-            </div>
-          ) : (
-            <div className="-mx-6 border-y border-border">
-              {filteredNotes.map(note => {
-                const isSelected = note.id === selectedId;
-                const status = getNoteStatus(note);
-                return (
-                  <button
-                    key={note.id}
-                    type="button"
-                    onClick={() => setSelectedId(note.id)}
-                    className={`w-full border-b border-border px-6 py-4 text-left transition-colors last:border-b-0 ${
-                      isSelected ? 'bg-primary/5' : 'hover:bg-surface-container-low'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <h3 className="text-[15px] font-bold leading-5 text-foreground line-clamp-2">
-                        {note.subtitulo || note.titulo}
-                      </h3>
-                      <span className={`shrink-0 rounded-full px-2 py-1 text-[8px] font-bold uppercase tracking-widest ${status.className}`}>
-                        {status.label}
-                      </span>
-                    </div>
-                    <p className="mt-2 line-clamp-2 text-xs leading-5 text-muted">
-                      {getNoteSummary(note)}
-                    </p>
-                    <div className="mt-3 flex items-center gap-1 text-[11px] font-medium text-foreground">
-                      <AppIcon name="calendar_month" className="text-[14px]" />
-                      {formatNoteDate(note.fecha)}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          )}
+          {renderConceptNoteList()}
           {selectedRecord && (
             <div className="border-t border-border pt-5 space-y-2">
               <button
@@ -625,28 +642,28 @@ export default function AdminNotasConceptualesPage() {
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Asociación</label>
-              <input value={draftForm.asociacion} onChange={e => updateField('asociacion', e.target.value)} className={fieldClass} />
+              <label htmlFor={`${fieldId}-1`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Asociación</label>
+              <input id={`${fieldId}-1`} value={draftForm.asociacion} onChange={e => updateField('asociacion', e.target.value)} className={fieldClass} />
             </div>
             <div>
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Título</label>
-              <input value={draftForm.titulo} onChange={e => updateField('titulo', e.target.value)} className={fieldClass} />
+              <label htmlFor={`${fieldId}-2`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Título</label>
+              <input id={`${fieldId}-2`} value={draftForm.titulo} onChange={e => updateField('titulo', e.target.value)} className={fieldClass} />
             </div>
             <div className="md:col-span-2">
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Nombre de la actividad</label>
-              <input value={draftForm.subtitulo} onChange={e => updateField('subtitulo', e.target.value)} className={fieldClass} required />
+              <label htmlFor={`${fieldId}-3`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Nombre de la actividad</label>
+              <input id={`${fieldId}-3`} value={draftForm.subtitulo} onChange={e => updateField('subtitulo', e.target.value)} className={fieldClass} required />
             </div>
             <div>
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Fecha</label>
-              <input value={draftForm.fecha} onChange={e => updateField('fecha', e.target.value)} className={fieldClass} required />
+              <label htmlFor={`${fieldId}-4`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Fecha</label>
+              <input id={`${fieldId}-4`} value={draftForm.fecha} onChange={e => updateField('fecha', e.target.value)} className={fieldClass} required />
             </div>
             <div>
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Horario</label>
-              <input value={draftForm.horario} onChange={e => updateField('horario', e.target.value)} className={fieldClass} required />
+              <label htmlFor={`${fieldId}-5`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Horario</label>
+              <input id={`${fieldId}-5`} value={draftForm.horario} onChange={e => updateField('horario', e.target.value)} className={fieldClass} required />
             </div>
             <div className="md:col-span-2">
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Lugar</label>
-              <input value={draftForm.lugar} onChange={e => updateField('lugar', e.target.value)} className={fieldClass} required />
+              <label htmlFor={`${fieldId}-6`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Lugar</label>
+              <input id={`${fieldId}-6`} value={draftForm.lugar} onChange={e => updateField('lugar', e.target.value)} className={fieldClass} required />
             </div>
           </div>
 
@@ -668,18 +685,18 @@ export default function AdminNotasConceptualesPage() {
             </div>
             <div className="space-y-4">
               {draftForm.agenda.map((row, index) => (
-                <div key={index} className="grid grid-cols-1 md:grid-cols-[160px_1fr_190px_44px] gap-3 items-end border border-border rounded-lg p-4">
+                <div key={row.clientId} className="grid grid-cols-1 md:grid-cols-[160px_1fr_190px_44px] gap-3 items-end border border-border rounded-lg p-4">
                   <div>
-                    <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Hora</label>
-                    <input value={row.hora} onChange={e => updateAgenda(index, 'hora', e.target.value)} className={fieldClass} />
+                    <label htmlFor={`${fieldId}-7-${index}`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Hora</label>
+                    <input id={`${fieldId}-7-${index}`} value={row.hora} onChange={e => updateAgenda(index, 'hora', e.target.value)} className={fieldClass} />
                   </div>
                   <div>
-                    <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Actividad</label>
-                    <input value={row.actividad} onChange={e => updateAgenda(index, 'actividad', e.target.value)} className={fieldClass} />
+                    <label htmlFor={`${fieldId}-8-${index}`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Actividad</label>
+                    <input id={`${fieldId}-8-${index}`} value={row.actividad} onChange={e => updateAgenda(index, 'actividad', e.target.value)} className={fieldClass} />
                   </div>
                   <div>
-                    <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Responsable</label>
-                    <input value={row.responsable} onChange={e => updateAgenda(index, 'responsable', e.target.value)} className={fieldClass} />
+                    <label htmlFor={`${fieldId}-9-${index}`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Responsable</label>
+                    <input id={`${fieldId}-9-${index}`} value={row.responsable} onChange={e => updateAgenda(index, 'responsable', e.target.value)} className={fieldClass} />
                   </div>
                   <button
                     type="button"
@@ -704,28 +721,28 @@ export default function AdminNotasConceptualesPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Firmante ACARO</label>
-              <input value={draftForm.firmanteAcaro} onChange={e => updateField('firmanteAcaro', e.target.value)} className={fieldClass} />
+              <label htmlFor={`${fieldId}-10`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Firmante ACARO</label>
+              <input id={`${fieldId}-10`} value={draftForm.firmanteAcaro} onChange={e => updateField('firmanteAcaro', e.target.value)} className={fieldClass} />
             </div>
             <div>
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Cargo firmante ACARO</label>
-              <input value={draftForm.cargoAcaro} onChange={e => updateField('cargoAcaro', e.target.value)} className={fieldClass} />
+              <label htmlFor={`${fieldId}-11`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Cargo firmante ACARO</label>
+              <input id={`${fieldId}-11`} value={draftForm.cargoAcaro} onChange={e => updateField('cargoAcaro', e.target.value)} className={fieldClass} />
             </div>
             <div>
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Firmante técnico</label>
-              <input value={draftForm.firmanteTecnico} onChange={e => updateField('firmanteTecnico', e.target.value)} className={fieldClass} />
+              <label htmlFor={`${fieldId}-12`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Firmante técnico</label>
+              <input id={`${fieldId}-12`} value={draftForm.firmanteTecnico} onChange={e => updateField('firmanteTecnico', e.target.value)} className={fieldClass} />
             </div>
             <div>
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Cargo firmante técnico</label>
-              <input value={draftForm.cargoTecnico} onChange={e => updateField('cargoTecnico', e.target.value)} className={fieldClass} />
+              <label htmlFor={`${fieldId}-13`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Cargo firmante técnico</label>
+              <input id={`${fieldId}-13`} value={draftForm.cargoTecnico} onChange={e => updateField('cargoTecnico', e.target.value)} className={fieldClass} />
             </div>
             <div>
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Documento realizado por</label>
-              <input value={draftForm.realizadoPor} onChange={e => updateField('realizadoPor', e.target.value)} className={fieldClass} />
+              <label htmlFor={`${fieldId}-14`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Documento realizado por</label>
+              <input id={`${fieldId}-14`} value={draftForm.realizadoPor} onChange={e => updateField('realizadoPor', e.target.value)} className={fieldClass} />
             </div>
             <div>
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Fecha del documento</label>
-              <input value={draftForm.fechaDocumento} onChange={e => updateField('fechaDocumento', e.target.value)} className={fieldClass} />
+              <label htmlFor={`${fieldId}-15`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Fecha del documento</label>
+              <input id={`${fieldId}-15`} value={draftForm.fechaDocumento} onChange={e => updateField('fechaDocumento', e.target.value)} className={fieldClass} />
             </div>
           </div>
 
@@ -740,7 +757,7 @@ export default function AdminNotasConceptualesPage() {
   );
 }
 
-function TextArea({ label, value, onChange, rows }: { label: string; value: string; onChange: (v: string) => void; rows: number }) {
+function TextArea({ label, value, onChange, rows }: Readonly<{ label: string; value: string; onChange: (v: string) => void; rows: number }>) {
   return (
     <div>
       <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">{label}</label>

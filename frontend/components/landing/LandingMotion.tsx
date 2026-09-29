@@ -18,7 +18,7 @@ type ScrollSceneProps = {
   className?: string
 }
 
-export function ScrollScene({ children, className }: ScrollSceneProps) {
+export function ScrollScene({ children, className }: Readonly<ScrollSceneProps>) {
   const ref = React.useRef<HTMLElement>(null)
 
   React.useEffect(() => {
@@ -93,7 +93,7 @@ export function ScrollReveal({
   delay = 0,
   distance = "md",
   direction = "up",
-}: ScrollRevealProps) {
+}: Readonly<ScrollRevealProps>) {
   const ref = React.useRef<HTMLDivElement>(null)
 
   React.useEffect(() => {

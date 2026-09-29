@@ -7,7 +7,7 @@ import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
-export function ThemeToggle({ className }: { className?: string }) {
+export function ThemeToggle({ className }: Readonly<{ className?: string }>) {
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = React.useState(false)
 

@@ -30,14 +30,14 @@ const COMMERCIAL_SERVICES: Service[] = [
 
 type JourneyProps = { id: string; section: string; description: string; kind: string; services: Service[]; cta?: { label: string; message: string } };
 
-function ServiceJourney({ id, section, description, kind, services, cta }: JourneyProps) {
+function ServiceJourney({ id, section, description, kind, services, cta }: Readonly<JourneyProps>) {
   const journeyRef = React.useRef<HTMLElement>(null);
   const [active, setActive] = React.useState(0);
   const current = services[active];
 
   React.useEffect(() => {
     const journey = journeyRef.current;
-    if (!journey) return;
+    if (!journey) { return; }
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let frame = 0;
     let visible = false;
@@ -110,7 +110,12 @@ function ServiceJourney({ id, section, description, kind, services, cta }: Journ
         </div>
 
         <nav className="absolute bottom-5 left-1/2 z-30 flex -translate-x-1/2 items-center gap-2" aria-label="Etapas del servicio">
-          {services.map((service, index) => <button key={service.number} type="button" onClick={() => { const journey = journeyRef.current; if (!journey) return; const travel = journey.offsetHeight - window.innerHeight; window.scrollTo({ top: journey.offsetTop + travel * (index / (services.length - 1)), behavior: "smooth" }); }} className={`group flex items-center gap-2 px-1 py-2 text-[9px] font-bold tracking-[0.16em] transition-opacity ${index === active ? "opacity-100" : "opacity-35 hover:opacity-70"}`} aria-current={index === active ? "step" : undefined} aria-label={`Ir a ${service.title}`}><span>{service.number}</span><span className={`hidden h-px transition-all sm:block ${index === active ? "w-10 bg-current" : "w-4 bg-current/50"}`} /></button>)}
+          {services.map((service, index) => <button key={service.number} type="button" onClick={() => {
+            const journey = journeyRef.current;
+            if (!journey) return;
+            const travel = journey.offsetHeight - window.innerHeight;
+            window.scrollTo({ top: journey.offsetTop + travel * (index / (services.length - 1)), behavior: "smooth" });
+          }} className={`group flex items-center gap-2 px-1 py-2 text-[9px] font-bold tracking-[0.16em] transition-opacity ${index === active ? "opacity-100" : "opacity-35 hover:opacity-70"}`} aria-current={index === active ? "step" : undefined} aria-label={`Ir a ${service.title}`}><span>{service.number}</span><span className={`hidden h-px transition-all sm:block ${index === active ? "w-10 bg-current" : "w-4 bg-current/50"}`} /></button>)}
         </nav>
         <div className="absolute inset-x-0 bottom-0 h-[2px] bg-current/10"><span className="service-journey-progress block h-full bg-current/55" /></div>
       </div>

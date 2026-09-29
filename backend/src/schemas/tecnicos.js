@@ -3,7 +3,7 @@ const { z } = require('../middlewares/validate');
 // La tabla tecnicos tiene: especialidad VARCHAR(150), disponible BOOLEAN
 // No existe campo cargo ni notas
 const createTecnicoSchema = z.object({
-  email:       z.string({ required_error: 'email es requerido' }).email('Email inválido').max(254),
+  email:       z.email('Email inválido').max(254),
   password:    z.string({ required_error: 'password es requerida' }).min(12, 'La contraseña debe tener al menos 12 caracteres').max(72, 'Contraseña demasiado larga'),
   nombre:      z.string({ required_error: 'nombre es requerido' }).trim().min(1, 'nombre es requerido').max(100),
   apellido:    z.string({ required_error: 'apellido es requerido' }).trim().min(1, 'apellido es requerido').max(100),

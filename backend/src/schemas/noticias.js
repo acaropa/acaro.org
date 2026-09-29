@@ -16,7 +16,7 @@ const secondaryImagesShape = {
     fileName: z.string().trim().min(1).max(255),
   })).max(10, 'Máximo 10 imágenes secundarias').optional(),
   imagenes: z.union([
-    z.array(z.string().url().max(500)),
+    z.array(z.url().max(500)),
     z.string().max(10_000),
   ]).optional().nullable(),
 };

@@ -61,7 +61,7 @@ const assignTecnicoSchema = z.object({
 });
 
 const addImagenSchema = z.object({
-  url:        z.string({ required_error: 'url es requerida' }).url('url debe ser una URL válida').max(1000),
+  url:        z.url('url debe ser una URL válida').max(1000),
   descripcion: z.string().trim().max(500).optional().nullable(),
 });
 

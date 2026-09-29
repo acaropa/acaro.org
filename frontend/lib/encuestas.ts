@@ -116,7 +116,7 @@ export const encuestasApi = {
     if (filters?.fechaInicio) params.set('fechaInicio', filters.fechaInicio)
     if (filters?.fechaFin) params.set('fechaFin', filters.fechaFin)
     const qs = params.toString()
-    return api.get<RespuestaEncuesta[]>(`/encuestas/${id}/resultados${qs ? `?${qs}` : ''}`)
+    return api.get<RespuestaEncuesta[]>(`/encuestas/${id}/resultados${qs ? ("?" + (qs)) : ''}`)
   },
   deleteResponse: (responseId: number) => api.delete<void>(`/encuestas/respuestas/${responseId}`),
   getPublic: (slug: string) => api.get<EncuestaFull>(`/encuestas/publica/${slug}`),

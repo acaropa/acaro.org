@@ -314,7 +314,7 @@ export default function AdminDashboardPage() {
   );
 }
 
-function MetricTile({ label, value, href }: { label: string; value: number; href: string }) {
+function MetricTile({ label, value, href }: Readonly<{ label: string; value: number; href: string }>) {
   return (
     <Link href={href} className="rounded-xl border border-border bg-card p-6 transition-colors hover:border-primary/40">
       <span className="font-label-caps text-[10px] uppercase tracking-widest text-muted">{label}</span>

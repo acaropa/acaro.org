@@ -78,6 +78,20 @@ async function fileExists(filePath) {
   }
 }
 
+async function generateVariant(src, input, width, format) {
+  const outputPublicPath = variantPath(src, width, format);
+  const output = publicPathToFile(outputPublicPath);
+  await fs.mkdir(path.dirname(output), { recursive: true });
+  if (!(await fileExists(output))) {
+    const formatQuality = assetQuality[src]?.[format] || quality[format];
+    const pipeline = sharp(input).resize({ width, withoutEnlargement: true });
+    if (format === 'avif') await pipeline.avif({ quality: formatQuality, effort: 4 }).toFile(output);
+    else await pipeline.webp({ quality: formatQuality }).toFile(output);
+  }
+  const stats = await fs.stat(output);
+  return { src: outputPublicPath, width, bytes: stats.size };
+}
+
 async function generate() {
   const manifest = {};
   await fs.rm(path.join(publicDir, "assets", "responsive"), { recursive: true, force: true });
@@ -104,34 +118,7 @@ async function generate() {
     for (const format of formats) {
       variants[format] = [];
       for (const width of widths) {
-        const outputPublicPath = variantPath(src, width, format);
-        const output = publicPathToFile(outputPublicPath);
-        await fs.mkdir(path.dirname(output), { recursive: true });
-
-        if (await fileExists(output)) {
-          const stats = await fs.stat(output);
-          variants[format].push({
-            src: outputPublicPath,
-            width,
-            bytes: stats.size,
-          });
-          continue;
-        }
-
-        const formatQuality = assetQuality[src]?.[format] || quality[format];
-        let pipeline = sharp(input).resize({ width, withoutEnlargement: true });
-        if (format === "avif") pipeline = pipeline.avif({ quality: formatQuality, effort: 4 });
-        if (format === "webp") pipeline = pipeline.webp({ quality: formatQuality });
-        if (format === "jpg") pipeline = pipeline.jpeg({ quality: quality.jpeg, mozjpeg: true });
-        if (format === "png") pipeline = pipeline.png({ quality: quality.png, compressionLevel: 9 });
-
-        await pipeline.toFile(output);
-        const stats = await fs.stat(output);
-        variants[format].push({
-          src: outputPublicPath,
-          width,
-          bytes: stats.size,
-        });
+        variants[format].push(await generateVariant(src, input, width, format));
       }
     }
 
@@ -148,7 +135,9 @@ async function generate() {
   console.log(`Generated responsive image variants for ${Object.keys(manifest).length} assets.`);
 }
 
-generate().catch(error => {
+try {
+  await generate();
+} catch (error) {
   console.error(error);
   process.exit(1);
-});
+}

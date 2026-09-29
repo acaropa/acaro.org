@@ -1,13 +1,13 @@
 "use client";
 
 import styles from "./panama-value-chain-map.module.css";
-import type { ActorTypeCode, ActorTypeOption } from "./types";
+import type { ActorTypeOption } from "./types";
 
 interface MapFiltersProps {
   filters: ActorTypeOption[];
-  activeFilter: ActorTypeCode;
+  activeFilter: string;
   disabled?: boolean;
-  onChange: (filter: ActorTypeCode) => void;
+  onChange: (filter: string) => void;
 }
 
 export function MapFilters({
@@ -15,7 +15,7 @@ export function MapFilters({
   activeFilter,
   disabled = false,
   onChange,
-}: MapFiltersProps) {
+}: Readonly<MapFiltersProps>) {
   return (
     <nav
       className={styles.filters}

@@ -29,6 +29,16 @@ describe('WAF — query params', () => {
 });
 
 describe('WAF — path traversal', () => {
+  test.each(['%252e%252e%252fsecret', '%252e%252e%255csecret'])('bloquea traversal codificado: %s', async value => {
+    const res = await request(app).get(`/api/health?q=${value}`);
+    expect(res.status).toBe(400);
+  });
+
+  test('no confunde un espacio codificado con un separador de ruta', async () => {
+    const res = await request(app).get('/api/health?q=%252e%252e%2520texto');
+    expect(res.status).not.toBe(400);
+  });
+
   test('bloquea ../ en el path', async () => {
     const res = await request(app).get('/api/../../../etc/passwd');
     expect([400, 404]).toContain(res.status);

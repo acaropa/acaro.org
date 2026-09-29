@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, type RefObject } from 'react'
+import { randomFraction } from '@/lib/random'
 
 export type SubmitMotionPhase = 'idle' | 'preparing' | 'flying' | 'waiting' | 'success' | 'error'
 
@@ -34,7 +35,7 @@ export function SurveySubmitMotion({
   buttonRef,
   onFlightStart,
   onArrive,
-}: Props) {
+}: Readonly<Props>) {
   const overlayRef = useRef<HTMLDivElement | null>(null)
   const planeRef = useRef<HTMLDivElement | null>(null)
   const targetRef = useRef<HTMLSpanElement | null>(null)
@@ -147,7 +148,7 @@ export function SurveySubmitMotion({
         const overlay = overlayRef.current
         if (!overlay) return
         const particle = document.createElement('span')
-        particle.className = Math.random() < 0.08
+        particle.className = randomFraction() < 0.08
           ? 'survey-flight-particle survey-flight-leaf'
           : 'survey-flight-particle'
         particle.style.transform = `translate3d(${x}px, ${y}px, 0) rotate(${angle}deg)`
@@ -176,7 +177,7 @@ export function SurveySubmitMotion({
           addParticle(
             point.x - Math.cos(Math.atan2(dy, dx)) * 16,
             point.y - Math.sin(Math.atan2(dy, dx)) * 16,
-            angle + (Math.random() * 18 - 9)
+            angle + (randomFraction() * 18 - 9)
           )
         }
 

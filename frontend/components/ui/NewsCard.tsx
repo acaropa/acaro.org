@@ -3,7 +3,7 @@ import { Calendar } from "lucide-react"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./card"
 import { News } from "@/data/mock-news"
 
-export function NewsCard({ news }: { news: News }) {
+export function NewsCard({ news }: Readonly<{ news: News }>) {
   return (
     <Card className="h-full flex flex-col hover:shadow-md transition-shadow group">
       <CardHeader>
@@ -24,8 +24,8 @@ export function NewsCard({ news }: { news: News }) {
           <Calendar className="w-4 h-4 mr-2" />
           {news.date}
         </div>
-        <Link 
-          href={`/noticias/${news.id}`} 
+        <Link
+          href={`/noticias/${news.id}`}
           className="text-sm font-semibold text-accent hover:text-accent-hover transition-colors mt-4"
         >
           Leer más &rarr;

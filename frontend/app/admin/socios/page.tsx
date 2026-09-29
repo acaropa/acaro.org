@@ -48,7 +48,7 @@ export default function SociosPage() {
     load();
   }, []);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.SubmitEvent) {
     e.preventDefault();
     setError('');
     setSaving(true);
@@ -74,6 +74,95 @@ export default function SociosPage() {
     const estado = socio.estado === 'activo' ? 'inactivo' : 'activo';
     await api.put(`/socios/${socio.id}`, { estado }).catch(() => {});
     load();
+  }
+
+  function renderMemberList() {
+    if (loading) {
+      return <DataLoadingState label="Cargando directorio..." className="py-12" />;
+    }
+    if (socios.length === 0) {
+      return (
+        <div className="bg-surface/30 border border-border border-dashed p-16 flex flex-col items-center justify-center text-center">
+          <AppIcon name="groups" className="text-[48px] text-muted mb-4 opacity-50" />
+          <h3 className="font-headline-md text-xl font-bold text-foreground mb-2">
+            Sin socios registrados
+          </h3>
+          <p className="font-body-md text-muted max-w-md">
+            El directorio de la asociación está vacío.
+          </p>
+        </div>
+      );
+    }
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {socios.map((s) => (
+          <article
+            key={s.id}
+            className="bg-card p-6 border border-border hover:border-primary/30 transition-colors flex flex-col group"
+          >
+            <div className="flex justify-between items-start mb-4">
+              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-surface text-primary font-headline-md font-bold text-lg">
+                {s.nombre.charAt(0)}
+                {s.apellido.charAt(0)}
+              </div>
+              <span
+                className={`font-label-caps text-[10px] tracking-widest uppercase px-2 py-1 rounded shrink-0 ${s.estado === 'activo' ? 'bg-brand-green/10 text-brand-green' : 'bg-muted/10 text-muted'}`}
+              >
+                {s.estado}
+              </span>
+            </div>
+
+            <h2 className="font-headline-md text-lg font-bold text-foreground mb-1 group-hover:text-primary transition-colors">
+              {s.apellido}, {s.nombre}
+            </h2>
+            <p className="text-sm text-muted font-body-md mb-4 font-mono">DNI: {s.dni ?? 'N/A'}</p>
+
+            <div className="flex flex-col gap-2 mb-6 flex-1">
+              <div className="flex items-center gap-2">
+                <AppIcon name="call" className="text-[16px] text-muted" />
+                <span className="text-sm text-foreground font-body-md">
+                  {s.telefono ?? 'No registrado'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <AppIcon name="mail" className="text-[16px] text-muted" />
+                <span className="text-sm text-foreground font-body-md">
+                  {s.email ?? 'No registrado'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <AppIcon name="calendar_today" className="text-[16px] text-muted" />
+                <span className="text-sm text-foreground font-body-md">
+                  Ingreso: {new Date(s.fecha_ingreso).toLocaleDateString('es-EC')}
+                </span>
+              </div>
+            </div>
+
+            {(canUpdate || canDelete) && (
+              <div className="flex justify-end gap-4 pt-4 border-t border-border/50">
+                {canUpdate && (
+                  <button
+                    onClick={() => toggleEstado(s)}
+                    className="flex items-center gap-1 text-sm font-medium text-foreground hover:text-primary transition-colors"
+                  >
+                    <AppIcon name="power_settings_new" className="text-[16px]" />
+                    {s.estado === 'activo' ? 'Desactivar' : 'Activar'}
+                  </button>
+                )}
+                {canDelete && (
+                  <button
+                    onClick={() => handleDelete(s.id)}
+                    className="flex items-center gap-1 text-sm font-medium text-red-600 hover:text-red-800 transition-colors"
+                  >
+                    <AppIcon name="delete" className="text-[16px]" /> Eliminar
+                  </button>
+                )}
+              </div>
+            )}
+          </article>
+        ))}
+      </div>
+    );
   }
 
   return (
@@ -122,72 +211,13 @@ export default function SociosPage() {
               </div>
             ))}
             {error && <p className="sm:col-span-2 rounded border-l-4 border-red-600 bg-red-50 p-4 font-body-md text-sm text-red-700">{error}</p>}
-            
+
             <ModalActions onCancel={() => setShowForm(false)} submitLabel="Guardar socio" pending={saving} />
           </div>
         </form>
       </Modal>
 
-      {loading ? (
-        <DataLoadingState label="Cargando directorio..." className="py-12" />
-      ) : socios.length === 0 ? (
-        <div className="bg-surface/30 border border-border border-dashed p-16 flex flex-col items-center justify-center text-center">
-          <AppIcon name="groups" className="text-[48px] text-muted mb-4 opacity-50" />
-          <h3 className="font-headline-md text-xl font-bold text-foreground mb-2">Sin socios registrados</h3>
-          <p className="font-body-md text-muted max-w-md">El directorio de la asociación está vacío.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {socios.map(s => (
-            <article key={s.id} className="bg-card p-6 border border-border hover:border-primary/30 transition-colors flex flex-col group">
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-surface text-primary font-headline-md font-bold text-lg">
-                  {s.nombre.charAt(0)}{s.apellido.charAt(0)}
-                </div>
-                <span className={`font-label-caps text-[10px] tracking-widest uppercase px-2 py-1 rounded shrink-0 ${s.estado === 'activo' ? 'bg-brand-green/10 text-brand-green' : 'bg-muted/10 text-muted'}`}>
-                  {s.estado}
-                </span>
-              </div>
-              
-              <h2 className="font-headline-md text-lg font-bold text-foreground mb-1 group-hover:text-primary transition-colors">
-                {s.apellido}, {s.nombre}
-              </h2>
-              <p className="text-sm text-muted font-body-md mb-4 font-mono">DNI: {s.dni ?? 'N/A'}</p>
-              
-              <div className="flex flex-col gap-2 mb-6 flex-1">
-                <div className="flex items-center gap-2">
-                  <AppIcon name="call" className="text-[16px] text-muted" />
-                  <span className="text-sm text-foreground font-body-md">{s.telefono ?? 'No registrado'}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <AppIcon name="mail" className="text-[16px] text-muted" />
-                  <span className="text-sm text-foreground font-body-md">{s.email ?? 'No registrado'}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <AppIcon name="calendar_today" className="text-[16px] text-muted" />
-                  <span className="text-sm text-foreground font-body-md">Ingreso: {new Date(s.fecha_ingreso).toLocaleDateString('es-EC')}</span>
-                </div>
-              </div>
-              
-              {(canUpdate || canDelete) && (
-                <div className="flex justify-end gap-4 pt-4 border-t border-border/50">
-                  {canUpdate && (
-                    <button onClick={() => toggleEstado(s)} className="flex items-center gap-1 text-sm font-medium text-foreground hover:text-primary transition-colors">
-                      <AppIcon name="power_settings_new" className="text-[16px]" />
-                      {s.estado === 'activo' ? 'Desactivar' : 'Activar'}
-                    </button>
-                  )}
-                  {canDelete && (
-                    <button onClick={() => handleDelete(s.id)} className="flex items-center gap-1 text-sm font-medium text-red-600 hover:text-red-800 transition-colors">
-                      <AppIcon name="delete" className="text-[16px]" /> Eliminar
-                    </button>
-                  )}
-                </div>
-              )}
-            </article>
-          ))}
-        </div>
-      )}
+      {renderMemberList()}
     </>
   );
 }

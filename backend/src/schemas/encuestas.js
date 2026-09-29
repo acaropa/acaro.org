@@ -38,7 +38,7 @@ const createEncuestaSchema = z.object({
   requiere_login:       z.boolean().optional(),
   permite_anonimo:      z.boolean().optional(),
   una_respuesta_por_ip: z.boolean().optional(),
-  fecha_cierre:         z.string().datetime({ offset: true }).or(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)).optional().nullable(),
+  fecha_cierre:         z.iso.datetime({ offset: true }).or(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)).optional().nullable(),
   mensaje_confirmacion: z.string().max(1000).optional().nullable(),
 });
 
@@ -49,7 +49,7 @@ const updateEncuestaSchema = z.object({
   requiere_login:       z.boolean().optional(),
   permite_anonimo:      z.boolean().optional(),
   una_respuesta_por_ip: z.boolean().optional(),
-  fecha_cierre:         z.string().datetime({ offset: true }).or(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)).optional().nullable(),
+  fecha_cierre:         z.iso.datetime({ offset: true }).or(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)).optional().nullable(),
   mensaje_confirmacion: z.string().max(1000).optional().nullable(),
 });
 

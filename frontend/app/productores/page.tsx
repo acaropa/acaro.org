@@ -15,7 +15,7 @@ import { api } from '@/lib/api';
 import { ProductorRecord, producerImage, formatExperience } from '@/lib/producers';
 
 
-function ProducerCard({ producer, index }: { producer: ProductorRecord; index: number }) {
+function ProducerCard({ producer, index }: Readonly<{ producer: ProductorRecord; index: number }>) {
   const experience = formatExperience(producer.anios_experiencia);
 
   return (
@@ -136,6 +136,41 @@ export default function Productores() {
   const visibleProducers = producers.slice(0, visibleCount);
   const hasMore = producers.length > visibleCount;
 
+  function renderProducerList() {
+    if (loading) {
+      return <DataLoadingState label="Cargando historias..." className="py-24" />;
+    }
+    if (producers.length === 0) {
+      return (
+        <EmptyState
+          title="Sin perfiles publicados"
+          description="Aún no se han publicado perfiles. Vuelve a consultar más adelante."
+        />
+      );
+    }
+    return (
+      <>
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-x-[24px] gap-y-16 items-stretch">
+          {visibleProducers.map((producer, i) => (
+            <ProducerCard key={producer.id} producer={producer} index={i} />
+          ))}
+        </div>
+
+        {hasMore && (
+          <div className="mt-16 flex justify-center">
+            <button
+              type="button"
+              onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
+              className="px-8 py-3 border border-primary text-primary text-xs font-bold tracking-widest uppercase hover:bg-primary hover:text-primary-foreground transition-colors"
+            >
+              Cargar más
+            </button>
+          </div>
+        )}
+      </>
+    );
+  }
+
   return (
     <PublicLayout className="landing-typography">
       <main className="flex-grow w-full">
@@ -192,34 +227,7 @@ export default function Productores() {
 
         {/* ── Listado de perfiles ── */}
         <section className="pb-[120px] px-[20px] md:px-[64px] max-w-[1280px] mx-auto w-full">
-          {loading ? (
-            <DataLoadingState label="Cargando historias..." className="py-24" />
-          ) : producers.length === 0 ? (
-            <EmptyState
-              title="Sin perfiles publicados"
-              description="Aún no se han publicado perfiles. Vuelve a consultar más adelante."
-            />
-          ) : (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-x-[24px] gap-y-16 items-stretch">
-                {visibleProducers.map((producer, i) => (
-                  <ProducerCard key={producer.id} producer={producer} index={i} />
-                ))}
-              </div>
-
-              {hasMore && (
-                <div className="mt-16 flex justify-center">
-                  <button
-                    type="button"
-                    onClick={() => setVisibleCount(count => count + PAGE_SIZE)}
-                    className="px-8 py-3 border border-primary text-primary text-xs font-bold tracking-widest uppercase hover:bg-primary hover:text-primary-foreground transition-colors"
-                  >
-                    Cargar más
-                  </button>
-                </div>
-              )}
-            </>
-          )}
+          {renderProducerList()}
         </section>
 
       </main>

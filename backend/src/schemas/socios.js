@@ -7,7 +7,7 @@ const createSocioSchema = z.object({
   fecha_ingreso: z.string({ required_error: 'fecha_ingreso es requerida' }).regex(/^\d{4}-\d{2}-\d{2}$/, 'Fecha inválida (YYYY-MM-DD)'),
   dni:           z.string().trim().max(20).optional().nullable(),
   telefono:      z.string().trim().max(20).optional().nullable(),
-  email:         z.string().email('Email inválido').max(254).optional().nullable(),
+  email:         z.email('Email inválido').max(254).optional().nullable(),
   direccion:     z.string().trim().max(255).optional().nullable(),
   user_id:       z.coerce.number().int().positive().optional().nullable(),
 });
@@ -18,7 +18,7 @@ const updateSocioSchema = z.object({
   fecha_ingreso: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   dni:           z.string().trim().max(20).optional().nullable(),
   telefono:      z.string().trim().max(20).optional().nullable(),
-  email:         z.string().email().max(254).optional().nullable(),
+  email:         z.email().max(254).optional().nullable(),
   direccion:     z.string().trim().max(255).optional().nullable(),
   // ENUM('activo','inactivo') en la tabla socios
   estado:        z.enum(['activo', 'inactivo']).optional(),

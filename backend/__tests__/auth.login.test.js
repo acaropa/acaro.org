@@ -1,10 +1,6 @@
 const request = require('supertest');
 
 jest.mock('../src/config/db', () => ({ query: jest.fn(), end: jest.fn() }));
-jest.mock('bcryptjs', () => ({
-  compare: jest.fn(),
-  hash:    jest.fn().mockResolvedValue('$hashed'),
-}));
 jest.mock('../src/services/sessions.service', () => ({
   REFRESH_COOKIE:           'acaro_refresh',
   setRefreshCookie:         jest.fn(),
@@ -20,6 +16,8 @@ jest.mock('../src/services/sessions.service', () => ({
 
 const db = require('../src/config/db');
 const bcrypt = require('bcryptjs');
+jest.spyOn(bcrypt, 'compare').mockResolvedValue(false);
+jest.spyOn(bcrypt, 'hash').mockResolvedValue('$hashed');
 const { createSession, setRefreshCookie } = require('../src/services/sessions.service');
 
 beforeAll(() => { process.env.JWT_SECRET = 'test-secret-32-characters-long!!'; });
@@ -33,12 +31,14 @@ const ACTIVE_USER = {
 };
 
 describe('POST /api/auth/login', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    db.query.mockReset();
+  });
 
   test('200 — credenciales correctas', async () => {
     db.query.mockResolvedValueOnce([[ACTIVE_USER]])           // findUserByEmail
-            .mockResolvedValueOnce([[{ affectedRows: 1 }]])  // resetLoginSecurity
-            .mockResolvedValueOnce([[{ insertId: 5 }]]);     // createSession INSERT
+            .mockResolvedValueOnce([{ affectedRows: 1 }]);  // resetLoginSecurity
     bcrypt.compare.mockResolvedValue(true);
     createSession.mockResolvedValue({ id: 5, refreshToken: 'tok.secret' });
 
@@ -73,6 +73,8 @@ describe('POST /api/auth/login', () => {
       .send({ email: 'noexiste@acaro.org', password: 'ContraseñaSegura!' });
 
     expect(res.status).toBe(401);
+    expect(bcrypt.compare).toHaveBeenCalledWith('ContraseñaSegura!', expect.stringMatching(/^\$2[aby]\$10\$/));
+    expect(bcrypt.hash).not.toHaveBeenCalled();
   });
 
   test('400 — email inválido rechazado por Zod', async () => {
@@ -95,7 +97,10 @@ describe('POST /api/auth/login', () => {
 });
 
 describe('POST /api/auth/register', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    db.query.mockReset();
+  });
 
   test('201 — registro exitoso', async () => {
     db.query.mockResolvedValueOnce([[]])                     // findUserByEmail (no existe)

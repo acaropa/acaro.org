@@ -5,7 +5,7 @@ import Image from 'next/image';
 
 import { AppIcon } from "@/components/ui/AppIcon"
 
-import { useCallback, useEffect, useState } from 'react';
+import { useId, useCallback, useEffect, useState } from 'react';
 import { api, apiAssetUrl } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { Modal, ModalActions } from '@/components/ui/Modal';
@@ -28,6 +28,7 @@ const emptyForm = {
 };
 
 export default function AdminProductores() {
+  const fieldId = useId();
   const { can } = useAuth();
   const canCreate = can(PERMISSIONS.PRODUCTORES_CREATE);
   const canUpdate = can(PERMISSIONS.PRODUCTORES_UPDATE);
@@ -113,7 +114,7 @@ export default function AdminProductores() {
     setShowForm(true);
   }
 
-  async function save(event: React.FormEvent) {
+  async function save(event: React.SubmitEvent) {
     event.preventDefault();
     setSaving(true);
     setError('');
@@ -172,6 +173,123 @@ export default function AdminProductores() {
     }
   }
 
+  function renderProducerList() {
+    if (loading) {
+      return <DataLoadingState label="Cargando productores..." className="py-12" />;
+    }
+    if (producers.length === 0) {
+      return (
+        <div className="bg-surface/30 border border-border border-dashed p-16 flex flex-col items-center justify-center text-center">
+          <AppIcon name="groups" className="text-[48px] text-muted mb-4 opacity-50" />
+          <h3 className="font-headline-md text-xl font-bold text-foreground mb-2">Sin productores</h3>
+          <p className="font-body-md text-muted max-w-md">
+            Aún no se han registrado perfiles de productores.
+          </p>
+        </div>
+      );
+    }
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {producers.map((item) => (
+          <article
+            key={item.id}
+            className="bg-card p-6 border border-border hover:border-primary/30 transition-colors flex flex-col group"
+          >
+            {item.imagen_url && (
+              <div className="relative w-full h-40 mb-4 overflow-hidden bg-surface">
+                <Image
+                  src={apiAssetUrl(item.imagen_url)}
+                  alt={item.nombre}
+                  fill
+                  sizes="(min-width: 1024px) 50vw, 100vw"
+                  className="object-cover"
+                />
+              </div>
+            )}
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span
+                    className={`font-label-caps text-[10px] tracking-widest uppercase px-2 py-1 rounded ${item.activo ? 'bg-brand-green/10 text-brand-green' : 'bg-muted/10 text-muted'}`}
+                  >
+                    {item.activo ? 'Activo' : 'Inactivo'}
+                  </span>
+                  {item.destacado && (
+                    <span className="font-label-caps text-[10px] tracking-widest uppercase text-accent bg-accent/10 px-2 py-1 rounded">
+                      Destacado
+                    </span>
+                  )}
+                  {(item.rol || item.comunidad) && (
+                    <span className="text-xs text-muted font-mono">
+                      {[item.rol, item.comunidad].filter(Boolean).join(' · ')}
+                    </span>
+                  )}
+                </div>
+                <h2 className="font-headline-md text-xl font-bold text-foreground group-hover:text-primary transition-colors">
+                  {item.nombre}
+                </h2>
+                <p className="text-xs text-muted font-mono">
+                  {formatExperience(item.anios_experiencia) || 'Experiencia no especificada'} ·
+                  Registrado el {formatProducerDate(item.created_at)}
+                </p>
+              </div>
+            </div>
+            {item.descripcion && (
+              <p className="mt-1 text-sm text-muted font-body-md flex-1 mb-6 line-clamp-3">
+                {item.descripcion}
+              </p>
+            )}
+            {item.frase_corta && (
+              <p className="mb-4 border-l-2 border-accent pl-3 text-sm italic text-foreground">
+                “{item.frase_corta}”
+              </p>
+            )}
+
+            <div className="flex flex-wrap gap-4 justify-end mt-auto pt-4 border-t border-border/50">
+              {canUpdate && (
+                <button
+                  onClick={() => startEdit(item)}
+                  className="flex items-center gap-1 text-sm font-medium text-foreground hover:text-primary transition-colors"
+                >
+                  <AppIcon name="edit" className="text-[16px]" /> Editar
+                </button>
+              )}
+              {canUpdate && (
+                <button
+                  onClick={() => void toggleField(item, 'destacado')}
+                  className="flex items-center gap-1 text-sm font-medium text-accent hover:underline"
+                >
+                  <AppIcon name="star" className="text-[16px]" />{' '}
+                  {item.destacado ? 'Quitar destacado' : 'Destacar'}
+                </button>
+              )}
+              {canUpdate && (
+                <button
+                  onClick={() => void toggleField(item, 'activo')}
+                  className="flex items-center gap-1 text-sm font-medium text-muted hover:text-foreground"
+                >
+                  <AppIcon
+                    name={item.activo ? 'visibility_off' : 'visibility'}
+                    className="text-[16px]"
+                  />{' '}
+                  {item.activo ? 'Ocultar' : 'Publicar'}
+                </button>
+              )}
+              {canDelete && (
+                <button
+                  onClick={() => void remove(item)}
+                  className="flex items-center gap-1 text-sm font-medium text-red-600 hover:text-red-800"
+                >
+                  <AppIcon name="delete" className="text-[16px]" /> Eliminar
+                </button>
+              )}
+            </div>
+          </article>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <>
       <section className="mb-8">
@@ -201,8 +319,8 @@ export default function AdminProductores() {
         <form onSubmit={save} className="relative z-10">
           <div className="relative z-10 grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="md:col-span-2">
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Nombre</label>
-              <input
+              <label htmlFor={`${fieldId}-1`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Nombre</label>
+              <input id={`${fieldId}-1`}
                 required
                 placeholder="Nombre de la persona"
                 value={form.nombre}
@@ -211,8 +329,8 @@ export default function AdminProductores() {
               />
             </div>
             <div>
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Provincia (Opcional)</label>
-              <select
+              <label htmlFor={`${fieldId}-2`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Provincia (Opcional)</label>
+              <select id={`${fieldId}-2`}
                 value={selectedProvincia}
                 onChange={event => {
                   setSelectedProvincia(event.target.value);
@@ -227,8 +345,8 @@ export default function AdminProductores() {
               </select>
             </div>
             <div>
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Distrito (Opcional)</label>
-              <select
+              <label htmlFor={`${fieldId}-3`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Distrito (Opcional)</label>
+              <select id={`${fieldId}-3`}
                 disabled={!selectedProvincia}
                 value={form.distrito_id}
                 onChange={event => setForm(current => ({ ...current, distrito_id: event.target.value }))}
@@ -241,8 +359,8 @@ export default function AdminProductores() {
               </select>
             </div>
             <div>
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Comunidad / Ubicación (Opcional)</label>
-              <input
+              <label htmlFor={`${fieldId}-4`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Comunidad / Ubicación (Opcional)</label>
+              <input id={`${fieldId}-4`}
                 placeholder="Ej. Changuinola"
                 value={form.comunidad}
                 onChange={event => setForm(current => ({ ...current, comunidad: event.target.value }))}
@@ -250,8 +368,8 @@ export default function AdminProductores() {
               />
             </div>
             <div>
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Rol en la cadena de valor (Opcional)</label>
-              <input
+              <label htmlFor={`${fieldId}-5`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Rol en la cadena de valor (Opcional)</label>
+              <input id={`${fieldId}-5`}
                 placeholder="Ej. Productor, Tostador, Barista..."
                 value={form.rol}
                 onChange={event => setForm(current => ({ ...current, rol: event.target.value }))}
@@ -259,8 +377,8 @@ export default function AdminProductores() {
               />
             </div>
             <div>
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Años de experiencia (Opcional)</label>
-              <input
+              <label htmlFor={`${fieldId}-6`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Años de experiencia (Opcional)</label>
+              <input id={`${fieldId}-6`}
                 type="number"
                 min={0}
                 placeholder="Ej. 12"
@@ -270,8 +388,8 @@ export default function AdminProductores() {
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Historia / Descripción (Opcional)</label>
-              <textarea
+              <label htmlFor={`${fieldId}-7`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Historia / Descripción (Opcional)</label>
+              <textarea id={`${fieldId}-7`}
                 placeholder="Historia o descripción personal (orígenes, trayectoria en el café)..."
                 value={form.descripcion}
                 onChange={event => setForm(current => ({ ...current, descripcion: event.target.value }))}
@@ -279,8 +397,8 @@ export default function AdminProductores() {
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Frase corta para el landing (Opcional)</label>
-              <input
+              <label htmlFor={`${fieldId}-8`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Frase corta para el landing (Opcional)</label>
+              <input id={`${fieldId}-8`}
                 placeholder="Ej. El café es el legado que quiero dejar a mi comunidad."
                 value={form.frase_corta}
                 onChange={event => setForm(current => ({ ...current, frase_corta: event.target.value }))}
@@ -288,8 +406,8 @@ export default function AdminProductores() {
               />
               <p className="mt-2 text-xs text-muted">Esta frase aparece en “La gente del Robusta”. Puedes escribir una frase de cualquier extensión.</p>
             </div>
-            <div className="md:col-span-2">
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Imagen / Foto (Opcional)</label>
+            <fieldset className="md:col-span-2">
+              <legend className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Imagen / Foto (Opcional)</legend>
               <ImageSourceSwitch
                 value={imageMode}
                 onChange={mode => {
@@ -313,7 +431,7 @@ export default function AdminProductores() {
                   helperText="Formatos JPG, PNG o WEBP, máximo 4 MB."
                 />
               )}
-            </div>
+            </fieldset>
 
             <div className="md:col-span-2 border border-border bg-surface/25 p-4">
               <div className="mb-4 flex items-start justify-between gap-4">
@@ -378,79 +496,7 @@ export default function AdminProductores() {
 
       {error && <p className="rounded border-l-4 border-red-600 bg-red-50 p-4 font-body-md text-sm text-red-700 mb-8">{error}</p>}
 
-      {loading ? (
-        <DataLoadingState label="Cargando productores..." className="py-12" />
-      ) : producers.length === 0 ? (
-        <div className="bg-surface/30 border border-border border-dashed p-16 flex flex-col items-center justify-center text-center">
-          <AppIcon name="groups" className="text-[48px] text-muted mb-4 opacity-50" />
-          <h3 className="font-headline-md text-xl font-bold text-foreground mb-2">Sin productores</h3>
-          <p className="font-body-md text-muted max-w-md">Aún no se han registrado perfiles de productores.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {producers.map(item => (
-            <article key={item.id} className="bg-card p-6 border border-border hover:border-primary/30 transition-colors flex flex-col group">
-              {item.imagen_url && (
-                <div className="relative w-full h-40 mb-4 overflow-hidden bg-surface">
-                  <Image src={apiAssetUrl(item.imagen_url)} alt={item.nombre} fill sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover" />
-                </div>
-              )}
-              <div className="flex items-start justify-between gap-4 mb-4">
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className={`font-label-caps text-[10px] tracking-widest uppercase px-2 py-1 rounded ${item.activo ? 'bg-brand-green/10 text-brand-green' : 'bg-muted/10 text-muted'}`}>
-                      {item.activo ? 'Activo' : 'Inactivo'}
-                    </span>
-                    {item.destacado && (
-                      <span className="font-label-caps text-[10px] tracking-widest uppercase text-accent bg-accent/10 px-2 py-1 rounded">
-                        Destacado
-                      </span>
-                    )}
-                    {(item.rol || item.comunidad) && (
-                      <span className="text-xs text-muted font-mono">
-                        {[item.rol, item.comunidad].filter(Boolean).join(' · ')}
-                      </span>
-                    )}
-                  </div>
-                  <h2 className="font-headline-md text-xl font-bold text-foreground group-hover:text-primary transition-colors">{item.nombre}</h2>
-                  <p className="text-xs text-muted font-mono">
-                    {formatExperience(item.anios_experiencia) || 'Experiencia no especificada'} · Registrado el {formatProducerDate(item.created_at)}
-                  </p>
-                </div>
-              </div>
-              {item.descripcion && (
-                <p className="mt-1 text-sm text-muted font-body-md flex-1 mb-6 line-clamp-3">{item.descripcion}</p>
-              )}
-              {item.frase_corta && (
-                <p className="mb-4 border-l-2 border-accent pl-3 text-sm italic text-foreground">“{item.frase_corta}”</p>
-              )}
-
-              <div className="flex flex-wrap gap-4 justify-end mt-auto pt-4 border-t border-border/50">
-                {canUpdate && (
-                  <button onClick={() => startEdit(item)} className="flex items-center gap-1 text-sm font-medium text-foreground hover:text-primary transition-colors">
-                    <AppIcon name="edit" className="text-[16px]" /> Editar
-                  </button>
-                )}
-                {canUpdate && (
-                  <button onClick={() => void toggleField(item, 'destacado')} className="flex items-center gap-1 text-sm font-medium text-accent hover:underline">
-                    <AppIcon name="star" className="text-[16px]" /> {item.destacado ? 'Quitar destacado' : 'Destacar'}
-                  </button>
-                )}
-                {canUpdate && (
-                  <button onClick={() => void toggleField(item, 'activo')} className="flex items-center gap-1 text-sm font-medium text-muted hover:text-foreground">
-                    <AppIcon name={item.activo ? 'visibility_off' : 'visibility'} className="text-[16px]" /> {item.activo ? 'Ocultar' : 'Publicar'}
-                  </button>
-                )}
-                {canDelete && (
-                  <button onClick={() => void remove(item)} className="flex items-center gap-1 text-sm font-medium text-red-600 hover:text-red-800">
-                    <AppIcon name="delete" className="text-[16px]" /> Eliminar
-                  </button>
-                )}
-              </div>
-            </article>
-          ))}
-        </div>
-      )}
+      {renderProducerList()}
     </>
   );
 }

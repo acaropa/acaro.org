@@ -1,6 +1,6 @@
 "use client";
 
-import { FocusEvent, FormEvent, ReactNode } from "react";
+import { FocusEvent, SubmitEvent, ReactNode } from "react";
 import { ArrowLeft, Search, X } from "lucide-react";
 import { OptimizedImage } from "@/components/ui/OptimizedImage";
 import { TypingIndicator } from "@/components/ui/TypingIndicator";
@@ -23,10 +23,10 @@ export function LibrarySearchHero({
   onFocus,
   backLabel,
   onBack,
-}: {
+}: Readonly<{
   query: string;
   onQueryChange: (value: string) => void;
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onSubmit: (event: SubmitEvent<HTMLFormElement>) => void;
   onClear?: () => void;
   isSearching?: boolean;
   topics?: Topic[];
@@ -35,7 +35,7 @@ export function LibrarySearchHero({
   onFocus?: () => void;
   backLabel?: string;
   onBack?: () => void;
-}) {
+}>) {
   return (
     <header
       style={{ viewTransitionName: "library-search-hero" }}

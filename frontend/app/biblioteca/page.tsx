@@ -2,7 +2,7 @@
 
 import { DataLoadingState } from "@/components/ui/TypingIndicator";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { SubmitEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -70,20 +70,27 @@ function LibraryBackdrop({
   staticImage,
   className = "",
   sizes = "(max-width: 1023px) calc(100vw - 40px), 50vw",
-}: {
+}: Readonly<{
   document?: LibraryDocument;
   themeImage?: string | null;
   staticImage?: string;
   className?: string;
   sizes?: string;
-}) {
-  const resolvedUrl = themeImage
-    ? apiAssetUrl(themeImage)
-    : staticImage
-      ? staticImage
-      : document?.coverImage
-        ? apiAssetUrl(document.coverImage)
-        : null;
+}>) {
+  function resolveResolvedUrl() {
+    if (themeImage) {
+      return apiAssetUrl(themeImage);
+    }
+    if (staticImage) {
+      return staticImage;
+    }
+    if (document?.coverImage) {
+      return apiAssetUrl(document.coverImage);
+    }
+    return null;
+  }
+
+  const resolvedUrl = resolveResolvedUrl();
 
   if (resolvedUrl) {
     return (
@@ -113,7 +120,7 @@ function ThemeCard({
   staticImage,
   className,
   onSelect,
-}: {
+}: Readonly<{
   title: string;
   description: string;
   category: string;
@@ -122,7 +129,7 @@ function ThemeCard({
   staticImage?: string;
   className: string;
   onSelect: () => void;
-}) {
+}>) {
   const imageSizes = className.includes("md:col-span-2")
     ? "(max-width: 767px) calc(100vw - 40px), 616px"
     : "(max-width: 767px) calc(100vw - 40px), 296px";
@@ -144,7 +151,7 @@ function ThemeCard({
   );
 }
 
-function FeaturedDocument({ document }: { document: LibraryDocument }) {
+function FeaturedDocument({ document }: Readonly<{ document: LibraryDocument }>) {
   return (
     <article className="grid overflow-hidden border border-[#d3c3c0] bg-white lg:grid-cols-2">
       <div className="relative min-h-[360px] overflow-hidden lg:min-h-[460px]">
@@ -194,7 +201,7 @@ function FeaturedDocument({ document }: { document: LibraryDocument }) {
   );
 }
 
-function DocumentCard({ document }: { document: LibraryDocument }) {
+function DocumentCard({ document }: Readonly<{ document: LibraryDocument }>) {
   return (
     <article className="flex h-full flex-col border border-[#d3c3c0] bg-white p-7 transition-shadow hover:shadow-[0_18px_40px_rgba(39,19,16,0.12)]">
       <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#231600]">{document.category}</p>
@@ -222,7 +229,7 @@ function DocumentCard({ document }: { document: LibraryDocument }) {
   );
 }
 
-function ResultItem({ document }: { document: LibraryDocument }) {
+function ResultItem({ document }: Readonly<{ document: LibraryDocument }>) {
   return (
     <div className="group flex flex-col gap-5 py-8 md:flex-row md:items-center md:justify-between">
       <div>
@@ -291,18 +298,18 @@ export default function Biblioteca() {
 
   const docsByCategory = useMemo(() => {
     return documents.reduce<Record<string, LibraryDocument | undefined>>((acc, document) => {
-      if (!acc[document.category]) acc[document.category] = document;
+      acc[document.category] ??= document;
       return acc;
     }, {});
   }, [documents]);
 
   function goToSearch(params?: Record<string, string>) {
     const searchParams = new URLSearchParams(params);
-    const href = `/biblioteca/buscar${searchParams.size ? `?${searchParams}` : ""}`;
+    const href = `/biblioteca/buscar${searchParams.size ? ("?" + (searchParams)) : ""}`;
     router.push(href, { scroll: false });
   }
 
-  function submitSearch(event: FormEvent<HTMLFormElement>) {
+  function submitSearch(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     const nextQuery = query.trim();
     setShowSuggestions(false);
@@ -313,6 +320,42 @@ export default function Biblioteca() {
     setQuery(title);
     setShowSuggestions(false);
     goToSearch({ q: title });
+  }
+
+  function renderDocumentCatalog() {
+    if (loading) {
+      return <DataLoadingState label="Cargando biblioteca..." className="py-20" />;
+    }
+    if (loadError) {
+      return (
+        <EmptyState
+          icon={<Library className="h-8 w-8" />}
+          title="No se pudo cargar la biblioteca"
+          description={loadError}
+        />
+      );
+    }
+    if (featured) {
+      return (
+        <>
+          <FeaturedDocument document={featured} />
+          {secondaryDocs.length > 0 && (
+            <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-3">
+              {secondaryDocs.map((document) => (
+                <DocumentCard key={document.id} document={document} />
+              ))}
+            </div>
+          )}
+        </>
+      );
+    }
+    return (
+      <EmptyState
+        icon={<Library className="h-8 w-8" />}
+        title="No hay documentos publicados"
+        description="Cuando se publiquen recursos, aparecerán en esta portada."
+      />
+    );
   }
 
   return (
@@ -398,28 +441,7 @@ export default function Biblioteca() {
                 </button>
               </div>
 
-              {loading ? (
-                <DataLoadingState label="Cargando biblioteca..." className="py-20" />
-              ) : loadError ? (
-                <EmptyState icon={<Library className="h-8 w-8" />} title="No se pudo cargar la biblioteca" description={loadError} />
-              ) : featured ? (
-                <>
-                  <FeaturedDocument document={featured} />
-                  {secondaryDocs.length > 0 && (
-                    <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-3">
-                      {secondaryDocs.map(document => (
-                        <DocumentCard key={document.id} document={document} />
-                      ))}
-                    </div>
-                  )}
-                </>
-              ) : (
-                <EmptyState
-                  icon={<Library className="h-8 w-8" />}
-                  title="No hay documentos publicados"
-                  description="Cuando se publiquen recursos, aparecerán en esta portada."
-                />
-              )}
+              {renderDocumentCatalog()}
             </div>
           </section>
 

@@ -14,7 +14,7 @@ import { useAuth } from '@/context/AuthContext';
 import { api, apiAssetUrl } from '@/lib/api';
 import { PERMISSIONS } from '@/lib/permissions';
 
-type Row = Record<string, string | number | null>;
+type Row = Record<string, MemberValue>;
 type PhaseTab = 'resumen' | 'tareas' | 'avances' | 'documentos' | 'evidencias' | 'riesgos' | 'decisiones' | 'reuniones' | 'finanzas' | 'auditoria';
 
 interface Workspace {
@@ -129,11 +129,11 @@ export default function ProjectWorkspacePage() {
       setError('');
       const workspace = await api.get<Workspace>(`/proyectos/${id}/gestion`);
       setData(workspace);
-      setActivePhaseId(current =>
-        workspace.fases.some(phase => Number(phase.id) === current)
-          ? current
-          : workspace.fases[0] ? Number(workspace.fases[0].id) : null
-      );
+      setActivePhaseId(current => {
+        if (workspace.fases.some(phase => Number(phase.id) === current)) return current;
+        const firstPhase = workspace.fases[0];
+        return firstPhase ? Number(firstPhase.id) : null;
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo cargar el expediente');
     }
@@ -197,7 +197,7 @@ export default function ProjectWorkspacePage() {
     }
   }
 
-  async function createRecord(event: React.FormEvent<HTMLFormElement>) {
+  async function createRecord(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!createKind) return;
     const form = new FormData(event.currentTarget);
@@ -223,7 +223,7 @@ export default function ProjectWorkspacePage() {
     await mutate(() => api.post(`/proyectos/${id}/gestion/${createKind}`, body));
   }
 
-  async function uploadFile(event: React.FormEvent<HTMLFormElement>) {
+  async function uploadFile(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!fileKind || !activePhaseId) return;
     const form = new FormData(event.currentTarget);
@@ -247,7 +247,7 @@ export default function ProjectWorkspacePage() {
     }));
   }
 
-  async function savePhase(event: React.FormEvent<HTMLFormElement>) {
+  async function savePhase(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!phase) return;
     const form = new FormData(event.currentTarget);
@@ -273,13 +273,13 @@ export default function ProjectWorkspacePage() {
     await mutate(() => api.post(`/proyectos/${id}/gestion/${kind}/${rowId}/revision`, { action, observation }));
   }
 
-  async function saveProject(event: React.FormEvent<HTMLFormElement>) {
+  async function saveProject(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     await mutate(() => api.put(`/proyectos/${id}`, Object.fromEntries(new FormData(event.currentTarget).entries())));
     setEditProject(false);
   }
 
-  async function assignTechnician(event: React.FormEvent<HTMLFormElement>) {
+  async function assignTechnician(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     const technicianId = Number(new FormData(event.currentTarget).get('tecnico_id'));
     if (!technicianId) return;
@@ -309,6 +309,68 @@ export default function ProjectWorkspacePage() {
     ...(project.tecnicos || []).map(person => ({ id: person.user_id, label: `${person.nombre} ${person.apellido}` })),
   ];
   const phaseFinance = financeSummary(phaseRows.finanzas);
+
+  function renderCreationFields() {
+    if (!createKind) return null;
+    if (createKind === 'fases') {
+      return (
+        <>
+          <DynamicField field={{ name: 'nombre', label: 'Nombre de la fase', required: true }} />
+          <DynamicField
+            field={{
+              name: 'estado',
+              label: 'Estado',
+              type: 'select',
+              options: ['pendiente', 'en_progreso', 'completado'],
+            }}
+          />
+          <DynamicField field={{ name: 'descripcion', label: 'Descripción', type: 'textarea' }} />
+          <DynamicField
+            field={{ name: 'responsable_id', label: 'Responsable', type: 'member' }}
+            members={phaseMembers}
+          />
+          <DynamicField
+            field={{ name: 'peso_porcentaje', label: 'Peso porcentual', type: 'number' }}
+          />
+          <DynamicField
+            field={{ name: 'porcentaje_avance', label: 'Avance inicial', type: 'number' }}
+          />
+          <DynamicField field={{ name: 'fecha_inicio', label: 'Fecha de inicio', type: 'date' }} />
+          <DynamicField field={{ name: 'fecha_fin', label: 'Fecha de cierre', type: 'date' }} />
+        </>
+      );
+    }
+    if (createKind === 'indicadores') {
+      return (
+        <>
+          <DynamicField
+            field={{ name: 'icono', label: 'Ícono', type: 'select', options: INDICADOR_ICONS }}
+          />
+          <DynamicField
+            field={{ name: 'valor', label: 'Valor (ej. 99 productores)', required: true }}
+          />
+          <DynamicField
+            field={{
+              name: 'etiqueta',
+              label: 'Etiqueta (ej. beneficiados, 49 mujeres y 50 hombres)',
+              required: true,
+            }}
+          />
+        </>
+      );
+    }
+    return creationFields[createKind].map((field) => <DynamicField key={field.name} field={field} />);
+  }
+
+  function resolveTitle() {
+    if (createKind === 'fases') {
+      return 'Crear fase' as const;
+    }
+    if (createKind === 'indicadores') {
+      return 'Agregar indicador destacado' as const;
+    }
+    return `Nuevo registro · ${createKind || ''}`;
+  }
 
   return (
     <>
@@ -434,27 +496,10 @@ export default function ProjectWorkspacePage() {
         </div>
       )}
 
-      <Modal isOpen={Boolean(createKind)} onClose={() => setCreateKind(null)} title={createKind === 'fases' ? 'Crear fase' : createKind === 'indicadores' ? 'Agregar indicador destacado' : `Nuevo registro · ${createKind || ''}`} maxWidth="max-w-3xl">
+      <Modal isOpen={Boolean(createKind)} onClose={() => setCreateKind(null)} title={resolveTitle()} maxWidth="max-w-3xl">
         {createKind && (
           <form onSubmit={createRecord} className="grid gap-4 md:grid-cols-2">
-            {createKind === 'fases' ? (
-              <>
-                <DynamicField field={{ name: 'nombre', label: 'Nombre de la fase', required: true }} />
-                <DynamicField field={{ name: 'estado', label: 'Estado', type: 'select', options: ['pendiente', 'en_progreso', 'completado'] }} />
-                <DynamicField field={{ name: 'descripcion', label: 'Descripción', type: 'textarea' }} />
-                <DynamicField field={{ name: 'responsable_id', label: 'Responsable', type: 'member' }} members={phaseMembers} />
-                <DynamicField field={{ name: 'peso_porcentaje', label: 'Peso porcentual', type: 'number' }} />
-                <DynamicField field={{ name: 'porcentaje_avance', label: 'Avance inicial', type: 'number' }} />
-                <DynamicField field={{ name: 'fecha_inicio', label: 'Fecha de inicio', type: 'date' }} />
-                <DynamicField field={{ name: 'fecha_fin', label: 'Fecha de cierre', type: 'date' }} />
-              </>
-            ) : createKind === 'indicadores' ? (
-              <>
-                <DynamicField field={{ name: 'icono', label: 'Ícono', type: 'select', options: INDICADOR_ICONS }} />
-                <DynamicField field={{ name: 'valor', label: 'Valor (ej. 99 productores)', required: true }} />
-                <DynamicField field={{ name: 'etiqueta', label: 'Etiqueta (ej. beneficiados, 49 mujeres y 50 hombres)', required: true }} />
-              </>
-            ) : creationFields[createKind].map(field => <DynamicField key={field.name} field={field} />)}
+            {renderCreationFields()}
             <ModalActions onCancel={() => setCreateKind(null)} submitLabel="Guardar registro" pending={busy} />
           </form>
         )}
@@ -507,18 +552,18 @@ export default function ProjectWorkspacePage() {
   );
 }
 
-function ProjectSummary({ data, progress, technicians, canManage, unassignedCount, onAssign, onRemove, onOpenPhases, onAddIndicador, onRemoveIndicador }: {
+function ProjectSummary({ data, progress, technicians, canManage, unassignedCount, onAssign, onRemove, onOpenPhases, onAddIndicador, onRemoveIndicador }: Readonly<{
   data: Workspace;
   progress: number;
   technicians: Row[];
   canManage: boolean;
   unassignedCount: number;
-  onAssign: (event: React.FormEvent<HTMLFormElement>) => void;
+  onAssign: (event: React.SubmitEvent<HTMLFormElement>) => void;
   onRemove: (id: number) => void;
   onOpenPhases: () => void;
   onAddIndicador: () => void;
   onRemoveIndicador: (id: number) => void;
-}) {
+}>) {
   const project = data.project;
   const indicadores = project.indicadores || [];
   return <main className="mt-6 grid gap-5 xl:grid-cols-[1fr_360px]">
@@ -569,7 +614,7 @@ function ProjectSummary({ data, progress, technicians, canManage, unassignedCoun
       </section>
       <section className="sm:col-span-2 rounded-2xl border border-border bg-card p-6">
         <SectionHeading title="Equipo del proyecto" subtitle="Personas disponibles como responsables de fase." />
-        {canManage && <form onSubmit={onAssign} className="mt-5 flex gap-2"><select name="tecnico_id" className="form-control" defaultValue=""><option value="" disabled>Seleccionar técnico</option>{technicians.filter(candidate => !(project.tecnicos || []).some(person => Number(person.id) === Number(candidate.id))).map(candidate => <option key={Number(candidate.id)} value={Number(candidate.id)}>{candidate.nombre} {candidate.apellido}</option>)}</select><button className="bg-primary px-4 text-[10px] font-bold uppercase tracking-widest text-primary-foreground">Asignar</button></form>}
+        {canManage && <form onSubmit={onAssign} className="mt-5 flex gap-2"><select name="tecnico_id" className="form-control" defaultValue=""><option value="" disabled>Seleccionar técnico</option>{technicians.filter(candidate => !(project.tecnicos || []).some(person => Number(person.id) === Number(candidate.id))).map(candidate => <option key={Number(candidate.id)} value={Number(candidate.id)}>{candidate.nombre} {candidate.apellido}</option>)}</select><button type="button" className="bg-primary px-4 text-[10px] font-bold uppercase tracking-widest text-primary-foreground">Asignar</button></form>}
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
           <Person label="Supervisor" value={String(project.supervisor_email || 'Sin asignar')} />
           {(project.tecnicos || []).map(person => <div key={Number(person.id)} className="relative"><Person label={String(person.especialidad || 'Técnico')} value={`${person.nombre} ${person.apellido}`} />{canManage && <button onClick={() => onRemove(Number(person.id))} className="absolute right-2 top-2 text-[10px] font-bold uppercase text-red-700">Quitar</button>}</div>)}
@@ -586,7 +631,7 @@ function ProjectSummary({ data, progress, technicians, canManage, unassignedCoun
   </main>;
 }
 
-function PhaseContent({ tab, phase, rows, finance, canManage, canOperate, canReview, onCreate, onFile, onUpdate, onArchive, onReview }: {
+function PhaseContent({ tab, phase, rows, finance, canManage, canOperate, canReview, onCreate, onFile, onUpdate, onArchive, onReview }: Readonly<{
   tab: PhaseTab;
   phase: Row;
   rows: Record<Exclude<PhaseTab, 'resumen'>, Row[]>;
@@ -599,7 +644,7 @@ function PhaseContent({ tab, phase, rows, finance, canManage, canOperate, canRev
   onUpdate: (kind: string, id: number, values: Record<string, unknown>) => void;
   onArchive: (kind: string, id: number) => void;
   onReview: (kind: 'archivos' | 'avances', id: number, action: string) => void;
-}) {
+}>) {
   if (tab === 'resumen') {
     const completed = rows.tareas.filter(item => item.estado === 'completada').length;
     return <div className="grid gap-4 md:grid-cols-3">
@@ -613,17 +658,45 @@ function PhaseContent({ tab, phase, rows, finance, canManage, canOperate, canRev
     </div>;
   }
 
-  const action = tab === 'documentos' ? () => onFile('documento')
-    : tab === 'evidencias' ? () => onFile('foto')
-    : tab === 'auditoria' ? undefined
-    : tab === 'decisiones' ? (canManage ? () => onCreate(tab) : undefined)
-    : canOperate ? () => onCreate(tab) : undefined;
+  function resolveAction() {
+    if (tab === 'documentos') {
+      return () => onFile('documento');
+    }
+    if (tab === 'evidencias') {
+      return () => onFile('foto');
+    }
+    if (tab === 'auditoria') {
+      return undefined;
+    }
+    if (tab === 'decisiones') {
+      if (canManage) {
+        return () => onCreate(tab);
+      }
+      return undefined;
+    }
+    if (canOperate) {
+      return () => onCreate(tab);
+    }
+    return undefined;
+  }
 
-  const actionLabel = tab === 'documentos' ? 'Subir PDF' : tab === 'evidencias' ? 'Subir evidencia' : 'Añadir';
+  const action = resolveAction();
+
+  function resolveActionLabel() {
+    if (tab === 'documentos') {
+      return 'Subir PDF' as const;
+    }
+    if (tab === 'evidencias') {
+      return 'Subir evidencia' as const;
+    }
+    return 'Añadir' as const;
+  }
+
+  const actionLabel = resolveActionLabel();
 
   return <div>
     <div className="mb-5 flex items-end justify-between gap-4"><SectionHeading title={phaseTabTitle(tab)} subtitle={phaseTabSubtitle(tab)} />{action && <button onClick={action} className="bg-primary px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-primary-foreground">{actionLabel}</button>}</div>
-    {tab === 'tareas' && <List rows={rows.tareas} empty="No hay tareas en esta fase." render={item => <RecordCard key={Number(item.id)} title={String(item.titulo)} description={`${item.descripcion || 'Sin descripción'}${item.fecha_limite ? ` · límite ${date(item.fecha_limite)}` : ''}`} badges={[statusLabel(item.prioridad), statusLabel(item.estado), `${item.porcentaje_avance || 0}%`]} actions={<>{canOperate && item.estado !== 'completada' && <MiniButton onClick={() => onUpdate('tareas', Number(item.id), { estado: 'completada', porcentaje_avance: 100 })}>Completar</MiniButton>}{canManage && <MiniButton danger onClick={() => onArchive('tareas', Number(item.id))}>Cancelar</MiniButton>}</>} />} />}
+    {tab === 'tareas' && <List rows={rows.tareas} empty="No hay tareas en esta fase." render={item => <RecordCard key={Number(item.id)} title={String(item.titulo)} description={`${item.descripcion || 'Sin descripción'}${item.fecha_limite ? (" · límite " + (date(item.fecha_limite))) : ''}`} badges={[statusLabel(item.prioridad), statusLabel(item.estado), `${item.porcentaje_avance || 0}%`]} actions={<>{canOperate && item.estado !== 'completada' && <MiniButton onClick={() => onUpdate('tareas', Number(item.id), { estado: 'completada', porcentaje_avance: 100 })}>Completar</MiniButton>}{canManage && <MiniButton danger onClick={() => onArchive('tareas', Number(item.id))}>Cancelar</MiniButton>}</>} />} />}
     {tab === 'avances' && <List rows={rows.avances} empty="No hay comentarios ni avances en esta fase." render={item => <RecordCard key={Number(item.id)} title={String(item.titulo || 'Actualización de fase')} description={String(item.descripcion)} badges={[statusLabel(item.estado), `${item.porcentaje_avance ?? 0}%`]} actions={canReview ? <ReviewActions onReview={actionName => onReview('avances', Number(item.id), actionName)} /> : null} />} />}
     {tab === 'documentos' && <DocumentList rows={rows.documentos} canManage={canManage} canReview={canReview} onReview={onReview} onArchive={onArchive} />}
     {tab === 'evidencias' && (rows.evidencias.length ? <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{rows.evidencias.map(item => <article key={Number(item.id)} className="overflow-hidden rounded-xl border border-border bg-background"><a href={apiAssetUrl(String(item.archivo_url))} target="_blank"><div className="relative h-44 w-full"><Image src={apiAssetUrl(String(item.archivo_url))} alt={String(item.titulo)} fill sizes="(min-width: 1280px) 33vw, (min-width: 640px) 50vw, 100vw" className="object-cover" /></div></a><div className="p-4"><strong>{String(item.titulo)}</strong><p className="mt-2 text-xs text-muted">{statusLabel(item.estado)}</p><div className="mt-3 flex flex-wrap gap-2">{canReview && <ReviewActions onReview={actionName => onReview('archivos', Number(item.id), actionName)} />}{canManage && <MiniButton danger onClick={() => onArchive('archivos', Number(item.id))}>Archivar</MiniButton>}</div></div></article>)}</div> : <Empty text="No hay evidencias en esta fase." />)}
@@ -635,23 +708,25 @@ function PhaseContent({ tab, phase, rows, finance, canManage, canOperate, canRev
   </div>;
 }
 
-function TopNav({ active, onClick, icon, children }: { active: boolean; onClick: () => void; icon: string; children: React.ReactNode }) { return <button onClick={onClick} className={`flex items-center gap-2 px-5 py-2.5 text-[11px] font-bold uppercase tracking-wider ${active ? 'bg-primary text-primary-foreground' : 'text-muted'}`}><AppIcon name={icon} className="text-[18px]" />{children}</button>; }
-function PhaseSelector({ phase, index, active, responsible, onClick }: { phase: Row; index: number; active: boolean; responsible: string; onClick: () => void }) { const progress = Number(phase.porcentaje_avance || 0); return <button onClick={onClick} className={`w-full rounded-xl border p-4 text-left transition-all ${active ? 'border-accent bg-[#2b1710] text-white shadow-lg' : 'border-border bg-background hover:border-accent/50'}`}><div className="flex items-center justify-between gap-3"><span className={`text-[9px] font-bold uppercase tracking-[0.18em] ${active ? 'text-[#d7a24a]' : 'text-accent'}`}>Fase {index + 1} · {phase.peso_porcentaje || 0}% peso</span><strong className="text-sm">{progress}%</strong></div><h3 className="mt-2 font-bold">{String(phase.nombre)}</h3><p className={`mt-1 truncate text-xs ${active ? 'text-[#d8cabb]' : 'text-muted'}`}>{responsible}</p><div className={`mt-3 h-1 overflow-hidden rounded-full ${active ? 'bg-white/15' : 'bg-border'}`}><div className="h-full bg-accent" style={{ width: `${progress}%` }} /></div></button>; }
-function PhaseHeader({ phase, responsible, canManage, onEdit }: { phase: Row; responsible: string; canManage: boolean; onEdit: () => void }) { return <header className="bg-[#f7f3ee] p-5 md:p-7"><div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between"><div><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">Fase activa</p><h2 className="mt-2 font-headline-md text-3xl tracking-tight">{String(phase.nombre)}</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-muted">{String(phase.descripcion || 'Sin descripción registrada.')}</p></div>{canManage && <button onClick={onEdit} className="border border-border bg-white px-4 py-2 text-[10px] font-bold uppercase tracking-widest">Configurar fase</button>}</div><div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><PhaseDatum label="Estado" value={statusLabel(phase.estado)} /><PhaseDatum label="Responsable" value={responsible} /><PhaseDatum label="Periodo" value={`${date(phase.fecha_inicio)} — ${date(phase.fecha_fin)}`} /><PhaseDatum label="Peso / avance" value={`${phase.peso_porcentaje || 0}% / ${phase.porcentaje_avance || 0}%`} /></div></header>; }
-function PhaseDatum({ label, value }: { label: string; value: string }) { return <div className="rounded-xl bg-white p-3"><span className="text-[9px] font-bold uppercase tracking-widest text-muted">{label}</span><strong className="mt-1 block truncate text-xs capitalize">{value}</strong></div>; }
-function PhaseMetric({ label, value }: { label: string; value: string }) { return <div className="rounded-xl border border-border bg-background p-5"><span className="text-[9px] font-bold uppercase tracking-widest text-muted">{label}</span><strong className="mt-2 block text-2xl">{value}</strong></div>; }
-function SectionHeading({ title, subtitle }: { title: string; subtitle: string }) { return <div><h2 className="font-headline-md text-2xl tracking-tight">{title}</h2><p className="mt-1 text-sm text-muted">{subtitle}</p></div>; }
-function Metric({ label, value, helper }: { label: string; value: string; helper: string }) { return <div className="rounded-2xl border border-border bg-card p-6"><span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted">{label}</span><strong className="mt-3 block text-4xl font-light tracking-tight">{value}</strong><p className="mt-2 text-sm text-muted">{helper}</p></div>; }
-function Person({ label, value }: { label: string; value: string }) { return <div className="rounded-xl bg-background p-4"><span className="text-[10px] font-bold uppercase tracking-widest text-muted">{label}</span><strong className="mt-1 block text-sm">{value}</strong></div>; }
-function Badge({ children }: { children: React.ReactNode }) { return <span className="rounded-full border border-white/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#ead8c6]">{children}</span>; }
-function Empty({ text }: { text: string }) { return <div className="rounded-xl border border-dashed border-border p-10 text-center text-sm text-muted">{text}</div>; }
+function TopNav({ active, onClick, icon, children }: Readonly<{ active: boolean; onClick: () => void; icon: string; children: React.ReactNode }>) { return <button onClick={onClick} className={`flex items-center gap-2 px-5 py-2.5 text-[11px] font-bold uppercase tracking-wider ${active ? 'bg-primary text-primary-foreground' : 'text-muted'}`}><AppIcon name={icon} className="text-[18px]" />{children}</button>; }
+function PhaseSelector({ phase, index, active, responsible, onClick }: Readonly<{ phase: Row; index: number; active: boolean; responsible: string; onClick: () => void }>) { const progress = Number(phase.porcentaje_avance || 0); return <button onClick={onClick} className={`w-full rounded-xl border p-4 text-left transition-all ${active ? 'border-accent bg-[#2b1710] text-white shadow-lg' : 'border-border bg-background hover:border-accent/50'}`}><div className="flex items-center justify-between gap-3"><span className={`text-[9px] font-bold uppercase tracking-[0.18em] ${active ? 'text-[#d7a24a]' : 'text-accent'}`}>Fase {index + 1} · {phase.peso_porcentaje || 0}% peso</span><strong className="text-sm">{progress}%</strong></div><h3 className="mt-2 font-bold">{String(phase.nombre)}</h3><p className={`mt-1 truncate text-xs ${active ? 'text-[#d8cabb]' : 'text-muted'}`}>{responsible}</p><div className={`mt-3 h-1 overflow-hidden rounded-full ${active ? 'bg-white/15' : 'bg-border'}`}><div className="h-full bg-accent" style={{ width: `${progress}%` }} /></div></button>; }
+function PhaseHeader({ phase, responsible, canManage, onEdit }: Readonly<{ phase: Row; responsible: string; canManage: boolean; onEdit: () => void }>) { return <header className="bg-[#f7f3ee] p-5 md:p-7"><div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between"><div><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">Fase activa</p><h2 className="mt-2 font-headline-md text-3xl tracking-tight">{String(phase.nombre)}</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-muted">{String(phase.descripcion || 'Sin descripción registrada.')}</p></div>{canManage && <button onClick={onEdit} className="border border-border bg-white px-4 py-2 text-[10px] font-bold uppercase tracking-widest">Configurar fase</button>}</div><div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><PhaseDatum label="Estado" value={statusLabel(phase.estado)} /><PhaseDatum label="Responsable" value={responsible} /><PhaseDatum label="Periodo" value={`${date(phase.fecha_inicio)} — ${date(phase.fecha_fin)}`} /><PhaseDatum label="Peso / avance" value={`${phase.peso_porcentaje || 0}% / ${phase.porcentaje_avance || 0}%`} /></div></header>; }
+function PhaseDatum({ label, value }: Readonly<{ label: string; value: string }>) { return <div className="rounded-xl bg-white p-3"><span className="text-[9px] font-bold uppercase tracking-widest text-muted">{label}</span><strong className="mt-1 block truncate text-xs capitalize">{value}</strong></div>; }
+function PhaseMetric({ label, value }: Readonly<{ label: string; value: string }>) { return <div className="rounded-xl border border-border bg-background p-5"><span className="text-[9px] font-bold uppercase tracking-widest text-muted">{label}</span><strong className="mt-2 block text-2xl">{value}</strong></div>; }
+function SectionHeading({ title, subtitle }: Readonly<{ title: string; subtitle: string }>) { return <div><h2 className="font-headline-md text-2xl tracking-tight">{title}</h2><p className="mt-1 text-sm text-muted">{subtitle}</p></div>; }
+function Metric({ label, value, helper }: Readonly<{ label: string; value: string; helper: string }>) { return <div className="rounded-2xl border border-border bg-card p-6"><span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted">{label}</span><strong className="mt-3 block text-4xl font-light tracking-tight">{value}</strong><p className="mt-2 text-sm text-muted">{helper}</p></div>; }
+function Person({ label, value }: Readonly<{ label: string; value: string }>) { return <div className="rounded-xl bg-background p-4"><span className="text-[10px] font-bold uppercase tracking-widest text-muted">{label}</span><strong className="mt-1 block text-sm">{value}</strong></div>; }
+function Badge({ children }: Readonly<{ children: React.ReactNode }>) { return <span className="rounded-full border border-white/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#ead8c6]">{children}</span>; }
+function Empty({ text }: Readonly<{ text: string }>) { return <div className="rounded-xl border border-dashed border-border p-10 text-center text-sm text-muted">{text}</div>; }
 function List({ rows, render, empty }: { rows: Row[]; render: (row: Row) => React.ReactNode; empty: string }) { return rows.length ? <div className="space-y-3">{rows.map(render)}</div> : <Empty text={empty} />; }
-function RecordCard({ title, description, badges, actions }: { title: string; description: string; badges: string[]; actions?: React.ReactNode }) { return <article className="flex flex-col gap-4 rounded-xl border border-border bg-background p-4 lg:flex-row lg:items-center lg:justify-between"><div><strong className="capitalize">{title}</strong><p className="mt-1 max-w-3xl text-sm leading-6 text-muted">{description}</p></div><div className="flex flex-wrap items-center gap-2">{badges.map((badge, index) => <span key={`${badge}-${index}`} className="rounded-full border border-border bg-card px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-muted">{badge}</span>)}{actions}</div></article>; }
-function MiniButton({ children, danger, onClick }: { children: React.ReactNode; danger?: boolean; onClick: () => void }) { return <button onClick={onClick} className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider ${danger ? 'bg-red-50 text-red-700' : 'bg-[#2f5d3a]/10 text-[#2f5d3a]'}`}>{children}</button>; }
-function ReviewActions({ onReview }: { onReview: (action: string) => void }) { return <div className="flex flex-wrap gap-2"><MiniButton onClick={() => onReview('aprobar')}>Aprobar</MiniButton><MiniButton danger onClick={() => onReview('rechazar')}>Rechazar</MiniButton><MiniButton onClick={() => onReview('correccion')}>Corregir</MiniButton></div>; }
-function DocumentList({ rows, canManage, canReview, onReview, onArchive }: { rows: Row[]; canManage: boolean; canReview: boolean; onReview: (kind: 'archivos' | 'avances', id: number, action: string) => void; onArchive: (kind: string, id: number) => void }) { return <List rows={rows} empty="No hay documentos en esta fase." render={item => <RecordCard key={Number(item.id)} title={String(item.titulo)} description={`PDF · ${item.nombre_original || ''} · ${formatBytes(item.size_bytes)} · ${date(item.created_at)}`} badges={[statusLabel(item.estado)]} actions={<><a href={apiAssetUrl(String(item.archivo_url))} target="_blank" className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-primary">Ver PDF</a>{canReview && <ReviewActions onReview={action => onReview('archivos', Number(item.id), action)} />}{canManage && <MiniButton danger onClick={() => onArchive('archivos', Number(item.id))}>Archivar</MiniButton>}</>} />} />; }
+function RecordCard({ title, description, badges, actions }: Readonly<{ title: string; description: string; badges: string[]; actions?: React.ReactNode }>) { return <article className="flex flex-col gap-4 rounded-xl border border-border bg-background p-4 lg:flex-row lg:items-center lg:justify-between"><div><strong className="capitalize">{title}</strong><p className="mt-1 max-w-3xl text-sm leading-6 text-muted">{description}</p></div><div className="flex flex-wrap items-center gap-2">{badges.map((badge, index) => <span key={`${badge}-${index}`} className="rounded-full border border-border bg-card px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-muted">{badge}</span>)}{actions}</div></article>; }
+function MiniButton({ children, danger, onClick }: Readonly<{ children: React.ReactNode; danger?: boolean; onClick: () => void }>) { return <button onClick={onClick} className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider ${danger ? 'bg-red-50 text-red-700' : 'bg-[#2f5d3a]/10 text-[#2f5d3a]'}`}>{children}</button>; }
+function ReviewActions({ onReview }: Readonly<{ onReview: (action: string) => void }>) { return <div className="flex flex-wrap gap-2"><MiniButton onClick={() => onReview('aprobar')}>Aprobar</MiniButton><MiniButton danger onClick={() => onReview('rechazar')}>Rechazar</MiniButton><MiniButton onClick={() => onReview('correccion')}>Corregir</MiniButton></div>; }
+function DocumentList({ rows, canManage, canReview, onReview, onArchive }: Readonly<{ rows: Row[]; canManage: boolean; canReview: boolean; onReview: (kind: 'archivos' | 'avances', id: number, action: string) => void; onArchive: (kind: string, id: number) => void }>) { return <List rows={rows} empty="No hay documentos en esta fase." render={item => <RecordCard key={Number(item.id)} title={String(item.titulo)} description={`PDF · ${item.nombre_original || ''} · ${formatBytes(item.size_bytes)} · ${date(item.created_at)}`} badges={[statusLabel(item.estado)]} actions={<><a href={apiAssetUrl(String(item.archivo_url))} target="_blank" className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-primary">Ver PDF</a>{canReview && <ReviewActions onReview={action => onReview('archivos', Number(item.id), action)} />}{canManage && <MiniButton danger onClick={() => onArchive('archivos', Number(item.id))}>Archivar</MiniButton>}</>} />} />; }
 
-function DynamicField({ field, members = [] }: { field: { name: string; label: string; type?: string; options?: string[]; required?: boolean }; members?: Array<{ id: string | number | null; label: string | number | null }> }) {
+type MemberValue = string | number | null;
+
+function DynamicField({ field, members = [] }: Readonly<{ field: { name: string; label: string; type?: string; options?: string[]; required?: boolean }; members?: Array<{ id: MemberValue; label: MemberValue }> }>) {
   const shared = { name: field.name, required: field.required, className: 'form-control' };
   let control: React.ReactNode;
   if (field.type === 'textarea') control = <textarea {...shared} rows={3} />;
@@ -661,15 +736,46 @@ function DynamicField({ field, members = [] }: { field: { name: string; label: s
   return <label className={field.type === 'textarea' ? 'md:col-span-2' : ''}><FieldLabel>{field.label}</FieldLabel>{control}</label>;
 }
 
-function FieldLabel({ children }: { children: React.ReactNode }) { return <span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-muted">{children}</span>; }
-function memberName(id: string | number | null, members: Array<{ id: string | number | null; label: string | number | null }>) { return String(members.find(member => Number(member.id) === Number(id))?.label || 'Sin responsable'); }
-function weightedProgress(phases: Row[]) { if (!phases.length) return 0; const totalWeight = phases.reduce((sum, phase) => sum + Number(phase.peso_porcentaje || 0), 0); if (!totalWeight) return Math.round(phases.reduce((sum, phase) => sum + Number(phase.porcentaje_avance || 0), 0) / phases.length); return Math.round(phases.reduce((sum, phase) => sum + Number(phase.porcentaje_avance || 0) * Number(phase.peso_porcentaje || 0), 0) / totalWeight); }
+function FieldLabel({ children }: Readonly<{ children: React.ReactNode }>) { return <span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-muted">{children}</span>; }
+function memberName(id: MemberValue, members: Array<{ id: MemberValue; label: MemberValue }>) { return String(members.find(member => Number(member.id) === Number(id))?.label || 'Sin responsable'); }
+function weightedProgress(phases: Row[]) {
+  if (!phases.length) {
+    return 0;
+  }
+  const totalWeight = phases.reduce((sum, phase) => sum + Number(phase.peso_porcentaje || 0), 0);
+  if (!totalWeight) {
+    return Math.round(
+      phases.reduce((sum, phase) => sum + Number(phase.porcentaje_avance || 0), 0) / phases.length,
+    );
+  }
+  return Math.round(
+    phases.reduce(
+      (sum, phase) =>
+        sum + Number(phase.porcentaje_avance || 0) * Number(phase.peso_porcentaje || 0),
+      0,
+    ) / totalWeight,
+  );
+}
 function financeSummary(rows: Row[]) { const summary: Record<string, number> = { presupuesto: 0, compromiso: 0, gasto: 0, ingreso: 0, ajuste: 0, saldo_estimado: 0 }; rows.forEach(item => { if (!['rechazado', 'archivado'].includes(String(item.estado))) summary[String(item.tipo)] += Number(item.monto || 0); }); summary.saldo_estimado = summary.presupuesto + summary.ingreso + summary.ajuste - summary.compromiso - summary.gasto; return summary; }
 function phaseTabTitle(tab: PhaseTab) { return ({ tareas: 'Tareas de la fase', avances: 'Bitácora y comentarios', documentos: 'Documentos de la fase', evidencias: 'Evidencias visuales', riesgos: 'Riesgos y problemas', decisiones: 'Decisiones y cambios', reuniones: 'Reuniones y acuerdos', finanzas: 'Finanzas de la fase', auditoria: 'Auditoría de la fase', resumen: 'Resumen' })[tab]; }
 function phaseTabSubtitle(tab: PhaseTab) { return ({ tareas: 'Actividades, responsables y vencimientos.', avances: 'Actualizaciones de campo y revisión institucional.', documentos: 'Solo informes, actas o documentos en PDF.', evidencias: 'Registro fotográfico contextualizado.', riesgos: 'Amenazas, incidencias y planes de respuesta.', decisiones: 'Acuerdos e impactos trazables.', reuniones: 'Minutas, participantes y próximos pasos.', finanzas: 'Presupuesto y movimientos de esta etapa.', auditoria: 'Historial de acciones realizadas en esta fase.', resumen: '' })[tab]; }
-function readFile(file: File) { return new Promise<string>((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.onerror = reject; reader.readAsDataURL(file); }); }
+function readFile(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') resolve(reader.result);
+      else reject(new TypeError('No se pudo leer el archivo como texto.'));
+    };
+    reader.onerror = () => reject(reader.error || new Error('No se pudo leer el archivo.'));
+    reader.readAsDataURL(file);
+  });
+}
+function scalarText(value: unknown): string {
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') return String(value);
+  return '';
+}
 function statusLabel(value: unknown) {
-  const key = String(value || '').trim();
+  const key = scalarText(value).trim();
   const labels: Record<string, string> = {
     pendiente_revision: 'Pendiente de revisión',
     requiere_correccion: 'Requiere corrección',
@@ -714,7 +820,15 @@ function formatBytes(value: unknown) {
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
-function date(value: unknown) { return value ? new Intl.DateTimeFormat('es-PA', { dateStyle: 'medium' }).format(new Date(String(value))) : 'Por definir'; }
-function dateTime(value: unknown) { return value ? new Intl.DateTimeFormat('es-PA', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(String(value))) : ''; }
+function date(value: unknown) { return value ? new Intl.DateTimeFormat('es-PA', { dateStyle: 'medium' }).format(new Date(scalarText(value))) : 'Por definir'; }
+function dateTime(value: unknown) { return value ? new Intl.DateTimeFormat('es-PA', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(scalarText(value))) : ''; }
 function money(value: unknown) { return new Intl.NumberFormat('es-PA', { style: 'currency', currency: 'USD' }).format(Number(value || 0)); }
-function healthColor(value: string) { return value === 'rojo' ? 'bg-red-500' : value === 'amarillo' ? 'bg-amber-400' : 'bg-emerald-500'; }
+function healthColor(value: string) {
+  if (value === 'rojo') {
+    return 'bg-red-500' as const;
+  }
+  if (value === 'amarillo') {
+    return 'bg-amber-400' as const;
+  }
+  return 'bg-emerald-500' as const;
+}

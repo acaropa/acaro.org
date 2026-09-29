@@ -1,3 +1,4 @@
+const { validateDocumentUrl, validateDocumentMetadata } = require('../utils/library-validation');
 const biblioteca = require('../services/biblioteca.service');
 const { hasPermission, PERMISSIONS } = require('../config/permissions');
 const { saveBase64Upload, PDF_EXTENSIONS, IMAGE_EXTENSIONS } = require('../utils/uploads');
@@ -56,45 +57,7 @@ function validateDocument(data = {}, partial = false, trustedFileUrl = false) {
     }
   }
 
-  if ('archivo_url' in data && !trustedFileUrl) {
-    try {
-      const url = new URL(data.archivo_url);
-      if (!['http:', 'https:'].includes(url.protocol)) throw new Error();
-      if (!url.pathname.toLowerCase().endsWith('.pdf')) return 'El enlace debe ser un PDF.';
-    } catch {
-      return 'El enlace debe ser una URL válida.';
-    }
-  }
-
-  if ('visibilidad' in data && !biblioteca.VISIBILITIES.includes(data.visibilidad)) {
-    return 'visibilidad inválida';
-  }
-  if ('etiquetas' in data && data.etiquetas !== null) {
-    if (!Array.isArray(data.etiquetas) || data.etiquetas.some(t => typeof t !== 'string')) {
-      return 'etiquetas debe ser un arreglo de textos';
-    }
-  }
-  if ('serie' in data && data.serie !== null && typeof data.serie !== 'string') {
-    return 'serie debe ser texto';
-  }
-  if ('orden_lectura' in data && data.orden_lectura !== null) {
-    const n = Number(data.orden_lectura);
-    if (!Number.isInteger(n) || n < 1) return 'orden_lectura debe ser un entero positivo';
-  }
-  if ('orden_portada' in data && data.orden_portada !== null) {
-    const n = Number(data.orden_portada);
-    if (!Number.isInteger(n) || n < 1) return 'orden_portada debe ser un entero positivo';
-  }
-  if ('destacado' in data && typeof data.destacado !== 'boolean') {
-    return 'destacado debe ser booleano';
-  }
-  if ('descripcion' in data && data.descripcion !== null && typeof data.descripcion !== 'string') {
-    return 'descripcion debe ser texto';
-  }
-  if ('imagen_portada' in data && data.imagen_portada !== null && typeof data.imagen_portada !== 'string') {
-    return 'imagen_portada debe ser texto';
-  }
-  return null;
+  return validateDocumentUrl(data, trustedFileUrl) || validateDocumentMetadata(data, biblioteca.VISIBILITIES);
 }
 
 async function canReadDocument(user, document) {
@@ -161,7 +124,7 @@ async function getBySlug(req, res, next) {
 
 async function create(req, res, next) {
   try {
-    const body = { ...(req.body || {}) };
+    const body = { ...req.body };
     const uploadedUrl = await resolveFileUpload(body);
     if (uploadedUrl) body.archivo_url = uploadedUrl;
     const uploadedCoverUrl = await resolveCoverUpload(body);
@@ -202,7 +165,7 @@ async function update(req, res, next) {
       return res.status(403).json({ error: 'No puedes editar este documento en su estado actual' });
     }
 
-    const body = { ...(req.body || {}) };
+    const body = { ...req.body };
     const uploadedUrl = await resolveFileUpload(body);
     if (uploadedUrl) body.archivo_url = uploadedUrl;
     const uploadedCoverUrl = await resolveCoverUpload(body);

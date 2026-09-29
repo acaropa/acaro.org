@@ -3,7 +3,7 @@ const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
 const morgan = require('morgan');
-const crypto = require('crypto');
+const crypto = require('node:crypto');
 
 const { defaultLimiter } = require('./middlewares/rateLimiter');
 const idempotency = require('./middlewares/idempotency.middleware');
@@ -74,24 +74,24 @@ app.use(helmet({
   xssFilter: true,
 }));
 
-const allowedOrigins = [
+const { isLocalOrigin } = require('./utils/local-origin');
+const allowedOrigins = new Set([
   'http://localhost:3001',
   'http://localhost:3000',
   process.env.FRONTEND_URL,
   'https://acaro.org',
   'https://www.acaro.org',
-].filter(Boolean);
+].filter(Boolean));
 
 const isDev = process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
 
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
+    if (allowedOrigins.has(origin)) return callback(null, true);
 
     if (isDev) {
-      const isLocalIp = /^https?:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+)(:\d+)?$/.test(origin);
-      if (isLocalIp) return callback(null, true);
+      if (isLocalOrigin(origin)) return callback(null, true);
     }
 
     const error = new Error('Origen no permitido');
@@ -150,8 +150,8 @@ const allowEmbedFromFrontend = (_req, res, next) => {
   next();
 };
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const devUploadsRedirect = (req, res, next) => {
   if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) {
     const localFilePath = path.join(uploadRoot, req.path);

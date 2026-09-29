@@ -5,7 +5,7 @@ const { z } = require('../middlewares/validate');
 const positiveIdString = z
   .string()
   .regex(/^\d+$/, 'El ID debe ser un número entero positivo')
-  .refine(s => parseInt(s, 10) > 0, 'El ID debe ser mayor que cero');
+  .refine(s => Number.parseInt(s, 10) > 0, 'El ID debe ser mayor que cero');
 
 const idParamSchema = z.object({ id: positiveIdString });
 
@@ -26,8 +26,8 @@ const paginationSchema = z.object({
 });
 
 const dateRangeSchema = z.object({
-  fechaInicio: z.string().datetime({ offset: true }).or(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)).optional(),
-  fechaFin:    z.string().datetime({ offset: true }).or(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)).optional(),
+  fechaInicio: z.iso.datetime({ offset: true }).or(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)).optional(),
+  fechaFin:    z.iso.datetime({ offset: true }).or(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)).optional(),
 });
 
 module.exports = { positiveIdString, idParamSchema, slugParamSchema, paginationSchema, dateRangeSchema };

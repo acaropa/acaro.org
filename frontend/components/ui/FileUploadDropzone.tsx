@@ -62,7 +62,7 @@ export function FileUploadDropzone({
   onFileSelect,
   required = false,
   showPreview = true,
-}: FileUploadDropzoneProps) {
+}: Readonly<FileUploadDropzoneProps>) {
   const id = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);

@@ -90,11 +90,11 @@ async function create(data, actor) {
 }
 
 async function update(id, data) {
-  const allowed = [
+  const allowed = new Set([
     'nombre', 'descripcion', 'frase_corta', 'imagen_url', 'imagenes', 'comunidad', 'rol',
     'anios_experiencia', 'distrito_id', 'activo', 'destacado',
-  ];
-  const fields = Object.keys(data).filter(field => allowed.includes(field));
+  ]);
+  const fields = Object.keys(data).filter(field => allowed.has(field));
   if (!fields.length) {
     const err = new Error('Sin campos válidos para actualizar');
     err.status = 400;
@@ -113,7 +113,7 @@ async function update(id, data) {
   }
 
   await db.query(
-    `UPDATE productores SET ${fields.map(field => `${field} = ?`).join(', ')} WHERE id = ?`,
+    `UPDATE productores SET ${fields.map(field => field + ' = ?').join(', ')} WHERE id = ?`,
     [...fields.map(field => values[field]), id]
   );
   invalidateProducerCache();

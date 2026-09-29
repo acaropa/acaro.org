@@ -71,7 +71,7 @@ const ENTITY_CONFIG = {
 
 function cleanData(data, fields) {
   return Object.fromEntries(fields
-    .filter(field => Object.prototype.hasOwnProperty.call(data, field))
+    .filter(field => Object.hasOwn(data, field))
     .map(field => [field, data[field] === '' ? null : data[field]]));
 }
 
@@ -84,7 +84,7 @@ function validateRequired(data, required) {
   }
 }
 
-async function audit(user, projectId, module, action, entityId, previous, next, reqMeta = {}) {
+async function audit({ user, projectId, module, action, entityId, previous, next, reqMeta = {} }) {
   const phaseId = next?.fase_id || previous?.fase_id || null;
   await db.query(
     `INSERT INTO auditoria
@@ -179,14 +179,14 @@ async function createEntity(kind, projectId, data, user, reqMeta) {
     err.status = 404;
     throw err;
   }
-  const values = { proyecto_id: Number(projectId), ...cleanData(data, config.fields), ...(config.create?.(user) || {}) };
+  const values = { proyecto_id: Number(projectId), ...cleanData(data, config.fields), ...config.create?.(user) };
   validateRequired(values, config.required);
   const columns = Object.keys(values);
   const [result] = await db.query(
     `INSERT INTO ${config.table} (${columns.join(', ')}) VALUES (${columns.map(() => '?').join(', ')})`,
     columns.map(column => values[column])
   );
-  await audit(user, Number(projectId), config.table, 'crear', result.insertId, null, values, reqMeta);
+  await audit({ user, projectId: Number(projectId), module: config.table, action: 'crear', entityId: result.insertId, previous: null, next: values, reqMeta });
   cache.invalidatePrefix('projects:');
   const [rows] = await db.query(`SELECT * FROM ${config.table} WHERE id = ?`, [result.insertId]);
   return rows[0];
@@ -209,7 +209,7 @@ async function updateEntity(kind, projectId, entityId, data, user, reqMeta, mana
     err.status = 403;
     throw err;
   }
-  const values = { ...cleanData(data, config.fields), ...(config.update?.(user) || {}) };
+  const values = { ...cleanData(data, config.fields), ...config.update?.(user) };
   if (!Object.keys(values).length) {
     const err = new Error('Sin campos validos para actualizar');
     err.status = 400;
@@ -217,10 +217,10 @@ async function updateEntity(kind, projectId, entityId, data, user, reqMeta, mana
   }
   const columns = Object.keys(values);
   await db.query(
-    `UPDATE ${config.table} SET ${columns.map(column => `${column} = ?`).join(', ')} WHERE id = ?`,
+    `UPDATE ${config.table} SET ${columns.map(column => column + ' = ?').join(', ')} WHERE id = ?`,
     [...columns.map(column => values[column]), entityId]
   );
-  await audit(user, Number(projectId), config.table, 'actualizar', Number(entityId), rows[0], values, reqMeta);
+  await audit({ user, projectId: Number(projectId), module: config.table, action: 'actualizar', entityId: Number(entityId), previous: rows[0], next: values, reqMeta });
   const [updated] = await db.query(`SELECT * FROM ${config.table} WHERE id = ?`, [entityId]);
   return updated[0];
 }
@@ -243,11 +243,11 @@ async function removeEntity(kind, projectId, entityId, user, reqMeta) {
     const values = config.archive(user);
     const columns = Object.keys(values);
     await db.query(
-      `UPDATE ${config.table} SET ${columns.map(column => `${column} = ?`).join(', ')} WHERE id = ?`,
+      `UPDATE ${config.table} SET ${columns.map(column => column + ' = ?').join(', ')} WHERE id = ?`,
       [...columns.map(column => values[column]), entityId]
     );
   }
-  await audit(user, Number(projectId), config.table, 'archivar', Number(entityId), rows[0], null, reqMeta);
+  await audit({ user, projectId: Number(projectId), module: config.table, action: 'archivar', entityId: Number(entityId), previous: rows[0], next: null, reqMeta });
   return true;
 }
 
@@ -275,11 +275,11 @@ async function createFile(projectId, data, user, reqMeta) {
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     values
   );
-  await audit(user, Number(projectId), 'proyecto_archivos', 'subir', result.insertId, null, {
+  await audit({ user, projectId: Number(projectId), module: 'proyecto_archivos', action: 'subir', entityId: result.insertId, previous: null, next: {
     fase_id: data.fase_id || null,
     titulo: data.titulo || data.file_name,
     tipo: data.tipo || 'documento',
-  }, reqMeta);
+  }, reqMeta });
   const [rows] = await db.query('SELECT * FROM proyecto_archivos WHERE id = ?', [result.insertId]);
   return rows[0];
 }
@@ -303,7 +303,7 @@ async function review(projectId, kind, entityId, action, observation, user, reqM
     `UPDATE ${table} SET estado = ?, revisado_por = ?, fecha_revision = NOW(), observacion_revision = ? WHERE id = ?`,
     [states[action], user.id, observation || null, entityId]
   );
-  await audit(user, Number(projectId), table, action, Number(entityId), rows[0], { estado: states[action], observation }, reqMeta);
+  await audit({ user, projectId: Number(projectId), module: table, action, entityId: Number(entityId), previous: rows[0], next: { estado: states[action], observation }, reqMeta });
   const [updated] = await db.query(`SELECT * FROM ${table} WHERE id = ?`, [entityId]);
   return updated[0];
 }

@@ -5,7 +5,7 @@ import Image from 'next/image';
 
 import { AppIcon } from "@/components/ui/AppIcon"
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useId, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link2, Save, Upload } from 'lucide-react';
 import { api, apiAssetUrl } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
@@ -18,7 +18,7 @@ const emptyForm = {
   titulo: '',
   resumen: '',
   contenido: '',
-  categoria: newsCategories[newsCategories.length - 1],
+  categoria: newsCategories.at(-1) ?? 'Otros',
   visibilidad: 'publica' as 'publica' | 'interna',
   imagen_portada: '',
   imagenes: [] as string[],
@@ -39,6 +39,7 @@ const stateTabs: Array<{ state: NoticiaRecord['estado']; label: string }> = [
 ];
 
 export default function AdminNoticias() {
+  const fieldId = useId();
   const { user, can } = useAuth();
   const canCreate = can(PERMISSIONS.NOTICIAS_CREATE, PERMISSIONS.NOTICIAS_CREATE_OWN);
   const canUpdateAll = can(PERMISSIONS.NOTICIAS_UPDATE);
@@ -115,7 +116,7 @@ export default function AdminNoticias() {
     setShowForm(true);
   }
 
-  async function save(event: React.FormEvent) {
+  async function save(event: React.SubmitEvent) {
     event.preventDefault();
     setSaving(true);
     setError('');
@@ -186,6 +187,112 @@ export default function AdminNoticias() {
     });
   }, [news, activeTab, mineOnly, user?.id]);
 
+  function renderNewsList() {
+    if (loading) {
+      return <DataLoadingState label="Cargando noticias..." className="py-12" />;
+    }
+    if (filtered.length === 0) {
+      return (
+        <div className="bg-surface/30 border border-border border-dashed p-16 flex flex-col items-center justify-center text-center">
+          <AppIcon name="newspaper" className="text-[48px] text-muted mb-4 opacity-50" />
+          <h3 className="font-headline-md text-xl font-bold text-foreground mb-2">Sin noticias</h3>
+          <p className="font-body-md text-muted max-w-md">
+            No se encontraron noticias en este estado.
+          </p>
+        </div>
+      );
+    }
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {filtered.map((item) => {
+          const isOwner = item.creado_por === user?.id;
+          const canEdit =
+            canUpdateAll || (isOwner && ['borrador', 'pendiente'].includes(item.estado));
+          return (
+            <article
+              key={item.id}
+              className="bg-card p-6 border border-border hover:border-primary/30 transition-colors flex flex-col group"
+            >
+              {item.imagen_portada && (
+                <div className="relative w-full h-40 mb-4 overflow-hidden bg-surface">
+                  <Image
+                    src={apiAssetUrl(item.imagen_portada)}
+                    alt={item.titulo}
+                    fill
+                    sizes="(min-width: 1024px) 50vw, 100vw"
+                    className="object-cover"
+                  />
+                </div>
+              )}
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span
+                      className={`font-label-caps text-[10px] tracking-widest uppercase px-2 py-1 rounded ${item.estado === 'publicada' ? 'bg-brand-green/10 text-brand-green' : 'bg-accent/10 text-accent'}`}
+                    >
+                      {stateLabels[item.estado]}
+                    </span>
+                    <span className="text-xs text-muted font-mono capitalize">
+                      {item.visibilidad}
+                    </span>
+                    <span className="font-label-caps text-[10px] tracking-widest uppercase text-accent bg-accent/10 px-2 py-1 rounded">
+                      {item.categoria}
+                    </span>
+                  </div>
+                  <h2 className="font-headline-md text-xl font-bold text-foreground group-hover:text-primary transition-colors">
+                    {item.titulo}
+                  </h2>
+                  <p className="text-xs text-muted font-mono">
+                    {item.creado_por_nombre || item.creado_por_email} · {formatNoticiaDate(item)}
+                  </p>
+                </div>
+              </div>
+              <p className="mt-1 text-sm text-muted font-body-md flex-1 mb-6 line-clamp-3">
+                {item.resumen || item.contenido}
+              </p>
+
+              <div className="flex flex-wrap gap-4 justify-end mt-auto pt-4 border-t border-border/50">
+                {canEdit && (
+                  <button
+                    onClick={() => startEdit(item)}
+                    className="flex items-center gap-1 text-sm font-medium text-foreground hover:text-primary transition-colors"
+                  >
+                    <AppIcon name="edit" className="text-[16px]" /> Editar
+                  </button>
+                )}
+                {canPublish && ['borrador', 'pendiente', 'archivada'].includes(item.estado) && (
+                  <button
+                    onClick={() => void publish(item)}
+                    className="flex items-center gap-1 text-sm font-medium text-brand-green hover:underline"
+                  >
+                    <AppIcon name="campaign" className="text-[16px]" />{' '}
+                    {item.estado === 'archivada' ? 'Republicar' : 'Publicar'}
+                  </button>
+                )}
+                {canUpdateAll && item.estado !== 'archivada' && (
+                  <button
+                    onClick={() => void archive(item)}
+                    className="flex items-center gap-1 text-sm font-medium text-muted hover:text-foreground"
+                  >
+                    <AppIcon name="inventory_2" className="text-[16px]" /> Archivar
+                  </button>
+                )}
+                {canDelete && (
+                  <button
+                    onClick={() => void remove(item)}
+                    className="flex items-center gap-1 text-sm font-medium text-red-600 hover:text-red-800"
+                  >
+                    <AppIcon name="delete" className="text-[16px]" /> Eliminar
+                  </button>
+                )}
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    );
+  }
+
   return (
     <>
       <section className="mb-8">
@@ -243,8 +350,8 @@ export default function AdminNoticias() {
         <form onSubmit={save} className="relative z-10">
           <div className="relative z-10 grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="md:col-span-2">
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Título</label>
-              <input
+              <label htmlFor={`${fieldId}-1`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Título</label>
+              <input id={`${fieldId}-1`}
                 required
                 placeholder="Escribe el título aquí..."
                 value={form.titulo}
@@ -253,8 +360,8 @@ export default function AdminNoticias() {
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Resumen (Opcional)</label>
-              <input
+              <label htmlFor={`${fieldId}-2`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Resumen (Opcional)</label>
+              <input id={`${fieldId}-2`}
                 placeholder="Breve descripción de la noticia..."
                 value={form.resumen}
                 onChange={event => setForm(current => ({ ...current, resumen: event.target.value }))}
@@ -262,8 +369,8 @@ export default function AdminNoticias() {
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Contenido</label>
-              <textarea
+              <label htmlFor={`${fieldId}-3`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Contenido</label>
+              <textarea id={`${fieldId}-3`}
                 required
                 placeholder="Cuerpo de la noticia..."
                 value={form.contenido}
@@ -272,8 +379,8 @@ export default function AdminNoticias() {
               />
             </div>
             <div>
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Categoría</label>
-              <select
+              <label htmlFor={`${fieldId}-4`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Categoría</label>
+              <select id={`${fieldId}-4`}
                 value={form.categoria}
                 onChange={event => setForm(current => ({ ...current, categoria: event.target.value }))}
                 className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors"
@@ -284,8 +391,8 @@ export default function AdminNoticias() {
               </select>
             </div>
             <div>
-              <label className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Visibilidad</label>
-              <select
+              <label htmlFor={`${fieldId}-5`} className="block font-label-caps text-[10px] text-muted mb-2 uppercase tracking-widest">Visibilidad</label>
+              <select id={`${fieldId}-5`}
                 value={form.visibilidad}
                 onChange={event => setForm(current => ({ ...current, visibilidad: event.target.value as 'publica' | 'interna' }))}
                 className="w-full bg-background border-b border-border px-4 py-3 font-body-md text-foreground focus:outline-none focus:border-primary transition-colors"
@@ -310,7 +417,7 @@ export default function AdminNoticias() {
                     <p className="mt-1 text-xs text-muted">Imagen principal que identifica la noticia.</p>
                   </div>
 
-                  <div className="mb-3 grid grid-cols-2 border border-border bg-background p-1" role="group" aria-label="Origen de la imagen de portada">
+                  <fieldset className="mb-3 grid grid-cols-2 border border-border bg-background p-1"  aria-label="Origen de la imagen de portada">
                     <button
                       type="button"
                       onClick={() => setImageMode('file')}
@@ -329,7 +436,7 @@ export default function AdminNoticias() {
                       <Link2 className="h-4 w-4" aria-hidden="true" />
                       Enlace
                     </button>
-                  </div>
+                  </fieldset>
 
                   {imageMode === 'url' ? (
                     <div>
@@ -399,7 +506,7 @@ export default function AdminNoticias() {
                     </div>
                   )}
 
-                  <div className="mb-3 grid grid-cols-2 border border-border bg-background p-1" role="group" aria-label="Origen de las fotos secundarias">
+                  <fieldset className="mb-3 grid grid-cols-2 border border-border bg-background p-1"  aria-label="Origen de las fotos secundarias">
                     <button
                       type="button"
                       onClick={() => setSecondaryImageMode('file')}
@@ -418,7 +525,7 @@ export default function AdminNoticias() {
                       <Link2 className="h-4 w-4" aria-hidden="true" />
                       Enlace
                     </button>
-                  </div>
+                  </fieldset>
 
                   {secondaryImageMode === 'file' ? (
                     <ImageUploadField
@@ -468,7 +575,7 @@ export default function AdminNoticias() {
               >
                 Cancelar
               </button>
-              <button
+              <button type="button"
                 disabled={saving}
                 className="flex h-11 min-w-44 items-center justify-center gap-2 bg-primary px-6 text-xs font-bold text-primary-foreground transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
               >
@@ -482,72 +589,7 @@ export default function AdminNoticias() {
 
       {error && <p className="rounded border-l-4 border-red-600 bg-red-50 p-4 font-body-md text-sm text-red-700 mb-8">{error}</p>}
 
-      {loading ? (
-        <DataLoadingState label="Cargando noticias..." className="py-12" />
-      ) : filtered.length === 0 ? (
-        <div className="bg-surface/30 border border-border border-dashed p-16 flex flex-col items-center justify-center text-center">
-          <AppIcon name="newspaper" className="text-[48px] text-muted mb-4 opacity-50" />
-          <h3 className="font-headline-md text-xl font-bold text-foreground mb-2">Sin noticias</h3>
-          <p className="font-body-md text-muted max-w-md">No se encontraron noticias en este estado.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {filtered.map(item => {
-            const isOwner = item.creado_por === user?.id;
-            const canEdit = canUpdateAll || (isOwner && ['borrador', 'pendiente'].includes(item.estado));
-            return (
-              <article key={item.id} className="bg-card p-6 border border-border hover:border-primary/30 transition-colors flex flex-col group">
-                {item.imagen_portada && (
-                  <div className="relative w-full h-40 mb-4 overflow-hidden bg-surface">
-                    <Image src={apiAssetUrl(item.imagen_portada)} alt={item.titulo} fill sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover" />
-                  </div>
-                )}
-                <div className="flex items-start justify-between gap-4 mb-4">
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className={`font-label-caps text-[10px] tracking-widest uppercase px-2 py-1 rounded ${item.estado === 'publicada' ? 'bg-brand-green/10 text-brand-green' : 'bg-accent/10 text-accent'}`}>
-                        {stateLabels[item.estado]}
-                      </span>
-                      <span className="text-xs text-muted font-mono capitalize">{item.visibilidad}</span>
-                      <span className="font-label-caps text-[10px] tracking-widest uppercase text-accent bg-accent/10 px-2 py-1 rounded">
-                        {item.categoria}
-                      </span>
-                    </div>
-                    <h2 className="font-headline-md text-xl font-bold text-foreground group-hover:text-primary transition-colors">{item.titulo}</h2>
-                    <p className="text-xs text-muted font-mono">
-                      {item.creado_por_nombre || item.creado_por_email} · {formatNoticiaDate(item)}
-                    </p>
-                  </div>
-                </div>
-                <p className="mt-1 text-sm text-muted font-body-md flex-1 mb-6 line-clamp-3">{item.resumen || item.contenido}</p>
-
-                <div className="flex flex-wrap gap-4 justify-end mt-auto pt-4 border-t border-border/50">
-                  {canEdit && (
-                    <button onClick={() => startEdit(item)} className="flex items-center gap-1 text-sm font-medium text-foreground hover:text-primary transition-colors">
-                      <AppIcon name="edit" className="text-[16px]" /> Editar
-                    </button>
-                  )}
-                  {canPublish && ['borrador', 'pendiente', 'archivada'].includes(item.estado) && (
-                    <button onClick={() => void publish(item)} className="flex items-center gap-1 text-sm font-medium text-brand-green hover:underline">
-                      <AppIcon name="campaign" className="text-[16px]" /> {item.estado === 'archivada' ? 'Republicar' : 'Publicar'}
-                    </button>
-                  )}
-                  {canUpdateAll && item.estado !== 'archivada' && (
-                    <button onClick={() => void archive(item)} className="flex items-center gap-1 text-sm font-medium text-muted hover:text-foreground">
-                      <AppIcon name="inventory_2" className="text-[16px]" /> Archivar
-                    </button>
-                  )}
-                  {canDelete && (
-                    <button onClick={() => void remove(item)} className="flex items-center gap-1 text-sm font-medium text-red-600 hover:text-red-800">
-                      <AppIcon name="delete" className="text-[16px]" /> Eliminar
-                    </button>
-                  )}
-                </div>
-              </article>
-            );
-          })}
-        </div>
-      )}
+      {renderNewsList()}
     </>
   );
 }

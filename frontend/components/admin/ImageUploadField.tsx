@@ -16,11 +16,11 @@ export function ImageSourceSwitch({
   value,
   onChange,
   allowKeep = false,
-}: {
+}: Readonly<{
   value: ImageSourceMode;
   onChange: (mode: ImageSourceMode) => void;
   allowKeep?: boolean;
-}) {
+}>) {
   const options = [
     { value: "file" as const, label: "Archivo", icon: Upload },
     { value: "url" as const, label: "Enlace", icon: Link2 },
@@ -28,10 +28,10 @@ export function ImageSourceSwitch({
   ];
 
   return (
-    <div
+    <fieldset
       className="mb-3 grid border border-border bg-background p-1"
       style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}
-      role="group"
+
       aria-label="Origen del archivo"
     >
       {options.map(option => {
@@ -53,7 +53,7 @@ export function ImageSourceSwitch({
           </button>
         );
       })}
-    </div>
+    </fieldset>
   );
 }
 interface ImageUploadFieldProps {
@@ -78,11 +78,13 @@ export function ImageUploadField({
   helperText,
   maxSizeMb = 4,
   showPreview = true,
-}: ImageUploadFieldProps) {
+}: Readonly<ImageUploadFieldProps>) {
   function handleFile(file: File) {
     const reader = new FileReader();
     reader.onload = () => {
-      onChange({ base64: String(reader.result), fileName: file.name });
+      if (typeof reader.result === 'string') {
+        onChange({ base64: reader.result, fileName: file.name });
+      }
     };
     reader.readAsDataURL(file);
   }
