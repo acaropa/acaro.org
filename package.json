@@ -8,7 +8,7 @@
     "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\""
   },
   "devDependencies": {
-    "concurrently": "^10.0.4"
+    "concurrently": "^10.0.5"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.2",
