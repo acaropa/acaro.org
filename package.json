@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.2",
-    "dotenv": "^17.4.2",
+    "dotenv": "^18.0.4",
     "mysql2": "^3.24.4"
   }
 }
